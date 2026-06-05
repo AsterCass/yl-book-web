@@ -2,7 +2,8 @@ import {createRouter, createWebHistory} from "vue-router";
 import NoAuth from "@/ui/pages/NoAuth.vue";
 import NotFound from "@/ui/pages/NotFound.vue";
 import NoLogin from "@/ui/pages/NoLogin.vue";
-import MainAgent from "../ui/pages/MainAgent.vue";
+import ZyyDashboard from "../ui/pages/ZYYDashboard.vue";
+import ZyyLogin from "@/ui/pages/ZYYLogin.vue";
 
 
 const router = createRouter({
@@ -11,10 +12,18 @@ const router = createRouter({
     routes: [
         {
             path: "/",
-            name: "main",
-            component: MainAgent,
+            name: "dashboard",
+            component: ZyyDashboard,
             meta: {
-                title: 'AI Agent Chat'
+                title: 'ZYY Dashboard'
+            },
+        },
+        {
+            path: "/login",
+            name: "login",
+            component: ZyyLogin,
+            meta: {
+                title: 'ZYY Login'
             },
         },
         {
@@ -56,7 +65,7 @@ router.afterEach(() => {
 
 export function backToHome(thisRouter) {
     thisRouter.push({
-        name: "main"
+        name: "dashboard"
     })
 }
 

@@ -1,8 +1,6 @@
 <template>
   <div>
-    143241243
-
-
+    dashboard
   </div>
 </template>
 
