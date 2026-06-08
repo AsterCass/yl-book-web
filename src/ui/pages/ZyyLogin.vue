@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <z-y-y-footer/>
+    <zyy-footer/>
 
   </q-layout>
 
@@ -149,7 +149,7 @@
 <script setup>
 
 import {onMounted, ref} from "vue";
-import ZYYFooter from "@/ui/views/ZYYFooter.vue";
+import ZyyFooter from "@/ui/views/ZyyFooter.vue";
 
 
 let showLogin = ref(true)

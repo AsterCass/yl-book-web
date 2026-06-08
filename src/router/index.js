@@ -2,8 +2,8 @@ import {createRouter, createWebHistory} from "vue-router";
 import NoAuth from "@/ui/pages/NoAuth.vue";
 import NotFound from "@/ui/pages/NotFound.vue";
 import NoLogin from "@/ui/pages/NoLogin.vue";
-import ZyyDashboard from "../ui/pages/ZYYDashboard.vue";
-import ZyyLogin from "@/ui/pages/ZYYLogin.vue";
+import ZyyDashboard from "../ui/pages/ZyyDashboard.vue";
+import ZyyLogin from "@/ui/pages/ZyyLogin.vue";
 
 
 const router = createRouter({
@@ -15,7 +15,7 @@ const router = createRouter({
             name: "dashboard",
             component: ZyyDashboard,
             meta: {
-                title: 'ZYY Dashboard'
+                title: 'ZYY Dashboard | 郑远元仪表盘'
             },
         },
         {
@@ -23,7 +23,7 @@ const router = createRouter({
             name: "login",
             component: ZyyLogin,
             meta: {
-                title: 'ZYY Login'
+                title: 'ZYY Login | 郑远元登录'
             },
         },
         {
