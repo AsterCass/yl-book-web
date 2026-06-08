@@ -7,3 +7,10 @@ export function userLogin(body) {
         data: body
     })
 }
+
+export function userLogout() {
+    return serviceShiro({
+        url: `/user/logout`,
+        method: 'post',
+    })
+}

@@ -49,6 +49,10 @@ const responseErrorConfig = error => {
 
 const serviceShiro = axios.create({
     baseURL: BASE_ADD,
+    // allow cookies (Set-Cookie) to be stored when server responds
+    // required when backend and frontend are on different origins and server
+    // sends cookies for authentication/session
+    withCredentials: true,
     timeout: 20000,
     paramsSerializer: {
         paramsSerializer: function (params) {

@@ -443,7 +443,7 @@
 
 .component-full-btn-mini-grow {
   @include component-full-btn-base(
-          $thisHeight: 2rem,
+          $thisHeight: 2.2rem,
           $thisWidth: auto,
   )
 }
