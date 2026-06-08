@@ -13,3 +13,13 @@ export function rawPCMToAudioBuffer(arrayBuffer, sampleRate = 24000) {
     audioBuffer.copyToChannel(float32Data, 0);
     return audioBuffer;
 }
+
+export function checkLoginFromCookie() {
+    const token = getCookie('YToken')
+    return !!token;
+}
+
+export function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+    return match ? decodeURIComponent(match[2]) : null
+}

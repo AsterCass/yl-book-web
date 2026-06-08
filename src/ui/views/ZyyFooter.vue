@@ -2,11 +2,11 @@
   <div v-if="simple" class="bottom-footer-base-simple row items-center justify-center">
 
     <div class="q-mx-md">
-      &copy; 2007-{{ curYear }}&nbsp;&nbsp;&nbsp;远元健康科技集团有限公司
+      &copy; 20026-{{ curYear }}&nbsp;&nbsp;&nbsp;{{$t('main_company')}}
     </div>
 
     <div class="q-mx-md">
-      开发者邮箱:&nbsp;&nbsp;&nbsp;astercass@qq.com
+      {{$t('main_footer_dev_mail')}}:&nbsp;&nbsp;&nbsp;astercass@qq.com
     </div>
 
   </div>

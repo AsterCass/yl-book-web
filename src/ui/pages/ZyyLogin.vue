@@ -6,28 +6,30 @@
     </q-img>
 
 
-    <div style="height: 2rem;" class="full-width">
-
+    <div style="height: 5rem; color: rgb(var(--full-container-text-color));"
+         class="full-width row items-center q-px-md">
+      <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">
+        <div class="row items-center q-ma-xs">
+          <q-icon name="fa-solid fa-language" size="1.75rem"/>
+        </div>
+      </q-btn>
     </div>
 
     <div class="col row justify-center items-center">
-      <div v-if="showLogin"
-           class="animated animate__fadeInUp animated_duration_15 astercasc-login-card column justify-between top-semi-trans-header-login">
+      <div
+          class="animated animate__fadeInUp animated_duration_15 astercasc-login-card column justify-between top-semi-trans-header-login">
 
         <div class="full-height column justify-evenly">
 
           <div class="row justify-center" style="margin-top: -15px !important">
             <h4>
-              astercasc.com
+              {{ $t('main_login_title') }}
             </h4>
           </div>
           <div class="row justify-center q-mx-md text-center q-mb-md">
             <div>
-              <span style="opacity: .5">{{ $t('main_login_subtitle_pre') }}</span>
-              <span @click=" emit('update:showUserLogin', false); showUserRegister = true"
-                    class="cask-jump-link-in-text">{{ $t('main_login_subtitle_center') }}</span>
-              <span style="opacity: .5"> {{ $t('main_login_subtitle_reset_pre') }}</span>
-              <span @click=" emit('update:showUserLogin', false); showUserResetPassword = true"
+              <span style="opacity: .5"> {{ $t('main_login_subtitle_pre') }}</span>
+              <span @click="notifyTopWarning($t('in_develop'))"
                     class="cask-jump-link-in-text">{{ $t('main_login_subtitle_reset_center') }}</span>
             </div>
           </div>
@@ -68,7 +70,7 @@
           <div class="row justify-center">
             <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
                    style="background-color: rgb(var(--semi-bg-container-background-color)) !important"
-                   @click="headerLogin">
+                   @click="userLoginMethod">
               <div class="row items-center">
                 <div class="q-mr-sm" style="font-size: 14px">
                   {{ $t('main_login') }}
@@ -87,14 +89,14 @@
           </div>
 
 
-          <div class="q-mb-md row justify-evenly items-center">
+          <div class="q-mb-lg row justify-evenly items-center">
 
             <q-icon name="fa-brands fa-github" size="2rem" class="cursor-pointer"
-                    @click="githubLogin"/>
+                    @click="notifyTopWarning($t('in_develop'))"/>
 
 
             <div class="relative-position">
-              <button class="gsi-material-button" @click="openLink(googleLoginUrl, false)">
+              <button class="gsi-material-button" @click="notifyTopWarning($t('in_develop'))">
                 <div class="gsi-material-button-state"></div>
                 <div class="gsi-material-button-content-wrapper">
                   <div class="gsi-material-button-icon">
@@ -113,10 +115,6 @@
                   </div>
                 </div>
               </button>
-              <div v-show="!agreePrivacy"
-                   class="absolute bg-transparent gsi-material-button-mask cursor-pointer "
-                   @click="notifyTopWarning($t('main_login_message_check'))">
-              </div>
             </div>
 
 
@@ -128,13 +126,6 @@
 
         </div>
 
-        <div class="q-my-md row justify-center q-mx-md text-center items-center">
-          <q-checkbox v-model="agreePrivacy" :val="true" class="component-ratio-base q-mr-sm" dense
-                      checked-icon="task_alt" unchecked-icon="panorama_fish_eye" style="margin-top: 1px"/>
-          <span style="opacity: .9">{{ $t('main_login_privacy_pre') }}</span>
-          <span @click="toSpecifyPage(thisRouter, 'privacy')"
-                class="cask-jump-link-in-text">&nbsp;{{ $t('main_login_privacy_center') }}&nbsp;</span>
-        </div>
 
       </div>
     </div>
@@ -150,21 +141,30 @@
 
 import {onMounted, ref} from "vue";
 import ZyyFooter from "@/ui/views/ZyyFooter.vue";
+import {switchLanguage} from "@/utils/global-tools.js";
+import {notifyTopWarning} from "@/utils/notification-tools.js";
+import {useRouter} from "vue-router";
+import {useGlobalStateStore} from "@/utils/global-state.js";
 
 
-let showLogin = ref(true)
-let userAccount = ref("")
-let userPasswd = ref("")
-let rememberLogin = ref(false)
+const globalState = useGlobalStateStore();
+const thisRouter = useRouter()
 
 
-function docLogin() {
-  let currentBody = {accountMail: userAccount.value, passwd: userPasswd.value}
+let inputMail = ref("")
+let inputPassword = ref("")
+
+
+function userLoginMethod() {
+  // check
+
+
+  let currentBody = {}
 }
 
+
 onMounted(() => {
-
-
+  // todo 如果有保存密码则直接覆盖 inputPassword 和 inputMail
 })
 
 

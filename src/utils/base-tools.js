@@ -1,5 +1,5 @@
 import {notifyTopNegative, notifyTopPositive} from "@/utils/notification-tools";
-import i18n from "@/i18n";
+import {i18n} from "@/i18n";
 
 const t = i18n.global.t
 

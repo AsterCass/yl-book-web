@@ -32,6 +32,8 @@
   "complex_table_more_setting": "More Setting",
   "complex_table_at_least_column": "Please retain at least one column of observable data",
 
+  "main_company": "Hangzhou Youlian E-commerce Co., Ltd",
+
   "main_title": "AsterCasc",
   "main_login":"Sign in",
   "main_create_account":"Create account",
@@ -63,10 +65,12 @@
   "main_setting_theme_dark": "Dark",
   "main_setting_theme_green": "Green",
 
-  "main_login_subtitle_pre": "Don't have an account? You can log in with a third-party account below, or ",
-  "main_login_subtitle_center": "register a new account",
-  "main_login_subtitle_reset_pre": ". If you have forgotten your password or wish to reset it, please ",
+  "main_footer_dev_mail": "Developer Email",
+
+  "main_login_title": "Appointment System",
+  "main_login_subtitle_pre": "This system does not support external registration. Please contact the administrator to create a new account. If you have forgotten your password or wish to reset it, please ",
   "main_login_subtitle_reset_center": "click",
+  "main_login_save_passwd": "Remember Password",
   "main_login_mail": "Mail",
   "main_login_account": "Account",
   "main_login_password": "Password",
@@ -81,7 +85,7 @@
   "main_login_success_copy": "Copied",
   "main_login_success_star_file": "Added",
   "main_login_fail_copy": "Copy failed",
-  "main_login_passwd_tips": "Password should be 8-20 characters long and contain uppercase, lowercase letters, and numbers",
+  "main_login_passwd_tips": "Password should be 8-20 characters long and contain uppercase, lowercase letters, and numbers. The account will be locked after more than 10 incorrect password attempts",
 
   "main_in_login_auth": "Logging in... Please do not leave this page...",
   "main_login_google_client_fail": "Get user info from Google fail",

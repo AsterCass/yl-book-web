@@ -1,9 +1,8 @@
-import i18n from '@/i18n';
+import {i18n, setLocale} from '@/i18n';
 import {Quasar} from 'quasar'
 import zh from 'quasar/lang/zh-CN'
 import en from 'quasar/lang/en-US'
 import {useGlobalStateStore} from '@/utils/global-state';
-import {isMiniScreenMethod} from "@/utils/base-tools";
 
 export function initGlobalState() {
     const globalState = useGlobalStateStore();
@@ -13,7 +12,7 @@ export function initGlobalState() {
     document.documentElement.setAttribute('hide-scrollbar', String(globalState.hideScroller));
     //language
     const lang = globalState.language ? globalState.language : navigator.language.slice(0, 2);
-    i18n.global.locale = lang
+    setLocale(lang)
     if (lang === 'zh') {
         Quasar.lang.set(zh)
         globalState.updateLanguage('zh');
@@ -21,8 +20,6 @@ export function initGlobalState() {
         Quasar.lang.set(en)
         globalState.updateLanguage('en');
     }
-    //screen size
-    globalState.updateScreenMini(isMiniScreenMethod());
     //login data check token expire
     if (globalState.isLogin) {
         // todo  check login
@@ -56,11 +53,11 @@ export function switchTheme() {
 export function updateLanguage(code) {
     const globalState = useGlobalStateStore();
     if (code === 'en') {
-        i18n.global.locale = 'en'
+        i18n.global.locale.value = 'en'
         Quasar.lang.set(en)
         globalState.updateLanguage(code);
     } else if (code === 'zh') {
-        i18n.global.locale = 'zh'
+        setLocale('zh')
         Quasar.lang.set(zh)
         globalState.updateLanguage(code);
     }
@@ -68,12 +65,12 @@ export function updateLanguage(code) {
 
 export function switchLanguage() {
     const globalState = useGlobalStateStore();
-    if (i18n.global.locale === 'en') {
-        i18n.global.locale = 'zh'
+    if (i18n.global.locale.value === 'en') {
+        setLocale('zh')
         Quasar.lang.set(zh)
         globalState.updateLanguage('zh');
     } else {
-        i18n.global.locale = 'en'
+        setLocale('en')
         Quasar.lang.set(en)
         globalState.updateLanguage('en');
     }

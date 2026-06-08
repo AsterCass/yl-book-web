@@ -6,6 +6,7 @@
 import {RouterView} from "vue-router";
 import {onBeforeUnmount, onMounted} from "vue";
 import emitter from "@/utils/bus.js";
+import {initGlobalState} from "@/utils/global-tools.js";
 
 
 function screenEventHandler() {
@@ -14,6 +15,7 @@ function screenEventHandler() {
 
 
 onMounted(() => {
+  initGlobalState()
   //resize
   window.addEventListener("resize", screenEventHandler);
 })
@@ -29,6 +31,7 @@ onBeforeUnmount(() => {
 @use "@fontsource/roboto-slab/index.css";
 @use "@/styles/base-components";
 @use "@/styles/extra-components";
+@use "@/styles/override-components";
 
 
 </style>

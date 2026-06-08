@@ -15,7 +15,7 @@ const router = createRouter({
             name: "dashboard",
             component: ZyyDashboard,
             meta: {
-                title: 'ZYY Dashboard | 郑远元仪表盘'
+                title: 'Dashboard | 仪表盘'
             },
         },
         {
@@ -23,7 +23,7 @@ const router = createRouter({
             name: "login",
             component: ZyyLogin,
             meta: {
-                title: 'ZYY Login | 郑远元登录'
+                title: 'Login | 登录'
             },
         },
         {
