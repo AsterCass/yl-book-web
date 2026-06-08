@@ -142,11 +142,15 @@
 import {onMounted, ref} from "vue";
 import ZyyFooter from "@/ui/views/ZyyFooter.vue";
 import {switchLanguage} from "@/utils/global-tools.js";
-import {notifyTopWarning} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useRouter} from "vue-router";
 import {useGlobalStateStore} from "@/utils/global-state.js";
+import {userLogin} from "@/api/user.js";
+import {backToHome} from "@/router/index.js";
+import {i18n} from "@/i18n/index.js";
 
 
+const t = i18n.global.t
 const globalState = useGlobalStateStore();
 const thisRouter = useRouter()
 
@@ -156,15 +160,23 @@ let inputPassword = ref("")
 
 
 function userLoginMethod() {
-  // check
+  // todo check param
 
+  // login
+  let currentBody = {mail: inputMail.value, password: inputPassword.value}
+  userLogin(currentBody).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    globalState.updateUserData(res.data.data)
+    notifyTopPositive(t('main_login_success'))
+    backToHome(thisRouter)
+  })
 
-  let currentBody = {}
 }
 
 
 onMounted(() => {
-  // todo 如果有保存密码则直接覆盖 inputPassword 和 inputMail
 })
 
 
