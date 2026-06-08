@@ -14,7 +14,7 @@
             您还有没有登录喔，请登录
           </p>
           <q-btn class="q-mt-lg error-page-btn"
-                 outline push label="Go to Homepage" @click="backToHome(thisRouter)"/>
+                 outline push label="Go to Homepage" @click="backToLogin(thisRouter)"/>
         </div>
       </div>
     </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import {backToHome} from "@/router/index.js"
+import {backToLogin} from "@/router/index.js"
 import {useRouter} from "vue-router";
 
 const thisRouter = useRouter()

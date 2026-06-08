@@ -69,6 +69,12 @@ export function backToHome(thisRouter) {
     })
 }
 
+export function backToLogin(thisRouter) {
+    thisRouter.push({
+        name: "login"
+    })
+}
+
 export function toSpecifyPage(thisRouter, pageName) {
     thisRouter.push({
         name: pageName
