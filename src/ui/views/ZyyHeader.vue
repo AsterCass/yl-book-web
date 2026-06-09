@@ -4,11 +4,9 @@
     <div class="top-semi-trans-header-base-content row justify-between items-center top-semi-trans-header-base-no-top">
 
       <div class="row items-center justify-start col-3">
-        <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs">
-          <div class="row items-center">
-            <div class="q-ma-xs">
-              {{ $t('main_pre_version') }}
-            </div>
+        <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">
+          <div class="row items-center q-ma-xs">
+            <q-icon name="fa-solid fa-language" size="1.75rem"/>
           </div>
         </q-btn>
       </div>
@@ -44,6 +42,7 @@ import {userLogout} from "@/api/user.js";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {i18n} from "@/i18n/index.js";
+import {switchLanguage} from "@/utils/global-tools.js";
 
 const t = i18n.global.t
 const thisRouter = useRouter()

@@ -2,8 +2,13 @@ import {createRouter, createWebHistory} from "vue-router";
 import NoAuth from "@/ui/pages/NoAuth.vue";
 import NotFound from "@/ui/pages/NotFound.vue";
 import NoLogin from "@/ui/pages/NoLogin.vue";
-import ZyyDashboard from "../ui/pages/ZyyDashboard.vue";
+import ZyyMain from "../ui/pages/ZyyMain.vue";
 import ZyyLogin from "@/ui/pages/ZyyLogin.vue";
+import ZyySubsystem from "@/ui/views/ZyySubsystem.vue";
+import ZyyBook from "@/ui/views/ZyyBook.vue";
+import ZyyUser from "@/ui/views/ZyyUser.vue";
+import ZyyStaff from "@/ui/views/ZyyStaff.vue";
+import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
 
 
 const router = createRouter({
@@ -12,11 +17,55 @@ const router = createRouter({
     routes: [
         {
             path: "/",
-            name: "dashboard",
-            component: ZyyDashboard,
-            meta: {
-                title: 'Dashboard | 仪表盘'
-            },
+            name: "main",
+            component: ZyyMain,
+            children: [
+                {
+                    path: '',
+                    name: 'mainRedirect',
+                    // 正常应该导航到仪表盘，但是这里仪表盘前期没有做的必要
+                    redirect: {name: 'subsystem'}
+                },
+                {
+                    path: "dashboard",
+                    name: "dashboard",
+                    component: ZyyDashboard,
+                    meta: {
+                        title: 'Dashboard | 仪表盘'
+                    },
+                },
+                {
+                    path: "subsystem",
+                    name: 'subsystem',
+                    component: ZyySubsystem,
+                    children: [
+                        {
+                            path: "book",
+                            name: "book",
+                            component: ZyyBook,
+                            meta: {
+                                title: 'Appointment | 预约管理'
+                            },
+                        },
+                        {
+                            path: "user",
+                            name: "user",
+                            component: ZyyUser,
+                            meta: {
+                                title: 'User | 用户管理'
+                            },
+                        },
+                        {
+                            path: "staff",
+                            name: "staff",
+                            component: ZyyStaff,
+                            meta: {
+                                title: 'Staff | 雇员管理'
+                            },
+                        },
+                    ]
+                },
+            ]
         },
         {
             path: "/login",
@@ -65,7 +114,7 @@ router.afterEach(() => {
 
 export function backToHome(thisRouter) {
     thisRouter.push({
-        name: "dashboard"
+        name: "main"
     })
 }
 
