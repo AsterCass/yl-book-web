@@ -9,6 +9,7 @@ import ZyyBook from "@/ui/views/ZyyBook.vue";
 import ZyyUser from "@/ui/views/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
+import ZyySubsystemMain from "@/ui/views/ZyySubsystemMain.vue";
 
 
 const router = createRouter({
@@ -19,13 +20,9 @@ const router = createRouter({
             path: "/",
             name: "main",
             component: ZyyMain,
+            // 正常应该导航到仪表盘，但是这里仪表盘前期没有做的必要
+            redirect: {name: 'subsystemMain'},
             children: [
-                {
-                    path: '',
-                    name: 'mainRedirect',
-                    // 正常应该导航到仪表盘，但是这里仪表盘前期没有做的必要
-                    redirect: {name: 'subsystem'}
-                },
                 {
                     path: "dashboard",
                     name: "dashboard",
@@ -39,6 +36,19 @@ const router = createRouter({
                     name: 'subsystem',
                     component: ZyySubsystem,
                     children: [
+                        {
+                            path: '',
+                            name: 'subsystemRedirect',
+                            redirect: {name: 'subsystemMain'}
+                        },
+                        {
+                            path: "main",
+                            name: "subsystemMain",
+                            component: ZyySubsystemMain,
+                            meta: {
+                                title: 'Subsystem | 子系统选择'
+                            },
+                        },
                         {
                             path: "book",
                             name: "book",
