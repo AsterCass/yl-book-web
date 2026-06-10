@@ -13,6 +13,7 @@ import ZyySubsystemMain from "@/ui/views/ZyySubsystemMain.vue";
 import ZyyAIAgent from "@/ui/views/ZyyAIAgent.vue";
 import ZyyBill from "@/ui/views/ZyyBill.vue";
 import ZyyOrder from "@/ui/views/ZyyOrder.vue";
+import ZyyPage from "@/ui/views/ZyyPage.vue";
 
 
 const router = createRouter({
@@ -74,6 +75,14 @@ const router = createRouter({
                             component: ZyyBill,
                             meta: {
                                 title: 'Bill | 账目管理'
+                            },
+                        },
+                        {
+                            path: "page",
+                            name: "page",
+                            component: ZyyPage,
+                            meta: {
+                                title: 'page | 页面管理'
                             },
                         },
                         {

@@ -8,12 +8,14 @@
                           { background: 'black', width: '7px', opacity: '0.6' }"
 
                    class="full-height full-width" :visible="true">
-      <div class="row justify-evenly" style="padding: 5% 0 0 0">
-        <cask-float-card v-for="(video, index) in systemList" :key="index" style="margin: 2.5rem"
+      <div class="row justify-evenly" style="padding: 5rem 0 0 0">
+        <cask-float-card v-for="(video, index) in systemList" :key="index" style="margin: 3rem 8rem"
                          :cover-image="video.collectionImg"
                          :character-image="video.collectionImgExtra"
                          :name="video.collectionName"
+                         :enable="video.enable"
                          :base-size="16"
+                         :disable-text="$t('in_develop_simple')"
                          :on-click="()=> {}"/>
       </div>
 
@@ -36,38 +38,46 @@ const systemList = ref([
   {
     collectionImg: "/img/subsystem/appointment.jpg",
     collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionName: "预约管理",
+    enable: true,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/staff.jpg",
+    collectionImgExtra: "/img/subsystem/staff.webp",
+    collectionName: "雇员管理",
+    enable: true,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/agent.jpg",
+    collectionImgExtra: "",
+    collectionName: "智能体系统",
+    enable: false,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/bill.jpg",
+    collectionImgExtra: "",
+    collectionName: "账户管理",
+    enable: false,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/order.jpg",
+    collectionImgExtra: "",
+    collectionName: "订单管理",
+    enable: false,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/page.jpg",
+    collectionImgExtra: "",
+    collectionName: "页面管理",
+    enable: false,
   },
   {
-    collectionImg: "/img/subsystem/appointment.jpg",
-    collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约系统"
+    collectionImg: "/img/subsystem/user.jpg",
+    collectionImgExtra: "/img/subsystem/user.webp",
+    collectionName: "用户管理",
+    enable: true,
   },
+
 ])
 
 </script>

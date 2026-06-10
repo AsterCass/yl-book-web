@@ -17,6 +17,7 @@
   "component_search": "Search",
 
   "in_develop": "This feature is under development. Stay tuned",
+  "in_develop_simple": "Coming Soon",
   "error_request": "The system is busy. Please try again later",
   "error_request_429": "You are sending requests too frequently. Please wait a moment and try again.",
   "no_login": "Unauthenticated users cannot perform this action. Please log in first",

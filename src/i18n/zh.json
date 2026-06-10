@@ -17,6 +17,7 @@
   "component_search": "检索",
 
   "in_develop": "功能开发中，敬请期待",
+  "in_develop_simple": "开发中，敬请期待",
   "error_request": "系统繁忙，请稍后再试",
   "error_request_429": "您的请求过于频繁，请稍后再试",
   "no_login": "未登录用户无法进行该操作，请先登录",

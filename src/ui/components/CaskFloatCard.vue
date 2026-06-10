@@ -2,13 +2,24 @@
 
   <div>
     <div class="column items-center justify-center" :style="`width: ${baseSize}rem;`" @click="onClick">
-      <div class="card cursor-pointer" :style="`width: ${baseSize}rem; height: ${baseSize/2*3}rem;`">
+      <div v-if="enable" class="card cursor-pointer" :style="`width: ${baseSize}rem; height: ${baseSize/2*3}rem;`">
         <div class="wrapper">
           <img :src="coverImage" class="cover-image"/>
         </div>
         <img :src="characterImage" class="character"/>
       </div>
-      <div class="title" :style="`width: ${baseSize}rem; font-size: ${baseSize/2*3}px`">
+      <div v-else class="card-common" :style="`width: ${baseSize}rem; height: ${baseSize/2*3}rem;`">
+        <div class="wrapper-common">
+          <img :src="coverImage" class="cover-image"/>
+        </div>
+        <h4 class="absolute full-width text-center q-px-md disable-text">
+          {{ disableText }}
+        </h4>
+      </div>
+      <div v-if="enable" class="title" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.2}px`">
+        {{ name }}
+      </div>
+      <div v-else class="title-common" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.2}px`">
         {{ name }}
       </div>
     </div>
@@ -47,6 +58,16 @@ const props = defineProps({
     type: Number,
     required: false,
     default: 10
+  },
+  enable: {
+    type: Boolean,
+    required: false,
+    default: true
+  },
+  disableText: {
+    type: String,
+    required: false,
+    default: ''
   }
 })
 
@@ -61,12 +82,35 @@ const props = defineProps({
   position: relative;
 }
 
+.card-common {
+  border-radius: 8px;
+  perspective: 2500px;
+  position: relative;
+
+  .disable-text {
+    top: 50%;
+    transform: translateY(-50%);
+    text-shadow: -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+  }
+}
+
 .wrapper {
   transition: all 0.75s;
   width: 100%;
   height: 100%;
   border-radius: 8px;
   z-index: -1;
+}
+
+.wrapper-common {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  z-index: -1;
+  filter: grayscale(1);
 }
 
 .cover-image {
@@ -86,7 +130,17 @@ const props = defineProps({
 }
 
 .title {
-  padding-top: .5rem;
+  padding-top: .75rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: all 0.75s;
+}
+
+.title-common {
+  padding-top: .75rem;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
