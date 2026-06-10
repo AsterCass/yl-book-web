@@ -9,14 +9,16 @@
 
                    class="full-height full-width" :visible="true">
       <div class="row justify-evenly" style="padding: 5rem 0 0 0">
-        <cask-float-card v-for="(video, index) in systemList" :key="index" style="margin: 3rem 8rem"
+        <cask-float-card v-for="(video, index) in systemList" :key="index"
+                         class="card-item"
+                         :ref="el => cardRefs[index] = el"
                          :cover-image="video.collectionImg"
                          :character-image="video.collectionImgExtra"
                          :name="$t(video.collectionName)"
                          :enable="video.enable"
                          :base-size="16"
                          :disable-text="$t('in_develop_simple')"
-                         :on-click="()=> { jumpToSubsystem(video.enable, video.navigationName) }"/>
+                         :on-click="()=> { jumpToSubsystem(video.enable, video.navigationName, index) }"/>
       </div>
 
     </q-scroll-area>
@@ -26,7 +28,7 @@
 
 <script setup>
 import CaskFloatCard from "@/ui/components/CaskFloatCard.vue";
-import {ref} from "vue";
+import {nextTick, ref} from "vue";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {useRouter} from "vue-router";
 import {toSpecifyPage} from "@/router/index.js";
@@ -34,6 +36,8 @@ import {toSpecifyPage} from "@/router/index.js";
 const globalState = useGlobalStateStore();
 const thisRouter = useRouter()
 
+const animating = ref(false);
+const cardRefs = ref([]);
 const systemList = ref([
   {
     collectionImg: "/img/subsystem/appointment.jpg",
@@ -87,16 +91,63 @@ const systemList = ref([
 ])
 
 
-function jumpToSubsystem(enable, navigationName) {
-  if (!enable) {
-    return
-  }
-  toSpecifyPage(thisRouter, navigationName)
+async function jumpToSubsystem(enable, navigationName, currentIndex) {
+  if (!enable || animating.value) return;
+
+  animating.value = true;
+
+  await nextTick();
+
+  const screenCenterX = window.innerWidth / 2;
+  const screenCenterY = window.innerHeight / 2;
+
+  cardRefs.value.forEach((card, index) => {
+    const el = card?.$el || card;
+
+    const rect = el.getBoundingClientRect();
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const offsetX = screenCenterX - centerX;
+    const offsetY = screenCenterY - centerY;
+
+    el.style.transition =
+        "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s";
+
+    if (index === currentIndex) {
+      el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.5)`;
+      el.style.zIndex = 10;
+    } else {
+      if (centerX < screenCenterX) {
+        el.style.transform = `translateX(${offsetX - 300}px) scale(0.8)`;
+      } else {
+        el.style.transform = `translateX(${offsetX + 300}px) scale(0.8)`;
+      }
+      el.style.opacity = 0;
+    }
+
+
+  });
+
+  setTimeout(() => {
+    toSpecifyPage(thisRouter, navigationName);
+  }, 300);
 }
 
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+
+.subsystem-main {
+
+  .card-item {
+    margin: 3rem 8rem;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+  }
+
+
+}
 
 
 </style>

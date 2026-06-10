@@ -1,10 +1,6 @@
 <template>
   <router-view v-slot="{ Component, route }">
-    <transition name="fade" mode="out-in">
-      <div :key="route.name">
-        <component :is="Component"></component>
-      </div>
-    </transition>
+    <component :is="Component"></component>
   </router-view>
 </template>
 

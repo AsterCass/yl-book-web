@@ -9,9 +9,7 @@
 
       <router-view v-slot="{ Component, route }">
         <transition name="fade" mode="out-in">
-          <div :key="route.name">
-            <component :is="Component"></component>
-          </div>
+          <component :is="Component" :key="route.fullPath"/>
         </transition>
       </router-view>
 
@@ -34,6 +32,24 @@ import ZyyFooter from "@/ui/views/ZyyFooter.vue";
 </script>
 
 
-<style scoped>
+<style scoped lang="scss">
+
+.fade-enter-from {
+  opacity: 0;
+  transform: scale(.95);
+}
+
+.fade-enter-active {
+  transition: all .5s ease;
+}
+
+.fade-leave-active {
+  transition: all .5s ease;
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(.95);
+}
 
 </style>
