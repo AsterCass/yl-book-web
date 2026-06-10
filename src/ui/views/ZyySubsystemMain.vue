@@ -12,7 +12,7 @@
         <cask-float-card v-for="(video, index) in systemList" :key="index" style="margin: 3rem 8rem"
                          :cover-image="video.collectionImg"
                          :character-image="video.collectionImgExtra"
-                         :name="video.collectionName"
+                         :name="$t(video.collectionName)"
                          :enable="video.enable"
                          :base-size="16"
                          :disable-text="$t('in_develop_simple')"
@@ -38,43 +38,43 @@ const systemList = ref([
   {
     collectionImg: "/img/subsystem/appointment.jpg",
     collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "预约管理",
+    collectionName: "zyy_subsystem_appointment",
     enable: true,
   },
   {
     collectionImg: "/img/subsystem/staff.jpg",
     collectionImgExtra: "/img/subsystem/staff.webp",
-    collectionName: "雇员管理",
+    collectionName: "zyy_subsystem_staff",
     enable: true,
   },
   {
     collectionImg: "/img/subsystem/agent.jpg",
     collectionImgExtra: "",
-    collectionName: "智能体系统",
+    collectionName: "zyy_subsystem_agent",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/bill.jpg",
     collectionImgExtra: "",
-    collectionName: "账户管理",
+    collectionName: "zyy_subsystem_bill",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/order.jpg",
     collectionImgExtra: "",
-    collectionName: "订单管理",
+    collectionName: "zyy_subsystem_order",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/page.jpg",
     collectionImgExtra: "",
-    collectionName: "页面管理",
+    collectionName: "zyy_subsystem_page",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/user.jpg",
     collectionImgExtra: "/img/subsystem/user.webp",
-    collectionName: "用户管理",
+    collectionName: "zyy_subsystem_user",
     enable: true,
   },
 

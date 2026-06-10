@@ -82,7 +82,7 @@ const router = createRouter({
                             name: "page",
                             component: ZyyPage,
                             meta: {
-                                title: 'page | 页面管理'
+                                title: 'Page | 页面管理'
                             },
                         },
                         {

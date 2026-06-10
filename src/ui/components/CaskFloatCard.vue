@@ -16,10 +16,10 @@
           {{ disableText }}
         </h4>
       </div>
-      <div v-if="enable" class="title" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.2}px`">
+      <div v-if="enable" class="title" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.15}px`">
         {{ name }}
       </div>
-      <div v-else class="title-common" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.2}px`">
+      <div v-else class="title-common" :style="`width: ${baseSize}rem; font-size: ${baseSize*1.15}px`">
         {{ name }}
       </div>
     </div>
