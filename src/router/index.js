@@ -10,6 +10,9 @@ import ZyyUser from "@/ui/views/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
 import ZyySubsystemMain from "@/ui/views/ZyySubsystemMain.vue";
+import ZyyAIAgent from "@/ui/views/ZyyAIAgent.vue";
+import ZyyBill from "@/ui/views/ZyyBill.vue";
+import ZyyOrder from "@/ui/views/ZyyOrder.vue";
 
 
 const router = createRouter({
@@ -55,6 +58,30 @@ const router = createRouter({
                             component: ZyyBook,
                             meta: {
                                 title: 'Appointment | 预约管理'
+                            },
+                        },
+                        {
+                            path: "order",
+                            name: "order",
+                            component: ZyyOrder,
+                            meta: {
+                                title: 'Order | 订单管理'
+                            },
+                        },
+                        {
+                            path: "bill",
+                            name: "bill",
+                            component: ZyyBill,
+                            meta: {
+                                title: 'Bill | 账目管理'
+                            },
+                        },
+                        {
+                            path: "agent",
+                            name: "agent",
+                            component: ZyyAIAgent,
+                            meta: {
+                                title: 'Agent | 智能体'
                             },
                         },
                         {
