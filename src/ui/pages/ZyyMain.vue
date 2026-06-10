@@ -5,7 +5,7 @@
 
     <zyy-header/>
 
-    <div class="col row" style="margin: 6rem 2% 1rem 2%">
+    <div class="col relative-position" style="margin: 6rem 0 1rem 0">
 
       <router-view v-slot="{ Component, route }">
         <transition name="fade" mode="out-in">

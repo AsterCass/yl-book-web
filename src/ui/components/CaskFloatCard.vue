@@ -1,14 +1,14 @@
 <template>
 
   <div>
-    <div class="column items-center justify-center" style="width: 10rem;" @click="onClick">
-      <div class="card cursor-pointer">
+    <div class="column items-center justify-center" :style="`width: ${baseSize}rem;`" @click="onClick">
+      <div class="card cursor-pointer" :style="`width: ${baseSize}rem; height: ${baseSize/2*3}rem;`">
         <div class="wrapper">
           <img :src="coverImage" class="cover-image"/>
         </div>
         <img :src="characterImage" class="character"/>
       </div>
-      <div class="title">
+      <div class="title" :style="`width: ${baseSize}rem; font-size: ${baseSize/2*3}px`">
         {{ name }}
       </div>
     </div>
@@ -42,6 +42,11 @@ const props = defineProps({
     required: false,
     default: () => {
     },
+  },
+  baseSize: {
+    type: Number,
+    required: false,
+    default: 10
   }
 })
 
@@ -51,8 +56,6 @@ const props = defineProps({
 <style lang="scss" scoped>
 
 .card {
-  width: 10rem;
-  height: 15rem;
   border-radius: 8px;
   perspective: 2500px;
   position: relative;
@@ -83,9 +86,8 @@ const props = defineProps({
 }
 
 .title {
-  padding-top: .2rem;
+  padding-top: .5rem;
   text-align: center;
-  width: 10rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
