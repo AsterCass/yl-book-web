@@ -35,6 +35,30 @@
           </div>
 
           <div class="q-mx-md">
+            <q-input v-model="inputTenantName" tabindex="0" dense outlined
+                     class="q-ma-md component-outline-input-grow-on-semi-trans">
+              <template v-slot:prepend>
+                <div class="row items-center justify-between">
+                  <q-icon class="q-mr-sm" name="fa-regular fa-building" size="1rem"/>
+                  <div style="opacity: 0.8">
+                    {{ $t('main_login_tenant') }}
+                  </div>
+                </div>
+              </template>
+            </q-input>
+
+            <q-input v-model="inputStoreName" tabindex="0" dense outlined
+                     class="q-ma-md component-outline-input-grow-on-semi-trans">
+              <template v-slot:prepend>
+                <div class="row items-center justify-between">
+                  <q-icon class="q-mr-sm" name="fa-solid fa-store" size="1rem"/>
+                  <div style="opacity: 0.8">
+                    {{ $t('main_login_store') }}
+                  </div>
+                </div>
+              </template>
+            </q-input>
+
             <q-input v-model="inputMail" tabindex="0" dense outlined
                      class="q-ma-md component-outline-input-grow-on-semi-trans">
               <template v-slot:prepend>
@@ -155,15 +179,24 @@ const globalState = useGlobalStateStore();
 const thisRouter = useRouter()
 
 
-let inputMail = ref("")
-let inputPassword = ref("")
+const inputMail = ref("")
+const inputPassword = ref("")
+const inputTenantName = ref("")
+const inputStoreName = ref("")
 
+// todo 新增保存信息
 
 function userLoginMethod() {
-  // todo check param
-
+  if (!inputMail.value || !inputPassword.value || !inputTenantName.value || !inputStoreName.value) {
+    notifyTopWarning(t('main_login_message_empty'))
+    return
+  }
   // login
-  let currentBody = {mail: inputMail.value, password: inputPassword.value}
+  let currentBody = {
+    mail: inputMail.value, password: inputPassword.value,
+    tenantName: inputTenantName.value, storeName: inputStoreName.value
+  }
+
   userLogin(currentBody).then(res => {
     if (!res || !res.data || !res.data.data) {
       return
