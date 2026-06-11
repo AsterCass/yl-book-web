@@ -11,8 +11,8 @@
         </q-btn>
       </div>
 
-      <div class="row items-center justify-center col-6">
-
+      <div class="row items-center justify-center col-6" style="font-size: 1.15rem; font-weight: 500">
+        {{ $t(thisRouter.currentRoute.value.meta.header)}}
       </div>
 
       <div class="row items-center justify-end col-3">

@@ -50,7 +50,8 @@ const router = createRouter({
                             name: "subsystemMain",
                             component: ZyySubsystemMain,
                             meta: {
-                                title: 'Subsystem | 子系统选择'
+                                title: 'Subsystem | 子系统选择',
+                                header: "yl_subsystem_main",
                             },
                         },
                         {
@@ -58,7 +59,8 @@ const router = createRouter({
                             name: "book",
                             component: ZyyBook,
                             meta: {
-                                title: 'Appointment | 预约管理'
+                                title: 'Appointment | 预约管理',
+                                header: "yl_subsystem_appointment",
                             },
                         },
                         {
@@ -66,7 +68,8 @@ const router = createRouter({
                             name: "order",
                             component: ZyyOrder,
                             meta: {
-                                title: 'Order | 订单管理'
+                                title: 'Order | 订单管理',
+                                header: "yl_subsystem_order",
                             },
                         },
                         {
@@ -74,7 +77,8 @@ const router = createRouter({
                             name: "bill",
                             component: ZyyBill,
                             meta: {
-                                title: 'Bill | 账目管理'
+                                title: 'Bill | 账目管理',
+                                header: "yl_subsystem_bill",
                             },
                         },
                         {
@@ -82,7 +86,8 @@ const router = createRouter({
                             name: "page",
                             component: ZyyPage,
                             meta: {
-                                title: 'Page | 页面管理'
+                                title: 'Page | 页面管理',
+                                header: "yl_subsystem_page",
                             },
                         },
                         {
@@ -90,7 +95,8 @@ const router = createRouter({
                             name: "agent",
                             component: ZyyAIAgent,
                             meta: {
-                                title: 'Agent | 智能体'
+                                title: 'Agent | 智能体',
+                                header: "yl_subsystem_agent",
                             },
                         },
                         {
@@ -98,7 +104,8 @@ const router = createRouter({
                             name: "user",
                             component: ZyyUser,
                             meta: {
-                                title: 'User | 用户管理'
+                                title: 'User | 用户管理',
+                                header: "yl_subsystem_user",
                             },
                         },
                         {
@@ -106,7 +113,8 @@ const router = createRouter({
                             name: "staff",
                             component: ZyyStaff,
                             meta: {
-                                title: 'Staff | 雇员管理'
+                                title: 'Staff | 雇员管理',
+                                header: "yl_subsystem_staff",
                             },
                         },
                     ]

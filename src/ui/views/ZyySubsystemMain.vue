@@ -42,49 +42,49 @@ const systemList = ref([
   {
     collectionImg: "/img/subsystem/appointment.jpg",
     collectionImgExtra: "/img/subsystem/appointment.webp",
-    collectionName: "zyy_subsystem_appointment",
+    collectionName: "yl_subsystem_appointment",
     navigationName: "book",
     enable: true,
   },
   {
     collectionImg: "/img/subsystem/staff.jpg",
     collectionImgExtra: "/img/subsystem/staff.webp",
-    collectionName: "zyy_subsystem_staff",
+    collectionName: "yl_subsystem_staff",
     navigationName: "staff",
     enable: true,
   },
   {
     collectionImg: "/img/subsystem/agent.jpg",
     collectionImgExtra: "",
-    collectionName: "zyy_subsystem_agent",
+    collectionName: "yl_subsystem_agent",
     navigationName: "agent",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/bill.jpg",
     collectionImgExtra: "",
-    collectionName: "zyy_subsystem_bill",
+    collectionName: "yl_subsystem_bill",
     navigationName: "bill",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/order.jpg",
     collectionImgExtra: "",
-    collectionName: "zyy_subsystem_order",
+    collectionName: "yl_subsystem_order",
     navigationName: "order",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/page.jpg",
     collectionImgExtra: "",
-    collectionName: "zyy_subsystem_page",
+    collectionName: "yl_subsystem_page",
     navigationName: "page",
     enable: false,
   },
   {
     collectionImg: "/img/subsystem/user.jpg",
     collectionImgExtra: "/img/subsystem/user.webp",
-    collectionName: "zyy_subsystem_user",
+    collectionName: "yl_subsystem_user",
     navigationName: "user",
     enable: true,
   },
@@ -116,13 +116,13 @@ async function jumpToSubsystem(enable, navigationName, currentIndex) {
         "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s";
 
     if (index === currentIndex) {
-      el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.5)`;
+      el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.25)`;
       el.style.zIndex = 10;
     } else {
       if (centerX < screenCenterX) {
-        el.style.transform = `translateX(${offsetX - 300}px) scale(0.8)`;
+        el.style.transform = `translateX(${offsetX - 1500}px) scale(0.8)`;
       } else {
-        el.style.transform = `translateX(${offsetX + 300}px) scale(0.8)`;
+        el.style.transform = `translateX(${offsetX + 1500}px) scale(0.8)`;
       }
       el.style.opacity = 0;
     }
