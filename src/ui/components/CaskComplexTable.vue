@@ -183,7 +183,7 @@ import {
   ComplexTableColumnIconSiteEnum,
   ComplexTableColumnTypeEnum,
   ComplexTableSortedStatus
-} from "@/constant/enums/component-enums";
+} from "@/constants/enums/table.js";
 import CaskDialogImage from "@/ui/components/CaskDialogImage.vue";
 import {notifyTopWarning} from "@/utils/notification-tools";
 import {useI18n} from 'vue-i18n'

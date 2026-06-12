@@ -223,7 +223,7 @@ router.beforeEach((to, from) => {
 })
 
 router.afterEach(() => {
-    //make sure scroller site right for header style
+    // make sure scroller site right for header style
     window.scrollTo(0, 0)
 })
 
