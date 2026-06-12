@@ -24,6 +24,7 @@ export const useGlobalStateStore = defineStore('globalState', {
         isLogin: false,
         loginToken: "",
         userData: null,
+        loginInfo: null,
     }),
     actions: {
         updateTheme(code) {
@@ -45,5 +46,8 @@ export const useGlobalStateStore = defineStore('globalState', {
         updateUserData(data) {
             this.userData = data
         },
+        updateLoginInfo(data) {
+            this.loginInfo = data
+        }
     },
 });

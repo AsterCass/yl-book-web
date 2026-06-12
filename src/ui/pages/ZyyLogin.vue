@@ -147,6 +147,12 @@
 
           </div>
 
+          <div class="q-mb-md row justify-center q-mx-md text-center items-center">
+            <q-checkbox v-model="isSaveLoginInfo" :val="true" class="component-ratio-base q-mr-sm" dense
+                        checked-icon="task_alt" unchecked-icon="panorama_fish_eye"/>
+            <span style="opacity: .9">{{ $t('main_setting_save_login_data') }}</span>
+          </div>
+
 
         </div>
 
@@ -184,7 +190,16 @@ const inputPassword = ref("")
 const inputTenantName = ref("")
 const inputStoreName = ref("")
 
-// todo 新增保存信息
+const isSaveLoginInfo = ref(false)
+const currentBody = ref({})
+
+function saveLoginInfo() {
+  if (isSaveLoginInfo.value) {
+    globalState.updateLoginInfo(currentBody.value)
+  } else {
+    globalState.updateLoginInfo(null)
+  }
+}
 
 function userLoginMethod() {
   if (!inputMail.value || !inputPassword.value || !inputTenantName.value || !inputStoreName.value) {
@@ -192,24 +207,38 @@ function userLoginMethod() {
     return
   }
   // login
-  let currentBody = {
+  currentBody.value = {
     mail: inputMail.value, password: inputPassword.value,
-    tenantName: inputTenantName.value, storeName: inputStoreName.value
+    tenantName: inputTenantName.value, storeName: inputStoreName.value,
+    // 前端字段
+    isSaveLoginInfo: isSaveLoginInfo.value,
   }
 
-  userLogin(currentBody).then(res => {
+  userLogin(currentBody.value).then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
     globalState.updateUserData(res.data.data)
+    saveLoginInfo()
     notifyTopPositive(t('main_login_success'))
     backToHome(thisRouter)
   })
+}
 
+function checkLoginInfo() {
+  // info
+  if (globalState.loginInfo) {
+    isSaveLoginInfo.value = globalState.loginInfo.isSaveLoginInfo
+    inputMail.value = globalState.loginInfo.mail
+    inputPassword.value = globalState.loginInfo.password
+    inputTenantName.value = globalState.loginInfo.tenantName
+    inputStoreName.value = globalState.loginInfo.storeName
+  }
 }
 
 
 onMounted(() => {
+  checkLoginInfo()
 })
 
 
