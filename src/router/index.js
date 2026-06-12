@@ -5,15 +5,18 @@ import NoLogin from "@/ui/pages/NoLogin.vue";
 import ZyyMain from "../ui/pages/ZyyMain.vue";
 import ZyyLogin from "@/ui/pages/ZyyLogin.vue";
 import ZyySubsystem from "@/ui/views/ZyySubsystem.vue";
-import ZyyBook from "@/ui/views/ZyyBook.vue";
-import ZyyUser from "@/ui/views/ZyyUser.vue";
-import ZyyStaff from "@/ui/views/ZyyStaff.vue";
+import ZyyBook from "@/ui/views/book/ZyyBook.vue";
+import ZyyUser from "@/ui/views/user/ZyyUser.vue";
+import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
 import ZyySubsystemMain from "@/ui/views/ZyySubsystemMain.vue";
-import ZyyAIAgent from "@/ui/views/ZyyAIAgent.vue";
-import ZyyBill from "@/ui/views/ZyyBill.vue";
-import ZyyOrder from "@/ui/views/ZyyOrder.vue";
-import ZyyPage from "@/ui/views/ZyyPage.vue";
+import ZyyAIAgent from "@/ui/views/agent/ZyyAIAgent.vue";
+import ZyyBill from "@/ui/views/bill/ZyyBill.vue";
+import ZyyOrder from "@/ui/views/order/ZyyOrder.vue";
+import ZyyPage from "@/ui/views/page/ZyyPage.vue";
+import ZyyUserUser from "@/ui/views/user/ZyyUserUser.vue";
+import ZyyUserRole from "@/ui/views/user/ZyyUserRole.vue";
+import ZyyUserPermission from "@/ui/views/user/ZyyUserPermission.vue";
 
 
 const router = createRouter({
@@ -103,10 +106,46 @@ const router = createRouter({
                             path: "user",
                             name: "user",
                             component: ZyyUser,
-                            meta: {
-                                title: 'User | 用户管理',
-                                header: "yl_subsystem_user",
-                            },
+                            redirect: {name: 'userUser'},
+                            children: [
+                                {
+                                    path: "user",
+                                    name: "userUser",
+                                    component: ZyyUserUser,
+                                    meta: {
+                                        title: 'User | 用户管理',
+                                        value: "userUser",
+                                        header: "yl_subsystem_user",
+                                        label: "yl_subsystem_user",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "role",
+                                    name: "userRole",
+                                    component: ZyyUserRole,
+                                    meta: {
+                                        title: 'Role | 角色管理',
+                                        value: "userRole",
+                                        header: "yl_subsystem_user_role",
+                                        label: "yl_subsystem_user_role",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "permission",
+                                    name: "userPermission",
+                                    component: ZyyUserPermission,
+                                    meta: {
+                                        title: 'Permission | 权限管理',
+                                        value: "userPermission",
+                                        header: "yl_subsystem_user_permission",
+                                        label: "yl_subsystem_user_permission",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+
+                            ]
                         },
                         {
                             path: "staff",

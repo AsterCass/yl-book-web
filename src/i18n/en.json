@@ -468,6 +468,9 @@
   "yl_subsystem_user": "User Management",
   "yl_subsystem_staff": "Staff Management",
 
+  "yl_subsystem_user_role": "Role Management",
+  "yl_subsystem_user_permission": "Permission Management",
+
 
   "home": "Home",
   "back_home": "Back to Home"

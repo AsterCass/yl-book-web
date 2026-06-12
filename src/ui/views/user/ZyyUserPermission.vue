@@ -1,12 +1,10 @@
-<template>
-  <div>
-    用户
-  </div>
-</template>
-
 <script setup>
 
 </script>
+
+<template>
+
+</template>
 
 <style scoped lang="scss">
 

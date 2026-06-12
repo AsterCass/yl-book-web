@@ -466,6 +466,9 @@
   "yl_subsystem_user": "用户管理",
   "yl_subsystem_staff": "雇员管理",
 
+  "yl_subsystem_user_role": "角色管理",
+  "yl_subsystem_user_permission": "权限管理",
+
   "home": "主页",
   "back_home": "回到主页"
 }
