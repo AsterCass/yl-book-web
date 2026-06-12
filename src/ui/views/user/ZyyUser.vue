@@ -11,7 +11,7 @@
                          { background: 'white', width: '7px', opacity: '0.6' } :
                           { background: 'black', width: '7px', opacity: '0.6' }"
                    class="col full-height full-width" :visible="true">
-      <div class="row" style="padding: 0 0 0 5rem">
+      <div class="row" style="padding: 0 0 0 5rem; ">
         <router-view v-slot="{ Component }">
           <transition name="fade-slide" mode="out-in">
             <component :is="Component"/>

@@ -1,6 +1,6 @@
 <template>
   <router-view v-slot="{ Component }">
-    <transition name="fade" mode="out-in">
+    <transition name="fade-slide" mode="out-in">
       <component :is="Component"/>
     </transition>
   </router-view>
@@ -12,23 +12,20 @@
 
 <style scoped lang="scss">
 
-.fade-enter-from {
+.fade-slide-enter-from {
   opacity: 0;
-  transform: scale(.95);
 }
 
-.fade-enter-active {
+.fade-slide-enter-active {
   transition: all .5s ease;
 }
 
-.fade-leave-active {
+.fade-slide-leave-active {
   transition: all .5s ease;
 }
 
-.fade-leave-to {
+.fade-slide-leave-to {
   opacity: 0;
-  transform: scale(.95);
 }
-
 
 </style>

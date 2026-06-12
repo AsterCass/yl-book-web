@@ -191,6 +191,30 @@ const router = createRouter({
     ],
 });
 
+const parentRouteMap = {
+    // user 子模块 -> subsystemMain
+    'userUser': 'subsystemMain',
+    'userRole': 'subsystemMain',
+    'userPermission': 'subsystemMain',
+
+    // subsystem -> subsystemMain
+    'book': 'subsystemMain',
+    'order': 'subsystemMain',
+    'bill': 'subsystemMain',
+    'page': 'subsystemMain',
+    'agent': 'subsystemMain',
+    'staff': 'subsystemMain',
+    'user': 'subsystemMain',
+}
+
+export function toParentPage(thisRouter) {
+    const currentName = thisRouter.currentRoute.value.name
+    const parentName = parentRouteMap[currentName]
+
+    if (parentName) {
+        thisRouter.push({name: parentName})
+    }
+}
 
 router.beforeEach((to, from, next) => {
     if (to.meta.title) {

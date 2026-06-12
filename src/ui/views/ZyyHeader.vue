@@ -4,9 +4,12 @@
     <div class="top-semi-trans-header-base-content row justify-between items-center top-semi-trans-header-base-no-top">
 
       <div class="row items-center justify-start col-3">
-        <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">
-          <div class="row items-center q-ma-xs">
-            <q-icon name="fa-solid fa-language" size="1.75rem"/>
+        <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs"
+               @click="upOneLevel">
+          <div class="row items-center">
+            <div class="q-ma-xs">
+              {{ $t('main_header_back_pre') }}
+            </div>
           </div>
         </q-btn>
       </div>
@@ -16,6 +19,13 @@
       </div>
 
       <div class="row items-center justify-end col-3">
+
+        <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">
+          <div class="row items-center q-ma-xs">
+            <q-icon name="fa-solid fa-language" size="1.75rem"/>
+          </div>
+        </q-btn>
+
         <q-btn no-caps unelevated class="shadow-2 component-full-btn-mini-grow" @click="logoutMethod">
           <div class="row items-center">
             <div class="q-mx-xs">
@@ -36,7 +46,7 @@
 
 import {onMounted} from "vue";
 import {checkLoginFromCookie} from "@/utils/common.js";
-import {backToLogin} from "@/router/index.js";
+import {backToLogin, toParentPage} from "@/router/index.js";
 import {useRouter} from "vue-router";
 import {userLogout} from "@/api/user.js";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
@@ -47,6 +57,10 @@ import {switchLanguage} from "@/utils/global-tools.js";
 const t = i18n.global.t
 const thisRouter = useRouter()
 const globalState = useGlobalStateStore();
+
+function upOneLevel() {
+  toParentPage(thisRouter)
+}
 
 function checkLogin() {
   const isLogin = checkLoginFromCookie()
