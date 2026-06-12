@@ -139,7 +139,6 @@ onMounted(async () => {
   await nextTick();
 
   const screenCenterX = window.innerWidth / 2;
-  const screenCenterY = window.innerHeight / 2;
 
   cardRefs.value.forEach((card, index) => {
     const el = card?.$el || card;
@@ -147,10 +146,8 @@ onMounted(async () => {
 
     const rect = el.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
 
     const offsetX = screenCenterX - centerX;
-    const offsetY = screenCenterY - centerY;
 
     // 根据卡片位置决定从哪侧飞入（与离开动画对称）
     const fromLeft = centerX < screenCenterX;
@@ -161,13 +158,12 @@ onMounted(async () => {
     el.style.transform = `translateX(${flyInX}px) scale(0.8)`;
     el.style.opacity = "0";
 
-    // 下一帧触发过渡
+    // 下一帧触发过渡 直接设置 transition + 修改样式在同一帧内，
+    // 浏览器会跳过中间态。双层 rAF 保证"初始位置"和"目标位置"分属两帧，过渡才会生效
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // 用 index 做 delay，每张卡错开 60ms
         el.style.transition =
-            `transform 0.8s ${index * 0.06}s cubic-bezier(0.4, 0, 0.2, 1),` +
-            `opacity 0.8s ${index * 0.06}s`;
+            "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s";
         el.style.transform = "translate(0, 0) scale(1)";
         el.style.opacity = "1";
       });
