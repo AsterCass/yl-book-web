@@ -12,9 +12,7 @@
                             force-text-color="rgb(var(--text-color))"/>
 
 
-        <router-view v-slot="{ Component, route }">
-          <component :is="Component"></component>
-        </router-view>
+        <router-view />
 
       </div>
 
