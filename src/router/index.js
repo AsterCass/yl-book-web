@@ -216,11 +216,10 @@ export function toParentPage(thisRouter) {
     }
 }
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
     if (to.meta.title) {
         document.title = to.meta.title
     }
-    next()
 })
 
 router.afterEach(() => {
