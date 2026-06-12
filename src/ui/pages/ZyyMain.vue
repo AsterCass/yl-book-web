@@ -5,7 +5,7 @@
 
     <zyy-header/>
 
-    <div class="col relative-position" style="margin: 6rem 0 1rem 0">
+    <div class="col relative-position" style="margin: 2rem 0 1rem 0">
       <router-view/>
     </div>
 

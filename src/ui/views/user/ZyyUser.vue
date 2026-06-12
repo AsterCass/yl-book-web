@@ -1,22 +1,25 @@
 <template>
-  <div class="absolute-full" style="margin: 0 2px">
+  <div class="absolute-full row" style="margin: 5rem 2px 0 5rem">
+
+
+    <cask-tabs-vertical :tabs="tabs" v-model="tab" :width="globalState.language === 'zh' ? '10rem' : '17rem'"
+                        :text-width="globalState.language === 'zh' ? '7rem' : '13rem'"
+                        force-text-color="rgb(var(--text-color))"/>
 
 
     <q-scroll-area :thumb-style="globalState.curThemeName === 'dark' ?
                          { background: 'white', width: '7px', opacity: '0.6' } :
                           { background: 'black', width: '7px', opacity: '0.6' }"
-                   class="full-height full-width" :visible="true">
-      <div class="row" style="padding: 5rem 0 0 5rem">
-        <cask-tabs-vertical :tabs="tabs" v-model="tab" :width="globalState.language === 'zh' ? '10rem' : '17rem'"
-                            :text-width="globalState.language === 'zh' ? '7rem' : '13rem'"
-                            force-text-color="rgb(var(--text-color))"/>
-
-
-        <router-view />
-
+                   class="col full-height full-width" :visible="true">
+      <div class="row" style="padding: 0 0 0 5rem">
+        <router-view v-slot="{ Component }">
+          <transition name="fade-slide" mode="out-in">
+            <component :is="Component"/>
+          </transition>
+        </router-view>
       </div>
-
     </q-scroll-area>
+
 
   </div>
 </template>
@@ -66,5 +69,25 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(80%);
+}
+
+.fade-slide-enter-active {
+  transition: all .5s ease;
+}
+
+.fade-slide-leave-active {
+  transition: all .5s ease;
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(80%);
+}
+
+
 
 </style>

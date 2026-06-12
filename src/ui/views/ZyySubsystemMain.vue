@@ -1,6 +1,6 @@
 <template>
 
-  <div class="subsystem-main absolute-full" style="margin: 0 2px">
+  <div class="subsystem-main absolute-full" style="margin: 3rem 2px 0 2px">
 
     <!--  todo  这里会过渡样式会导致滚动栏一起过渡，有点奇怪，先隐藏-->
     <q-scroll-area :thumb-style="globalState.curThemeName === 'dark' ?
