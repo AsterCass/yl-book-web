@@ -97,40 +97,14 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {delay} from "@/utils/base-tools.js";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
 import {perList} from "@/api/permission.js";
+import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js";
 
 const keyword = ref("")
 const parentId = ref("")
 const selectType = ref(null)
 const selectStatus = ref(null)
-const typeOptions = ref([
-  {
-    label: '页面',
-    value: 1,
-  },
-  {
-    label: '按钮',
-    value: 2,
-  },
-  {
-    label: '接口',
-    value: 3,
-  },
-])
-const statusOptions = ref([
-  {
-    label: '正常',
-    value: 0,
-  },
-  {
-    label: '禁用',
-    value: 1,
-  },
-  {
-    label: '锁定',
-    value: 2,
-  },
-])
-
+const typeOptions = ref(PermissionTypeEnum.toSelectForm())
+const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
 const tableData = ref([])
 const tableDynamicData = ref(
@@ -141,7 +115,6 @@ const tableDynamicData = ref(
       dataSum: 0,
     }
 )
-
 
 function selectPermission() {
   tableDynamicData.value.inLoading = true
@@ -157,6 +130,10 @@ function selectPermission() {
       return
     }
     const thisData = res.data.data
+    thisData.forEach(data => {
+      data.typeName = PermissionTypeEnum.fromCode(data.type).name;
+      data.statusName = CommonStatusEnum.fromCode(data.status).name;
+    });
     tableData.value = thisData
     tableDynamicData.value.dataSum = thisData.length
     tableDynamicData.value.inLoading = false

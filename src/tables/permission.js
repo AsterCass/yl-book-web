@@ -43,14 +43,14 @@ const tablePermissionCol = [
         align: 'center',
     },
     {
-        name: 'type',
-        field: 'type',
+        name: 'typeName',
+        field: 'typeName',
         label: '权限类型',
         align: 'center',
     },
     {
-        name: 'status',
-        field: 'status',
+        name: 'statusName',
+        field: 'statusName',
         label: '权限状态',
         align: 'center',
     },
