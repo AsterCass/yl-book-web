@@ -2,11 +2,10 @@
 
   <div class="subsystem-main absolute-full" style="margin: 0 2px">
 
-
+    <!--  todo  这里会过渡样式会导致滚动栏一起过渡，有点奇怪，先隐藏-->
     <q-scroll-area :thumb-style="globalState.curThemeName === 'dark' ?
-                         { background: 'white', width: '7px', opacity: '0.6' } :
-                          { background: 'black', width: '7px', opacity: '0.6' }"
-
+                         { background: 'white', width: '7px', opacity: '0' } :
+                          { background: 'black', width: '7px', opacity: '0' }"
                    class="full-height full-width" :visible="true">
       <div class="row justify-evenly" style="padding: 5rem 0 0 0">
         <cask-float-card v-for="(video, index) in systemList" :key="index"
