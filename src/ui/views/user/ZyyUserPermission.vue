@@ -70,7 +70,8 @@
              @click="notifyTopWarning($t('in_develop'))" push>
         导出权限
       </q-btn>
-      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="clearSearch" push>
+      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
+             @click="()=> {clearSearch(); selectPermission();}" push>
         清空条件
       </q-btn>
     </div>
@@ -81,15 +82,9 @@
                         :custom-table-operation="tablePermissionOperation"
                         :table-dynamic-data="tableDynamicData"
                         @toNewPage="(pageObj) => {
-                            tableDynamicData.inLoading = true
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            const start = (tableDynamicData.pageNo - 1) * tableDynamicData.pageSize;
-                            const end = start + tableDynamicData.pageSize;
-
-                            delay(500).then(() => {
-                              tableDynamicData.inLoading = false
-                            })
+                            selectPermission()
                           }"
                         @operationClick="(name, row) => {
                             if(name === 'update') {
@@ -174,7 +169,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
-import {delay} from "@/utils/base-tools.js";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
 import {perCreate, perDelete, perList, perUpdate} from "@/api/permission.js";
 import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js";
@@ -292,6 +286,7 @@ function selectPermission() {
     id: perId.value, keyword: keyword.value, parentId: parentId.value,
     type: selectType.value ? selectType.value.value : null,
     status: selectStatus.value ? selectStatus.value.value : null,
+    pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
   perList(param).then(res => {
@@ -299,7 +294,8 @@ function selectPermission() {
       tableDynamicData.value.inLoading = false
       return
     }
-    const thisData = res.data.data
+    const thisData = res.data.data.records
+    tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       const thisPer = PermissionTypeEnum.fromCode(data.type)
       const thisStatus = CommonStatusEnum.fromCode(data.status)
@@ -314,7 +310,6 @@ function selectPermission() {
       data.typeNameWebColorName = thisPer.color
     });
     tableData.value = thisData
-    tableDynamicData.value.dataSum = thisData.length
     tableDynamicData.value.inLoading = false
   })
 
