@@ -101,9 +101,9 @@ export const tablePermission = {
  */
 export const tablePermissionOperation = [
     {
-        label: '详情',
-        condition: 'webShowDetailOp',
-        name: 'detail',
+        label: '修改',
+        condition: 'perUpdateOp',
+        name: 'update',
     },
     {
         label: '删除',

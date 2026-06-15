@@ -58,11 +58,11 @@
     </div>
 
     <div class="row">
-      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="" push>
+      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectPermission" push>
         查询
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
-             @click="isNew = true; showUpsertPermission = true"
+             @click="clearUpsertParam(); isNew = true; showUpsertPermission = true"
              push>
         添加权限
       </q-btn>
@@ -92,8 +92,16 @@
                             })
                           }"
                         @operationClick="(name, row) => {
-                            if(name === 'detail') {
-                              console.log(name, row)
+                            if(name === 'update') {
+                              clearUpsertParam();
+                              updatePerId = row.id
+                              perCode = row.code
+                              perName = row.name
+                              perDesc = row.desc
+                              perParentId = row.parentId
+                              perType =  PermissionTypeEnum.fromCodeToSelectFrom(row.type)
+                              isNew = false;
+                              showUpsertPermission = true
                             }
                             if(name === 'delete') {
                               toDeletePerId = row.id
@@ -147,7 +155,7 @@
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-center">
-          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="newPer">
+          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="upsertPer">
             {{ isNew ? "添加" : "更新" }}
           </q-btn>
         </div>
@@ -168,7 +176,7 @@ import {onMounted, ref} from "vue";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {delay} from "@/utils/base-tools.js";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
-import {perCreate, perDelete, perList} from "@/api/permission.js";
+import {perCreate, perDelete, perList, perUpdate} from "@/api/permission.js";
 import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
@@ -189,6 +197,8 @@ const perCode = ref("")
 const perDesc = ref("")
 const perParentId = ref("")
 const perType = ref({label: '页面', value: 1})
+
+const updatePerId = ref("")
 
 // delete permission
 const showDeletePermission = ref(false)
@@ -221,8 +231,13 @@ function clearUpsertParam() {
   perType.value = {label: '页面', value: 1}
 }
 
-function newPer() {
+function upsertPer() {
   if (!perName.value || !perCode.value || !perType.value || !perType.value.value) {
+    notifyTopWarning("提供参数不足")
+    return;
+  }
+
+  if (!updatePerId.value && !isNew.value) {
     notifyTopWarning("提供参数不足")
     return;
   }
@@ -235,14 +250,26 @@ function newPer() {
     code: perCode.value,
   }
 
-  perCreate(body).then(res => {
-    if (!res || !res.data) {
-      return
-    }
-    clearUpsertParam()
-    showUpsertPermission.value = false
-    selectPermission()
-  })
+  if (isNew.value) {
+    perCreate(body).then(res => {
+      if (!res || !res.data) {
+        return
+      }
+      clearUpsertParam()
+      showUpsertPermission.value = false
+      selectPermission()
+    })
+  } else {
+    perUpdate(updatePerId.value, body).then(res => {
+      if (!res || !res.data) {
+        return
+      }
+      clearUpsertParam()
+      showUpsertPermission.value = false
+      selectPermission()
+    })
+  }
+
 }
 
 function deletePer() {
@@ -262,7 +289,7 @@ function deletePer() {
 function selectPermission() {
   tableDynamicData.value.inLoading = true
   const param = {
-    keyword: keyword.value, parentId: parentId.value,
+    id: perId.value, keyword: keyword.value, parentId: parentId.value,
     type: selectType.value ? selectType.value.value : null,
     status: selectStatus.value ? selectStatus.value.value : null,
   }
@@ -277,6 +304,7 @@ function selectPermission() {
       data.typeName = PermissionTypeEnum.fromCode(data.type).name;
       data.statusName = CommonStatusEnum.fromCode(data.status).name;
       data.perDeleteOp = true
+      data.perUpdateOp = true
     });
     tableData.value = thisData
     tableDynamicData.value.dataSum = thisData.length

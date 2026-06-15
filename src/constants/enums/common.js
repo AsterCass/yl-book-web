@@ -14,6 +14,14 @@ class Enum {
         return this.codeMap.get(code);
     }
 
+    fromCodeToSelectFrom(code) {
+        const thisEnum = this.codeMap.get(code);
+        return {
+            label: thisEnum.name,
+            value: thisEnum.code
+        };
+    }
+
     getAll() {
         return Array.from(this.enumMap.values());
     }
