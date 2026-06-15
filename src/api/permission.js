@@ -8,3 +8,19 @@ export function perList(params) {
         method: 'get',
     })
 }
+
+export function perCreate(body) {
+    return serviceShiro({
+        url: `/permission/create`,
+        data: body,
+        method: 'post',
+    })
+}
+
+export function perUpdate(id, body) {
+    return serviceShiro({
+        url: `/permission/update/${id}`,
+        data: body,
+        method: 'post',
+    })
+}
