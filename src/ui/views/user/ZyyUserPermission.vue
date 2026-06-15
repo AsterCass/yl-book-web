@@ -96,7 +96,9 @@
                               console.log(name, row)
                             }
                             if(name === 'delete') {
-                              console.log(name, row)
+                              toDeletePerId = row.id
+                              toDeletePerName = row.name
+                              showDeletePermission = true
                             }
                           }"
     />
@@ -152,6 +154,12 @@
       </q-card>
     </q-dialog>
 
+    <cask-dialog-judgment :dialog-judgment-data="{title: '删除权限', content:`是否删除【${toDeletePerName}】权限`,
+                                                falseLabel: '取消', trueLabel: '确认'}"
+                          :callback-method="isTrue => { showDeletePermission = false; if (isTrue) deletePer() }"
+                          v-model="showDeletePermission"
+    />
+
   </div>
 </template>
 
@@ -160,9 +168,10 @@ import {onMounted, ref} from "vue";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {delay} from "@/utils/base-tools.js";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
-import {perCreate, perList} from "@/api/permission.js";
+import {perCreate, perDelete, perList} from "@/api/permission.js";
 import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js";
-import {notifyTopWarning} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 
 const perId = ref("")
 const keyword = ref("")
@@ -180,6 +189,11 @@ const perCode = ref("")
 const perDesc = ref("")
 const perParentId = ref("")
 const perType = ref({label: '页面', value: 1})
+
+// delete permission
+const showDeletePermission = ref(false)
+const toDeletePerId = ref("")
+const toDeletePerName = ref("")
 
 const tableData = ref([])
 const tableDynamicData = ref(
@@ -231,6 +245,19 @@ function newPer() {
   })
 }
 
+function deletePer() {
+  if (!toDeletePerId.value) {
+    notifyTopWarning("提供参数不足")
+  }
+  perDelete(toDeletePerId.value).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive("删除成功")
+    selectPermission()
+  })
+}
+
 
 function selectPermission() {
   tableDynamicData.value.inLoading = true
@@ -249,6 +276,7 @@ function selectPermission() {
     thisData.forEach(data => {
       data.typeName = PermissionTypeEnum.fromCode(data.type).name;
       data.statusName = CommonStatusEnum.fromCode(data.status).name;
+      data.perDeleteOp = true
     });
     tableData.value = thisData
     tableDynamicData.value.dataSum = thisData.length

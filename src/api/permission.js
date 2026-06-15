@@ -24,3 +24,10 @@ export function perUpdate(id, body) {
         method: 'post',
     })
 }
+
+export function perDelete(id) {
+    return serviceShiro({
+        url: `/permission/delete/${id}`,
+        method: 'delete',
+    })
+}

@@ -107,7 +107,7 @@ export const tablePermissionOperation = [
     },
     {
         label: '删除',
-        condition: 'webShowDeleteOp',
+        condition: 'perDeleteOp',
         name: 'delete',
     }
 ]
