@@ -111,7 +111,7 @@ export const tablePermission = {
  */
 export const tablePermissionOperation = [
     {
-        label: '修改',
+        label: '编辑',
         condition: 'perUpdateOp',
         name: 'update',
     },

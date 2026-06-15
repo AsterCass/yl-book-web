@@ -202,7 +202,7 @@ function saveLoginInfo() {
 }
 
 function userLoginMethod() {
-  if (!inputMail.value || !inputPassword.value || !inputTenantName.value || !inputStoreName.value) {
+  if (!inputMail.value || !inputPassword.value || !inputTenantName.value) {
     notifyTopWarning(t('main_login_message_empty'))
     return
   }
