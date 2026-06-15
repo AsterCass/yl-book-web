@@ -36,15 +36,15 @@ class Enum {
 
 
 export const CommonStatusEnum = new Enum({
-    NORMAL: {code: 0, name: '正常', desc: ''},
-    DISABLE: {code: 1, name: '禁用', desc: ''},
-    LOCKED: {code: 2, name: '锁定', desc: ''}
+    NORMAL: {code: 0, name: '正常', desc: '', color: 'rgb(68, 117, 80)'},
+    DISABLE: {code: 1, name: '禁用', desc: '', color: 'rgb(200, 60, 60)'},
+    LOCKED: {code: 2, name: '锁定', desc: '', color: 'rgb(245, 166, 35)'}
 });
 
 export const PermissionTypeEnum = new Enum({
-    NORMAL: {code: 1, name: '页面', desc: ''},
-    DISABLE: {code: 2, name: '按钮', desc: ''},
-    LOCKED: {code: 3, name: '接口', desc: ''}
+    NORMAL: {code: 1, name: '页面', desc: '', color: 'rgb(68, 117, 80)'},
+    DISABLE: {code: 2, name: '按钮', desc: '', color: 'rgb(166, 133, 44)'},
+    LOCKED: {code: 3, name: '接口', desc: '', color: 'rgb(142, 68, 173)'}
 });
 
 

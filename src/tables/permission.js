@@ -17,6 +17,8 @@
 * imageSize（可选项，默认无限制）
 */
 
+import {ComplexTableColumnTypeEnum} from "@/constants/enums/table.js";
+
 const tablePermissionCol = [
     {
         name: 'id',
@@ -31,9 +33,22 @@ const tablePermissionCol = [
         align: 'center',
     },
     {
+        name: 'typeName',
+        field: 'typeName',
+        label: '权限类型',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
         name: 'code',
         field: 'code',
         label: '权限码',
+        align: 'center',
+    },
+    {
+        name: 'desc',
+        field: 'desc',
+        label: '权限描述',
         align: 'center',
     },
     {
@@ -43,16 +58,11 @@ const tablePermissionCol = [
         align: 'center',
     },
     {
-        name: 'typeName',
-        field: 'typeName',
-        label: '权限类型',
-        align: 'center',
-    },
-    {
         name: 'statusName',
         field: 'statusName',
         label: '权限状态',
         align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
         name: 'createTime',

@@ -301,10 +301,17 @@ function selectPermission() {
     }
     const thisData = res.data.data
     thisData.forEach(data => {
-      data.typeName = PermissionTypeEnum.fromCode(data.type).name;
-      data.statusName = CommonStatusEnum.fromCode(data.status).name;
+      const thisPer = PermissionTypeEnum.fromCode(data.type)
+      const thisStatus = CommonStatusEnum.fromCode(data.status)
+      data.typeName = thisPer.name;
+      data.statusName = thisStatus.name;
       data.perDeleteOp = true
       data.perUpdateOp = true
+      if (data.meta) {
+        data.desc = JSON.parse(data.meta).desc
+      }
+      data.statusNameWebColorName = thisStatus.color
+      data.typeNameWebColorName = thisPer.color
     });
     tableData.value = thisData
     tableDynamicData.value.dataSum = thisData.length
