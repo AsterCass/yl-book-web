@@ -24,7 +24,7 @@ const responseConfig = response => {
                 notifyTopWarning(t('error_request'))
                 return null
             }
-            if (500 === bizStatus) {
+            if (bizStatus >= 500) {
                 notifyTopWarning(serverData.message)
                 return null
             }
