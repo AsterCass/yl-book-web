@@ -7,7 +7,7 @@
           权限ID&nbsp;:
         </h6>
       </div>
-      <q-input v-model="perId" tabindex="0" dense outlined placeholder="例如：YLP001"
+      <q-input v-model="selectId" tabindex="0" dense outlined placeholder="例如：YLP001"
                class="q-ma-md component-outline-input-std">
       </q-input>
 
@@ -58,11 +58,11 @@
     </div>
 
     <div class="row">
-      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectPermission" push>
+      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectData" push>
         查询
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
-             @click="clearUpsertParam(); isNew = true; showUpsertPermission = true"
+             @click="clearUpsertParam(); isNew = true; showUpsert = true"
              push>
         添加权限
       </q-btn>
@@ -71,7 +71,7 @@
         导出权限
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
-             @click="()=> {clearSearch(); selectPermission();}" push>
+             @click="()=> {clearSearch(); selectData();}" push>
         清空条件
       </q-btn>
     </div>
@@ -83,29 +83,29 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            selectPermission()
+                            selectData()
                           }"
                         @operationClick="(name, row) => {
                             if(name === 'update') {
                               clearUpsertParam();
-                              updatePerId = row.id
-                              perCode = row.code
-                              perName = row.name
-                              perDesc = row.desc
-                              perParentId = row.parentId
-                              perType =  PermissionTypeEnum.fromCodeToSelectFrom(row.type)
+                              updateId = row.id
+                              upsertCode = row.code
+                              upsertName = row.name
+                              upsertDesc = row.desc
+                              upsertParentId = row.parentId
+                              upsertType =  PermissionTypeEnum.fromCodeToSelectFrom(row.type)
                               isNew = false;
-                              showUpsertPermission = true
+                              showUpsert = true
                             }
                             if(name === 'delete') {
-                              toDeletePerId = row.id
-                              toDeletePerName = row.name
-                              showDeletePermission = true
+                              toDeleteId = row.id
+                              toDeleteName = row.name
+                              showDelete = true
                             }
                           }"
     />
 
-    <q-dialog :model-value="showUpsertPermission" @hide="showUpsertPermission = false"
+    <q-dialog :model-value="showUpsert" @hide="showUpsert = false"
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
@@ -122,11 +122,11 @@
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 style="white-space: nowrap;">权限名称&nbsp;:</h6>
-          <q-input v-model="perName" dense outlined placeholder="例如：添加用户"
+          <q-input v-model="upsertName" dense outlined placeholder="例如：添加用户"
                    class="component-outline-input-std"/>
 
           <h6 style="white-space: nowrap;">权限码&nbsp;:</h6>
-          <q-input v-model="perCode" dense outlined placeholder="例如：user:add"
+          <q-input v-model="upsertCode" dense outlined placeholder="例如：user:add"
                    class="component-outline-input-std"/>
 
           <h6 style="white-space: nowrap;">权限类型&nbsp;:</h6>
@@ -135,30 +135,30 @@
                     popup-content-class="component-extra-card-std"
                     clear-icon="fa-solid fa-xmark"
                     menu-anchor="bottom start" :menu-offset="[0, 5]"
-                    v-model="perType" :options="typeOptions">
+                    v-model="upsertType" :options="typeOptions">
           </q-select>
 
           <h6 style="white-space: nowrap;">权限描述&nbsp;:</h6>
-          <q-input v-model="perDesc" dense outlined placeholder="可为空"
+          <q-input v-model="upsertDesc" dense outlined placeholder="可为空"
                    class="component-outline-input-std"/>
 
           <h6 style="white-space: nowrap;">父权限ID&nbsp;:</h6>
-          <q-input v-model="perParentId" dense outlined placeholder="可为空"
+          <q-input v-model="upsertParentId" dense outlined placeholder="可为空"
                    class="component-outline-input-std"/>
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-center">
-          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="upsertPer">
+          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="upsertData">
             {{ isNew ? "添加" : "更新" }}
           </q-btn>
         </div>
       </q-card>
     </q-dialog>
 
-    <cask-dialog-judgment :dialog-judgment-data="{title: '删除权限', content:`是否删除【${toDeletePerName}】权限`,
+    <cask-dialog-judgment :dialog-judgment-data="{title: '删除权限', content:`是否删除【${toDeleteName}】权限`,
                                                 falseLabel: '取消', trueLabel: '确认'}"
-                          :callback-method="isTrue => { showDeletePermission = false; if (isTrue) deletePer() }"
-                          v-model="showDeletePermission"
+                          :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
+                          v-model="showDelete"
     />
 
   </div>
@@ -173,7 +173,7 @@ import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js"
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 
-const perId = ref("")
+const selectId = ref("")
 const keyword = ref("")
 const parentId = ref("")
 const selectType = ref(null)
@@ -181,21 +181,21 @@ const selectStatus = ref(null)
 const typeOptions = ref(PermissionTypeEnum.toSelectForm())
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
-// create/update permission
-const showUpsertPermission = ref(false)
+// create/update 
+const showUpsert = ref(false)
 const isNew = ref(false)
-const perName = ref("")
-const perCode = ref("")
-const perDesc = ref("")
-const perParentId = ref("")
-const perType = ref({label: '页面', value: 1})
+const upsertName = ref("")
+const upsertCode = ref("")
+const upsertDesc = ref("")
+const upsertParentId = ref("")
+const upsertType = ref({label: '页面', value: 1})
 
-const updatePerId = ref("")
+const updateId = ref("")
 
-// delete permission
-const showDeletePermission = ref(false)
-const toDeletePerId = ref("")
-const toDeletePerName = ref("")
+// delete 
+const showDelete = ref(false)
+const toDeleteId = ref("")
+const toDeleteName = ref("")
 
 const tableData = ref([])
 const tableDynamicData = ref(
@@ -208,7 +208,7 @@ const tableDynamicData = ref(
 )
 
 function clearSearch() {
-  perId.value = ""
+  selectId.value = ""
   keyword.value = ""
   parentId.value = ""
   selectType.value = null
@@ -216,30 +216,30 @@ function clearSearch() {
 }
 
 function clearUpsertParam() {
-  perName.value = ""
-  perCode.value = ""
-  perDesc.value = ""
-  perParentId.value = ""
-  perType.value = {label: '页面', value: 1}
+  upsertName.value = ""
+  upsertCode.value = ""
+  upsertDesc.value = ""
+  upsertParentId.value = ""
+  upsertType.value = {label: '页面', value: 1}
 }
 
-function upsertPer() {
-  if (!perName.value || !perCode.value || !perType.value || !perType.value.value) {
+function upsertData() {
+  if (!upsertName.value || !upsertCode.value || !upsertType.value || !upsertType.value.value) {
     notifyTopWarning("提供参数不足")
     return;
   }
 
-  if (!updatePerId.value && !isNew.value) {
+  if (!updateId.value && !isNew.value) {
     notifyTopWarning("提供参数不足")
     return;
   }
 
   const body = {
-    parentId: perParentId.value,
-    name: perName.value,
-    type: perType.value.value,
-    desc: perDesc.value,
-    code: perCode.value,
+    parentId: upsertParentId.value,
+    name: upsertName.value,
+    type: upsertType.value.value,
+    desc: upsertDesc.value,
+    code: upsertCode.value,
   }
 
   if (isNew.value) {
@@ -248,40 +248,40 @@ function upsertPer() {
         return
       }
       clearUpsertParam()
-      showUpsertPermission.value = false
-      selectPermission()
+      showUpsert.value = false
+      selectData()
     })
   } else {
-    perUpdate(updatePerId.value, body).then(res => {
+    perUpdate(updateId.value, body).then(res => {
       if (!res || !res.data) {
         return
       }
       clearUpsertParam()
-      showUpsertPermission.value = false
-      selectPermission()
+      showUpsert.value = false
+      selectData()
     })
   }
 
 }
 
-function deletePer() {
-  if (!toDeletePerId.value) {
+function deleteData() {
+  if (!toDeleteId.value) {
     notifyTopWarning("提供参数不足")
   }
-  perDelete(toDeletePerId.value).then(res => {
+  perDelete(toDeleteId.value).then(res => {
     if (!res || !res.data) {
       return
     }
     notifyTopPositive("删除成功")
-    selectPermission()
+    selectData()
   })
 }
 
 
-function selectPermission() {
+function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    id: perId.value, keyword: keyword.value, parentId: parentId.value,
+    id: selectId.value, keyword: keyword.value, parentId: parentId.value,
     type: selectType.value ? selectType.value.value : null,
     status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
@@ -295,17 +295,17 @@ function selectPermission() {
     const thisData = res.data.data.records
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
-      const thisPer = PermissionTypeEnum.fromCode(data.type)
-      const thisStatus = CommonStatusEnum.fromCode(data.status)
-      data.typeName = thisPer.name;
-      data.statusName = thisStatus.name;
-      data.perDeleteOp = true
-      data.perUpdateOp = true
+      const typeEnum = PermissionTypeEnum.fromCode(data.type)
+      const statusEnum = CommonStatusEnum.fromCode(data.status)
+      data.typeName = typeEnum.name;
+      data.statusName = statusEnum.name;
+      data.deleteOp = true
+      data.updateOp = true
       if (data.meta) {
         data.desc = JSON.parse(data.meta).desc
       }
-      data.statusNameWebColorName = thisStatus.color
-      data.typeNameWebColorName = thisPer.color
+      data.statusNameWebColorName = statusEnum.color
+      data.typeNameWebColorName = typeEnum.color
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
@@ -314,7 +314,7 @@ function selectPermission() {
 }
 
 onMounted(()=> {
-  selectPermission();
+  selectData();
 })
 </script>
 

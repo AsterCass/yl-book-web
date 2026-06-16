@@ -63,7 +63,7 @@
                         @operationClick="(name, row) => {
                             if(name === 'update') {
                               clearUpsertParam();
-                              upsertId = row.id
+                              updateId = row.id
                               upsertCode = row.code
                               upsertName = row.name
                               upsertDesc = row.desc
@@ -159,7 +159,7 @@ const upsertName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
 
-const upsertId = ref("")
+const updateId = ref("")
 
 function clearUpsertParam() {
   upsertName.value = ""
@@ -188,7 +188,7 @@ function upsertData() {
     return;
   }
 
-  if (!upsertId.value && !isNew.value) {
+  if (!updateId.value && !isNew.value) {
     notifyTopWarning("提供参数不足")
     return;
   }
@@ -209,7 +209,7 @@ function upsertData() {
       selectData()
     })
   } else {
-    roleUpdate(upsertId.value, body).then(res => {
+    roleUpdate(updateId.value, body).then(res => {
       if (!res || !res.data) {
         return
       }
@@ -248,14 +248,14 @@ function selectData() {
     const thisData = res.data.data.records
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
-      const thisStatus = CommonStatusEnum.fromCode(data.status)
-      data.statusName = thisStatus.name;
+      const statusEnum = CommonStatusEnum.fromCode(data.status)
+      data.statusName = statusEnum.name;
       data.deleteOp = true
       data.updateOp = true
       if (data.meta) {
         data.desc = JSON.parse(data.meta).desc
       }
-      data.statusNameWebColorName = thisStatus.color
+      data.statusNameWebColorName = statusEnum.color
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false

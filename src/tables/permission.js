@@ -112,12 +112,12 @@ export const tablePermission = {
 export const tablePermissionOperation = [
     {
         label: '编辑',
-        condition: 'perUpdateOp',
+        condition: 'updateOp',
         name: 'update',
     },
     {
         label: '删除',
-        condition: 'perDeleteOp',
+        condition: 'deleteOp',
         name: 'delete',
     }
 ]
