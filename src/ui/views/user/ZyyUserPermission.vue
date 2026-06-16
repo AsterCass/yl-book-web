@@ -76,7 +76,6 @@
       </q-btn>
     </div>
 
-
     <cask-complex-table class="full-width" style="padding: 2rem 5rem 0 0.5rem" :table-base-info="tablePermission"
                         :table-data="tableData"
                         :custom-table-operation="tablePermissionOperation"
@@ -105,7 +104,6 @@
                             }
                           }"
     />
-
 
     <q-dialog :model-value="showUpsertPermission" @hide="showUpsertPermission = false"
               transition-show="fade" transition-hide="fade">
