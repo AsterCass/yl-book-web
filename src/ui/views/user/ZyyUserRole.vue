@@ -8,7 +8,7 @@
           角色ID&nbsp;:
         </h6>
       </div>
-      <q-input v-model="roleId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLP001"
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLP001"
                tabindex="0">
       </q-input>
 
@@ -37,7 +37,7 @@
     </div>
 
     <div class="row">
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectRole">
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
         查询
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
@@ -50,7 +50,7 @@
         导出角色
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
-             unelevated @click="()=> {clearSearch(); selectRole();}">
+             unelevated @click="()=> {clearSearch(); selectData();}">
         清空条件
       </q-btn>
     </div>
@@ -79,7 +79,7 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            selectRole()
+                            selectData()
                           }"
     />
 
@@ -114,7 +114,7 @@
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-center">
-          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertRole">
+          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
             {{ isNew ? "添加" : "更新" }}
           </q-btn>
         </div>
@@ -122,7 +122,7 @@
     </q-dialog>
 
     <cask-dialog-judgment v-model="showDelete"
-                          :callback-method="isTrue => { showDelete = false; if (isTrue) deleteRole() }"
+                          :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
                           :dialog-judgment-data="{title: '删除角色', content:`是否删除【${toDeleteName}】角色`,
                                                 falseLabel: '取消', trueLabel: '确认'}"
     />
@@ -141,13 +141,13 @@ import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableRole, tableRoleOperation} from "@/tables/role.js";
 
 
-const roleId = ref("")
+const selectId = ref("")
 const keyword = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
 function clearSearch() {
-  roleId.value = ""
+  selectId.value = ""
   keyword.value = ""
   selectStatus.value = null
 }
@@ -182,7 +182,7 @@ const tableDynamicData = ref(
     }
 )
 
-function upsertRole() {
+function upsertData() {
   if (!upsertName.value || !upsertCode.value) {
     notifyTopWarning("提供参数不足")
     return;
@@ -206,7 +206,7 @@ function upsertRole() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectRole()
+      selectData()
     })
   } else {
     roleUpdate(upsertId.value, body).then(res => {
@@ -215,12 +215,12 @@ function upsertRole() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectRole()
+      selectData()
     })
   }
 }
 
-function deleteRole() {
+function deleteData() {
   if (!toDeleteId.value) {
     notifyTopWarning("提供参数不足")
   }
@@ -229,14 +229,14 @@ function deleteRole() {
       return
     }
     notifyTopPositive("删除成功")
-    selectRole()
+    selectData()
   })
 }
 
-function selectRole() {
+function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    id: roleId.value, keyword: keyword.value,
+    id: selectId.value, keyword: keyword.value,
     status: selectStatus.value ? selectStatus.value.value : null,
   }
 
@@ -264,7 +264,7 @@ function selectRole() {
 }
 
 onMounted(() => {
-  selectRole();
+  selectData();
 })
 </script>
 
