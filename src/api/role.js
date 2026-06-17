@@ -25,6 +25,14 @@ export function roleUpdate(id, body) {
     })
 }
 
+export function roleUpdatePer(id, body) {
+    return serviceShiro({
+        url: `/role/update/${id}/permission`,
+        data: body,
+        method: 'post',
+    })
+}
+
 export function roleDelete(id) {
     return serviceShiro({
         url: `/role/delete/${id}`,

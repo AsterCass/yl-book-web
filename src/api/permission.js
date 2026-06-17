@@ -9,6 +9,13 @@ export function perList(params) {
     })
 }
 
+export function perListSimple() {
+    return serviceShiro({
+        url: `/permission/list/simple`,
+        method: 'get',
+    })
+}
+
 export function perCreate(body) {
     return serviceShiro({
         url: `/permission/create`,

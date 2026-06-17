@@ -75,6 +75,19 @@
                               toDeleteName = row.name
                               showDelete = true
                             }
+                            if (name === 'getPer') {
+                              toggleDisablePerTree(perTree, false)
+                              ticked = row.simplePerList
+                              isUpdatePer = false
+                              showRolePer = true
+                            }
+                            if (name === 'updatePer') {
+                              toggleDisablePerTree(perTree, true)
+                              updateId = row.id
+                              ticked = row.simplePerList
+                              isUpdatePer = true
+                              showRolePer = true
+                            }
                           }"
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
@@ -121,6 +134,42 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog :model-value="showRolePer" @hide="showRolePer = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          权限分配
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div style="padding-top: .1rem">
+
+        </div>
+
+        <q-tree
+            class="q-ml-md"
+            color="grey-10"
+            :nodes="perTree"
+            node-key="label"
+            tick-strategy="leaf"
+            no-connectors
+            accordion
+            default-expand-all
+            nodeKey="id"
+            v-model:ticked="ticked"
+        />
+
+        <div v-if="isUpdatePer" class="row q-mt-xl q-mb-md justify-center">
+          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateDataPer">
+            保存
+          </q-btn>
+        </div>
+        <div v-else style="height: 2rem">
+        </div>
+      </q-card>
+    </q-dialog>
+
     <cask-dialog-judgment v-model="showDelete"
                           :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
                           :dialog-judgment-data="{title: '删除角色', content:`是否删除【${toDeleteName}】角色`,
@@ -132,13 +181,14 @@
 </template>
 
 <script setup>
-import {roleCreate, roleDelete, roleList, roleUpdate} from "@/api/role.js";
+import {roleCreate, roleDelete, roleList, roleUpdate, roleUpdatePer} from "@/api/role.js";
 import {CommonStatusEnum} from "@/constants/enums/common.js";
 import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableRole, tableRoleOperation} from "@/tables/role.js";
+import {perListSimple} from "@/api/permission.js";
 
 
 const selectId = ref("")
@@ -166,6 +216,12 @@ function clearUpsertParam() {
   upsertCode.value = ""
   upsertDesc.value = ""
 }
+
+// get/update permission
+const showRolePer = ref(false)
+const isUpdatePer = ref(false)
+const ticked = ref([])
+const perTree = ref([])
 
 // delete
 const showDelete = ref(false)
@@ -215,9 +271,31 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
+      notifyTopPositive("更新角色成功")
       selectData()
     })
   }
+}
+
+function updateDataPer() {
+  if (!updateId.value) {
+    notifyTopWarning("提供参数不足")
+    return;
+  }
+
+  const body = {
+    permissionIdList: ticked.value
+  }
+
+  roleUpdatePer(updateId.value, body).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showRolePer.value = false
+    notifyTopPositive("配置权限成功")
+    selectData()
+  })
+
 }
 
 function deleteData() {
@@ -238,6 +316,7 @@ function selectData() {
   const param = {
     id: selectId.value, keyword: keyword.value,
     status: selectStatus.value ? selectStatus.value.value : null,
+    pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
   roleList(param).then(res => {
@@ -252,6 +331,13 @@ function selectData() {
       data.statusName = statusEnum.name;
       data.deleteOp = true
       data.updateOp = true
+      data.getPerOp = true
+      data.updatePerOp = true
+      if (data.permissionDtoList && data.permissionDtoList.length > 0) {
+        data.simplePerList = data.permissionDtoList.map(item => item.id)
+      } else {
+        data.simplePerList = []
+      }
       if (data.meta) {
         data.desc = JSON.parse(data.meta).desc
       }
@@ -263,8 +349,61 @@ function selectData() {
 
 }
 
+
+function toggleDisablePerTree(nodes, enable = true, depth = 0) {
+  for (const node of nodes) {
+    node.tickable = enable
+    if (node.children?.length) {
+      toggleDisablePerTree(node.children, enable, depth + 1);
+    }
+  }
+}
+
+
+function buildPerTree(list) {
+  const map = new Map();
+  const roots = [];
+
+  // 先建立 id -> node 映射
+  for (const item of list) {
+    map.set(item.id, {label: item.name, _id: item.id, _parentId: item.parentId, id: item.id});
+  }
+
+  // 再建立父子关系
+  for (const node of map.values()) {
+    if (node._parentId && map.has(node._parentId)) {
+      const parent = map.get(node._parentId);
+      if (!parent.children) parent.children = [];
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  // 清理内部字段
+  function clean(node) {
+    delete node._id;
+    delete node._parentId;
+    if (node.children) node.children.forEach(clean);
+    return node;
+  }
+
+  return roots.map(clean);
+}
+
+function getAllPermissions() {
+  perListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    const thisData = res.data.data
+    perTree.value = buildPerTree(thisData)
+  })
+}
+
 onMounted(() => {
-  selectData();
+  selectData()
+  getAllPermissions()
 })
 </script>
 

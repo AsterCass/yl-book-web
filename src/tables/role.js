@@ -115,6 +115,16 @@ export const tableRoleOperation = [
         name: 'update',
     },
     {
+        label: '查看权限',
+        condition: 'getPerOp',
+        name: 'getPer',
+    },
+    {
+        label: '修改权限',
+        condition: 'updatePerOp',
+        name: 'updatePer',
+    },
+    {
         label: '删除',
         condition: 'deleteOp',
         name: 'delete',
