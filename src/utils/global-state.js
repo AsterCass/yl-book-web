@@ -21,8 +21,6 @@ export const useGlobalStateStore = defineStore('globalState', {
     state: () => ({
         curThemeName: 'light',
         language: '',
-        isLogin: false,
-        loginToken: "",
         userData: null,
         loginInfo: null,
     }),
@@ -32,16 +30,6 @@ export const useGlobalStateStore = defineStore('globalState', {
         },
         updateLanguage(code) {
             this.language = code;
-        },
-        updateToken(token) {
-            if (token) {
-                this.isLogin = true;
-                this.loginToken = token;
-            } else {
-                this.isLogin = false;
-                this.loginToken = "";
-                this.userData = null
-            }
         },
         updateUserData(data) {
             this.userData = data

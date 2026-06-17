@@ -21,9 +21,6 @@ export function initGlobalState() {
         globalState.updateLanguage('en');
     }
     //login data check token expire
-    if (globalState.isLogin) {
-        // todo  check login
-    }
     //more
 }
 

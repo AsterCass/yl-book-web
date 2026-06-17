@@ -2,7 +2,8 @@ import axios from 'axios'
 import Qs from 'qs'
 import {notifyTopWarning} from "@/utils/notification-tools";
 import {i18n} from '@/i18n';
-import {useGlobalStateStore} from "@/utils/global-state";
+import {deleteCookie} from "@/utils/common.js";
+import router, {backToLogin} from '@/router'
 
 const t = i18n.global.t
 const BASE_ADD = import.meta.env.VITE_APP_BASE_ADD
@@ -10,14 +11,14 @@ const BASE_ADD = import.meta.env.VITE_APP_BASE_ADD
 
 const responseConfig = response => {
     if (response && 200 === response.status) {
-        const globalState = useGlobalStateStore()
         const serverData = response.data
         let bizStatus = 0
         if (serverData instanceof Object) {
             bizStatus = serverData.status
             if (600 === bizStatus) {
                 notifyTopWarning(t('no_login'))
-                globalState.updateToken(null)
+                deleteCookie()
+                backToLogin(router)
                 return null
             }
             if (400 === bizStatus) {

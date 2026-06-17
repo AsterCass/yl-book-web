@@ -45,7 +45,7 @@
 <script setup>
 
 import {onMounted} from "vue";
-import {checkLoginFromCookie} from "@/utils/common.js";
+import {checkLoginFromCookie, deleteCookie} from "@/utils/common.js";
 import {backToLogin, toParentPage} from "@/router/index.js";
 import {useRouter} from "vue-router";
 import {userLogout} from "@/api/user.js";
@@ -74,7 +74,7 @@ function logoutMethod() {
     if (!res || !res.data) {
       return
     }
-    globalState.updateToken(null)
+    deleteCookie()
     notifyTopPositive(t('main_login_success_logout'))
     backToLogin(thisRouter)
   })
