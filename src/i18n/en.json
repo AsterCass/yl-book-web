@@ -472,6 +472,8 @@
 
   "yl_subsystem_user_role": "Role Management",
   "yl_subsystem_user_permission": "Permission Management",
+  "yl_subsystem_user_store": "Store Management",
+  "yl_subsystem_user_tenant": "Tenant Management",
 
 
   "home": "Home",

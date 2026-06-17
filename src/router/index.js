@@ -17,6 +17,8 @@ import ZyyPage from "@/ui/views/page/ZyyPage.vue";
 import ZyyUserUser from "@/ui/views/user/ZyyUserUser.vue";
 import ZyyUserRole from "@/ui/views/user/ZyyUserRole.vue";
 import ZyyUserPermission from "@/ui/views/user/ZyyUserPermission.vue";
+import ZyyUserStore from "@/ui/views/user/ZyyUserStore.vue";
+import ZyyUserTenant from "@/ui/views/user/ZyyUserTenant.vue";
 
 
 const router = createRouter({
@@ -141,6 +143,30 @@ const router = createRouter({
                                         value: "userPermission",
                                         header: "yl_subsystem_user_permission",
                                         label: "yl_subsystem_user_permission",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "store",
+                                    name: "userStore",
+                                    component: ZyyUserStore,
+                                    meta: {
+                                        title: 'Store | 商户管理',
+                                        value: "userStore",
+                                        header: "yl_subsystem_user_store",
+                                        label: "yl_subsystem_user_store",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "tenant",
+                                    name: "userTenant",
+                                    component: ZyyUserTenant,
+                                    meta: {
+                                        title: 'Tenant | 租户管理',
+                                        value: "userTenant",
+                                        header: "yl_subsystem_user_tenant",
+                                        label: "yl_subsystem_user_tenant",
                                         color: 'rgb(var(--full-container-background-color))'
                                     },
                                 },

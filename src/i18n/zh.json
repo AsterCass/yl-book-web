@@ -467,6 +467,8 @@
   "yl_subsystem_agent": "智能体系统",
   "yl_subsystem_user": "用户管理",
   "yl_subsystem_staff": "雇员管理",
+  "yl_subsystem_user_store": "商户管理",
+  "yl_subsystem_user_tenant": "租户管理",
 
   "yl_subsystem_user_role": "角色管理",
   "yl_subsystem_user_permission": "权限管理",

@@ -71,9 +71,21 @@ const tablePermissionCol = [
         align: 'center',
     },
     {
+        name: 'createUserName',
+        field: 'createUserName',
+        label: '创建用户',
+        align: 'center',
+    },
+    {
         name: 'updateTime',
         field: 'updateTime',
         label: '更新时间',
+        align: 'center',
+    },
+    {
+        name: 'updateUserName',
+        field: 'updateUserName',
+        label: '更新用户',
         align: 'center',
     },
     {
