@@ -47,5 +47,27 @@ export const PermissionTypeEnum = new Enum({
     LOCKED: {code: 3, name: '接口', desc: '', color: 'rgb(142, 68, 173)'}
 });
 
+export const GenderOptEnum = new Enum({
+    FEMALE: {
+        code: 0, name: '女', color: 'pink-7', desc: ''
+    }, MALE: {
+        code: 1, name: '男', color: 'blue-7', desc: ''
+    }, LESBIAN: {
+        code: 2, name: '女同性恋', color: 'deep-purple-7', desc: ''
+    }, GAY: {
+        code: 3, name: '男同性恋', color: 'green-7', desc: ''
+    }, BISEXUAL: {
+        code: 4, name: '双性恋', color: 'purple-7', desc: ''
+    }, TRANSGENDER: {
+        code: 5, name: '跨性别', color: 'light-green-7', desc: ''
+    }, QUEER: {
+        code: 6, name: '酷儿', color: 'teal-7', desc: ''
+    }, HELICOPTER: {
+        code: 7, name: '武装直升飞机', color: 'grey-10', desc: ''
+    }, WALMART_BAG: {
+        code: 8, name: '沃尔玛购物袋', color: 'blue-grey-7', desc: ''
+    }
+});
+
 
 
