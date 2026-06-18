@@ -5,7 +5,7 @@
 
       <div class="q-ml-md">
         <h6>
-          角色ID&nbsp;:
+          角色编号&nbsp;:
         </h6>
       </div>
       <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLP001"

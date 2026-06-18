@@ -4,7 +4,7 @@
 
       <div class="q-ml-md">
         <h6>
-          权限ID&nbsp;:
+          权限编号&nbsp;:
         </h6>
       </div>
       <q-input v-model="selectId" tabindex="0" dense outlined placeholder="例如：YLP001"
