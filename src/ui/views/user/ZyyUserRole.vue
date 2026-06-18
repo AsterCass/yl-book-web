@@ -221,6 +221,8 @@ function clearUpsertParam() {
 const showRolePer = ref(false)
 const isUpdatePer = ref(false)
 const ticked = ref([])
+const tickedSet = ref(new Set())
+const perMap = ref(new Map())
 const perTree = ref([])
 
 // delete
@@ -277,14 +279,25 @@ function upsertData() {
   }
 }
 
+function addSelfAndParentPer(currentPer) {
+  tickedSet.value.add(currentPer)
+  if (perMap.value.has(currentPer) && perMap.value.get(currentPer).parentId) {
+    addSelfAndParentPer(perMap.value.get(currentPer).parentId)
+  }
+}
+
 function updateDataPer() {
   if (!updateId.value) {
     notifyTopWarning("提供参数不足")
     return;
   }
 
+  // 将父权限同样标记允许
+  for (const tickedPer of ticked.value) {
+    addSelfAndParentPer(tickedPer)
+  }
   const body = {
-    permissionIdList: ticked.value
+    permissionIdList: [...tickedSet.value]
   }
 
   roleUpdatePer(updateId.value, body).then(res => {
@@ -361,18 +374,20 @@ function toggleDisablePerTree(nodes, enable = true, depth = 0) {
 
 
 function buildPerTree(list) {
-  const map = new Map();
   const roots = [];
 
   // 先建立 id -> node 映射
   for (const item of list) {
-    map.set(item.id, {label: item.name, _id: item.id, _parentId: item.parentId, id: item.id});
+    perMap.value.set(item.id, {
+      label: item.name, _id: item.id, _parentId: item.parentId,
+      id: item.id, parentId: item.parentId
+    });
   }
 
   // 再建立父子关系
-  for (const node of map.values()) {
-    if (node._parentId && map.has(node._parentId)) {
-      const parent = map.get(node._parentId);
+  for (const node of perMap.value.values()) {
+    if (node._parentId && perMap.value.has(node._parentId)) {
+      const parent = perMap.value.get(node._parentId);
       if (!parent.children) parent.children = [];
       parent.children.push(node);
     } else {
