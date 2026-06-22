@@ -294,6 +294,7 @@ function updateDataPer() {
   }
 
   // 将父权限同样标记允许
+  tickedSet.value.clear()
   for (const tickedPer of ticked.value) {
     addSelfAndParentPer(tickedPer)
   }
