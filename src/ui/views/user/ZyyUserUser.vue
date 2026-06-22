@@ -77,7 +77,11 @@
                             if(name === 'update') {
                               clearUpsertParam();
                               updateId = row.id
-                              upsertName = row.name
+                              upsertNickName = row.nickName
+                              upsertGender = GenderOptEnum.fromCodeToSelectFrom(row.gender)
+                              upsertPhone = row.phone
+                              upsertMail = row.mail
+                              upsertBirth = row.birth
                               isNew = false;
                               showUpsert = true
                             }
@@ -110,9 +114,30 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 style="white-space: nowrap;">用户名称&nbsp;:</h6>
-          <q-input v-model="upsertName" class="component-outline-input-std" dense outlined
-                   placeholder="例如：添加用户"/>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户昵称&nbsp;:</h6>
+          <q-input v-model="upsertNickName" class="component-outline-input-std" dense outlined
+                   placeholder="例如：张三"/>
+
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户邮箱&nbsp;:</h6>
+          <q-input v-model="upsertMail" class="component-outline-input-std" dense outlined
+                   placeholder="例如：zs01@gmail.com"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户手机号&nbsp;:</h6>
+          <q-input v-model="upsertPhone" class="component-outline-input-std" dense outlined
+                   placeholder="例如：13811012138"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户性别&nbsp;:</h6>
+          <q-select outlined clearable class="component-outline-input-grow"
+                    dropdown-icon="fa-solid fa-caret-down"
+                    popup-content-class="component-extra-card-std"
+                    clear-icon="fa-solid fa-xmark"
+                    menu-anchor="bottom start" :menu-offset="[0, 5]"
+                    v-model="upsertGender" :options="genderOptions">
+          </q-select>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户生日&nbsp;:</h6>
+          <cask-date-picker v-model="upsertBirth"/>
+
 
         </div>
 
@@ -142,6 +167,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableUser, tableUserOperation} from "@/tables/user.js";
 import {userCreate, userDelete, userList, userUpdate} from "@/api/user.js";
+import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 
 
 const selectId = ref("")
@@ -150,6 +176,7 @@ const phone = ref("")
 const mail = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
+const genderOptions = ref(GenderOptEnum.toSelectForm())
 
 function clearSearch() {
   selectId.value = ""
@@ -162,12 +189,20 @@ function clearSearch() {
 // create/update
 const showUpsert = ref(false)
 const isNew = ref(false)
-const upsertName = ref("")
+const upsertNickName = ref("")
+const upsertMail = ref("")
+const upsertPhone = ref("")
+const upsertGender = ref(null)
+const upsertBirth = ref("")
 
 const updateId = ref("")
 
 function clearUpsertParam() {
-  upsertName.value = ""
+  upsertNickName.value = ""
+  upsertMail.value = ""
+  upsertPhone.value = ""
+  upsertGender.value = null
+  upsertBirth.value = ""
 }
 
 // delete
@@ -186,7 +221,7 @@ const tableDynamicData = ref(
 )
 
 function upsertData() {
-  if (!upsertName.value) {
+  if (!upsertNickName.value || !upsertMail.value) {
     notifyTopWarning("提供参数不足")
     return;
   }

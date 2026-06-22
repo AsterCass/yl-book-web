@@ -117,15 +117,15 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 style="white-space: nowrap;">权限名称&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限名称&nbsp;:</h6>
           <q-input v-model="upsertName" dense outlined placeholder="例如：添加用户"
                    class="component-outline-input-std"/>
 
-          <h6 style="white-space: nowrap;">权限码&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限码&nbsp;:</h6>
           <q-input v-model="upsertCode" dense outlined placeholder="例如：user:add"
                    class="component-outline-input-std"/>
 
-          <h6 style="white-space: nowrap;">权限类型&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限类型&nbsp;:</h6>
           <q-select outlined clearable class="component-outline-input-grow"
                     dropdown-icon="fa-solid fa-caret-down"
                     popup-content-class="component-extra-card-std"
@@ -134,11 +134,11 @@
                     v-model="upsertType" :options="typeOptions">
           </q-select>
 
-          <h6 style="white-space: nowrap;">权限描述&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">权限描述&nbsp;:</h6>
           <q-input v-model="upsertDesc" dense outlined placeholder="可为空"
                    class="component-outline-input-std"/>
 
-          <h6 style="white-space: nowrap;">父权限ID&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">父权限ID&nbsp;:</h6>
           <q-input v-model="upsertParentId" dense outlined placeholder="可为空"
                    class="component-outline-input-std"/>
         </div>

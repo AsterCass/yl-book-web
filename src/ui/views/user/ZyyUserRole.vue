@@ -108,15 +108,15 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 style="white-space: nowrap;">角色名称&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">角色名称&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-std" dense outlined
-                   placeholder="例如：添加用户"/>
+                   placeholder="例如：部门管理"/>
 
-          <h6 style="white-space: nowrap;">角色码&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">角色码&nbsp;:</h6>
           <q-input v-model="upsertCode" class="component-outline-input-std" dense outlined
-                   placeholder="例如：user:add"/>
+                   placeholder="例如：deMngt"/>
 
-          <h6 style="white-space: nowrap;">角色描述&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">角色描述&nbsp;:</h6>
           <q-input v-model="upsertDesc" class="component-outline-input-std" dense outlined
                    placeholder="可为空"/>
 
