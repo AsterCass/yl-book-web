@@ -7,7 +7,7 @@
           用户编号&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLP001"
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLU001"
                tabindex="0">
       </q-input>
 
@@ -61,10 +61,6 @@
              unelevated
              @click="clearUpsertParam(); isNew = true; showUpsert = true">
         添加用户
-      </q-btn>
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
-             unelevated @click="notifyTopWarning($t('in_develop'))">
-        导出用户
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated @click="()=> {clearSearch(); selectData();}">

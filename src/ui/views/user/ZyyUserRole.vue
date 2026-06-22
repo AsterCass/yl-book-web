@@ -8,7 +8,7 @@
           角色编号&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLP001"
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLR001"
                tabindex="0">
       </q-input>
 
@@ -17,7 +17,7 @@
           角色名称/角色码&nbsp;:
         </h6>
       </div>
-      <q-input v-model="keyword" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：添加用户"
+      <q-input v-model="keyword" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：部门管理"
                tabindex="0">
       </q-input>
 
@@ -44,10 +44,6 @@
              unelevated
              @click="clearUpsertParam(); isNew = true; showUpsert = true">
         添加角色
-      </q-btn>
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
-             unelevated @click="notifyTopWarning($t('in_develop'))">
-        导出角色
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated @click="()=> {clearSearch(); selectData();}">

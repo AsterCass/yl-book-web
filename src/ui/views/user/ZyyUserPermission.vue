@@ -67,10 +67,6 @@
         添加权限
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
-             @click="notifyTopWarning($t('in_develop'))" push>
-        导出权限
-      </q-btn>
-      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
              @click="()=> {clearSearch(); selectData();}" push>
         清空条件
       </q-btn>
