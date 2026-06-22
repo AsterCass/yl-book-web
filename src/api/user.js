@@ -39,6 +39,14 @@ export function userUpdate(id, body) {
     })
 }
 
+export function userUpdateRole(id, body) {
+    return serviceShiro({
+        url: `/user/update/${id}/role`,
+        data: body,
+        method: 'post',
+    })
+}
+
 export function userDelete(id) {
     return serviceShiro({
         url: `/user/delete/${id}`,

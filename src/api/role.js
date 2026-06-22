@@ -9,6 +9,13 @@ export function roleList(params) {
     })
 }
 
+export function roleListSimple() {
+    return serviceShiro({
+        url: `/role/list/simple`,
+        method: 'get',
+    })
+}
+
 export function roleCreate(body) {
     return serviceShiro({
         url: `/role/create`,

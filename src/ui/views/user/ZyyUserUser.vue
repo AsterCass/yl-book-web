@@ -91,13 +91,23 @@
                               showDelete = true
                             }
                             if (name === 'getRole') {
-                              ticked = row.simpleRoleList
+                              clearUserRole()
+                              for(const role of  row.simpleRoleList) {
+                                if (role in userRoleMap) {
+                                  userRoleMap[role] = true
+                                }
+                              }
                               isUpdateRole = false
                               showUserRole = true
                             }
                             if (name === 'updateRole') {
                               updateId = row.id
-                              ticked = row.simpleRoleList
+                              clearUserRole()
+                              for(const role of  row.simpleRoleList) {
+                                if (role in userRoleMap) {
+                                  userRoleMap[role] = true
+                                }
+                              }
                               isUpdateRole = true
                               showUserRole = true
                             }
@@ -171,6 +181,33 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog :model-value="showUserRole" @hide="showUserRole = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          角色分配
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="row q-px-sm" style="padding-top: .1rem; width: 25rem">
+          <div v-for="roleItem in allRoleList" :key="roleItem.id">
+            <q-checkbox class="q-ma-xs" color="grey-10" size="37px" v-model="userRoleMap[roleItem.id]"
+                        :label="roleItem.name" :disable="!isUpdateRole"/>
+          </div>
+
+        </div>
+
+        <div v-if="isUpdateRole" class="row q-mt-xl q-mb-md justify-center">
+          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateUserRole">
+            保存
+          </q-btn>
+        </div>
+        <div v-else style="height: 2rem">
+        </div>
+      </q-card>
+    </q-dialog>
+
 
     <cask-dialog-judgment v-model="showDelete"
                           :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
@@ -183,13 +220,14 @@
 
 <script setup>
 import {CommonStatusEnum, GenderOptEnum} from "@/constants/enums/common.js";
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableUser, tableUserOperation} from "@/tables/user.js";
-import {userCreate, userDelete, userList, userUpdate} from "@/api/user.js";
+import {userCreate, userDelete, userList, userUpdate, userUpdateRole} from "@/api/user.js";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
+import {roleListSimple} from "@/api/role.js";
 
 
 const selectId = ref("")
@@ -230,7 +268,8 @@ function clearUpsertParam() {
 // assign role
 const isUpdateRole = ref(false)
 const showUserRole = ref(false)
-const ticked = ref([])
+const allRoleList = ref([])
+const userRoleMap = reactive({})
 
 // delete
 const showDelete = ref(false)
@@ -288,6 +327,38 @@ function upsertData() {
   }
 }
 
+function clearUserRole() {
+  for (const key in userRoleMap) {
+    userRoleMap[key] = false
+  }
+}
+
+function updateUserRole() {
+  if (!updateId.value) {
+    notifyTopWarning("提供参数不足")
+    return;
+  }
+
+  const body = {
+    roleIdList: []
+  }
+
+  for (const key in userRoleMap) {
+    if (userRoleMap[key]) {
+      body.roleIdList.push(key)
+    }
+  }
+
+  userUpdateRole(updateId.value, body).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showUserRole.value = false
+    notifyTopPositive("配置角色成功")
+    selectData()
+  })
+
+}
 
 function deleteData() {
   if (!toDeleteId.value) {
@@ -326,16 +397,33 @@ function selectData() {
       data.updateOp = true
       data.getRoleOp = true
       data.updateRoleOp = true
+      if (data.roleDtoList && data.roleDtoList.length > 0) {
+        data.simpleRoleList = data.roleDtoList.map(item => item.id)
+      } else {
+        data.simpleRoleList = []
+      }
       data.statusNameWebColorName = statusEnum.color
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
   })
+}
 
+function getAllRoles() {
+  roleListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    res.data.data.forEach(role => {
+      userRoleMap[role.id] = false
+    })
+    allRoleList.value = res.data.data
+  })
 }
 
 onMounted(() => {
   selectData()
+  getAllRoles()
 })
 </script>
 
