@@ -13,6 +13,33 @@
 
       <div class="q-ml-md">
         <h6>
+          用户昵称&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="nickName" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：张三"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
+          用户邮箱&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="mail" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：zs01@gmail.com"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
+          用户手机号&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="phone" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：13811012138"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
           用户状态&nbsp;:
         </h6>
       </div>
@@ -122,13 +149,17 @@ import {userCreate, userDelete, userList, userUpdate} from "@/api/user.js";
 
 
 const selectId = ref("")
-const keyword = ref("")
+const nickName = ref("")
+const phone = ref("")
+const mail = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
 function clearSearch() {
   selectId.value = ""
-  keyword.value = ""
+  nickName.value = ""
+  phone.value = ""
+  mail.value = ""
   selectStatus.value = null
 }
 
@@ -210,7 +241,7 @@ function deleteData() {
 function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    id: selectId.value, keyword: keyword.value,
+    id: selectId.value, nickName: nickName.value, phone: phone.value, mail: mail.value,
     status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
