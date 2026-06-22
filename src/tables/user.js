@@ -45,6 +45,12 @@ const tableUserCol = [
         align: 'center',
     },
     {
+        name: 'roles',
+        field: 'roles',
+        label: '用户角色',
+        align: 'center',
+    },
+    {
         name: 'genderName',
         field: 'genderName',
         label: '性别',
@@ -73,18 +79,6 @@ const tableUserCol = [
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
-        align: 'center',
-    },
-    {
-        name: 'updateTime',
-        field: 'updateTime',
-        label: '更新时间',
-        align: 'center',
-    },
-    {
-        name: 'updateUserName',
-        field: 'updateUserName',
-        label: '更新用户',
         align: 'center',
     },
     {
@@ -125,11 +119,6 @@ export const tableUserOperation = [
         label: '编辑',
         condition: 'updateOp',
         name: 'update',
-    },
-    {
-        label: '查看角色',
-        condition: 'getRoleOp',
-        name: 'getRole',
     },
     {
         label: '修改角色',

@@ -90,16 +90,6 @@
                               toDeleteName = row.nickName
                               showDelete = true
                             }
-                            if (name === 'getRole') {
-                              clearUserRole()
-                              for(const role of  row.simpleRoleList) {
-                                if (role in userRoleMap) {
-                                  userRoleMap[role] = true
-                                }
-                              }
-                              isUpdateRole = false
-                              showUserRole = true
-                            }
                             if (name === 'updateRole') {
                               updateId = row.id
                               clearUserRole()
@@ -108,7 +98,6 @@
                                   userRoleMap[role] = true
                                 }
                               }
-                              isUpdateRole = true
                               showUserRole = true
                             }
                           }"
@@ -193,17 +182,15 @@
         <div class="row q-px-sm" style="padding-top: .1rem; width: 25rem">
           <div v-for="roleItem in allRoleList" :key="roleItem.id">
             <q-checkbox class="q-ma-xs" color="grey-10" size="37px" v-model="userRoleMap[roleItem.id]"
-                        :label="roleItem.name" :disable="!isUpdateRole"/>
+                        :label="roleItem.name"/>
           </div>
 
         </div>
 
-        <div v-if="isUpdateRole" class="row q-mt-xl q-mb-md justify-center">
+        <div class="row q-mt-xl q-mb-md justify-center">
           <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateUserRole">
             保存
           </q-btn>
-        </div>
-        <div v-else style="height: 2rem">
         </div>
       </q-card>
     </q-dialog>
@@ -266,7 +253,6 @@ function clearUpsertParam() {
 }
 
 // assign role
-const isUpdateRole = ref(false)
 const showUserRole = ref(false)
 const allRoleList = ref([])
 const userRoleMap = reactive({})
@@ -397,8 +383,13 @@ function selectData() {
       data.updateOp = true
       data.getRoleOp = true
       data.updateRoleOp = true
+      data.roles = ""
       if (data.roleDtoList && data.roleDtoList.length > 0) {
         data.simpleRoleList = data.roleDtoList.map(item => item.id)
+        for (const thisRole of data.roleDtoList) {
+          data.roles += thisRole.name + ","
+        }
+        data.roles = data.roles.slice(0, -1)
       } else {
         data.simpleRoleList = []
       }
