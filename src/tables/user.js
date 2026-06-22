@@ -127,6 +127,16 @@ export const tableUserOperation = [
         name: 'update',
     },
     {
+        label: '查看角色',
+        condition: 'getRoleOp',
+        name: 'getRole',
+    },
+    {
+        label: '修改角色',
+        condition: 'updateRoleOp',
+        name: 'updateRole',
+    },
+    {
         label: '删除',
         condition: 'deleteOp',
         name: 'delete',

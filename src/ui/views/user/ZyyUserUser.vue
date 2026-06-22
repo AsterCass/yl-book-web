@@ -87,8 +87,19 @@
                             }
                             if(name === 'delete') {
                               toDeleteId = row.id
-                              toDeleteName = row.name
+                              toDeleteName = row.nickName
                               showDelete = true
+                            }
+                            if (name === 'getRole') {
+                              ticked = row.simpleRoleList
+                              isUpdateRole = false
+                              showUserRole = true
+                            }
+                            if (name === 'updateRole') {
+                              updateId = row.id
+                              ticked = row.simpleRoleList
+                              isUpdateRole = true
+                              showUserRole = true
                             }
                           }"
                         @toNewPage="(pageObj) => {
@@ -105,6 +116,12 @@
           {{ isNew ? "添加用户" : "更新用户" }}
         </h5>
 
+        <div class="q-mx-sm" style="opacity: 0.5; width: 25rem">
+          <div v-if="isNew">
+            默认密码和邮箱相同，创建后用户需要在15日内修改密码，否则账号会被锁定，无法登录
+          </div>
+        </div>
+
         <q-separator class="component-separator-base" inset spaced="1rem"/>
 
         <div style="padding-top: .1rem">
@@ -115,15 +132,15 @@
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户昵称&nbsp;:</h6>
-          <q-input v-model="upsertNickName" class="component-outline-input-std" dense outlined
+          <q-input v-model="upsertNickName" class="component-outline-input-grow" dense outlined
                    placeholder="例如：张三"/>
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户邮箱&nbsp;:</h6>
-          <q-input v-model="upsertMail" class="component-outline-input-std" dense outlined
+          <q-input v-model="upsertMail" class="component-outline-input-grow" dense outlined
                    placeholder="例如：zs01@gmail.com"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">用户手机号&nbsp;:</h6>
-          <q-input v-model="upsertPhone" class="component-outline-input-std" dense outlined
+          <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    placeholder="例如：13811012138"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">用户性别&nbsp;:</h6>
@@ -209,6 +226,11 @@ function clearUpsertParam() {
   upsertGender.value = null
   upsertBirth.value = ""
 }
+
+// assign role
+const isUpdateRole = ref(false)
+const showUserRole = ref(false)
+const ticked = ref([])
 
 // delete
 const showDelete = ref(false)
@@ -302,6 +324,8 @@ function selectData() {
       data.genderName = genderEnum.name;
       data.deleteOp = true
       data.updateOp = true
+      data.getRoleOp = true
+      data.updateRoleOp = true
       data.statusNameWebColorName = statusEnum.color
     });
     tableData.value = thisData
