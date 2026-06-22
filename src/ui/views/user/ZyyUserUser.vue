@@ -236,7 +236,13 @@ function upsertData() {
     return;
   }
 
-  const body = {}
+  const body = {
+    mail: upsertMail.value,
+    nickName: upsertNickName.value,
+    phone: upsertPhone.value,
+    gender: upsertGender.value ? upsertGender.value.value : null,
+    birth: upsertBirth.value ? upsertBirth.value : null,
+  }
 
   if (isNew.value) {
     userCreate(body).then(res => {
