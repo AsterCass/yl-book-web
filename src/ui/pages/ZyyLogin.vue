@@ -221,6 +221,9 @@ function userLoginMethod() {
     globalState.updateUserData(res.data.data)
     saveLoginInfo()
     notifyTopPositive(t('main_login_success'))
+    if (currentBody.value.mail === currentBody.value.password) {
+      notifyTopWarning(t('yl_warning_passwd_init'), 30000)
+    }
     backToHome(thisRouter)
   })
 }
