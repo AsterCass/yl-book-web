@@ -2,7 +2,7 @@
   <div>
     <q-input v-model="pickDate" tabindex="0" dense outlined
              class="component-outline-input-mini" :placeholder="placeholder"
-             no-error-icon mask="date" @update:modelValue="updateUiInput"
+             no-error-icon mask="####-##-##" @update:modelValue="updateUiInput"
     >
       <template v-slot:append>
         <q-icon name="fa-regular fa-calendar" size="1rem" class="cursor-pointer">
@@ -13,7 +13,7 @@
           >
             <div>
               <div class="row">
-                <q-date class="q-mx-sm" v-model="dateUiInput">
+                <q-date class="q-mx-sm" v-model="dateUiInput" mask="YYYY-MM-DD">
                 </q-date>
               </div>
             </div>
@@ -39,7 +39,7 @@ const props = defineProps({
   placeholder: {
     type: String,
     required: false,
-    default: '1970/01/01'
+    default: '1970-01-01'
   },
 })
 
@@ -52,9 +52,9 @@ let dateUiInput = ref("")
 
 function updateUiInput() {
   if (pickDate.value && pickDate.value.length >= 10) {
-    const thisDate = date.extractDate(pickDate.value, 'YYYY/MM/DD')
+    const thisDate = date.extractDate(pickDate.value, 'YYYY-MM-DD')
     //这里的thisDate不一定对，需要自动矫正
-    pickDate.value = date.formatDate(thisDate, 'YYYY/MM/DD')
+    pickDate.value = date.formatDate(thisDate, 'YYYY-MM-DD')
     dateUiInput.value = pickDate.value
   }
   emit('update:modelValue',  pickDate.value);
@@ -63,7 +63,7 @@ function updateUiInput() {
 function saveDate() {
   if (dateUiInput.value) {
     const timeStamp = new Date(dateUiInput.value)
-    const dateStr = date.formatDate(timeStamp, 'YYYY/MM/DD')
+    const dateStr = date.formatDate(timeStamp, 'YYYY-MM-DD')
     pickDate.value = dateStr
     emit('update:modelValue', dateStr);
   }

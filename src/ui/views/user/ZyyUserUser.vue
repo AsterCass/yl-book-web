@@ -98,7 +98,7 @@
                           }"
     />
 
-    <q-dialog :model-value="showUpsert" transition-hide="fade"
+    <q-dialog :model-value="showUpsert" transition-hide="fade" no-backdrop-dismiss no-shake
               transition-show="fade" @hide="showUpsert = false">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
@@ -141,10 +141,15 @@
 
         </div>
 
-        <div class="row q-mt-xl q-mb-md justify-center">
+        <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
             {{ isNew ? "添加" : "更新" }}
           </q-btn>
+
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showUpsert = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+
         </div>
       </q-card>
     </q-dialog>

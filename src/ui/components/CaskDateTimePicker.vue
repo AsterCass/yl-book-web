@@ -2,7 +2,7 @@
   <div>
     <q-input v-model="pickDatetime" tabindex="0" dense outlined
              class="component-outline-input-std" :placeholder="placeholder"
-             no-error-icon mask="datetime" @update:modelValue="updateUiInput"
+             no-error-icon mask="####-##-## ##:##" @update:modelValue="updateUiInput"
     >
       <template v-slot:append>
         <q-icon name="fa-regular fa-clock" size="1.1rem" class="cursor-pointer">
@@ -13,7 +13,7 @@
           >
             <div>
               <div class="row">
-                <q-date class="q-mx-sm" v-model="dateUiInput"/>
+                <q-date class="q-mx-sm" v-model="dateUiInput" mask="YYYY-MM-DD"/>
                 <cask-time v-model="timeUiInput" @update:modelValue="it => {timeUiInput = it}"/>
               </div>
             </div>
@@ -40,7 +40,7 @@ const props = defineProps({
   placeholder: {
     type: String,
     required: false,
-    default: '1970/01/01 00:00'
+    default: '1970-01-01 00:00'
   },
 })
 
@@ -54,9 +54,9 @@ let timeUiInput = ref("")
 
 function updateUiInput() {
   if (pickDatetime.value && pickDatetime.value.length >= 16) {
-    const thisDate = date.extractDate(pickDatetime.value, 'YYYY/MM/DD HH:mm')
+    const thisDate = date.extractDate(pickDatetime.value, 'YYYY-MM-DD HH:mm')
     //这里的thisDate不一定对，需要自动矫正
-    const thisDateStr = date.formatDate(thisDate, 'YYYY/MM/DD HH:mm')
+    const thisDateStr = date.formatDate(thisDate, 'YYYY-MM-DD HH:mm')
     pickDatetime.value = thisDateStr
     dateUiInput.value = thisDateStr.substring(0, 10)
     timeUiInput.value = thisDateStr.substring(11)
