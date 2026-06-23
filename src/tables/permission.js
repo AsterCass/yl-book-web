@@ -120,6 +120,7 @@ export const tablePermission = {
  * label：展示在操作列的操作文字内容
  * condition：出现条件，比如出现条件为 'cod', 那么只有在该行数据 thisData.cod 判断为 true 的时候才会显示
  * name：在用户点击时候，会将该字段值传回，用于确定哪个label被点击
+ * color: 按钮颜色
  */
 export const tablePermissionOperation = [
     {
@@ -131,5 +132,6 @@ export const tablePermissionOperation = [
         label: '删除',
         condition: 'deleteOp',
         name: 'delete',
+        color: 'rgb(var(--negative))',
     }
 ]

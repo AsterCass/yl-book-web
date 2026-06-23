@@ -158,7 +158,7 @@
           <div class="row justify-center">
             <div v-show="!operation.condition ||  props.row[operation.condition]"
                  v-for="(operation, index) in customTableOperation" :key="index"
-                 style="color: rgb(var(--pointer)); cursor: pointer; margin: 0 .2rem"
+                 :style="`color: ${operation.color ? operation.color : 'rgb(var(--pointer))'}; cursor: pointer; margin: 0 .2rem`"
                  @click="emit('operationClick', operation.name, props.row) ">
               {{ operation.label }}
             </div>
