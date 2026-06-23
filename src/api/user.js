@@ -47,6 +47,22 @@ export function userUpdateRole(id, body) {
     })
 }
 
+export function userUpdateDisable(id, data) {
+    return serviceShiro({
+        url: `/user/update/${id}/disable`,
+        params: data,
+        method: 'post',
+    })
+}
+
+export function userUpdateLock(id, data) {
+    return serviceShiro({
+        url: `/user/update/${id}/lock`,
+        params: data,
+        method: 'post',
+    })
+}
+
 export function userDelete(id) {
     return serviceShiro({
         url: `/user/delete/${id}`,

@@ -129,5 +129,20 @@ export const tableUserOperation = [
         label: '删除',
         condition: 'deleteOp',
         name: 'delete',
+    },
+    {
+        label: '禁用',
+        condition: 'disableOp',
+        name: 'disable',
+    },
+    {
+        label: '启用',
+        condition: 'enableOp',
+        name: 'enable',
+    },
+    {
+        label: '解锁',
+        condition: 'unlockOp',
+        name: 'unlock',
     }
 ]

@@ -383,6 +383,13 @@ function selectData() {
       data.updateOp = true
       data.getRoleOp = true
       data.updateRoleOp = true
+      if (data.status === CommonStatusEnum.NORMAL.code) {
+        data.disableOp = true
+      } else if (data.status === CommonStatusEnum.DISABLE.code) {
+        data.enableOp = true
+      } else if (data.status === CommonStatusEnum.LOCKED.code) {
+        data.unlockOp = true
+      }
       data.roles = ""
       if (data.roleDtoList && data.roleDtoList.length > 0) {
         data.simpleRoleList = data.roleDtoList.map(item => item.id)
