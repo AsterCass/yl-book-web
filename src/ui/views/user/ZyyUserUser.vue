@@ -85,11 +85,6 @@
                               isNew = false;
                               showUpsert = true
                             }
-                            if(name === 'delete') {
-                              toDeleteId = row.id
-                              toDeleteName = row.nickName
-                              showDelete = true
-                            }
                             if (name === 'updateRole') {
                               updateId = row.id
                               clearUserRole()
@@ -99,6 +94,34 @@
                                 }
                               }
                               showUserRole = true
+                            }
+                            if(name === 'delete') {
+                              toOpId = row.id
+                              toOpTitle = '删除用户'
+                              toOpDesc = `是否要删除【${row.nickName}】用户`
+                              toOpFunc = deleteData
+                              showOperation = true
+                            }
+                            if (name === 'disable') {
+                              toOpId = row.id
+                              toOpTitle = '禁用用户'
+                              toOpDesc = `是否要禁用【${row.nickName}】用户`
+                              toOpFunc = disableData
+                              showOperation = true
+                            }
+                            if (name === 'enable') {
+                              toOpId = row.id
+                              toOpTitle = '启用用户'
+                              toOpDesc = `是否要启用【${row.nickName}】用户`
+                              toOpFunc = enableData
+                              showOperation = true
+                            }
+                            if (name === 'unlock') {
+                              toOpId = row.id
+                              toOpTitle = '解锁用户'
+                              toOpDesc = `是否要解锁【${row.nickName}】用户`
+                              toOpFunc = unlockData
+                              showOperation = true
                             }
                           }"
                         @toNewPage="(pageObj) => {
@@ -117,7 +140,7 @@
 
         <div class="q-mx-sm" style="opacity: 0.5; width: 25rem">
           <div v-if="isNew">
-            默认密码和邮箱相同，创建后用户需要在15日内修改密码，否则账号会被锁定，无法登录
+            默认密码和邮箱相同，创建后用户需要在3日内修改密码，否则账号会被锁定，无法登录
           </div>
         </div>
 
@@ -196,9 +219,9 @@
     </q-dialog>
 
 
-    <cask-dialog-judgment v-model="showDelete"
-                          :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
-                          :dialog-judgment-data="{title: '删除用户', content:`是否删除【${toDeleteName}】用户`,
+    <cask-dialog-judgment v-model="showOperation"
+                          :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
+                          :dialog-judgment-data="{title: `${toOpTitle}`, content:`${toOpDesc}`,
                                                 falseLabel: '取消', trueLabel: '确认'}"
     />
 
@@ -212,7 +235,15 @@ import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableUser, tableUserOperation} from "@/tables/user.js";
-import {userCreate, userDelete, userList, userUpdate, userUpdateRole} from "@/api/user.js";
+import {
+  userCreate,
+  userDelete,
+  userList,
+  userUpdate,
+  userUpdateDisable,
+  userUpdateLock,
+  userUpdateRole
+} from "@/api/user.js";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {roleListSimple} from "@/api/role.js";
 
@@ -257,10 +288,12 @@ const showUserRole = ref(false)
 const allRoleList = ref([])
 const userRoleMap = reactive({})
 
-// delete
-const showDelete = ref(false)
-const toDeleteId = ref("")
-const toDeleteName = ref("")
+// op
+const showOperation = ref(false)
+const toOpId = ref("")
+const toOpTitle = ref("")
+const toOpDesc = ref("")
+const toOpFunc = ref(null)
 
 const tableData = ref([])
 const tableDynamicData = ref(
@@ -346,11 +379,50 @@ function updateUserRole() {
 
 }
 
-function deleteData() {
-  if (!toDeleteId.value) {
+function enableData() {
+  if (!toOpId.value) {
     notifyTopWarning("提供参数不足")
   }
-  userDelete(toDeleteId.value).then(res => {
+  userUpdateDisable(toOpId.value, {isDisable: false}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive("启用成功")
+    selectData()
+  })
+}
+
+function disableData() {
+  if (!toOpId.value) {
+    notifyTopWarning("提供参数不足")
+  }
+  userUpdateDisable(toOpId.value, {isDisable: true}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive("禁用成功")
+    selectData()
+  })
+}
+
+function unlockData() {
+  if (!toOpId.value) {
+    notifyTopWarning("提供参数不足")
+  }
+  userUpdateLock(toOpId.value, {isLock: false}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive("解锁成功")
+    selectData()
+  })
+}
+
+function deleteData() {
+  if (!toOpId.value) {
+    notifyTopWarning("提供参数不足")
+  }
+  userDelete(toOpId.value).then(res => {
     if (!res || !res.data) {
       return
     }

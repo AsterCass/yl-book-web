@@ -148,5 +148,6 @@ export const tableUserOperation = [
         label: '解锁',
         condition: 'unlockOp',
         name: 'unlock',
+        color: 'rgb(var(--positive))',
     }
 ]
