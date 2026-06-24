@@ -495,10 +495,11 @@
   "user_role": {
     "label": { "id": "角色编号", "name": "角色名称/角色码", "status": "角色状态" },
     "placeholder": { "id": "例如：YLR001", "name": "例如：部门管理", "code": "例如：deMngt", "optional": "可为空" },
-    "button": { "query": "查询", "add": "添加角色", "clear": "清空条件" },
+    "button": { "query": "查询", "add": "添加角色", "clear": "清空条件",  "save": "保存"  },
     "upsert": { "title_add": "添加角色", "title_update": "更新角色", "field": { "name": "角色名称", "code": "角色码", "desc": "角色描述" }, "save_add": "添加", "save_update": "更新" },
     "dialog": { "delete": { "title": "删除角色", "content": "是否删除【{name}】角色", "cancel": "取消", "confirm": "确认" } },
-    "notify": { "update_success": "更新角色成功", "per_update_success": "配置权限成功" }
+    "notify": { "update_success": "更新角色成功", "per_update_success": "配置权限成功" },
+    "role_assign": { "title": "权限分配" }
   },
 
   "user_setting": { "field": { "old_password": "原密码：", "new_password": "新密码：", "repeat_password": "重复密码：" } },
@@ -508,6 +509,8 @@
   "validation": { "insufficient_parameters": "提供参数不足" },
 
   "notify": { "delete_success": "删除成功" },
+
+  "staff": { "title": "雇员" },
 
   "user_user": {
     "label": { "id": "用户编号", "nick": "用户昵称", "mail": "用户邮箱", "phone": "用户手机号", "status": "用户状态" },

@@ -2,7 +2,7 @@
 
 
   <div>
-    雇员
+    {{ $t('staff.title') }}
   </div>
 </template>
 

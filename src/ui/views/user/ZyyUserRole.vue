@@ -143,7 +143,7 @@
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          权限分配
+          {{ $t('user_role.role_assign.title') }}
         </h5>
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
@@ -167,7 +167,7 @@
 
         <div v-if="isUpdatePer" class="row q-mt-xl q-mb-md justify-center">
           <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateDataPer">
-            保存
+            {{ $t('user_role.button.save') }}
           </q-btn>
         </div>
         <div v-else style="height: 2rem">

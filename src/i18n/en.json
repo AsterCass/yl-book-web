@@ -497,10 +497,11 @@
   "user_role": {
     "label": { "id": "Role ID", "name": "Role Name / Code", "status": "Role Status" },
     "placeholder": { "id": "e.g.: YLR001", "name": "e.g.: Department Management", "code": "e.g.: deMngt", "optional": "Optional" },
-    "button": { "query": "Query", "add": "Add Role", "clear": "Clear Filters" },
+    "button": { "query": "Query", "add": "Add Role", "clear": "Clear Filters",  "save": "Save"},
     "upsert": { "title_add": "Add Role", "title_update": "Update Role", "field": { "name": "Role Name", "code": "Role Code", "desc": "Role Description" }, "save_add": "Add", "save_update": "Update" },
     "dialog": { "delete": { "title": "Delete Role", "content": "Delete role 【{name}】?", "cancel": "Cancel", "confirm": "Confirm" } },
-    "notify": { "update_success": "Role updated successfully", "per_update_success": "Permissions updated successfully" }
+    "notify": { "update_success": "Role updated successfully", "per_update_success": "Permissions updated successfully" },
+    "role_assign": { "title": "Permission Assignment" }
   },
 
   "user_setting": { "field": { "old_password": "Old password", "new_password": "New password", "repeat_password": "Repeat password" } },
@@ -510,6 +511,8 @@
   "validation": { "insufficient_parameters": "Insufficient parameters provided" },
 
   "notify": { "delete_success": "Deletion successful" },
+
+  "staff": { "title": "Staff" },
 
   "user_user": {
     "label": { "id": "User ID", "nick": "User Nickname", "mail": "User Email", "phone": "User Phone", "status": "User Status", "roles": "Roles", "gender": "Gender", "birth": "Birth", "create_time": "Create Time", "create_user": "Create User", "operation": "Operation" },
