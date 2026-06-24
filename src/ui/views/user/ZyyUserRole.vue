@@ -5,25 +5,27 @@
 
       <div class="q-ml-md">
         <h6>
-          角色编号&nbsp;:
+          {{ $t('user_role.label.id') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLR001"
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_role.placeholder.id')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          角色名称/角色码&nbsp;:
+          {{ $t('user_role.label.name') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="keyword" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：部门管理"
+      <q-input v-model="keyword" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_role.placeholder.name')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          角色状态&nbsp;:
+          {{ $t('user_role.label.status') }}&nbsp;:
         </h6>
       </div>
       <q-select v-model="selectStatus" :menu-offset="[0, 5]" :options="statusOptions"
@@ -38,16 +40,16 @@
 
     <div class="row">
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
-        查询
+        {{ $t('user_role.button.query') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated
              @click="clearUpsertParam(); isNew = true; showUpsert = true">
-        添加角色
+        {{ $t('user_role.button.add') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated @click="()=> {clearSearch(); selectData();}">
-        清空条件
+        {{ $t('user_role.button.clear') }}
       </q-btn>
     </div>
 
@@ -96,7 +98,7 @@
               transition-show="fade" @hide="showUpsert = false">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          {{ isNew ? "添加角色" : "更新角色" }}
+          {{ isNew ? $t('user_role.upsert.title_add') : $t('user_role.upsert.title_update') }}
         </h5>
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
@@ -108,23 +110,25 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">角色名称&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_role.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-std" dense outlined
-                   placeholder="例如：部门管理"/>
+                   :placeholder="t('user_role.placeholder.name')"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">角色码&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_role.upsert.field.code') }}&nbsp;:</h6>
           <q-input v-model="upsertCode" class="component-outline-input-std" dense outlined
-                   placeholder="例如：deMngt"/>
+                   :placeholder="t('user_role.placeholder.code')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">角色描述&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_role.upsert.field.desc')
+            }}&nbsp;:</h6>
           <q-input v-model="upsertDesc" class="component-outline-input-std" dense outlined
-                   placeholder="可为空"/>
+                   :placeholder="t('user_role.placeholder.optional')"/>
 
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
-            {{ isNew ? "添加" : "更新" }}
+            {{ isNew ? $t('user_role.upsert.save_add') : $t('user_role.upsert.save_update') }}
           </q-btn>
 
           <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showUpsert = false">
@@ -173,8 +177,7 @@
 
     <cask-dialog-judgment v-model="showDelete"
                           :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
-                          :dialog-judgment-data="{title: '删除角色', content:`是否删除【${toDeleteName}】角色`,
-                                                falseLabel: '取消', trueLabel: '确认'}"
+                          :dialog-judgment-data="{ title: $t('user_role.dialog.delete.title'), content: $t('user_role.dialog.delete.content', { name: toDeleteName }), falseLabel: $t('user_role.dialog.delete.cancel'), trueLabel: $t('user_role.dialog.delete.confirm') }"
     />
 
   </div>
@@ -186,12 +189,14 @@ import {roleCreate, roleDelete, roleList, roleUpdate, roleUpdatePer} from "@/api
 import {CommonStatusEnum} from "@/constants/enums/common.js";
 import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
+import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableRole, tableRoleOperation} from "@/tables/role.js";
 import {perListSimple} from "@/api/permission.js";
 
 
+const {t} = useI18n()
 const selectId = ref("")
 const keyword = ref("")
 const selectStatus = ref(null)
@@ -243,12 +248,12 @@ const tableDynamicData = ref(
 
 function upsertData() {
   if (!upsertName.value || !upsertCode.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
   if (!updateId.value && !isNew.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
@@ -274,7 +279,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      notifyTopPositive("更新角色成功")
+      notifyTopPositive(t('user_role.notify.update_success'))
       selectData()
     })
   }
@@ -289,7 +294,7 @@ function addSelfAndParentPer(currentPer) {
 
 function updateDataPer() {
   if (!updateId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
@@ -307,7 +312,7 @@ function updateDataPer() {
       return
     }
     showRolePer.value = false
-    notifyTopPositive("配置权限成功")
+    notifyTopPositive(t('user_role.notify.per_update_success'))
     selectData()
   })
 
@@ -315,13 +320,13 @@ function updateDataPer() {
 
 function deleteData() {
   if (!toDeleteId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   roleDelete(toDeleteId.value).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("删除成功")
+    notifyTopPositive(t('notify.delete_success'))
     selectData()
   })
 }

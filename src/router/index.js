@@ -1,4 +1,5 @@
 import {createRouter, createWebHistory} from "vue-router";
+import {i18n} from '@/i18n/index.js'
 import NoAuth from "@/ui/pages/NoAuth.vue";
 import NotFound from "@/ui/pages/NotFound.vue";
 import NoLogin from "@/ui/pages/NoLogin.vue";
@@ -55,7 +56,7 @@ const router = createRouter({
                             name: "subsystemMain",
                             component: ZyySubsystemMain,
                             meta: {
-                                title: 'Subsystem | 子系统选择',
+                                title: 'yl_subsystem_main',
                                 header: "yl_subsystem_main",
                             },
                         },
@@ -64,7 +65,7 @@ const router = createRouter({
                             name: "book",
                             component: ZyyBook,
                             meta: {
-                                title: 'Appointment | 预约管理',
+                                title: 'yl_subsystem_appointment',
                                 header: "yl_subsystem_appointment",
                             },
                         },
@@ -73,7 +74,7 @@ const router = createRouter({
                             name: "order",
                             component: ZyyOrder,
                             meta: {
-                                title: 'Order | 订单管理',
+                                title: 'yl_subsystem_order',
                                 header: "yl_subsystem_order",
                             },
                         },
@@ -82,7 +83,7 @@ const router = createRouter({
                             name: "bill",
                             component: ZyyBill,
                             meta: {
-                                title: 'Bill | 账目管理',
+                                title: 'yl_subsystem_bill',
                                 header: "yl_subsystem_bill",
                             },
                         },
@@ -91,7 +92,7 @@ const router = createRouter({
                             name: "page",
                             component: ZyyPage,
                             meta: {
-                                title: 'Page | 页面管理',
+                                title: 'yl_subsystem_page',
                                 header: "yl_subsystem_page",
                             },
                         },
@@ -100,7 +101,7 @@ const router = createRouter({
                             name: "agent",
                             component: ZyyAIAgent,
                             meta: {
-                                title: 'Agent | 智能体',
+                                title: 'yl_subsystem_agent',
                                 header: "yl_subsystem_agent",
                             },
                         },
@@ -115,7 +116,7 @@ const router = createRouter({
                                     name: "userUser",
                                     component: ZyyUserUser,
                                     meta: {
-                                        title: 'User | 用户管理',
+                                        title: 'yl_subsystem_user',
                                         value: "userUser",
                                         header: "yl_subsystem_user",
                                         label: "yl_subsystem_user",
@@ -127,7 +128,7 @@ const router = createRouter({
                                     name: "userRole",
                                     component: ZyyUserRole,
                                     meta: {
-                                        title: 'Role | 角色管理',
+                                        title: 'yl_subsystem_user_role',
                                         value: "userRole",
                                         header: "yl_subsystem_user_role",
                                         label: "yl_subsystem_user_role",
@@ -139,7 +140,7 @@ const router = createRouter({
                                     name: "userPermission",
                                     component: ZyyUserPermission,
                                     meta: {
-                                        title: 'Permission | 权限管理',
+                                        title: 'yl_subsystem_user_tenant',
                                         value: "userPermission",
                                         header: "yl_subsystem_user_permission",
                                         label: "yl_subsystem_user_permission",
@@ -151,7 +152,7 @@ const router = createRouter({
                                     name: "userStore",
                                     component: ZyyUserStore,
                                     meta: {
-                                        title: 'Store | 商户管理',
+                                        title: 'yl_subsystem_user_store',
                                         value: "userStore",
                                         header: "yl_subsystem_user_store",
                                         label: "yl_subsystem_user_store",
@@ -163,7 +164,7 @@ const router = createRouter({
                                     name: "userTenant",
                                     component: ZyyUserTenant,
                                     meta: {
-                                        title: 'Tenant | 租户管理',
+                                        title: 'yl_subsystem_user_store',
                                         value: "userTenant",
                                         header: "yl_subsystem_user_tenant",
                                         label: "yl_subsystem_user_tenant",
@@ -178,7 +179,7 @@ const router = createRouter({
                             name: "staff",
                             component: ZyyStaff,
                             meta: {
-                                title: 'Staff | 雇员管理',
+                                title: 'yl_subsystem_staff',
                                 header: "yl_subsystem_staff",
                             },
                         },
@@ -222,6 +223,8 @@ const parentRouteMap = {
     'userUser': 'subsystemMain',
     'userRole': 'subsystemMain',
     'userPermission': 'subsystemMain',
+    'userStore': 'subsystemMain',
+    'userTenant': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'book': 'subsystemMain',
@@ -244,7 +247,7 @@ export function toParentPage(thisRouter) {
 
 router.beforeEach((to, from) => {
     if (to.meta.title) {
-        document.title = to.meta.title
+        document.title = i18n.global.t(to.meta.title)
     }
 })
 

@@ -94,7 +94,7 @@
             <q-tab-panel name="passwd" style="min-width: 30rem; padding: 1rem 0 1rem 0">
               <div class="column full-height">
                 <h6>
-                  原密码：
+                  {{ $t('user_setting.field.old_password') }}
                 </h6>
                 <q-input v-model="userPasswdData.origin" tabindex="0" dense outlined
                          :type="userPasswdData.show ? 'text' : 'password'"
@@ -106,7 +106,7 @@
                   </template>
                 </q-input>
                 <h6 style="margin-top: 1rem !important">
-                  新密码：
+                  {{ $t('user_setting.field.new_password') }}
                 </h6>
                 <q-input v-model="userPasswdData.new" tabindex="0" dense outlined
                          :type="userPasswdData.show ? 'text' : 'password'"
@@ -118,7 +118,7 @@
                   </template>
                 </q-input>
                 <h6 style="margin-top: 1rem !important">
-                  重复密码：
+                  {{ $t('user_setting.field.repeat_password') }}
                 </h6>
                 <q-input v-model="userPasswdData.repeat" tabindex="0" dense outlined
                          :type="userPasswdData.show ? 'text' : 'password'"

@@ -28,7 +28,7 @@
         </q-badge>
         <q-badge color="grey-10" v-for="(role, index) in userInfo.userRoleList" :key="index" class="q-mx-xs"
                  style="font-size: 11px; padding: 3px 6px;"
-                 :label="role.name ? role.name : '神秘角色'">
+                 :label="role.name ? role.name : $t('role.unknown')">
         </q-badge>
       </div>
 

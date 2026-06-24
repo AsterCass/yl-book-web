@@ -5,16 +5,16 @@
       <div class="row justify-center">
         <div class="col-md-12 text-center">
           <h1>
-            Error 404
+            {{ $t('error.404.title') }}
           </h1>
           <h2>
-            Erm. Page not found
+            {{ $t('error.404.subtitle') }}
           </h2>
           <p>
-            页面地址错咯，回到主页重新看看吧
+            {{ $t('error.404.message') }}
           </p>
           <q-btn class="q-mt-lg error-page-btn"
-                 outline push label="Go to Homepage" @click="backToHome(thisRouter)"/>
+                 outline push :label="$t('back_home')" @click="backToHome(thisRouter)"/>
         </div>
       </div>
     </div>

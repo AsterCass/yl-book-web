@@ -2,36 +2,36 @@
   <div class="full-width">
     <div class="row items-center">
 
+              <div class="q-ml-md">
+                <h6>
+                  {{ $t('user_permission.label.id') }}&nbsp;:
+                </h6>
+              </div>
+              <q-input v-model="selectId" tabindex="0" dense outlined :placeholder="t('user_permission.placeholder.id')"
+                       class="q-ma-md component-outline-input-std">
+              </q-input>
+
       <div class="q-ml-md">
         <h6>
-          权限编号&nbsp;:
+          {{ $t('user_permission.label.name') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectId" tabindex="0" dense outlined placeholder="例如：YLP001"
+      <q-input v-model="keyword" tabindex="0" dense outlined :placeholder="t('user_permission.placeholder.name')"
                class="q-ma-md component-outline-input-std">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          权限名称/权限码&nbsp;:
+          {{ $t('user_permission.label.parent_id') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="keyword" tabindex="0" dense outlined placeholder="例如：添加用户"
+      <q-input v-model="parentId" tabindex="0" dense outlined :placeholder="t('user_permission.placeholder.parent_id')"
                class="q-ma-md component-outline-input-std">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          父权限ID&nbsp;:
-        </h6>
-      </div>
-      <q-input v-model="parentId" tabindex="0" dense outlined placeholder="例如：YLP001"
-               class="q-ma-md component-outline-input-std">
-      </q-input>
-
-      <div class="q-ml-md">
-        <h6>
-          权限类型&nbsp;:
+          {{ $t('user_permission.label.type') }}&nbsp;:
         </h6>
       </div>
       <q-select outlined clearable class="q-ma-md component-outline-input-grow"
@@ -44,7 +44,7 @@
 
       <div class="q-ml-md">
         <h6>
-          权限状态&nbsp;:
+          {{ $t('user_permission.label.status') }}&nbsp;:
         </h6>
       </div>
       <q-select outlined clearable class="q-ma-md component-outline-input-grow"
@@ -59,16 +59,16 @@
 
     <div class="row">
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectData" push>
-        查询
+        {{ $t('user_permission.button.query') }}
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
              @click="clearUpsertParam(); isNew = true; showUpsert = true"
              push>
-        添加权限
+        {{ $t('user_permission.button.add') }}
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
              @click="()=> {clearSearch(); selectData();}" push>
-        清空条件
+        {{ $t('user_permission.button.clear') }}
       </q-btn>
     </div>
 
@@ -105,7 +105,7 @@
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          {{ isNew ? "添加权限" : "更新权限" }}
+          {{ isNew ? $t('user_permission.upsert.title_add') : $t('user_permission.upsert.title_update') }}
         </h5>
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
@@ -117,15 +117,15 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限名称&nbsp;:</h6>
-          <q-input v-model="upsertName" dense outlined placeholder="例如：添加用户"
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_permission.upsert.field.name') }}&nbsp;:</h6>
+          <q-input v-model="upsertName" dense outlined :placeholder="t('user_permission.placeholder.name')"
                    class="component-outline-input-std"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限码&nbsp;:</h6>
-          <q-input v-model="upsertCode" dense outlined placeholder="例如：user:add"
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_permission.upsert.field.code') }}&nbsp;:</h6>
+          <q-input v-model="upsertCode" dense outlined :placeholder="t('user_permission.placeholder.code')"
                    class="component-outline-input-std"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">权限类型&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_permission.upsert.field.type') }}&nbsp;:</h6>
           <q-select outlined clearable class="component-outline-input-grow"
                     dropdown-icon="fa-solid fa-caret-down"
                     popup-content-class="component-extra-card-std"
@@ -134,18 +134,18 @@
                     v-model="upsertType" :options="typeOptions">
           </q-select>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">权限描述&nbsp;:</h6>
-          <q-input v-model="upsertDesc" dense outlined placeholder="可为空"
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('user_permission.upsert.field.desc') }}&nbsp;:</h6>
+          <q-input v-model="upsertDesc" dense outlined :placeholder="t('user_permission.placeholder.optional')"
                    class="component-outline-input-std"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">父权限ID&nbsp;:</h6>
-          <q-input v-model="upsertParentId" dense outlined placeholder="可为空"
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('user_permission.upsert.field.parent_id') }}&nbsp;:</h6>
+          <q-input v-model="upsertParentId" dense outlined :placeholder="t('user_permission.placeholder.optional')"
                    class="component-outline-input-std"/>
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="upsertData">
-            {{ isNew ? "添加" : "更新" }}
+              {{ isNew ? $t('user_permission.upsert.save_add') : $t('user_permission.upsert.save_update') }}
           </q-btn>
 
           <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showUpsert = false">
@@ -156,8 +156,7 @@
       </q-card>
     </q-dialog>
 
-    <cask-dialog-judgment :dialog-judgment-data="{title: '删除权限', content:`是否删除【${toDeleteName}】权限`,
-                                                falseLabel: '取消', trueLabel: '确认'}"
+        <cask-dialog-judgment :dialog-judgment-data="{ title: $t('user_permission.dialog.delete.title'), content: $t('user_permission.dialog.delete.content', { name: toDeleteName }), falseLabel: $t('user_permission.dialog.delete.cancel'), trueLabel: $t('user_permission.dialog.delete.confirm') }"
                           :callback-method="isTrue => { showDelete = false; if (isTrue) deleteData() }"
                           v-model="showDelete"
     />
@@ -167,6 +166,7 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
+import {useI18n} from 'vue-i18n';
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
 import {perCreate, perDelete, perList, perUpdate} from "@/api/permission.js";
@@ -174,6 +174,7 @@ import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js"
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 
+const { t } = useI18n()
 const selectId = ref("")
 const keyword = ref("")
 const parentId = ref("")
@@ -226,12 +227,12 @@ function clearUpsertParam() {
 
 function upsertData() {
   if (!upsertName.value || !upsertCode.value || !upsertType.value || !upsertType.value.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
   if (!updateId.value && !isNew.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
@@ -267,13 +268,13 @@ function upsertData() {
 
 function deleteData() {
   if (!toDeleteId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   perDelete(toDeleteId.value).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("删除成功")
+    notifyTopPositive(t('notify.delete_success'))
     selectData()
   })
 }

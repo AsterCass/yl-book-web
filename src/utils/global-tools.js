@@ -3,6 +3,7 @@ import {Quasar} from 'quasar'
 import zh from 'quasar/lang/zh-CN'
 import en from 'quasar/lang/en-US'
 import {useGlobalStateStore} from '@/utils/global-state';
+import router from "@/router/index.js";
 
 export function initGlobalState() {
     const globalState = useGlobalStateStore();
@@ -71,5 +72,6 @@ export function switchLanguage() {
         Quasar.lang.set(en)
         globalState.updateLanguage('en');
     }
+    document.title = i18n.global.t(router.currentRoute.value.meta.title)
 }
 

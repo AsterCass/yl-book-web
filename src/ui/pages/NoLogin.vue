@@ -5,16 +5,16 @@
       <div class="row justify-center">
         <div class="col-md-12 text-center">
           <h1>
-            Error 401
+            {{ $t('error.401.title') }}
           </h1>
           <h2>
-            Erm. User not login
+            {{ $t('error.401.subtitle') }}
           </h2>
           <p>
-            您还有没有登录喔，请登录
+            {{ $t('error.401.message') }}
           </p>
           <q-btn class="q-mt-lg error-page-btn"
-                 outline push label="Go to Homepage" @click="backToLogin(thisRouter)"/>
+                 outline push :label="$t('main_login')" @click="backToLogin(thisRouter)"/>
         </div>
       </div>
     </div>

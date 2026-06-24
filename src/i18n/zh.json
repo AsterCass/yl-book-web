@@ -476,6 +476,39 @@
   "yl_subsystem_user_role": "角色管理",
   "yl_subsystem_user_permission": "权限管理",
 
+  "error": {
+    "401": {"title": "错误 401", "subtitle": "用户未登录", "message": "您还未登录，请先登录。"},
+    "403": {"title": "错误 403", "subtitle": "用户认证失败", "message": "您还未被授权当前页面，回到主页重新看看吧"},
+    "404": {"title": "错误 404", "subtitle": "页面未找到", "message": "页面地址错咯，回到主页重新看看吧"}
+  },
+
+  "dashboard": { "placeholder": "这里是仪表盘，暂时用不到" },
+
+  "user_permission": {
+    "label": { "id": "权限编号", "name": "权限名称/权限码", "parent_id": "父权限ID", "type": "权限类型", "status": "权限状态" },
+    "placeholder": { "id": "例如：YLP001", "name": "例如：添加用户", "parent_id": "例如：YLP001", "code": "例如：user:add", "optional": "可为空" },
+    "button": { "query": "查询", "add": "添加权限", "clear": "清空条件" },
+    "upsert": { "title_add": "添加权限", "title_update": "更新权限", "field": { "name": "权限名称", "code": "权限码", "type": "权限类型", "desc": "权限描述", "parent_id": "父权限ID" }, "save_add": "添加", "save_update": "更新" },
+    "dialog": { "delete": { "title": "删除权限", "content": "是否删除【{name}】权限", "cancel": "取消", "confirm": "确认" } }
+  },
+
+  "user_role": {
+    "label": { "id": "角色编号", "name": "角色名称/角色码", "status": "角色状态" },
+    "placeholder": { "id": "例如：YLR001", "name": "例如：部门管理", "code": "例如：deMngt", "optional": "可为空" },
+    "button": { "query": "查询", "add": "添加角色", "clear": "清空条件" },
+    "upsert": { "title_add": "添加角色", "title_update": "更新角色", "field": { "name": "角色名称", "code": "角色码", "desc": "角色描述" }, "save_add": "添加", "save_update": "更新" },
+    "dialog": { "delete": { "title": "删除角色", "content": "是否删除【{name}】角色", "cancel": "取消", "confirm": "确认" } },
+    "notify": { "update_success": "更新角色成功", "per_update_success": "配置权限成功" }
+  },
+
+  "user_setting": { "field": { "old_password": "原密码：", "new_password": "新密码：", "repeat_password": "重复密码：" } },
+
+  "role": { "unknown": "神秘角色" },
+
+  "validation": { "insufficient_parameters": "提供参数不足" },
+
+  "notify": { "delete_success": "删除成功" },
+
   "home": "主页",
   "back_home": "回到主页"
 }

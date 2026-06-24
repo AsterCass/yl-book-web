@@ -478,6 +478,39 @@
   "yl_subsystem_user_store": "Store Management",
   "yl_subsystem_user_tenant": "Tenant Management",
 
+  "error": {
+    "401": {"title": "Error 401", "subtitle": "User not logged in", "message": "You are not logged in. Please sign in."},
+    "403": {"title": "Error 403", "subtitle": "User authentication failed", "message": "You are not authorized to view this page. Please return to the homepage."},
+    "404": {"title": "Error 404", "subtitle": "Page not found", "message": "The page address is incorrect. Please return to the homepage."}
+  },
+
+  "dashboard": { "placeholder": "This is the dashboard, currently unused" },
+
+  "user_permission": {
+    "label": { "id": "Permission ID", "name": "Permission Name / Code", "parent_id": "Parent Permission ID", "type": "Permission Type", "status": "Permission Status" },
+    "placeholder": { "id": "e.g.: YLP001", "name": "e.g.: Add User", "parent_id": "e.g.: YLP001", "code": "e.g.: user:add", "optional": "Optional" },
+    "button": { "query": "Query", "add": "Add Permission", "clear": "Clear Filters" },
+    "upsert": { "title_add": "Add Permission", "title_update": "Update Permission", "field": { "name": "Permission Name", "code": "Permission Code", "type": "Permission Type", "desc": "Permission Description", "parent_id": "Parent Permission ID" }, "save_add": "Add", "save_update": "Update" },
+    "dialog": { "delete": { "title": "Delete Permission", "content": "Delete permission 【{name}】?", "cancel": "Cancel", "confirm": "Confirm" } }
+  },
+
+  "user_role": {
+    "label": { "id": "Role ID", "name": "Role Name / Code", "status": "Role Status" },
+    "placeholder": { "id": "e.g.: YLR001", "name": "e.g.: Department Management", "code": "e.g.: deMngt", "optional": "Optional" },
+    "button": { "query": "Query", "add": "Add Role", "clear": "Clear Filters" },
+    "upsert": { "title_add": "Add Role", "title_update": "Update Role", "field": { "name": "Role Name", "code": "Role Code", "desc": "Role Description" }, "save_add": "Add", "save_update": "Update" },
+    "dialog": { "delete": { "title": "Delete Role", "content": "Delete role 【{name}】?", "cancel": "Cancel", "confirm": "Confirm" } },
+    "notify": { "update_success": "Role updated successfully", "per_update_success": "Permissions updated successfully" }
+  },
+
+  "user_setting": { "field": { "old_password": "Old password", "new_password": "New password", "repeat_password": "Repeat password" } },
+
+  "role": { "unknown": "Unknown Role" },
+
+  "validation": { "insufficient_parameters": "Insufficient parameters provided" },
+
+  "notify": { "delete_success": "Deletion successful" },
+
 
   "home": "Home",
   "back_home": "Back to Home"

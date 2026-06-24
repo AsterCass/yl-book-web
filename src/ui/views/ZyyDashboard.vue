@@ -1,7 +1,7 @@
 <template>
 
   <div>
-    这里是仪表盘，暂时用不到
+    {{ $t('dashboard.placeholder') }}
   </div>
 
 </template>
