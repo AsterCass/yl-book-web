@@ -71,7 +71,7 @@
                 <div class="col column justify-end">
                   <div class="row justify-evenly">
                     <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
-                           @click="saveUserData()">
+                           @click="saveUserData">
                       <div class="row items-center">
                         <div class="q-mx-sm">
                           {{ $t('main_setting_save') }}
@@ -89,6 +89,76 @@
             <q-tab-panel name="pro" style="min-width: 30rem; padding: 0">
               <div class="row justify-center items-center full-height">
                 {{ $t('in_develop') }}
+              </div>
+            </q-tab-panel>
+            <q-tab-panel name="passwd" style="min-width: 30rem; padding: 1rem 0 1rem 0">
+              <div class="column full-height">
+                <h6>
+                  原密码：
+                </h6>
+                <q-input v-model="userPasswdData.origin" tabindex="0" dense outlined
+                         :type="userPasswdData.show ? 'text' : 'password'"
+                         class="q-mr-xl component-outline-input-grow-on-semi-trans">
+                  <template v-slot:prepend>
+                    <div class="row items-center justify-between">
+                      <q-icon class="q-mr-sm" name="fa-solid fa-unlock-keyhole" size="1rem"/>
+                    </div>
+                  </template>
+                </q-input>
+                <h6 style="margin-top: 1rem !important">
+                  新密码：
+                </h6>
+                <q-input v-model="userPasswdData.new" tabindex="0" dense outlined
+                         :type="userPasswdData.show ? 'text' : 'password'"
+                         class="q-mr-xl component-outline-input-grow-on-semi-trans">
+                  <template v-slot:prepend>
+                    <div class="row items-center justify-between">
+                      <q-icon class="q-mr-sm" name="fa-solid fa-unlock-keyhole" size="1rem"/>
+                    </div>
+                  </template>
+                </q-input>
+                <h6 style="margin-top: 1rem !important">
+                  重复密码：
+                </h6>
+                <q-input v-model="userPasswdData.repeat" tabindex="0" dense outlined
+                         :type="userPasswdData.show ? 'text' : 'password'"
+                         class="q-mr-xl component-outline-input-grow-on-semi-trans">
+                  <template v-slot:prepend>
+                    <div class="row items-center justify-between">
+                      <q-icon class="q-mr-sm" name="fa-solid fa-unlock-keyhole" size="1rem"/>
+                    </div>
+                  </template>
+                </q-input>
+                <div class="q-ml-xs" style="width: 28rem; margin-top: 1rem; opacity: .5; font-size: .75rem">
+                  {{ $t('main_login_passwd_tips') }}
+                </div>
+
+                <div v-if="userPasswdData.show" class="q-ml-xs cask-jump-link-in-text" style="margin-top: 1rem;"
+                     @click="userPasswdData.show = false">
+                  {{ $t('main_register_hide_passwd') }}
+                </div>
+                <div v-else class="q-ml-xs cask-jump-link-in-text" style="margin-top: 1rem; "
+                     @click="userPasswdData.show = true">
+                  {{ $t('main_register_show_passwd') }}
+                </div>
+
+
+                <div class="col column justify-end">
+                  <div class="row justify-evenly">
+                    <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                           @click="saveNewPasswd">
+                      <div class="row items-center">
+                        <div class="q-mx-sm">
+                          {{ $t('main_setting_save') }}
+                        </div>
+                      </div>
+                    </q-btn>
+                    <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                           @click="showUserSetting = false">
+                      {{ $t('main_setting_cancel') }}
+                    </q-btn>
+                  </div>
+                </div>
               </div>
             </q-tab-panel>
             <q-tab-panel name="sec" style="min-width: 30rem; padding: 0">
@@ -134,6 +204,12 @@ const userSettingData = ref({
   birth: "",
   motto: "",
 })
+const userPasswdData = ref({
+  origin: "",
+  new: "",
+  repeat: "",
+  show: false,
+})
 
 watch(() => globalState.userData, () => {
   reloadData();
@@ -152,6 +228,11 @@ const tabs = ref([
   {
     value: 'pro',
     label: 'main_space_setting_developer',
+    color: 'rgb(var(--full-container-background-color))'
+  },
+  {
+    value: 'passwd',
+    label: 'main_space_setting_passwd',
     color: 'rgb(var(--full-container-background-color))'
   },
   {
@@ -195,13 +276,25 @@ function saveUserData() {
   })
 }
 
+function saveNewPasswd() {
+
+}
+
 function reloadData() {
+  // base
   if (globalState.userData && globalState.userData.id) {
     userSettingData.value = JSON.parse(JSON.stringify(globalState.userData))
     userSettingData.value.genderObj = GenderOptEnum.fromCodeToSelectFrom(globalState.userData.gender)
     if (!userSettingData.value.motto) {
       userSettingData.value.motto = ""
     }
+  }
+  // passwd
+  userPasswdData.value = {
+    origin: "",
+    new: "",
+    repeat: "",
+    show: false,
   }
 }
 

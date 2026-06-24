@@ -88,7 +88,7 @@
   "main_login_success_copy": "Copied",
   "main_login_success_star_file": "Added",
   "main_login_fail_copy": "Copy failed",
-  "main_login_passwd_tips": "Password should be 8-20 characters long and contain uppercase, lowercase letters, and numbers. The account will be locked after more than 10 incorrect password attempts",
+  "main_login_passwd_tips": "The password must be 8-20 characters long and include uppercase letters, lowercase letters, and numbers. The account will be locked after multiple incorrect password attempts, and you will be unable to log in.",
 
   "main_in_login_auth": "Logging in... Please do not leave this page...",
   "main_login_google_client_fail": "Get user info from Google fail",
@@ -393,6 +393,7 @@
   "main_space_setting_profile": "Public Profile",
   "main_space_setting_privacy": "Privacy & Security",
   "main_space_setting_developer": "Advanced",
+  "main_space_setting_passwd": "Change Password",
   "main_space_setting_account": "Account",
   "main_space_setting_account_mail": "Mail: ",
   "main_space_setting_account_nickname": "Nickname: ",

@@ -88,7 +88,7 @@
   "main_login_success_copy": "复制成功",
   "main_login_success_star_file": "添加成功",
   "main_login_fail_copy": "复制失败",
-  "main_login_passwd_tips": "密码8-20位且需要包含大写、小写和数字。密码错误 10 次以上则锁定账号",
+  "main_login_passwd_tips": "密码长度需要8-20位且需要包含大写、小写和数字。如果密码错误过多，您的登录将被锁定，无法登录",
 
   "main_in_login_auth": "正在登录中... 请勿离开当前页面 ...",
   "main_login_google_client_fail": "获取用户信息失败",
@@ -391,6 +391,7 @@
   "main_space_setting_profile": "基础设置",
   "main_space_setting_privacy": "隐私和安全",
   "main_space_setting_developer": "进阶设置",
+  "main_space_setting_passwd": "修改密码",
   "main_space_setting_account": "账户设置",
   "main_space_setting_account_mail": "邮箱：",
   "main_space_setting_account_nickname": "昵称：",
