@@ -25,7 +25,7 @@
           <q-avatar size="33px">
             <q-img src="/favicon.svg"/>
           </q-avatar>
-          <zyy-user-space-setting :user-info="{
+          <zyy-header-user-menu :user-info="{
                   userId: globalState.userData.id,
                   userAvatar: '/favicon.svg',
                   userNickname: globalState.userData.nickName,
@@ -64,7 +64,7 @@ import {notifyTopWarning} from "@/utils/notification-tools.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {i18n} from "@/i18n/index.js";
 import {switchLanguage} from "@/utils/global-tools.js";
-import ZyyUserSpaceSetting from "@/ui/views/common/ZyyUserSpaceSetting.vue";
+import ZyyHeaderUserMenu from "@/ui/views/common/ZyyHeaderUserMenu.vue";
 
 const t = i18n.global.t
 const thisRouter = useRouter()
