@@ -25,13 +25,7 @@
           <q-avatar size="33px">
             <q-img src="/favicon.svg"/>
           </q-avatar>
-          <zyy-header-user-menu :user-info="{
-                  userId: globalState.userData.id,
-                  userAvatar: '/favicon.svg',
-                  userNickname: globalState.userData.nickName,
-                  userGender: globalState.userData.gender,
-                  userRoleList: globalState.userData.roleDtoList,
-                }"/>
+          <zyy-header-user-menu/>
         </q-btn>
 
         <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">

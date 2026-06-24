@@ -22,20 +22,19 @@
       </div>
 
       <div class="q-mt-sm row justify-center">
-        <q-badge class="q-mx-xs" style="font-size: 11px; padding: 2px 6px 3px 6px;"
+        <q-badge class="q-mx-xs" style="font-size: 11px; padding: 3px 6px;"
                  :color="GenderOptEnum.fromCode(userInfo.userGender).color"
                  :label="GenderOptEnum.fromCode(userInfo.userGender).name">
         </q-badge>
-        <q-badge v-for="(role, index) in userInfo.userRoleList" :key="index" class="q-mx-xs"
-                 style="font-size: 11px; padding: 2px 6px 3px 6px;"
+        <q-badge color="grey-10" v-for="(role, index) in userInfo.userRoleList" :key="index" class="q-mx-xs"
+                 style="font-size: 11px; padding: 3px 6px;"
                  :label="role.name ? role.name : '神秘角色'">
         </q-badge>
       </div>
 
       <div class="row q-mx-sm q-mt-lg q-mb-sm">
         <q-btn no-caps unelevated class="shadow-2 component-full-btn-full"
-               @click="toSpecifyPageWithQuery(
-                  thisRouter, 'space', {id: userInfo.userId})">
+               @click="emitter.emit('showUserSettingEvent')">
           <div class="q-mx-xs">
             {{ $t('main_user_detail_detail') }}
           </div>
@@ -58,9 +57,9 @@
 
 <script setup>
 
-import {defineProps, onBeforeUnmount, onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import {delay} from "@/utils/base-tools";
-import {backToLogin, toSpecifyPageWithQuery} from "@/router";
+import {backToLogin} from "@/router";
 import {useRouter} from "vue-router";
 import {notifyTopPositive} from "@/utils/notification-tools";
 import {useI18n} from "vue-i18n";
@@ -68,28 +67,21 @@ import {userLogout} from "@/api/user";
 import {deleteCookie} from "@/utils/common.js";
 import {GenderOptEnum} from "@/constants/enums/common.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
+import emitter from "@/utils/bus";
 
-const props = defineProps({
-  userInfo: {
-    type: Object,
-    required: false,
-    default: () => {
-      return {
-        userId: "",
-        userMotto: "",
-        userAvatar: "",
-        userNickname: "",
-        userGender: 0,
-        userRoleList: []
-      };
-    },
-  },
-})
 
 const thisRouter = useRouter()
 const {t} = useI18n()
 const globalState = useGlobalStateStore();
 
+const userInfo = ref({
+  userId: globalState.userData ? globalState.userData.id : "",
+  userMotto: "",
+  userAvatar: '/favicon.svg',
+  userNickname: globalState.userData ? globalState.userData.nickName : "",
+  userGender: globalState.userData ? globalState.userData.gender : 0,
+  userRoleList: globalState.userData ? globalState.userData.roleDtoList : [],
+})
 const userToolTipRef = ref(null)
 const showTooltip = ref(false)
 let parentElement = null;

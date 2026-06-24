@@ -9,6 +9,8 @@
       <router-view/>
     </div>
 
+    <zyy-user-setting/>
+
     <zyy-footer/>
 
   </q-layout>
@@ -19,6 +21,7 @@
 <script setup>
 import ZyyHeader from "@/ui/views/ZyyHeader.vue";
 import ZyyFooter from "@/ui/views/ZyyFooter.vue";
+import ZyyUserSetting from "@/ui/views/common/ZyyUserSetting.vue";
 </script>
 
 

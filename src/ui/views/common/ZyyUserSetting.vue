@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog :model-value="showUserSpaceSetting" @hide="closeUserSpaceSetting"
+    <q-dialog :model-value="showUserSetting" @hide="showUserSetting = false"
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std row" style="max-width: 2000px !important">
         <cask-tabs-vertical :tabs="tabs" v-model="tab" width="12rem" text-width="10rem"
@@ -35,7 +35,7 @@
                               popup-content-class="component-extra-card-std shadow-0"
                               clear-icon="fa-solid fa-xmark"
                               menu-anchor="bottom start" :menu-offset="[0, 5]"
-                              v-model="userSettingData.genderObj" :options="genderOptEnum">
+                              v-model="userSettingData.genderObj" :options="genderOptions">
                     </q-select>
                     <h6 style="margin-top: 1rem !important">
                       {{ $t('main_space_setting_account_birth') }}
@@ -47,20 +47,14 @@
 
                   <div style="width: 200px;" class="column items-center justify-center">
                     <div class="relative-position" style="width: 140px; height: 140px">
-                      <q-avatar size="130px" style="filter: blur(3px); position: absolute;">
-                        <q-img :src="isDbAvatar ? userSettingData.avatar : currentAvatarBase64"/>
-                      </q-avatar>
                       <q-avatar size="120px" style=" position: absolute; left: 5px; top: 5px">
-                        <q-img :src="isDbAvatar ? userSettingData.avatar : currentAvatarBase64"/>
+                        <q-img :src="userSettingData.avatar"/>
                       </q-avatar>
                     </div>
                     <q-btn no-caps unelevated push class="component-full-btn-mini-mini-grow shadow-2 q-mt-sm"
-                           style="font-size: 0.75rem !important" @click="startUploadAvatar">
+                           style="font-size: 0.75rem !important" @click="notifyTopWarning($t('in_develop'))">
                       {{ $t('main_space_setting_account_avatar_change') }}
                     </q-btn>
-                    <q-file ref="avatarUpload" outlined v-model="currentAvatar" v-show="false"
-                            accept=".jpg,.jpeg,.png" max-file-size="512000" @rejected="rejectAvatar"/>
-
                     <div style="font-size: 0.7rem; opacity: .75;" class="q-mt-sm text-center">
                       {{ $t('main_space_setting_account_avatar_tips') }}
                     </div>
@@ -82,11 +76,10 @@
                         <div class="q-mx-sm">
                           {{ $t('main_setting_save') }}
                         </div>
-                        <q-spinner-ios v-if="inSaveData" size="1rem"/>
                       </div>
                     </q-btn>
                     <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
-                           @click="reloadData();closeUserSpaceSetting(); ">
+                           @click="showUserSetting = false">
                       {{ $t('main_setting_cancel') }}
                     </q-btn>
                   </div>
@@ -119,26 +112,20 @@
 
 import {useGlobalStateStore} from "@/utils/global-state";
 import {useI18n} from "vue-i18n";
-import {defineEmits, defineProps, onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import CaskTabsVertical from "@/ui/components/CaskTabsVertical.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import CaskLongTextInputSimple from "@/ui/components/CaskLongTextInputSimple.vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools";
-
+import {GenderOptEnum} from "@/constants/enums/common.js";
+import emitter from "@/utils/bus";
 
 const {t} = useI18n()
 const globalState = useGlobalStateStore();
 
-const emit = defineEmits(['update:modelValue']);
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
-    default: false
-  },
-})
-const showUserSpaceSetting = ref(props.modelValue);
-
+const showUserSetting = ref(false);
+// data
+const genderOptions = ref(GenderOptEnum.toSelectForm())
 const userSettingData = ref({
   nickName: "",
   gender: 0,
@@ -147,16 +134,7 @@ const userSettingData = ref({
   motto: "",
 })
 
-watch(() => props.modelValue, () => {
-  if (props.modelValue) {
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.paddingRight = `${scrollbarWidth}px`;
-    document.body.style.overflow = 'hidden';
-  }
-  showUserSpaceSetting.value = props.modelValue
-})
-
-watch(() => globalState.loginToken, () => {
+watch(() => globalState.userData, () => {
   reloadData();
 })
 
@@ -188,75 +166,22 @@ const tabs = ref([
 ])
 const tab = ref("base");
 
-const inSaveData = ref(false)
-
-// avatar
-const avatarUpload = ref(null);
-const isDbAvatar = ref(true)
-const currentAvatar = ref(null);
-const currentAvatarBase64 = ref("")
-const reader = new FileReader();
-reader.onload = function () {
-  currentAvatarBase64.value = this.result
-};
-
-watch(currentAvatar, () => {
-  isDbAvatar.value = false
-  reader.readAsDataURL(currentAvatar.value);
-})
-
-const startUploadAvatar = () => {
-  if (avatarUpload.value) {
-    avatarUpload.value.pickFiles()
-  }
-}
-
-const rejectAvatar = () => {
-  notifyTopWarning(t('main_space_setting_account_avatar_tips'))
-}
-
 function saveUserData() {
-  if (!checkNickName(userSettingData.value.nickName)) {
-    notifyTopWarning(t('main_space_setting_account_error_nickname'))
-    return
-  }
-  if (!checkMotto(userSettingData.value.motto)) {
-    notifyTopWarning(t('main_space_setting_account_error_motto'))
-    return
-  }
-
-  inSaveData.value = true
-
   const updateUserData = {
     id: globalState.userData.id,
     nickName: userSettingData.value.nickName,
     gender: userSettingData.value.genderObj ? userSettingData.value.genderObj.value : 0,
-    birth: userSettingData.value.birth.replaceAll("/", "-"),
+    birth: userSettingData.value.birth,
     motto: userSettingData.value.motto,
   }
 
   updateInfo(updateUserData).then(res => {
     if (!res || !res.data) {
-      inSaveData.value = false
       return
     }
     notifyTopPositive(t('main_space_setting_account_data_suc'))
-    if (!isDbAvatar.value) {
-      let formData = new FormData();
-      formData.append('file', currentAvatar.value, currentAvatar.value.name)
-      updateAvatar(formData).then(res => {
-        if (!res || !res.data) {
-          inSaveData.value = false
-          return
-        }
-        notifyTopPositive(t('main_space_setting_account_avatar_suc'))
-        saveFinish()
-      })
-    } else {
-      saveFinish()
-    }
+    saveFinish()
   })
-
 }
 
 function saveFinish() {
@@ -267,29 +192,20 @@ function saveFinish() {
     globalState.updateUserData(res.data.data)
     reloadData()
   })
-  isDbAvatar.value = true
-  inSaveData.value = false
-  closeUserSpaceSetting()
-}
-
-function closeUserSpaceSetting() {
-  document.body.style.overflow = 'auto'
-  document.body.style.paddingRight = ''
-  showUserSpaceSetting.value = false
-  emit('update:modelValue', false)
+  showUserSetting.value = false
 }
 
 function reloadData() {
-  isDbAvatar.value = true
   if (globalState.userData && globalState.userData.id) {
-    userSettingData.value = structuredClone(globalState.userData)
-    userSettingData.value.genderObj = getGenderObj(userSettingData.value.gender)
-    userSettingData.value.birth = userSettingData.value.birth.replaceAll("-", "/")
+    userSettingData.value = JSON.parse(JSON.stringify(globalState.userData))
   }
 }
 
 onMounted(() => {
   reloadData()
+  emitter.on("showUserSettingEvent", () => {
+    showUserSetting.value = true
+  })
 })
 
 </script>
