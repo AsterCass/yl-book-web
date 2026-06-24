@@ -464,6 +464,9 @@
 
   "yl_warning_passwd_init": "This is the initial password. Please change your password by clicking the avatar in the top right corner as soon as possible; otherwise, your account will be locked and you will be unable to log in",
 
+  "yl_system_dashboard": "Dashboard",
+  "yl_system_login": "Login",
+
   "yl_subsystem_main": "Subsystem Selection",
   "yl_subsystem_appointment": "Appointment Management",
   "yl_subsystem_order": "Order Management",
