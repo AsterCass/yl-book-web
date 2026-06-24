@@ -57,13 +57,13 @@
 
 <script setup>
 
-import {onBeforeUnmount, onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {delay} from "@/utils/base-tools";
 import {backToLogin} from "@/router";
 import {useRouter} from "vue-router";
 import {notifyTopPositive} from "@/utils/notification-tools";
 import {useI18n} from "vue-i18n";
-import {userLogout} from "@/api/user";
+import {userLogout} from "@/api/myu";
 import {deleteCookie} from "@/utils/common.js";
 import {GenderOptEnum} from "@/constants/enums/common.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
@@ -74,20 +74,27 @@ const thisRouter = useRouter()
 const {t} = useI18n()
 const globalState = useGlobalStateStore();
 
-const userInfo = ref({
-  userId: globalState.userData ? globalState.userData.id : "",
-  userMotto: "",
-  userAvatar: '/favicon.svg',
-  userNickname: globalState.userData ? globalState.userData.nickName : "",
-  userGender: globalState.userData ? globalState.userData.gender : 0,
-  userRoleList: globalState.userData ? globalState.userData.roleDtoList : [],
-})
+const userInfo = ref({})
 const userToolTipRef = ref(null)
 const showTooltip = ref(false)
 let parentElement = null;
 const prepareToHide = ref(false)
 const prepareToShow = ref(false)
 
+watch(() => globalState.userData, () => {
+  reloadData()
+})
+
+function reloadData() {
+  userInfo.value = {
+    userId: globalState.userData ? globalState.userData.id : "",
+    userMotto: globalState.userData ? globalState.userData.motto : "",
+    userAvatar: '/favicon.svg',
+    userNickname: globalState.userData ? globalState.userData.nickName : "",
+    userGender: globalState.userData ? globalState.userData.gender : 0,
+    userRoleList: globalState.userData ? globalState.userData.roleDtoList : [],
+  }
+}
 
 const handleMouseEnter = () => {
   prepareToShow.value = true;
@@ -132,7 +139,7 @@ onMounted(() => {
     parentElement.addEventListener('mouseenter', handleMouseEnter);
     parentElement.addEventListener('mouseleave', handleMouseLeave);
   }
-
+  reloadData()
 });
 
 

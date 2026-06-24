@@ -48,7 +48,7 @@
                   <div style="width: 200px;" class="column items-center justify-center">
                     <div class="relative-position" style="width: 140px; height: 140px">
                       <q-avatar size="120px" style=" position: absolute; left: 5px; top: 5px">
-                        <q-img :src="userSettingData.avatar"/>
+                        <q-img src="/favicon.svg"/>
                       </q-avatar>
                     </div>
                     <q-btn no-caps unelevated push class="component-full-btn-mini-mini-grow shadow-2 q-mt-sm"
@@ -119,6 +119,7 @@ import CaskLongTextInputSimple from "@/ui/components/CaskLongTextInputSimple.vue
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools";
 import {GenderOptEnum} from "@/constants/enums/common.js";
 import emitter from "@/utils/bus";
+import {mDetail, mUpdate} from "@/api/myu.js";
 
 const {t} = useI18n()
 const globalState = useGlobalStateStore();
@@ -136,6 +137,10 @@ const userSettingData = ref({
 
 watch(() => globalState.userData, () => {
   reloadData();
+})
+
+watch(() => showUserSetting.value, () => {
+  reloadData()
 })
 
 const tabs = ref([
@@ -168,36 +173,35 @@ const tab = ref("base");
 
 function saveUserData() {
   const updateUserData = {
-    id: globalState.userData.id,
     nickName: userSettingData.value.nickName,
     gender: userSettingData.value.genderObj ? userSettingData.value.genderObj.value : 0,
     birth: userSettingData.value.birth,
     motto: userSettingData.value.motto,
   }
 
-  updateInfo(updateUserData).then(res => {
+  mUpdate(updateUserData).then(res => {
     if (!res || !res.data) {
       return
     }
     notifyTopPositive(t('main_space_setting_account_data_suc'))
-    saveFinish()
+    showUserSetting.value = false
+    mDetail().then(res => {
+      if (!res || !res.data || !res.data.data) {
+        return
+      }
+      globalState.updateUserData(res.data.data)
+      reloadData()
+    })
   })
-}
-
-function saveFinish() {
-  userDetail().then(res => {
-    if (!res || !res.data || !res.data.data) {
-      return
-    }
-    globalState.updateUserData(res.data.data)
-    reloadData()
-  })
-  showUserSetting.value = false
 }
 
 function reloadData() {
   if (globalState.userData && globalState.userData.id) {
     userSettingData.value = JSON.parse(JSON.stringify(globalState.userData))
+    userSettingData.value.genderObj = GenderOptEnum.fromCodeToSelectFrom(globalState.userData.gender)
+    if (!userSettingData.value.motto) {
+      userSettingData.value.motto = ""
+    }
   }
 }
 

@@ -21,7 +21,8 @@
       <div class="row items-center justify-end col-3">
 
 
-        <q-btn round style="margin: 0 1.5rem 0 1.5rem" color="transparent" size="11px" flat>
+        <q-btn round style="margin: 0 1.5rem 0 1.5rem" color="transparent" size="11px" flat
+               @click="emitter.emit('showUserSettingEvent')">
           <q-avatar size="33px">
             <q-img src="/favicon.svg"/>
           </q-avatar>
@@ -59,6 +60,7 @@ import {useGlobalStateStore} from "@/utils/global-state.js";
 import {i18n} from "@/i18n/index.js";
 import {switchLanguage} from "@/utils/global-tools.js";
 import ZyyHeaderUserMenu from "@/ui/views/common/ZyyHeaderUserMenu.vue";
+import emitter from "@/utils/bus.js";
 
 const t = i18n.global.t
 const thisRouter = useRouter()

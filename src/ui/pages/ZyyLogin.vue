@@ -175,7 +175,7 @@ import {switchLanguage} from "@/utils/global-tools.js";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useRouter} from "vue-router";
 import {useGlobalStateStore} from "@/utils/global-state.js";
-import {userLogin} from "@/api/user.js";
+import {userLogin} from "@/api/myu.js";
 import {backToHome} from "@/router/index.js";
 import {i18n} from "@/i18n/index.js";
 
