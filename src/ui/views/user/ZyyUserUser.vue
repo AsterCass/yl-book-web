@@ -4,43 +4,47 @@
 
       <div class="q-ml-md">
         <h6>
-          用户编号&nbsp;:
+          {{ $t('user_user.label.id') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：YLU001"
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_user.placeholder.id')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          用户昵称&nbsp;:
+          {{ $t('user_user.label.nick') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="nickName" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：张三"
+      <q-input v-model="nickName" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_user.placeholder.nick')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          用户邮箱&nbsp;:
+          {{ $t('user_user.label.mail') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="mail" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：zs01@gmail.com"
+      <q-input v-model="mail" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_user.placeholder.mail')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          用户手机号&nbsp;:
+          {{ $t('user_user.label.phone') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="phone" class="q-ma-md component-outline-input-std" dense outlined placeholder="例如：13811012138"
+      <q-input v-model="phone" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_user.placeholder.phone')"
                tabindex="0">
       </q-input>
 
       <div class="q-ml-md">
         <h6>
-          用户状态&nbsp;:
+          {{ $t('user_user.label.status') }}&nbsp;:
         </h6>
       </div>
       <q-select v-model="selectStatus" :menu-offset="[0, 5]" :options="statusOptions"
@@ -55,16 +59,16 @@
 
     <div class="row">
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
-        查询
+        {{ $t('user_user.button.query') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated
              @click="clearUpsertParam(); isNew = true; showUpsert = true">
-        添加用户
+        {{ $t('user_user.button.add') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated @click="()=> {clearSearch(); selectData();}">
-        清空条件
+        {{ $t('user_user.button.clear') }}
       </q-btn>
     </div>
 
@@ -97,29 +101,29 @@
                             }
                             if(name === 'delete') {
                               toOpId = row.id
-                              toOpTitle = '删除用户'
-                              toOpDesc = `是否要删除【${row.nickName}】用户`
+                              toOpTitle = $t('user_user.dialog.delete.title')
+                              toOpDesc = $t('user_user.dialog.delete.content', { name: row.nickName })
                               toOpFunc = deleteData
                               showOperation = true
                             }
                             if (name === 'disable') {
                               toOpId = row.id
-                              toOpTitle = '禁用用户'
-                              toOpDesc = `是否要禁用【${row.nickName}】用户`
+                              toOpTitle = $t('user_user.dialog.disable.title')
+                              toOpDesc = $t('user_user.dialog.disable.content', { name: row.nickName })
                               toOpFunc = disableData
                               showOperation = true
                             }
                             if (name === 'enable') {
                               toOpId = row.id
-                              toOpTitle = '启用用户'
-                              toOpDesc = `是否要启用【${row.nickName}】用户`
+                              toOpTitle = $t('user_user.dialog.enable.title')
+                              toOpDesc = $t('user_user.dialog.enable.content', { name: row.nickName })
                               toOpFunc = enableData
                               showOperation = true
                             }
                             if (name === 'unlock') {
                               toOpId = row.id
-                              toOpTitle = '解锁用户'
-                              toOpDesc = `是否要解锁【${row.nickName}】用户`
+                              toOpTitle = $t('user_user.dialog.unlock.title')
+                              toOpDesc = $t('user_user.dialog.unlock.content', { name: row.nickName })
                               toOpFunc = unlockData
                               showOperation = true
                             }
@@ -135,12 +139,12 @@
               transition-show="fade" @hide="showUpsert = false">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          {{ isNew ? "添加用户" : "更新用户" }}
+          {{ isNew ? $t('user_user.upsert.title_add') : $t('user_user.upsert.title_update') }}
         </h5>
 
         <div class="q-mx-sm" style="opacity: 0.5; width: 25rem">
           <div v-if="isNew">
-            默认密码和邮箱相同，创建后用户需要在3日内修改密码，否则账号会被锁定，无法登录
+            {{ $t('user_user.upsert.default_password_note') }}
           </div>
         </div>
 
@@ -153,19 +157,23 @@
         <div class="q-ma-md"
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户昵称&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_user.upsert.field.nick') }}&nbsp;:</h6>
           <q-input v-model="upsertNickName" class="component-outline-input-grow" dense outlined
-                   placeholder="例如：张三"/>
+                   :placeholder="t('user_user.placeholder.nick')"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">用户邮箱&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_user.upsert.field.mail') }}&nbsp;:</h6>
           <q-input v-model="upsertMail" class="component-outline-input-grow" dense outlined
-                   placeholder="例如：zs01@gmail.com"/>
+                   :placeholder="t('user_user.placeholder.mail')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户手机号&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_user.upsert.field.phone')
+            }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
-                   placeholder="例如：13811012138"/>
+                   :placeholder="t('user_user.placeholder.phone')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户性别&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_user.upsert.field.gender')
+            }}&nbsp;:</h6>
           <q-select outlined clearable class="component-outline-input-grow"
                     dropdown-icon="fa-solid fa-caret-down"
                     popup-content-class="component-extra-card-std"
@@ -174,7 +182,9 @@
                     v-model="upsertGender" :options="genderOptions">
           </q-select>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">用户生日&nbsp;:</h6>
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_user.upsert.field.birth')
+            }}&nbsp;:</h6>
           <cask-date-picker v-model="upsertBirth"/>
 
 
@@ -182,7 +192,7 @@
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
-            {{ isNew ? "添加" : "更新" }}
+            {{ isNew ? $t('user_user.upsert.save_add') : $t('user_user.upsert.save_update') }}
           </q-btn>
 
           <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showUpsert = false">
@@ -197,7 +207,7 @@
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          角色分配
+          {{ $t('user_user.role_assign.title') }}
         </h5>
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
@@ -212,7 +222,7 @@
 
         <div class="row q-mt-xl q-mb-md justify-center">
           <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateUserRole">
-            保存
+            {{ $t('user_user.button.save') }}
           </q-btn>
         </div>
       </q-card>
@@ -221,8 +231,7 @@
 
     <cask-dialog-judgment v-model="showOperation"
                           :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
-                          :dialog-judgment-data="{title: `${toOpTitle}`, content:`${toOpDesc}`,
-                                                falseLabel: '取消', trueLabel: '确认'}"
+                          :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('user_user.dialog.common.cancel'), trueLabel: $t('user_user.dialog.common.confirm') }"
     />
 
   </div>
@@ -232,6 +241,7 @@
 import {CommonStatusEnum, GenderOptEnum} from "@/constants/enums/common.js";
 import {onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
+import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableUser, tableUserOperation} from "@/tables/user.js";
@@ -255,6 +265,7 @@ const mail = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
 const genderOptions = ref(GenderOptEnum.toSelectForm())
+const {t} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
@@ -307,12 +318,12 @@ const tableDynamicData = ref(
 
 function upsertData() {
   if (!upsertNickName.value || !upsertMail.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
   if (!updateId.value && !isNew.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
@@ -340,7 +351,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      notifyTopPositive("更新用户成功")
+      notifyTopPositive(t('user_user.notify.update_success'))
       selectData()
     })
   }
@@ -354,7 +365,7 @@ function clearUserRole() {
 
 function updateUserRole() {
   if (!updateId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
 
@@ -373,7 +384,7 @@ function updateUserRole() {
       return
     }
     showUserRole.value = false
-    notifyTopPositive("配置角色成功")
+    notifyTopPositive(t('user_user.notify.role_assign_success'))
     selectData()
   })
 
@@ -381,52 +392,52 @@ function updateUserRole() {
 
 function enableData() {
   if (!toOpId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   userUpdateDisable(toOpId.value, {isDisable: false}).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("启用成功")
+    notifyTopPositive(t('user_user.notify.enable_success'))
     selectData()
   })
 }
 
 function disableData() {
   if (!toOpId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   userUpdateDisable(toOpId.value, {isDisable: true}).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("禁用成功")
+    notifyTopPositive(t('user_user.notify.disable_success'))
     selectData()
   })
 }
 
 function unlockData() {
   if (!toOpId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   userUpdateLock(toOpId.value, {isLock: false}).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("解锁成功")
+    notifyTopPositive(t('user_user.notify.unlock_success'))
     selectData()
   })
 }
 
 function deleteData() {
   if (!toOpId.value) {
-    notifyTopWarning("提供参数不足")
+    notifyTopWarning(t('validation.insufficient_parameters'))
   }
   userDelete(toOpId.value).then(res => {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive("删除成功")
+    notifyTopPositive(t('notify.delete_success'))
     selectData()
   })
 }

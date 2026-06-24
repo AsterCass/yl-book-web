@@ -509,6 +509,22 @@
 
   "notify": { "delete_success": "删除成功" },
 
+  "user_user": {
+    "label": { "id": "用户编号", "nick": "用户昵称", "mail": "用户邮箱", "phone": "用户手机号", "status": "用户状态" },
+    "placeholder": { "id": "例如：YLU001", "nick": "例如：张三", "mail": "例如：zs01\\@gmail.com", "phone": "例如：13811012138" },
+    "button": { "query": "查询", "add": "添加用户", "clear": "清空条件", "save": "保存" },
+    "upsert": { "title_add": "添加用户", "title_update": "更新用户", "default_password_note": "默认密码和邮箱相同，创建后用户需要在3日内修改密码，否则账号会被锁定，无法登录", "field": { "nick": "用户昵称", "mail": "用户邮箱", "phone": "用户手机号", "gender": "用户性别", "birth": "用户生日" }, "save_add": "添加", "save_update": "更新" },
+    "role_assign": { "title": "角色分配" },
+    "dialog": {
+      "common": { "cancel": "取消", "confirm": "确认" },
+      "delete": { "title": "删除用户", "content": "是否要删除【{name}】用户" },
+      "disable": { "title": "禁用用户", "content": "是否要禁用【{name}】用户" },
+      "enable": { "title": "启用用户", "content": "是否要启用【{name}】用户" },
+      "unlock": { "title": "解锁用户", "content": "是否要解锁【{name}】用户" }
+    },
+    "notify": { "update_success": "更新用户成功", "role_assign_success": "配置角色成功", "enable_success": "启用成功", "disable_success": "禁用成功", "unlock_success": "解锁成功" }
+  },
+
   "home": "主页",
   "back_home": "回到主页"
 }

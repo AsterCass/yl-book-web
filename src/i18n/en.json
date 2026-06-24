@@ -511,6 +511,21 @@
 
   "notify": { "delete_success": "Deletion successful" },
 
+  "user_user": {
+    "label": { "id": "User ID", "nick": "User Nickname", "mail": "User Email", "phone": "User Phone", "status": "User Status", "roles": "Roles", "gender": "Gender", "birth": "Birth", "create_time": "Create Time", "create_user": "Create User", "operation": "Operation" },
+    "placeholder": { "id": "e.g.: YLU001", "nick": "e.g.: Zhang San", "mail": "e.g.: zs01\\@gmail.com", "phone": "e.g.: 13811012138" },
+    "button": { "query": "Query", "add": "Add User", "clear": "Clear Filters", "save": "Save" },
+    "upsert": { "title_add": "Add User", "title_update": "Update User", "default_password_note": "Default password equals email. Please ensure the user changes password within 3 days to avoid lockout.", "field": { "nick": "User Nickname", "mail": "User Email", "phone": "User Phone", "gender": "User Gender", "birth": "User Birth" }, "save_add": "Add", "save_update": "Update" },
+    "role_assign": { "title": "Assign Roles" },
+    "dialog": {
+      "common": { "cancel": "Cancel", "confirm": "Confirm" },
+      "delete": { "title": "Delete User", "content": "Delete user 【{name}】?" },
+      "disable": { "title": "Disable User", "content": "Disable user 【{name}】?" },
+      "enable": { "title": "Enable User", "content": "Enable user 【{name}】?" },
+      "unlock": { "title": "Unlock User", "content": "Unlock user 【{name}】?" }
+    },
+    "notify": { "update_success": "User updated successfully", "role_assign_success": "Roles updated successfully", "enable_success": "Enabled successfully", "disable_success": "Disabled successfully", "unlock_success": "Unlocked successfully" }
+  },
 
   "home": "Home",
   "back_home": "Back to Home"
