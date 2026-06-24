@@ -459,7 +459,7 @@
 
   "main_header_back_pre": "返回上级",
 
-  "yl_warning_passwd_init": "目前为初始密码，请及时修改密码，否则账号会被锁定，无法登录",
+  "yl_warning_passwd_init": "目前为初始密码，请及时点击右上角头像修改密码，否则账号会被锁定，无法登录",
 
   "yl_subsystem_main": "子系统选择",
   "yl_subsystem_appointment": "预约管理",

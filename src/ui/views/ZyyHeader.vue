@@ -20,17 +20,29 @@
 
       <div class="row items-center justify-end col-3">
 
+
+        <q-btn round style="margin: 0 1.5rem 0 1.5rem" color="transparent" size="11px" flat>
+          <q-avatar size="33px">
+            <q-img src="/favicon.svg"/>
+          </q-avatar>
+          <zyy-user-space-setting :user-info="{
+                  userId: globalState.userData.id,
+                  userAvatar: '/favicon.svg',
+                  userNickname: globalState.userData.nickName,
+                  userGender: globalState.userData.gender,
+                  userRoleList: globalState.userData.roleDtoList,
+                }"/>
+        </q-btn>
+
         <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs" @click="switchLanguage()">
           <div class="row items-center q-ma-xs">
             <q-icon name="fa-solid fa-language" size="1.75rem"/>
           </div>
         </q-btn>
 
-        <q-btn no-caps unelevated class="shadow-2 component-full-btn-mini-grow" @click="logoutMethod">
-          <div class="row items-center">
-            <div class="q-mx-xs">
-              {{ $t('main_logout') }}
-            </div>
+        <q-btn no-caps unelevated class="q-mx-xs" dense round @click="notifyTopWarning($t('in_develop'))">
+          <div class="row items-center q-ma-xs">
+            <q-icon name="fa-solid fa-gear" size="1.25rem"/>
           </div>
         </q-btn>
 
@@ -45,14 +57,14 @@
 <script setup>
 
 import {onMounted} from "vue";
-import {checkLoginFromCookie, deleteCookie} from "@/utils/common.js";
+import {checkLoginFromCookie} from "@/utils/common.js";
 import {backToLogin, toParentPage} from "@/router/index.js";
 import {useRouter} from "vue-router";
-import {userLogout} from "@/api/user.js";
-import {notifyTopPositive} from "@/utils/notification-tools.js";
+import {notifyTopWarning} from "@/utils/notification-tools.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {i18n} from "@/i18n/index.js";
 import {switchLanguage} from "@/utils/global-tools.js";
+import ZyyUserSpaceSetting from "@/ui/views/common/ZyyUserSpaceSetting.vue";
 
 const t = i18n.global.t
 const thisRouter = useRouter()
@@ -67,17 +79,6 @@ function checkLogin() {
   if (!isLogin) {
     backToLogin(thisRouter)
   }
-}
-
-function logoutMethod() {
-  userLogout().then(res => {
-    if (!res || !res.data) {
-      return
-    }
-    deleteCookie()
-    notifyTopPositive(t('main_login_success_logout'))
-    backToLogin(thisRouter)
-  })
 }
 
 onMounted(() => {
