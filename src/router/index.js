@@ -20,6 +20,8 @@ import ZyyUserRole from "@/ui/views/user/ZyyUserRole.vue";
 import ZyyUserPermission from "@/ui/views/user/ZyyUserPermission.vue";
 import ZyyUserStore from "@/ui/views/user/ZyyUserStore.vue";
 import ZyyUserTenant from "@/ui/views/user/ZyyUserTenant.vue";
+import ZyyStaffStaff from "@/ui/views/staff/ZyyStaffStaff.vue";
+import ZyyStaffSkill from "@/ui/views/staff/ZyyStaffSkill.vue";
 
 
 const router = createRouter({
@@ -178,10 +180,33 @@ const router = createRouter({
                             path: "staff",
                             name: "staff",
                             component: ZyyStaff,
-                            meta: {
-                                title: 'yl_subsystem_staff',
-                                header: "yl_subsystem_staff",
-                            },
+                            redirect: {name: 'staffStaff'},
+                            children: [
+                                {
+                                    path: "staff",
+                                    name: "staffStaff",
+                                    component: ZyyStaffStaff,
+                                    meta: {
+                                        title: 'yl_subsystem_staff',
+                                        value: "staffStaff",
+                                        header: "yl_subsystem_staff",
+                                        label: "yl_subsystem_staff",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "Skill",
+                                    name: "staffSkill",
+                                    component: ZyyStaffSkill,
+                                    meta: {
+                                        title: 'yl_subsystem_staff_skill',
+                                        value: "staffSkill",
+                                        header: "yl_subsystem_staff_skill",
+                                        label: "yl_subsystem_staff_skill",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                            ]
                         },
                     ]
                 },
@@ -225,6 +250,9 @@ const parentRouteMap = {
     'userPermission': 'subsystemMain',
     'userStore': 'subsystemMain',
     'userTenant': 'subsystemMain',
+
+    'staffStaff': 'subsystemMain',
+    'staffSkill': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'book': 'subsystemMain',
