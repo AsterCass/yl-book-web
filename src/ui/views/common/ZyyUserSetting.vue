@@ -92,7 +92,7 @@
               </div>
             </q-tab-panel>
             <q-tab-panel name="passwd" style="min-width: 30rem; padding: 1rem 0 1rem 0">
-              <div class="column full-height">
+              <form class="column full-height" autocomplete="off">
                 <h6>
                   {{ $t('user_setting.field.old_password') }}
                 </h6>
@@ -159,7 +159,7 @@
                     </q-btn>
                   </div>
                 </div>
-              </div>
+              </form>
             </q-tab-panel>
             <q-tab-panel name="sec" style="min-width: 30rem; padding: 0">
               <div class="row justify-center items-center full-height">

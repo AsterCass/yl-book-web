@@ -1,5 +1,5 @@
 <template>
-  <div v-if="simple" class="bottom-footer-base-simple row items-center justify-center">
+  <div class="bottom-footer-base-simple row items-center justify-center">
 
     <div class="q-mx-md">
       &copy; 20026-{{ curYear }}&nbsp;&nbsp;&nbsp;{{$t('main_company')}}
@@ -11,28 +11,14 @@
 
   </div>
 
-  <div v-else>
-    todo
-  </div>
 </template>
 
 <script setup>
 
-import {useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import {date} from "quasar";
 
-const thisRouter = useRouter()
-
 const curYear = ref("2020")
-
-const props = defineProps({
-  simple: {
-    type: Boolean,
-    required: false,
-    default: true,
-  },
-});
 
 
 onMounted(() => {

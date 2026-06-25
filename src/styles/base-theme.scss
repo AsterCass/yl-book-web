@@ -156,7 +156,7 @@ p {
   overflow: visible;
   z-index: 12;
   background: transparent;
-  height: 14px;
+  height: var(--scrollbar-width);
   width: var(--scrollbar-width);
 }
 

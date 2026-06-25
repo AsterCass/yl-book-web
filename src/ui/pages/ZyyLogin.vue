@@ -1,6 +1,6 @@
 <template>
 
-  <q-layout class="component-full-screen column" view="hhh lpr fff">
+  <div class="fixed-full column">
     <q-img class="fixed" width="100%" height="100%" position="50% 58%" style="z-index: -1"
            fit="cover" src="/img/login.jpg">
     </q-img>
@@ -17,7 +17,7 @@
 
     <div class="col row justify-center items-center">
       <div
-          class="animated animate__fadeInUp animated_duration_15 astercasc-login-card column justify-between top-semi-trans-header-login">
+          class="animated animate__fadeInUp animated_duration_15  column justify-between top-semi-trans-header-login">
 
         <div class="full-height column justify-evenly">
 
@@ -162,7 +162,7 @@
 
     <zyy-footer/>
 
-  </q-layout>
+  </div>
 
 </template>
 

@@ -1,6 +1,4 @@
 <template>
-
-
   <div>
     {{ $t('staff.title') }}
   </div>
