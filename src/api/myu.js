@@ -24,6 +24,14 @@ export function mUpdate(body) {
     })
 }
 
+export function mPasswd(body) {
+    return serviceShiro({
+        url: `/user/m/passwd`,
+        method: 'post',
+        data: body
+    })
+}
+
 export function mDetail() {
     return serviceShiro({
         url: `/user/m/detail`,

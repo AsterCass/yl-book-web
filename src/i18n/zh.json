@@ -105,6 +105,7 @@
   "main_register_mail_check": "邮箱格式错误",
   "main_register_account_check": "账号格式错误，8-20位且只能由英文字母和数字组成",
   "main_register_passwd_check": "密码格式错误，8-20位且需要包含大写、小写和数字",
+  "main_register_passwd_repeat": "两次密码输入不一致",
   "main_register_code_check": "验证码不能为空",
 
   "main_reset_passwd_btn": "重置",
@@ -404,6 +405,7 @@
   "main_space_setting_account_error_motto": "个性签名过长，需要在50个字符以内",
   "main_space_setting_account_avatar_suc": "头像上传成功",
   "main_space_setting_account_data_suc": "基础设置修改成功",
+  "main_space_setting_account_passwd_suc": "密码修改成功",
 
   "main_space_setting_report_admin": "堂下何人，为何状告本官？",
 

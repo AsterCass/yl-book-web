@@ -189,8 +189,13 @@ import CaskLongTextInputSimple from "@/ui/components/CaskLongTextInputSimple.vue
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools";
 import {GenderOptEnum} from "@/constants/enums/common.js";
 import emitter from "@/utils/bus";
-import {mDetail, mUpdate} from "@/api/myu.js";
+import {mDetail, mPasswd, mUpdate} from "@/api/myu.js";
+import {checkIsPasswd} from "@/utils/format-check.js";
+import {deleteCookie} from "@/utils/common.js";
+import {backToLogin} from "@/router/index.js";
+import {useRouter} from "vue-router";
 
+const thisRouter = useRouter()
 const {t} = useI18n()
 const globalState = useGlobalStateStore();
 
@@ -277,6 +282,32 @@ function saveUserData() {
 }
 
 function saveNewPasswd() {
+  if (userPasswdData.value.new !== userPasswdData.value.repeat) {
+    notifyTopWarning(t('main_register_passwd_repeat'))
+    return
+  }
+
+  if (!checkIsPasswd(userPasswdData.value.new)) {
+    notifyTopWarning(t('main_register_passwd_check'))
+    return
+  }
+
+  const updatePasswdData = {
+    originPasswd: userPasswdData.value.origin,
+    newPasswd: userPasswdData.value.new,
+  }
+
+  mPasswd(updatePasswdData).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('main_space_setting_account_passwd_suc'))
+    showUserSetting.value = false
+    // logout
+    deleteCookie()
+    globalState.updateUserData(null)
+    backToLogin(thisRouter)
+  })
 
 }
 

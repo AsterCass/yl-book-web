@@ -105,6 +105,7 @@
   "main_register_mail_check": "Invalid email format",
   "main_register_account_check": "Invalid account format, it should be 8-20 characters long and only consist of letters and numbers",
   "main_register_passwd_check": "Password format is incorrect, it should be 8-20 characters long and contain uppercase, lowercase letters, and numbers",
+  "main_register_passwd_repeat": "两次密码输入不一致",
   "main_register_code_check": "Verification code cannot be empty",
 
   "main_reset_passwd_btn": "Reset",
@@ -406,6 +407,7 @@
   "main_space_setting_account_error_motto": "Bio is too long. Please keep it within 50 characters",
   "main_space_setting_account_avatar_suc": "Avatar uploaded successfully",
   "main_space_setting_account_data_suc": "Public Profile updated successfully",
+  "main_space_setting_account_passwd_suc": "密码修改成功",
 
   "main_space_setting_report_admin": "Who stands before this court, and why do you bring charges against this official?",
   "main_video_public": "Public Videos",
