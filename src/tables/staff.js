@@ -49,6 +49,7 @@ const tableStaffCol = [
         field: 'skills',
         label: '雇员技能',
         align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
     {
         name: 'statusName',

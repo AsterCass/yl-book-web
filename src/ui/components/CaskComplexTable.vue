@@ -147,6 +147,14 @@
               </template>
             </q-img>
           </div>
+          <div v-else-if="thisSlot.slotType === ComplexTableColumnTypeEnum.MULTI_ROW">
+            <div class="q-my-xs">
+              <div style="margin: 3px 0" v-for="(singleItem, index) in getSplitItems( props.row[thisSlot.name])"
+                   :key="index">
+                {{ singleItem }}
+              </div>
+            </div>
+          </div>
           <div v-else>
             {{ props.row[thisSlot.name] }}
           </div>
@@ -251,6 +259,13 @@ const visibleColumns = ref([])
 watch(() => props.multipleSelectData, () => {
   selectedData.value = props.multipleSelectData
 })
+
+const getSplitItems = (str) => {
+  if (!str) {
+    return []
+  }
+  return str.split(',').filter(item => item.trim() !== '')
+}
 
 const toNewPage = () => {
   emit('toNewPage', {pageNo: pageNo.value, pageSize: pageSize.value})

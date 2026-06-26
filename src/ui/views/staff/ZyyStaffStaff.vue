@@ -353,7 +353,7 @@ function selectData() {
       if (data.skillDtoList && data.skillDtoList.length > 0) {
         data.simpleSkillList = data.skillDtoList.map(item => item.id)
         for (const thisSkill of data.skillDtoList) {
-          data.skills += thisSkill.name + "\n"
+          data.skills += thisSkill.name + ","
         }
         data.skills = data.skills.slice(0, -1)
       } else {

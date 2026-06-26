@@ -3,6 +3,7 @@ export const ComplexTableColumnTypeEnum = Object.freeze({
     POINT: 1,
     ICON_COLOR: 2,
     IMAGE: 3,
+    MULTI_ROW: 4,
 });
 
 export const ComplexTableColumnIconSiteEnum = Object.freeze({
