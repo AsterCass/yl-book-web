@@ -537,6 +537,18 @@
     "notify": { "update_success": "User updated successfully", "role_assign_success": "Roles updated successfully", "enable_success": "Enabled successfully", "disable_success": "Disabled successfully", "unlock_success": "Unlocked successfully" }
   },
 
+  "staff_skill": {
+    "label": { "id": "技能编号", "name": "技能名称", "code": "技能码", "status": "技能状态" },
+    "placeholder": { "id": "例如：YLSK001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70"},
+    "button": { "query": "查询", "add": "添加技能", "clear": "清空条件", "save": "保存" },
+    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "code": "技能码", "desc": "技能描述", "consumeMinutes": "技能时长"}, "save_add": "添加", "save_update": "更新" },
+    "dialog": {
+      "common": { "cancel": "取消", "confirm": "确认" },
+      "delete": { "title": "删除技能", "content": "是否要删除【{name}】技能" }
+    },
+    "notify": { "update_success": "更新技能成功" }
+  },
+
   "home": "Home",
   "back_home": "Back to Home"
 }
