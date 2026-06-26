@@ -548,7 +548,7 @@
 
   "staff_skill": {
     "label": { "id": "Skill ID", "name": "Skill Name", "code": "Skill Code", "status": "Skill Status" },
-    "placeholder": { "id": "e.g. YLSK001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70" },
+    "placeholder": { "id": "e.g. YLSS001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70" },
     "button": { "query": "Search", "add": "Add Skill", "clear": "Clear Filters", "save": "Save" },
     "upsert": { "title_add": "Add Skill", "title_update": "Update Skill", "field": { "name": "Skill Name", "code": "Skill Code", "desc": "Skill Description", "consumeMinutes": "Duration" }, "save_add": "Add", "save_update": "Update" },
     "dialog": {
