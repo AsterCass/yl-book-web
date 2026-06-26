@@ -109,4 +109,9 @@ export const tableStaffOperation = [
         name: 'delete',
         color: 'rgb(var(--negative))',
     },
+    {
+        label: '配置技能',
+        condition: 'skillOp',
+        name: 'updateSkill',
+    },
 ]
