@@ -527,7 +527,28 @@
     "upsert": { "title_add": "Add Staff", "title_update": "Update Staff", "field": { "name": "Staff Name", "phone": "Staff Phone", "priority": "Priority" }, "save_add": "Add", "save_update": "Update" },
     "dialog": { "common": { "cancel": "Cancel", "confirm": "Confirm" }, "delete": { "title": "Delete Staff", "content": "Delete staff 【{name}】?" } },
     "notify": { "update_success": "Staff updated successfully", "skill_assign_success": "Skills assigned successfully" },
-    "skill_assign": { "title": "Assign Skills" }
+    "skill_assign": { "title": "Assign Skills" },
+    "schedule": {
+      "title": "Planned Working Time",
+      "note": "You can configure multiple time ranges per day; overlaps are allowed and will be simplified on the backend",
+      "add": "Add Time Range",
+      "empty": "No time range",
+      "start": "Start Time",
+      "end": "End Time",
+      "day": {
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
+        "7": "Sunday"
+      },
+      "notify": {
+        "invalid_time": "Invalid time format. Please check and try again",
+        "invalid_range": "Invalid range: end time must be later than start time"
+      }
+    }
   },
 
   "user_user": {

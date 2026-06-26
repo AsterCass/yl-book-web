@@ -74,6 +74,7 @@
                               upsertName = row.name
                               upsertPhone = row.phone
                               upsertPriority = row.priority
+                              initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               isNew = false;
                               showUpsert = true
                             }
@@ -131,6 +132,43 @@
 
         </div>
 
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-mx-md q-mb-md">
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
+            {{ $t('staff.schedule.title') }}
+          </h6>
+          <div class="q-mt-sm" style="opacity: .7; font-size: .9rem;">
+            {{ $t('staff.schedule.note') }}
+          </div>
+
+          <div v-for="dayOfWeek in dayOfWeekList" :key="dayOfWeek" class="q-mt-md">
+            <div class="row items-center">
+              <div style="min-width: 7rem; font-weight: 600;">
+                {{ $t(`staff.schedule.day.${dayOfWeek}`) }}
+              </div>
+              <q-btn no-caps dense flat color="primary" icon="fa-solid fa-plus"
+                     @click="addScheduleRange(dayOfWeek)">
+                {{ $t('staff.schedule.add') }}
+              </q-btn>
+            </div>
+
+            <div v-if="upsertScheduleMap[dayOfWeek].length === 0" class="q-mt-xs"
+                 style="opacity: .6; font-size: .85rem;">
+              {{ $t('staff.schedule.empty') }}
+            </div>
+
+            <div v-for="(range, rangeIndex) in upsertScheduleMap[dayOfWeek]" :key="`${dayOfWeek}-${rangeIndex}`"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <cask-time-picker v-model="range.startTime" :placeholder="t('staff.schedule.start')"/>
+              <div>~</div>
+              <cask-time-picker v-model="range.endTime" :placeholder="t('staff.schedule.end')"/>
+              <q-btn round dense flat color="negative" icon="fa-solid fa-trash"
+                     @click="removeScheduleRange(dayOfWeek, rangeIndex)"/>
+            </div>
+          </div>
+        </div>
+
         <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
             {{ isNew ? $t('staff.upsert.save_add') : $t('staff.upsert.save_update') }}
@@ -184,6 +222,7 @@ import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import CaskTimePicker from "@/ui/components/CaskTimePicker.vue";
 import {tableStaff, tableStaffOperation} from "@/tables/staff.js";
 import {staffCreate, staffDelete, staffList, staffUpdate, staffUpdateSkill} from "@/api/staff.js";
 import {staffListSimple} from "@/api/staff-skill.js";
@@ -209,13 +248,127 @@ const isNew = ref(false)
 const upsertName = ref("")
 const upsertPhone = ref("")
 const upsertPriority = ref(null)
+const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
+const upsertScheduleMap = reactive({
+  1: [],
+  2: [],
+  3: [],
+  4: [],
+  5: [],
+  6: [],
+  7: [],
+})
 
 const updateId = ref("")
 
 function clearUpsertParam() {
+  updateId.value = ""
   upsertName.value = ""
   upsertPhone.value = ""
   upsertPriority.value = null
+  clearScheduleParam()
+}
+
+function minuteToTime(minute) {
+  const safeMinute = Number(minute)
+  if (Number.isNaN(safeMinute)) {
+    return null
+  }
+  const clampMinute = Math.max(0, Math.min(1440, safeMinute))
+  const hour = Math.floor(clampMinute / 60)
+  const minutePart = clampMinute % 60
+  return `${String(hour).padStart(2, '0')}:${String(minutePart).padStart(2, '0')}`
+}
+
+function timeToMinute(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string' || timeStr.length < 5) {
+    return null
+  }
+  const timeParts = timeStr.split(':')
+  if (timeParts.length !== 2) {
+    return null
+  }
+  const hour = Number(timeParts[0])
+  const minute = Number(timeParts[1])
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return null
+  }
+  if (hour < 0 || hour > 24 || minute < 0 || minute > 59) {
+    return null
+  }
+  if (hour === 24 && minute > 0) {
+    return null
+  }
+  return hour * 60 + minute
+}
+
+function clearScheduleParam() {
+  for (const dayOfWeek of dayOfWeekList) {
+    upsertScheduleMap[dayOfWeek] = []
+  }
+}
+
+function addScheduleRange(dayOfWeek) {
+  if (!dayOfWeekList.includes(dayOfWeek)) {
+    return
+  }
+  upsertScheduleMap[dayOfWeek].push({
+    startTime: '09:00',
+    endTime: '18:00',
+  })
+}
+
+function removeScheduleRange(dayOfWeek, rangeIndex) {
+  if (!dayOfWeekList.includes(dayOfWeek)) {
+    return
+  }
+  upsertScheduleMap[dayOfWeek].splice(rangeIndex, 1)
+}
+
+function initScheduleParam(scheduleList) {
+  clearScheduleParam()
+  if (!scheduleList || !Array.isArray(scheduleList)) {
+    return
+  }
+  for (const schedule of scheduleList) {
+    const dayOfWeek = Number(schedule.dayOfWeek)
+    if (!dayOfWeekList.includes(dayOfWeek)) {
+      continue
+    }
+    const startTime = minuteToTime(schedule.startMinute)
+    const endTime = minuteToTime(schedule.endMinute)
+    if (!startTime || !endTime) {
+      continue
+    }
+    upsertScheduleMap[dayOfWeek].push({
+      startTime: startTime,
+      endTime: endTime,
+    })
+  }
+}
+
+function buildScheduleListForSubmit() {
+  const scheduleList = []
+  for (const dayOfWeek of dayOfWeekList) {
+    for (const range of upsertScheduleMap[dayOfWeek]) {
+      const startMinute = timeToMinute(range.startTime)
+      const endMinute = timeToMinute(range.endTime)
+      if (startMinute === null || endMinute === null) {
+        notifyTopWarning(t('staff.schedule.notify.invalid_time'))
+        return null
+      }
+      if (startMinute >= endMinute) {
+        notifyTopWarning(t('staff.schedule.notify.invalid_range'))
+        return null
+      }
+      scheduleList.push({
+        dayOfWeek: dayOfWeek,
+        startMinute: startMinute,
+        endMinute: endMinute,
+      })
+    }
+  }
+  return scheduleList
 }
 
 // assign skill
@@ -251,10 +404,16 @@ function upsertData() {
     return;
   }
 
+  const scheduleList = buildScheduleListForSubmit()
+  if (scheduleList === null) {
+    return;
+  }
+
   const body = {
     name: upsertName.value,
     phone: upsertPhone.value,
     priority: upsertPriority.value,
+    scheduleList: scheduleList,
   }
 
   if (isNew.value) {

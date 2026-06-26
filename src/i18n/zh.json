@@ -525,7 +525,28 @@
     "upsert": { "title_add": "添加雇员", "title_update": "更新雇员", "field": { "name": "雇员名称", "phone": "雇员手机号", "priority": "优先级" }, "save_add": "添加", "save_update": "更新" },
     "dialog": { "common": { "cancel": "取消", "confirm": "确认" }, "delete": { "title": "删除雇员", "content": "是否要删除【{name}】雇员" } },
     "notify": { "update_success": "更新雇员成功", "skill_assign_success": "配置技能成功" },
-    "skill_assign": { "title": "技能分配" }
+    "skill_assign": { "title": "技能分配" },
+    "schedule": {
+      "title": "计划工作时间",
+      "note": "一天可配置多个时间段，允许交集，系统会在后端进行简化处理",
+      "add": "添加时间段",
+      "empty": "暂无时间段",
+      "start": "开始时间",
+      "end": "结束时间",
+      "day": {
+        "1": "周一",
+        "2": "周二",
+        "3": "周三",
+        "4": "周四",
+        "5": "周五",
+        "6": "周六",
+        "7": "周日"
+      },
+      "notify": {
+        "invalid_time": "时间格式无效，请检查后重试",
+        "invalid_range": "时间段无效：结束时间必须晚于开始时间"
+      }
+    }
   },
 
   "user_user": {
