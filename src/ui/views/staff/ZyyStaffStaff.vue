@@ -125,7 +125,7 @@
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.phone')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.priority') }}&nbsp;:</h6>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff.upsert.field.priority') }}&nbsp;:</h6>
           <q-input v-model="upsertPriority" class="component-outline-input-grow" dense outlined
                    mask="###" :placeholder="t('staff.placeholder.priority')"/>
 
@@ -186,7 +186,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableStaff, tableStaffOperation} from "@/tables/staff.js";
 import {staffCreate, staffDelete, staffList, staffUpdate, staffUpdateSkill} from "@/api/staff.js";
-import {staffSkillList} from "@/api/staff-skill.js";
+import {staffListSimple} from "@/api/staff-skill.js";
 
 
 const selectId = ref("")
@@ -368,14 +368,14 @@ function selectData() {
 
 function getAllSkills() {
   // fetch a large page to get all skills for assigning
-  staffSkillList({pageNo: 1, pageSize: 9999}).then(res => {
+  staffListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    res.data.data.records.forEach(skill => {
+    res.data.data.forEach(skill => {
       staffSkillMap[skill.id] = false
     })
-    allSkillList.value = res.data.data.records
+    allSkillList.value = res.data.data
   })
 }
 

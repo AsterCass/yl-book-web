@@ -9,6 +9,13 @@ export function staffSkillList(params) {
     })
 }
 
+export function staffListSimple() {
+    return serviceShiro({
+        url: `/staff/skill/list/simple`,
+        method: 'get',
+    })
+}
+
 export function staffSkillCreate(body) {
     return serviceShiro({
         url: `/staff/skill/create`,
