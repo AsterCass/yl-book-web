@@ -125,13 +125,14 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('staff_skill.upsert.field.desc')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertCode" class="component-outline-input-grow" dense outlined
+          <q-input v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff_skill.placeholder.desc')"/>
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
               $t('staff_skill.upsert.field.consumeMinutes')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertCode" class="component-outline-input-grow" dense outlined
+          <q-input v-model="upsertConsumeMinutes" class="component-outline-input-grow" dense outlined
+                   mask="###"
                    :placeholder="t('staff_skill.placeholder.consumeMinutes')"/>
 
 
@@ -190,7 +191,7 @@ const isNew = ref(false)
 const upsertName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
-const upsertConsumeMinutes = ref(0)
+const upsertConsumeMinutes = ref(null)
 
 const updateId = ref("")
 
@@ -198,7 +199,7 @@ function clearUpsertParam() {
   upsertName.value = ""
   upsertCode.value = ""
   upsertDesc.value = ""
-  upsertConsumeMinutes.value = 0
+  upsertConsumeMinutes.value = null
 }
 
 // op
@@ -219,7 +220,7 @@ const tableDynamicData = ref(
 )
 
 function upsertData() {
-  if (!upsertName.value) {
+  if (!upsertName.value || !upsertConsumeMinutes.value || !upsertCode.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
@@ -275,7 +276,7 @@ function deleteData() {
 function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    id: selectId.value, name: upsertName.value, code: selectCode.value,
+    id: selectId.value, name: selectName.value, code: selectCode.value,
     status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
