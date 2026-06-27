@@ -142,7 +142,7 @@
           {{ isNew ? $t('user_user.upsert.title_add') : $t('user_user.upsert.title_update') }}
         </h5>
 
-        <div class="q-mx-sm" style="opacity: 0.5; width: 25rem">
+        <div class="q-mx-sm" style="opacity: 0.5; width: 25rem; font-size: 0.85rem">
           <div v-if="isNew">
             {{ $t('user_user.upsert.default_password_note') }}
           </div>

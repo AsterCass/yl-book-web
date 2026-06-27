@@ -132,29 +132,32 @@
 
         </div>
 
-        <q-separator class="component-separator-base" inset spaced="1rem"/>
-
         <div class="q-mx-md q-mb-md">
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
             {{ $t('staff.schedule.title') }}
           </h6>
-          <div class="q-mt-sm" style="opacity: .7; font-size: .9rem;">
+          <div class="q-mt-sm q-ml-md" style="opacity: 0.5; width: 25rem; font-size: 0.85rem">
             {{ $t('staff.schedule.note') }}
           </div>
 
-          <div v-for="dayOfWeek in dayOfWeekList" :key="dayOfWeek" class="q-mt-md">
+          <div v-for="dayOfWeek in dayOfWeekList" :key="dayOfWeek" class="q-mt-md q-ml-md">
             <div class="row items-center">
-              <div style="min-width: 7rem; font-weight: 600;">
+              <div style="min-width: 7rem; font-size: 0.85rem; font-weight: 500;">
                 {{ $t(`staff.schedule.day.${dayOfWeek}`) }}
               </div>
-              <q-btn no-caps dense flat color="primary" icon="fa-solid fa-plus"
+              <q-btn no-caps unelevated  class="component-none-btn-mini-grow"
                      @click="addScheduleRange(dayOfWeek)">
-                {{ $t('staff.schedule.add') }}
+                <div class="row items-center justify-center">
+                  <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                  <div class="q-ml-xs" style="font-size: 0.85rem">
+                    {{ $t('staff.schedule.add') }}
+                  </div>
+                </div>
               </q-btn>
             </div>
 
             <div v-if="upsertScheduleMap[dayOfWeek].length === 0" class="q-mt-xs"
-                 style="opacity: .6; font-size: .85rem;">
+                 style="opacity: .5; font-size: .75rem;">
               {{ $t('staff.schedule.empty') }}
             </div>
 
@@ -163,8 +166,13 @@
               <cask-time-picker v-model="range.startTime" :placeholder="t('staff.schedule.start')"/>
               <div>~</div>
               <cask-time-picker v-model="range.endTime" :placeholder="t('staff.schedule.end')"/>
-              <q-btn round dense flat color="negative" icon="fa-solid fa-trash"
-                     @click="removeScheduleRange(dayOfWeek, rangeIndex)"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow"
+                     @click="removeScheduleRange(dayOfWeek, rangeIndex)">
+                <div class="row items-center">
+                  <q-icon name="fa-solid fa-trash" size="1rem"/>
+                </div>
+              </q-btn>
+
             </div>
           </div>
         </div>
