@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-input v-model="pickDate" tabindex="0" dense outlined
-             class="component-outline-input-mini" :placeholder="placeholder"
+             :class="inputClass" :placeholder="placeholder"
              no-error-icon mask="####-##-##" @update:modelValue="updateUiInput"
     >
       <template v-slot:append>
@@ -41,6 +41,11 @@ const props = defineProps({
     required: false,
     default: '1970-01-01'
   },
+  inputClass: {
+    type: String,
+    required: false,
+    default: 'component-outline-input-mini'
+  }
 })
 
 const pickDate = ref(props.modelValue)

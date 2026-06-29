@@ -591,6 +591,8 @@
       "name": "Customer Name",
       "phone": "Customer Phone",
       "bookingTime": "Booking Time",
+      "bookingTimeStart": "Start Time",
+      "bookingTimeEnd": "End Time",
       "status": "Status",
       "staffName": "Staff",
       "staffPhone": "Staff Phone",
@@ -600,6 +602,8 @@
       "name": "e.g.: Tom",
       "phone": "e.g.: 13811012138",
       "bookingTime": "Select booking time",
+      "bookingTimeStart": "Select start date",
+      "bookingTimeEnd": "Select end date",
       "bookingUrl": "e.g.: https://meeting.tencent.com/xxx"
     },
     "button": {

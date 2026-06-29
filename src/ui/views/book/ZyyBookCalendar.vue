@@ -7,20 +7,16 @@
           {{ $t('book_calendar.date_start') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="dateStart" class="q-ma-md component-outline-input-std" dense outlined
-               type="date"
-               tabindex="0">
-      </q-input>
+      <cask-date-picker v-model="dateStart" class="q-ma-md"
+                        :placeholder="t('book_calendar.date_start')"/>
 
       <div class="q-ml-md">
         <h6>
           {{ $t('book_calendar.date_end') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="dateEnd" class="q-ma-md component-outline-input-std" dense outlined
-               type="date"
-               tabindex="0">
-      </q-input>
+      <cask-date-picker v-model="dateEnd" class="q-ma-md"
+                        :placeholder="t('book_calendar.date_end')"/>
 
     </div>
 
@@ -80,6 +76,7 @@
 import {onMounted, ref, computed} from "vue";
 import {useI18n} from 'vue-i18n'
 import {notifyTopWarning} from "@/utils/notification-tools.js";
+import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {bookList} from "@/api/book.js";
 import {BookStatusEnum} from "@/constants/enums/book.js";
 

@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-input v-model="pickDatetime" tabindex="0" dense outlined
-             class="component-outline-input-std" :placeholder="placeholder"
+             :class="inputClass" :placeholder="placeholder"
              no-error-icon mask="####-##-## ##:##" @update:modelValue="updateUiInput"
     >
       <template v-slot:append>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import {defineEmits, defineProps, onMounted, ref} from "vue";
+import {defineEmits, defineProps, onMounted, ref, watch} from "vue";
 import CaskTime from "@/ui/components/CaskTime.vue";
 import {date} from "quasar";
 
@@ -42,15 +42,20 @@ const props = defineProps({
     required: false,
     default: '1970-01-01 00:00'
   },
+  inputClass: {
+    type: String,
+    required: false,
+    default: 'component-outline-input-std'
+  }
 })
 
 const pickDatetime = ref(props.modelValue)
-// watch(() => props.modelValue, () => {
-//   pickTime.value = props.modelValue
-// })
+watch(() => props.modelValue, () => {
+  pickDatetime.value = props.modelValue
+})
 
-let dateUiInput = ref("")
-let timeUiInput = ref("")
+const dateUiInput = ref("")
+const timeUiInput = ref("")
 
 function updateUiInput() {
   if (pickDatetime.value && pickDatetime.value.length >= 16) {

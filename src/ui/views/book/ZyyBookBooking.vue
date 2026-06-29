@@ -35,6 +35,22 @@
                 outlined popup-content-class="component-extra-card-std">
       </q-select>
 
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_booking.label.bookingTimeStart') }}&nbsp;:
+        </h6>
+      </div>
+      <cask-date-time-picker v-model="selectBookingTimeStart" class="q-ma-md" input-class="component-outline-input-grow"
+                             :placeholder="t('book_booking.placeholder.bookingTimeStart')"/>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_booking.label.bookingTimeEnd') }}&nbsp;:
+        </h6>
+      </div>
+      <cask-date-time-picker v-model="selectBookingTimeEnd" class="q-ma-md" input-class="component-outline-input-grow"
+                             :placeholder="t('book_booking.placeholder.bookingTimeEnd')"/>
+
     </div>
 
     <div class="row">
@@ -106,8 +122,8 @@
              style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.bookingTime') }}&nbsp;:</h6>
-          <q-input v-model="upsertBookingTime" class="component-outline-input-grow" dense outlined
-                   :placeholder="t('book_booking.placeholder.bookingTime')"/>
+          <cask-date-time-picker v-model="upsertBookingTime" input-class="component-outline-input-grow"
+                                 :placeholder="t('book_booking.placeholder.bookingTime')"/>
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
@@ -195,19 +211,22 @@
 </template>
 
 <script setup>
-import {BookStatusEnum, AssignStrategyEnum} from "@/constants/enums/book.js";
+import {AssignStrategyEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookCreate, bookDelete, bookList, bookUpdate, bookAssign} from "@/api/book.js";
+import {bookAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
 import {staffList} from "@/api/staff.js";
+import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 
 const selectName = ref("")
 const selectPhone = ref("")
 const selectStatus = ref(null)
+const selectBookingTimeStart = ref("")
+const selectBookingTimeEnd = ref("")
 const statusOptions = ref(BookStatusEnum.toSelectForm())
 const assignStrategyOptions = ref(AssignStrategyEnum.toSelectForm())
 const {t} = useI18n()
@@ -216,6 +235,8 @@ function clearSearch() {
   selectName.value = ""
   selectPhone.value = ""
   selectStatus.value = null
+  selectBookingTimeStart.value = ""
+  selectBookingTimeEnd.value = ""
 }
 
 // create/update
@@ -353,6 +374,8 @@ function selectData() {
   const param = {
     name: selectName.value, phone: selectPhone.value,
     status: selectStatus.value ? selectStatus.value.value : null,
+    bookingTimeStartStr: selectBookingTimeStart.value ? selectBookingTimeStart.value : null,
+    bookingTimeEndStr: selectBookingTimeEnd.value ? selectBookingTimeEnd.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
