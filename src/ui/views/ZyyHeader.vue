@@ -71,10 +71,10 @@ function upOneLevel() {
 }
 
 function checkLogin() {
-  const isLogin = checkLoginFromCookie()
-  if (!isLogin) {
-    backToLogin(thisRouter)
-  }
+  // const isLogin = checkLoginFromCookie()
+  // if (!isLogin) {
+  //   backToLogin(thisRouter)
+  // }
 }
 
 onMounted(() => {
