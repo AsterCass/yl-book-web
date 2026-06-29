@@ -1,4 +1,4 @@
-class Enum {
+export class Enum {
     constructor(enumMap) {
         this.enumMap = new Map();
         this.codeMap = new Map();

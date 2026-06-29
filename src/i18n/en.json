@@ -580,5 +580,81 @@
   },
 
   "home": "Home",
-  "back_home": "Back to Home"
+  "back_home": "Back to Home",
+
+  "yl_subsystem_appointment_calendar": "Booking Calendar",
+
+  "book_booking": {
+    "title": "Booking Management",
+    "label": {
+      "id": "Booking ID",
+      "name": "Customer Name",
+      "phone": "Customer Phone",
+      "bookingTime": "Booking Time",
+      "status": "Status",
+      "staffName": "Staff",
+      "staffPhone": "Staff Phone",
+      "bookingUrl": "Booking URL"
+    },
+    "placeholder": {
+      "name": "e.g.: Tom",
+      "phone": "e.g.: 13811012138",
+      "bookingTime": "Select booking time",
+      "bookingUrl": "e.g.: https://meeting.tencent.com/xxx"
+    },
+    "button": {
+      "query": "Query",
+      "add": "Add Booking",
+      "clear": "Clear Filters",
+      "save": "Save"
+    },
+    "upsert": {
+      "title_add": "Add Booking",
+      "title_update": "Update Booking",
+      "field": {
+        "bookingTime": "Booking Time",
+        "name": "Customer Name",
+        "bookProjectName": "Project",
+        "phone": "Customer Phone",
+        "mail": "Customer Email",
+        "preferredStaffId": "Preferred Staff",
+        "assignStrategy": "Assignment Strategy",
+        "bookingUrl": "Booking URL"
+      },
+      "save_add": "Add",
+      "save_update": "Update",
+      "assign_title": "Assign Staff",
+      "assign_select_staff": "Select Staff",
+      "assign_confirm": "Confirm Assignment"
+    },
+    "dialog": {
+      "common": {
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "delete": {
+        "title": "Cancel Booking",
+        "content": "Cancel booking for 【{name}】?"
+      }
+    },
+    "notify": {
+      "update_success": "Booking updated successfully",
+      "assign_success": "Staff assigned successfully"
+    }
+  },
+
+  "book_calendar": {
+    "title": "Booking Calendar",
+    "date_start": "Start Date",
+    "date_end": "End Date",
+    "button": {
+      "query": "Query"
+    },
+    "no_data": "No bookings found",
+    "status": {
+      "pending": "Pending",
+      "assigned": "Assigned",
+      "cancelled": "Cancelled"
+    }
+  }
 }

@@ -7,6 +7,8 @@ import ZyyMain from "../ui/pages/ZyyMain.vue";
 import ZyyLogin from "@/ui/pages/ZyyLogin.vue";
 import ZyySubsystem from "@/ui/views/ZyySubsystem.vue";
 import ZyyBook from "@/ui/views/book/ZyyBook.vue";
+import ZyyBookBooking from "@/ui/views/book/ZyyBookBooking.vue";
+import ZyyBookCalendar from "@/ui/views/book/ZyyBookCalendar.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -66,10 +68,33 @@ const router = createRouter({
                             path: "book",
                             name: "book",
                             component: ZyyBook,
-                            meta: {
-                                title: 'yl_subsystem_appointment',
-                                header: "yl_subsystem_appointment",
-                            },
+                            redirect: {name: 'bookBooking'},
+                            children: [
+                                {
+                                    path: "booking",
+                                    name: "bookBooking",
+                                    component: ZyyBookBooking,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment',
+                                        value: "bookBooking",
+                                        header: "yl_subsystem_appointment",
+                                        label: "yl_subsystem_appointment",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                                {
+                                    path: "calendar",
+                                    name: "bookCalendar",
+                                    component: ZyyBookCalendar,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_calendar',
+                                        value: "bookCalendar",
+                                        header: "yl_subsystem_appointment_calendar",
+                                        label: "yl_subsystem_appointment_calendar",
+                                        color: 'rgb(var(--full-container-background-color))'
+                                    },
+                                },
+                            ]
                         },
                         {
                             path: "order",
@@ -254,8 +279,10 @@ const parentRouteMap = {
     'staffStaff': 'subsystemMain',
     'staffSkill': 'subsystemMain',
 
+    'bookBooking': 'subsystemMain',
+    'bookCalendar': 'subsystemMain',
+
     // subsystem -> subsystemMain
-    'book': 'subsystemMain',
     'order': 'subsystemMain',
     'bill': 'subsystemMain',
     'page': 'subsystemMain',

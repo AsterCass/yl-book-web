@@ -578,5 +578,81 @@
   },
 
   "home": "主页",
-  "back_home": "回到主页"
+  "back_home": "回到主页",
+
+  "yl_subsystem_appointment_calendar": "预约日历",
+
+  "book_booking": {
+    "title": "预约管理",
+    "label": {
+      "id": "预约编号",
+      "name": "客户名称",
+      "phone": "客户手机号",
+      "bookingTime": "预约时间",
+      "status": "预约状态",
+      "staffName": "服务人员",
+      "staffPhone": "服务人员手机号",
+      "bookingUrl": "预约链接"
+    },
+    "placeholder": {
+      "name": "例如：张三",
+      "phone": "例如：13811012138",
+      "bookingTime": "请选择预约时间",
+      "bookingUrl": "例如：https://meeting.tencent.com/xxx"
+    },
+    "button": {
+      "query": "查询",
+      "add": "添加预约",
+      "clear": "清空条件",
+      "save": "保存"
+    },
+    "upsert": {
+      "title_add": "添加预约",
+      "title_update": "更新预约",
+      "field": {
+        "bookingTime": "预约时间",
+        "name": "客户名称",
+        "bookProjectName": "预约项目",
+        "phone": "客户手机号",
+        "mail": "客户邮箱",
+        "preferredStaffId": "偏好员工",
+        "assignStrategy": "分配策略",
+        "bookingUrl": "预约链接"
+      },
+      "save_add": "添加",
+      "save_update": "更新",
+      "assign_title": "分配员工",
+      "assign_select_staff": "选择员工",
+      "assign_confirm": "确认分配"
+    },
+    "dialog": {
+      "common": {
+        "cancel": "取消",
+        "confirm": "确认"
+      },
+      "delete": {
+        "title": "取消预约",
+        "content": "是否要取消【{name}】的预约"
+      }
+    },
+    "notify": {
+      "update_success": "更新预约成功",
+      "assign_success": "分配员工成功"
+    }
+  },
+
+  "book_calendar": {
+    "title": "预约日历",
+    "date_start": "开始日期",
+    "date_end": "结束日期",
+    "button": {
+      "query": "查询"
+    },
+    "no_data": "暂无预约数据",
+    "status": {
+      "pending": "待分配",
+      "assigned": "已分配",
+      "cancelled": "已取消"
+    }
+  }
 }
