@@ -75,6 +75,7 @@
                               upsertCode = row.code
                               upsertDesc = row.description
                               upsertConsumeMinutes = row.consumeMinutes
+                              upsertAliasList = row.aliasList
                               isNew = false;
                               showUpsert = true
                             }
@@ -136,6 +137,41 @@
                    :placeholder="t('staff_skill.placeholder.consumeMinutes')"/>
 
 
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{
+              $t('staff_skill.upsert.field.aliasList')
+            }}&nbsp;:</h6>
+          <div>
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+              {{ $t('staff_skill.upsert.alias_note') }}
+            </div>
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                   @click="addAliasItem">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('staff_skill.upsert.alias_add') }}
+                </div>
+              </div>
+            </q-btn>
+
+            <div v-if="upsertAliasList.length === 0" class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
+              {{ $t('staff_skill.upsert.alias_empty') }}
+            </div>
+
+            <div v-for="(aliasValue, aliasIndex) in upsertAliasList" :key="`alias-${aliasIndex}-${aliasValue}`"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-input v-model="upsertAliasList[aliasIndex]" class="component-outline-input-grow" dense outlined
+                       :placeholder="t('staff_skill.placeholder.alias')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeAliasItem(aliasIndex)">
+                <div class="row items-center">
+                  <q-icon name="fa-solid fa-trash" size="1rem"/>
+                </div>
+              </q-btn>
+            </div>
+          </div>
+
+
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
@@ -192,6 +228,7 @@ const upsertName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
 const upsertConsumeMinutes = ref(null)
+const upsertAliasList = ref([])
 
 const updateId = ref("")
 
@@ -200,6 +237,7 @@ function clearUpsertParam() {
   upsertCode.value = ""
   upsertDesc.value = ""
   upsertConsumeMinutes.value = null
+  upsertAliasList.value = []
 }
 
 // op
@@ -219,6 +257,14 @@ const tableDynamicData = ref(
     }
 )
 
+function addAliasItem() {
+  upsertAliasList.value.push('')
+}
+
+function removeAliasItem(aliasIndex) {
+  upsertAliasList.value.splice(aliasIndex, 1)
+}
+
 function upsertData() {
   if (!upsertName.value || !upsertConsumeMinutes.value || !upsertCode.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
@@ -235,6 +281,7 @@ function upsertData() {
     code: upsertCode.value,
     description: upsertDesc.value,
     consumeMinutes: upsertConsumeMinutes.value,
+    aliasList: upsertAliasList.value,
   }
 
   if (isNew.value) {
