@@ -39,6 +39,13 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        name: 'aliases',
+        field: 'aliases',
+        label: '技能别名',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
         name: 'description',
         field: 'description',
         label: '技能描述',

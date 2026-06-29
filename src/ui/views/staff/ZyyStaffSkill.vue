@@ -159,7 +159,7 @@
               {{ $t('staff_skill.upsert.alias_empty') }}
             </div>
 
-            <div v-for="(aliasValue, aliasIndex) in upsertAliasList" :key="`alias-${aliasIndex}-${aliasValue}`"
+            <div v-for="(aliasValue, aliasIndex) in upsertAliasList" :key="aliasIndex"
                  class="row items-center q-mt-xs" style="gap: .5rem;">
               <q-input v-model="upsertAliasList[aliasIndex]" class="component-outline-input-grow" dense outlined
                        :placeholder="t('staff_skill.placeholder.alias')"/>
@@ -341,6 +341,11 @@ function selectData() {
       data.deleteOp = true
       data.updateOp = true
       data.statusNameWebColorName = statusEnum.color
+      data.aliasList = data.aliasList || []
+      data.aliases = ""
+      if (data.aliasList && data.aliasList.length > 0) {
+        data.aliases =  data.aliasList.join(",")
+      }
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
