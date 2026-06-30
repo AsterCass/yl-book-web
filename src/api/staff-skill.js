@@ -9,7 +9,7 @@ export function staffSkillList(params) {
     })
 }
 
-export function staffListSimple() {
+export function staffSkillListSimple() {
     return serviceShiro({
         url: `/staff/skill/list/simple`,
         method: 'get',

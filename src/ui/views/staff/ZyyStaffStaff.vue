@@ -233,7 +233,7 @@ import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskTimePicker from "@/ui/components/CaskTimePicker.vue";
 import {tableStaff, tableStaffOperation} from "@/tables/staff.js";
 import {staffCreate, staffDelete, staffList, staffUpdate, staffUpdateSkill} from "@/api/staff.js";
-import {staffListSimple} from "@/api/staff-skill.js";
+import {staffSkillListSimple} from "@/api/staff-skill.js";
 
 
 const selectId = ref("")
@@ -535,7 +535,7 @@ function selectData() {
 
 function getAllSkills() {
   // fetch a large page to get all skills for assigning
-  staffListSimple().then(res => {
+  staffSkillListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }

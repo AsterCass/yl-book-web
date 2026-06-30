@@ -8,6 +8,13 @@ export function staffList(params) {
     })
 }
 
+export function staffListSimple() {
+    return serviceShiro({
+        url: `/staff/list/simple`,
+        method: 'get',
+    })
+}
+
 export function staffCreate(body) {
     return serviceShiro({
         url: `/staff/create`,

@@ -129,9 +129,17 @@
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('book_booking.placeholder.name')"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
-          <q-input v-model="upsertBookProjectNameStr" class="component-outline-input-grow" dense outlined
-                   placeholder="haircut, coloring"/>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
+            {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
+          <q-select v-model="upsertBookProjectName" :menu-offset="[0, 5]" :options="skillOptions"
+                    class="component-outline-input-grow"
+                    clear-icon="fa-solid fa-xmark"
+                    clearable
+                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                    multiple
+                    use-chips
+                    outlined popup-content-class="component-extra-card-std">
+          </q-select>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
@@ -148,6 +156,7 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.assignStrategy') }}&nbsp;:</h6>
           <q-select v-model="upsertAssignStrategy" :menu-offset="[0, 5]" :options="assignStrategyOptions"
                     class="component-outline-input-grow"
+                    clear-icon="fa-solid fa-xmark"
                     clearable
                     dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                     outlined popup-content-class="component-extra-card-std">
@@ -219,7 +228,8 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
 import {bookAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
-import {staffList} from "@/api/staff.js";
+import {staffListSimple} from "@/api/staff.js";
+import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 
 const selectName = ref("")
@@ -245,12 +255,12 @@ const isNew = ref(false)
 const upsertBookingTime = ref("")
 const upsertName = ref("")
 const upsertBookProjectName = ref([])
-const upsertBookProjectNameStr = ref("")
 const upsertPhone = ref("")
 const upsertMail = ref("")
 const upsertPreferredStaffId = ref("")
 const upsertAssignStrategy = ref(null)
 const upsertBookingUrl = ref("")
+const skillOptions = ref([])
 
 const updateId = ref("")
 
@@ -259,7 +269,6 @@ function clearUpsertParam() {
   upsertBookingTime.value = ""
   upsertName.value = ""
   upsertBookProjectName.value = []
-  upsertBookProjectNameStr.value = ""
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertPreferredStaffId.value = ""
@@ -302,16 +311,10 @@ function upsertData() {
     return;
   }
 
-  // parse bookProjectName from comma-separated string
-  let projectNames = []
-  if (upsertBookProjectNameStr.value) {
-    projectNames = upsertBookProjectNameStr.value.split(',').map(s => s.trim()).filter(s => s)
-  }
-
   const body = {
     bookTimeStr: upsertBookingTime.value,
     name: upsertName.value,
-    bookProjectName: projectNames,
+    bookProjectName: upsertBookProjectName.value,
     phone: upsertPhone.value,
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
@@ -410,7 +413,7 @@ function selectData() {
 
 function loadStaffList() {
   // Load staff list for assign dialog
-  staffList({pageNo: 1, pageSize: 9999}).then(res => {
+  staffListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
@@ -421,9 +424,22 @@ function loadStaffList() {
   })
 }
 
+function loadSkillList() {
+  staffSkillListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    skillOptions.value = res.data.data.map(skill => ({
+      label: skill.name,
+      value: skill.name,
+    }))
+  })
+}
+
 onMounted(() => {
   selectData()
   loadStaffList()
+  loadSkillList()
 })
 </script>
 
