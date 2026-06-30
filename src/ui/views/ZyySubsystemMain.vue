@@ -7,7 +7,7 @@
                           { background: 'black', width: '7px', opacity: '0.6' }"
                    class="full-height full-width" :visible="true">
       <div class="row justify-evenly" style="padding: 5rem 0 0 0">
-        <cask-float-card v-for="(video, index) in systemList" :key="index"
+        <cask-float-card v-for="(video, index) in visibleSystemList" :key="index"
                          class="card-item"
                          :ref="el => cardRefs[index] = el"
                          :cover-image="video.collectionImg"
@@ -26,7 +26,7 @@
 
 <script setup>
 import CaskFloatCard from "@/ui/components/CaskFloatCard.vue";
-import {nextTick, onMounted, ref} from "vue";
+import {computed, nextTick, onMounted, ref} from "vue";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {useRouter} from "vue-router";
 import {toSpecifyPage} from "@/router/index.js";
@@ -42,6 +42,7 @@ const systemList = ref([
     collectionImgExtra: "/img/subsystem/appointment.webp",
     collectionName: "yl_subsystem_appointment",
     navigationName: "book",
+    permission: "book",
     enable: true,
   },
   {
@@ -49,6 +50,7 @@ const systemList = ref([
     collectionImgExtra: "/img/subsystem/staff.webp",
     collectionName: "yl_subsystem_staff",
     navigationName: "staff",
+    permission: "staff",
     enable: true,
   },
   {
@@ -56,6 +58,7 @@ const systemList = ref([
     collectionImgExtra: "",
     collectionName: "yl_subsystem_agent",
     navigationName: "agent",
+    permission: "agent",
     enable: false,
   },
   {
@@ -63,6 +66,7 @@ const systemList = ref([
     collectionImgExtra: "",
     collectionName: "yl_subsystem_bill",
     navigationName: "bill",
+    permission: "bill",
     enable: false,
   },
   {
@@ -70,6 +74,7 @@ const systemList = ref([
     collectionImgExtra: "",
     collectionName: "yl_subsystem_order",
     navigationName: "order",
+    permission: "order",
     enable: false,
   },
   {
@@ -77,6 +82,7 @@ const systemList = ref([
     collectionImgExtra: "",
     collectionName: "yl_subsystem_page",
     navigationName: "page",
+    permission: "page",
     enable: false,
   },
   {
@@ -84,9 +90,14 @@ const systemList = ref([
     collectionImgExtra: "/img/subsystem/user.webp",
     collectionName: "yl_subsystem_user",
     navigationName: "user",
+    permission: "user",
     enable: true,
   },
 ])
+
+// 仅展示当前用户有页面级权限的子系统
+const visibleSystemList = computed(() =>
+    systemList.value.filter(item => globalState.hasPermission(item.permission)))
 
 
 async function jumpToSubsystem(enable, navigationName, currentIndex) {

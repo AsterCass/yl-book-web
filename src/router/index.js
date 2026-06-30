@@ -1,5 +1,6 @@
 import {createRouter, createWebHistory} from "vue-router";
 import {i18n} from '@/i18n/index.js'
+import {useGlobalStateStore} from "@/utils/global-state.js";
 import NoAuth from "@/ui/pages/NoAuth.vue";
 import NotFound from "@/ui/pages/NotFound.vue";
 import NoLogin from "@/ui/pages/NoLogin.vue";
@@ -69,6 +70,9 @@ const router = createRouter({
                             name: "book",
                             component: ZyyBook,
                             redirect: {name: 'bookBooking'},
+                            meta: {
+                                permission: 'book'
+                            },
                             children: [
                                 {
                                     path: "booking",
@@ -79,7 +83,8 @@ const router = createRouter({
                                         value: "bookBooking",
                                         header: "yl_subsystem_appointment",
                                         label: "yl_subsystem_appointment",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:book'
                                     },
                                 },
                                 {
@@ -91,7 +96,8 @@ const router = createRouter({
                                         value: "bookCalendar",
                                         header: "yl_subsystem_appointment_calendar",
                                         label: "yl_subsystem_appointment_calendar",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:calendar'
                                     },
                                 },
                             ]
@@ -103,6 +109,7 @@ const router = createRouter({
                             meta: {
                                 title: 'yl_subsystem_order',
                                 header: "yl_subsystem_order",
+                                permission: 'order'
                             },
                         },
                         {
@@ -112,6 +119,7 @@ const router = createRouter({
                             meta: {
                                 title: 'yl_subsystem_bill',
                                 header: "yl_subsystem_bill",
+                                permission: 'bill'
                             },
                         },
                         {
@@ -121,6 +129,7 @@ const router = createRouter({
                             meta: {
                                 title: 'yl_subsystem_page',
                                 header: "yl_subsystem_page",
+                                permission: 'page'
                             },
                         },
                         {
@@ -130,6 +139,7 @@ const router = createRouter({
                             meta: {
                                 title: 'yl_subsystem_agent',
                                 header: "yl_subsystem_agent",
+                                permission: 'agent'
                             },
                         },
                         {
@@ -137,6 +147,9 @@ const router = createRouter({
                             name: "user",
                             component: ZyyUser,
                             redirect: {name: 'userUser'},
+                            meta: {
+                                permission: 'user'
+                            },
                             children: [
                                 {
                                     path: "user",
@@ -147,7 +160,8 @@ const router = createRouter({
                                         value: "userUser",
                                         header: "yl_subsystem_user",
                                         label: "yl_subsystem_user",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'user:user'
                                     },
                                 },
                                 {
@@ -159,7 +173,8 @@ const router = createRouter({
                                         value: "userRole",
                                         header: "yl_subsystem_user_role",
                                         label: "yl_subsystem_user_role",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'user:role'
                                     },
                                 },
                                 {
@@ -171,7 +186,8 @@ const router = createRouter({
                                         value: "userPermission",
                                         header: "yl_subsystem_user_permission",
                                         label: "yl_subsystem_user_permission",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'user:permission'
                                     },
                                 },
                                 {
@@ -183,7 +199,8 @@ const router = createRouter({
                                         value: "userStore",
                                         header: "yl_subsystem_user_store",
                                         label: "yl_subsystem_user_store",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'user:store'
                                     },
                                 },
                                 {
@@ -195,7 +212,8 @@ const router = createRouter({
                                         value: "userTenant",
                                         header: "yl_subsystem_user_tenant",
                                         label: "yl_subsystem_user_tenant",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'user:tenant'
                                     },
                                 },
 
@@ -206,6 +224,9 @@ const router = createRouter({
                             name: "staff",
                             component: ZyyStaff,
                             redirect: {name: 'staffStaff'},
+                            meta: {
+                                permission: 'staff'
+                            },
                             children: [
                                 {
                                     path: "staff",
@@ -216,7 +237,8 @@ const router = createRouter({
                                         value: "staffStaff",
                                         header: "yl_subsystem_staff",
                                         label: "yl_subsystem_staff",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'staff:staff'
                                     },
                                 },
                                 {
@@ -228,7 +250,8 @@ const router = createRouter({
                                         value: "staffSkill",
                                         header: "yl_subsystem_staff_skill",
                                         label: "yl_subsystem_staff_skill",
-                                        color: 'rgb(var(--full-container-background-color))'
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'staff:skill'
                                     },
                                 },
                             ]
@@ -300,9 +323,39 @@ export function toParentPage(thisRouter) {
     }
 }
 
+// 在目标路由的父级下找到第一个有权限访问的兄弟页面（用于默认重定向落到无权页面时兜底）
+function findPermittedSibling(to, store) {
+    const matched = to.matched
+    const parent = matched.length >= 2 ? matched[matched.length - 2] : null
+    if (!parent || !parent.children) {
+        return null
+    }
+    for (const child of parent.children) {
+        if (!child.name || child.name === to.name) {
+            continue
+        }
+        const childPermission = child.meta ? child.meta.permission : null
+        if (store.hasPermission(childPermission)) {
+            return child.name
+        }
+    }
+    return null
+}
+
 router.beforeEach((to, from) => {
     if (to.meta.title) {
         document.title = i18n.global.t(to.meta.title)
+    }
+
+    // 页面级权限校验：仅在已登录（存在用户数据）时拦截，未登录交由请求拦截器/登录流程处理
+    const store = useGlobalStateStore()
+    const permission = to.meta.permission
+    if (permission && store.userData && !store.hasPermission(permission)) {
+        const fallback = findPermittedSibling(to, store)
+        if (fallback) {
+            return {name: fallback}
+        }
+        return {name: '403'}
     }
 })
 

@@ -24,6 +24,30 @@ export const useGlobalStateStore = defineStore('globalState', {
         userData: null,
         loginInfo: null,
     }),
+    getters: {
+        // 当前用户拥有的权限码集合（兼容 userData 直接为用户对象或包一层 userData 两种结构）
+        permissionCodeSet(state) {
+            const ud = state.userData
+            const list = (ud && (ud.permissionDtoList
+                || (ud.userData && ud.userData.permissionDtoList))) || []
+            const set = new Set()
+            for (const per of list) {
+                if (per && per.code) {
+                    set.add(per.code)
+                }
+            }
+            return set
+        },
+        // 判断是否拥有某个权限码（页面级）；未传 code 视为不限制
+        hasPermission() {
+            return (code) => {
+                if (!code) {
+                    return true
+                }
+                return this.permissionCodeSet.has(code)
+            }
+        },
+    },
     actions: {
         updateTheme(code) {
             this.curThemeName = code;

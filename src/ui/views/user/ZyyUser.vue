@@ -37,12 +37,14 @@ const thisRouter = useRouter()
 const tabs = computed(() => {
   const userRoute = thisRouter.getRoutes().find(r => r.name === 'user')
   if (!userRoute || !userRoute.children) return []
-  return userRoute.children.map(item => ({
-    value: item.meta?.value || item.name,
-    label: item.meta?.label,
-    color: item.meta?.color,
-    routeName: item.name
-  }))
+  return userRoute.children
+      .filter(item => globalState.hasPermission(item.meta?.permission))
+      .map(item => ({
+        value: item.meta?.value || item.name,
+        label: item.meta?.label,
+        color: item.meta?.color,
+        routeName: item.name
+      }))
 })
 
 const tab = ref("");
