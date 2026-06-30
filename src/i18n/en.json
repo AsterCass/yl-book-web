@@ -604,7 +604,8 @@
       "bookingTime": "Select booking time",
       "bookingTimeStart": "Select start date",
       "bookingTimeEnd": "Select end date",
-      "bookingUrl": "e.g.: https://meeting.tencent.com/xxx"
+      "bookingUrl": "e.g.: https://meeting.tencent.com/xxx",
+      "remark": "Enter remark"
     },
     "button": {
       "query": "Query",
@@ -623,7 +624,9 @@
         "mail": "Customer Email",
         "preferredStaffId": "Preferred Staff",
         "assignStrategy": "Assignment Strategy",
-        "bookingUrl": "Booking URL"
+        "bookingUrl": "Booking URL",
+        "source": "Booking Source",
+        "remark": "Remark"
       },
       "save_add": "Add",
       "save_update": "Update",

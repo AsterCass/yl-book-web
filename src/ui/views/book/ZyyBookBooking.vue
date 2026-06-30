@@ -57,9 +57,7 @@
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
         {{ $t('book_booking.button.query') }}
       </q-btn>
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
-             unelevated
-             @click="clearUpsertParam(); isNew = true; showUpsert = true">
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="openAddBooking">
         {{ $t('book_booking.button.add') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
@@ -87,9 +85,10 @@
                               upsertSkillIdList = (row.skillDtoList || []).map(s => s.id)
                               upsertPhone = row.phone
                               upsertMail = row.mail
-                              upsertPreferredStaffId = row.preferredStaffId || ''
-                              upsertAssignStrategy = row.assignStrategy || null
-                              upsertBookingUrl = row.bookingUrl
+                              upsertPreferredStaffId = row.preferredStaffId || null
+                              upsertRemark = row.remark || ''
+                              upsertSource = BookSourceEnum.fromCodeToSelectFrom(
+                                  row.source || BookSourceEnum.WECHAT.code)
                               isNew = false;
                               showUpsert = true
                             }
@@ -155,21 +154,27 @@
                    placeholder="example@mail.com"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.preferredStaffId') }}&nbsp;:</h6>
-          <q-input v-model="upsertPreferredStaffId" class="component-outline-input-grow" dense outlined
-                   placeholder="staff id"/>
-
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.assignStrategy') }}&nbsp;:</h6>
-          <q-select v-model="upsertAssignStrategy" :menu-offset="[0, 5]" :options="assignStrategyOptions"
+          <q-select v-model="upsertPreferredStaffId" :menu-offset="[0, 5]" :options="staffSelectOptions"
                     class="component-outline-input-grow"
                     clear-icon="fa-solid fa-xmark"
                     clearable
-                    dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
                     outlined popup-content-class="component-extra-card-std">
           </q-select>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.bookingUrl') }}&nbsp;:</h6>
-          <q-input v-model="upsertBookingUrl" class="component-outline-input-grow" dense outlined
-                   :placeholder="t('book_booking.placeholder.bookingUrl')"/>
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
+            {{ $t('book_booking.upsert.field.source') }}&nbsp;:</h6>
+          <q-select v-model="upsertSource" :menu-offset="[0, 5]" :options="sourceOptions"
+                    class="component-outline-input-grow"
+                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                    outlined popup-content-class="component-extra-card-std">
+          </q-select>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('book_booking.upsert.field.remark') }}&nbsp;:</h6>
+          <q-input v-model="upsertRemark" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('book_booking.placeholder.remark')"/>
+
 
         </div>
 
@@ -285,10 +290,11 @@
 </template>
 
 <script setup>
-import {AssignStrategyEnum, BookStatusEnum} from "@/constants/enums/book.js";
+import {AssignStrategyEnum, BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
+import {date} from "quasar";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
@@ -303,7 +309,7 @@ const selectStatus = ref(null)
 const selectBookingTimeStart = ref("")
 const selectBookingTimeEnd = ref("")
 const statusOptions = ref(BookStatusEnum.toSelectForm())
-const assignStrategyOptions = ref(AssignStrategyEnum.toSelectForm())
+const sourceOptions = ref(BookSourceEnum.toSelectForm())
 const {t} = useI18n()
 
 function clearSearch() {
@@ -322,9 +328,9 @@ const upsertName = ref("")
 const upsertSkillIdList = ref([])
 const upsertPhone = ref("")
 const upsertMail = ref("")
-const upsertPreferredStaffId = ref("")
-const upsertAssignStrategy = ref(null)
-const upsertBookingUrl = ref("")
+const upsertPreferredStaffId = ref(null)
+const upsertSource = ref(BookSourceEnum.fromCodeToSelectFrom(BookSourceEnum.WECHAT.code))
+const upsertRemark = ref("")
 const skillOptions = ref([])
 
 const updateId = ref("")
@@ -336,9 +342,17 @@ function clearUpsertParam() {
   upsertSkillIdList.value = []
   upsertPhone.value = ""
   upsertMail.value = ""
-  upsertPreferredStaffId.value = ""
-  upsertAssignStrategy.value = null
-  upsertBookingUrl.value = ""
+  upsertPreferredStaffId.value = null
+  upsertSource.value = BookSourceEnum.fromCodeToSelectFrom(BookSourceEnum.WECHAT.code)
+  upsertRemark.value = ""
+}
+
+function openAddBooking() {
+  clearUpsertParam()
+  // default booking time: 5 minutes from now
+  upsertBookingTime.value = date.formatDate(Date.now() + 5 * 60 * 1000, 'YYYY-MM-DD HH:mm')
+  isNew.value = true
+  showUpsert.value = true
 }
 
 // assign
@@ -425,8 +439,9 @@ function upsertData() {
     phone: upsertPhone.value,
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
-    assignStrategy: upsertAssignStrategy.value ? upsertAssignStrategy.value.value : null,
-    bookingUrl: upsertBookingUrl.value,
+    assignStrategy: AssignStrategyEnum.PRIORITY.code,
+    source: upsertSource.value ? upsertSource.value.value : BookSourceEnum.WECHAT.code,
+    remark: upsertRemark.value,
   }
 
   if (isNew.value) {
@@ -507,6 +522,8 @@ function selectData() {
       data.deleteOp = data.status !== -1
       // booking projects (skill names) for MULTI_ROW column
       data.bookProjectNames = (data.skillDtoList || []).map(item => item.name).join(',')
+      // creator display: prefer name, fall back to id
+      data.createUserName = data.createUserName || data.createUserId
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
@@ -520,7 +537,7 @@ function loadStaffList() {
       return
     }
     staffSelectOptions.value = res.data.data.map(staff => ({
-      label: `${staff.name} (${staff.phone || '无电话'})`,
+      label: `${staff.name} ( ${staff.phone || ' - '} )`,
       value: staff.id,
     }))
   })

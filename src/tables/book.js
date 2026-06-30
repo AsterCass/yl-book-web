@@ -39,6 +39,12 @@ const tableBookCol = [
         align: 'center',
     },
     {
+        name: 'mail',
+        field: 'mail',
+        label: '客户邮箱',
+        align: 'center',
+    },
+    {
         name: 'bookingTime',
         field: 'bookingTime',
         label: '预约时间',
@@ -66,21 +72,15 @@ const tableBookCol = [
         type: ComplexTableColumnTypeEnum.POINT,
     },
     {
-        name: 'staffPhone',
-        field: 'staffPhone',
-        label: '服务人员手机号',
-        align: 'center',
-    },
-    {
-        name: 'bookingUrl',
-        field: 'bookingUrl',
-        label: '预约链接',
-        align: 'center',
-    },
-    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
+        align: 'center',
+    },
+    {
+        name: 'createUserName',
+        field: 'createUserName',
+        label: '创建用户',
         align: 'center',
     },
     {

@@ -602,7 +602,8 @@
       "bookingTime": "请选择预约时间",
       "bookingTimeStart": "请选择开始日期",
       "bookingTimeEnd": "请选择结束日期",
-      "bookingUrl": "例如：https://meeting.tencent.com/xxx"
+      "bookingUrl": "例如：https://meeting.tencent.com/xxx",
+      "remark": "请输入备注信息"
     },
     "button": {
       "query": "查询",
@@ -621,7 +622,9 @@
         "mail": "客户邮箱",
         "preferredStaffId": "偏好员工",
         "assignStrategy": "分配策略",
-        "bookingUrl": "预约链接"
+        "bookingUrl": "预约链接",
+        "source": "预约来源",
+        "remark": "备注"
       },
       "save_add": "添加",
       "save_update": "更新",
