@@ -87,8 +87,7 @@
                               upsertMail = row.mail
                               upsertPreferredStaffId = row.preferredStaffId || null
                               upsertRemark = row.remark || ''
-                              upsertSource = BookSourceEnum.fromCodeToSelectFrom(
-                                  row.source || BookSourceEnum.WECHAT.code)
+                              upsertSource = row.source
                               isNew = false;
                               showUpsert = true
                             }
@@ -329,7 +328,7 @@ const upsertSkillIdList = ref([])
 const upsertPhone = ref("")
 const upsertMail = ref("")
 const upsertPreferredStaffId = ref(null)
-const upsertSource = ref(BookSourceEnum.fromCodeToSelectFrom(BookSourceEnum.WECHAT.code))
+const upsertSource = ref(BookSourceEnum.WECHAT.code)
 const upsertRemark = ref("")
 const skillOptions = ref([])
 
@@ -343,7 +342,7 @@ function clearUpsertParam() {
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertPreferredStaffId.value = null
-  upsertSource.value = BookSourceEnum.fromCodeToSelectFrom(BookSourceEnum.WECHAT.code)
+  upsertSource.value = BookSourceEnum.WECHAT.code
   upsertRemark.value = ""
 }
 
@@ -440,7 +439,7 @@ function upsertData() {
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
-    source: upsertSource.value ? upsertSource.value.value : BookSourceEnum.WECHAT.code,
+    source: upsertSource.value ? upsertSource.value : BookSourceEnum.WECHAT.code,
     remark: upsertRemark.value,
   }
 
