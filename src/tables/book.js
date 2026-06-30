@@ -58,6 +58,12 @@ const tableBookCol = [
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
     {
+        name: 'sourceName',
+        field: 'sourceName',
+        label: '预约来源',
+        align: 'center',
+    },
+    {
         name: 'statusName',
         field: 'statusName',
         label: '预约状态',
@@ -81,6 +87,12 @@ const tableBookCol = [
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
+        align: 'center',
+    },
+    {
+        name: 'remark',
+        field: 'remark',
+        label: '备注',
         align: 'center',
     },
     {

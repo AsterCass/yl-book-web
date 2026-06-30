@@ -524,6 +524,9 @@ function selectData() {
       data.bookProjectNames = (data.skillDtoList || []).map(item => item.name).join(',')
       // creator display: prefer name, fall back to id
       data.createUserName = data.createUserName || data.createUserId
+      // booking source name
+      const sourceEnum = BookSourceEnum.fromCode(data.source)
+      data.sourceName = sourceEnum ? sourceEnum.name : ''
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
