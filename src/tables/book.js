@@ -45,6 +45,13 @@ const tableBookCol = [
         align: 'center',
     },
     {
+        name: 'bookProjectNames',
+        field: 'bookProjectNames',
+        label: '预约项目',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
         name: 'statusName',
         field: 'statusName',
         label: '预约状态',
@@ -56,6 +63,7 @@ const tableBookCol = [
         field: 'staffName',
         label: '服务人员',
         align: 'center',
+        type: ComplexTableColumnTypeEnum.POINT,
     },
     {
         name: 'staffPhone',
@@ -118,6 +126,11 @@ export const tableBookOperation = [
     {
         label: '分配员工',
         condition: 'assignOp',
+        name: 'assign',
+    },
+    {
+        label: '重新分配',
+        condition: 'reassignOp',
         name: 'assign',
     },
     {

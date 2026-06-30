@@ -644,6 +644,11 @@
     "notify": {
       "update_success": "Booking updated successfully",
       "assign_success": "Staff assigned successfully"
+    },
+    "staff_detail": {
+      "title": "Staff Details",
+      "skill": "Skills",
+      "close": "Close"
     }
   },
 

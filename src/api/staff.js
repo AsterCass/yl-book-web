@@ -15,6 +15,13 @@ export function staffListSimple() {
     })
 }
 
+export function staffDetail(id) {
+    return serviceShiro({
+        url: `/staff/detail/${id}`,
+        method: 'get',
+    })
+}
+
 export function staffCreate(body) {
     return serviceShiro({
         url: `/staff/create`,

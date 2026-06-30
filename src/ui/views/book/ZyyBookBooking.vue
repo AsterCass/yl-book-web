@@ -73,13 +73,18 @@
                         :table-dynamic-data="tableDynamicData"
                         class="full-width"
                         style="padding: 2rem 5rem 0 0.5rem"
+                        @columnClick="(name, row) => {
+                            if (name === 'staffName' && row.staffId) {
+                              openStaffDetail(row.staffId)
+                            }
+                          }"
                         @operationClick="(name, row) => {
                             if(name === 'update') {
                               clearUpsertParam();
                               updateId = row.id
                               upsertBookingTime = row.bookingTime
                               upsertName = row.name
-                              upsertBookProjectName = row.bookProjectName || []
+                              upsertSkillIdList = (row.skillDtoList || []).map(s => s.id)
                               upsertPhone = row.phone
                               upsertMail = row.mail
                               upsertPreferredStaffId = row.preferredStaffId || ''
@@ -131,7 +136,7 @@
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
             {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
-          <q-select v-model="upsertBookProjectName" :menu-offset="[0, 5]" :options="skillOptions"
+          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptions"
                     class="component-outline-input-grow"
                     clear-icon="fa-solid fa-xmark"
                     clearable
@@ -211,6 +216,66 @@
       </q-card>
     </q-dialog>
 
+    <!-- Staff Detail Dialog (read-only) -->
+    <q-dialog :model-value="showStaffDetail" @hide="showStaffDetail = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('book_booking.staff_detail.title') }}
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div v-if="staffDetailData" class="q-ma-md" style="min-width: 25rem">
+          <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
+            <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.name') }}&nbsp;:</h6>
+            <div>{{ staffDetailData.name || '-' }}</div>
+
+            <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
+            <div>{{ staffDetailData.phone || '-' }}</div>
+
+            <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.priority') }}&nbsp;:</h6>
+            <div>{{ staffDetailData.priority }}</div>
+
+            <h6 style="white-space: nowrap; align-self: flex-start;">{{
+                $t('book_booking.staff_detail.skill')
+              }}&nbsp;:</h6>
+            <div class="row" style="gap: .4rem;">
+              <div v-for="skill in (staffDetailData.skillDtoList || [])" :key="skill.id">
+                {{ skill.name }}
+              </div>
+              <div v-if="!staffDetailData.skillDtoList || staffDetailData.skillDtoList.length === 0"
+                   style="opacity: .5;">-
+              </div>
+            </div>
+
+            <h6 style="white-space: nowrap; grid-column: 1 / -1;">{{ $t('staff.schedule.title') }}&nbsp;:</h6>
+
+            <template v-for="dayOfWeek in dayOfWeekList" :key="dayOfWeek">
+              <div style="white-space: nowrap; font-size: 0.85rem; font-weight: 500;">
+                {{ $t(`staff.schedule.day.${dayOfWeek}`) }}
+              </div>
+              <div v-if="staffDetailScheduleMap[dayOfWeek] && staffDetailScheduleMap[dayOfWeek].length > 0"
+                   class="row items-center" style="gap: .6rem; font-size: .85rem;">
+                <div v-for="(range, rangeIndex) in staffDetailScheduleMap[dayOfWeek]" :key="rangeIndex">
+                  {{ range.startTime }} ~ {{ range.endTime }}
+                </div>
+              </div>
+              <div v-else style="opacity: .5; font-size: .8rem;">
+                {{ $t('staff.schedule.empty') }}
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="row q-mt-xl q-mb-md justify-center">
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showStaffDetail = false">
+            {{ $t('book_booking.staff_detail.close') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
     <cask-dialog-judgment v-model="showOperation"
                           :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
                           :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
@@ -221,14 +286,14 @@
 
 <script setup>
 import {AssignStrategyEnum, BookStatusEnum} from "@/constants/enums/book.js";
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
 import {bookAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
-import {staffListSimple} from "@/api/staff.js";
+import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 
@@ -254,7 +319,7 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertBookingTime = ref("")
 const upsertName = ref("")
-const upsertBookProjectName = ref([])
+const upsertSkillIdList = ref([])
 const upsertPhone = ref("")
 const upsertMail = ref("")
 const upsertPreferredStaffId = ref("")
@@ -268,7 +333,7 @@ function clearUpsertParam() {
   updateId.value = ""
   upsertBookingTime.value = ""
   upsertName.value = ""
-  upsertBookProjectName.value = []
+  upsertSkillIdList.value = []
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertPreferredStaffId.value = ""
@@ -282,6 +347,48 @@ const assignBookId = ref("")
 const assignBookName = ref("")
 const assignStaffId = ref(null)
 const staffSelectOptions = ref([])
+
+// staff detail (read-only)
+const showStaffDetail = ref(false)
+const staffDetailData = ref(null)
+const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
+const staffDetailScheduleMap = reactive({1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: []})
+
+function minuteToTime(minute) {
+  const safeMinute = Number(minute)
+  if (Number.isNaN(safeMinute)) {
+    return null
+  }
+  const clampMinute = Math.max(0, Math.min(1440, safeMinute))
+  const hour = Math.floor(clampMinute / 60)
+  const minutePart = clampMinute % 60
+  return `${String(hour).padStart(2, '0')}:${String(minutePart).padStart(2, '0')}`
+}
+
+function openStaffDetail(staffId) {
+  for (const dayOfWeek of dayOfWeekList) {
+    staffDetailScheduleMap[dayOfWeek] = []
+  }
+  staffDetail(staffId).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    staffDetailData.value = res.data.data
+    for (const schedule of (staffDetailData.value.scheduleList || [])) {
+      const dayOfWeek = Number(schedule.dayOfWeek)
+      if (!dayOfWeekList.includes(dayOfWeek)) {
+        continue
+      }
+      const startTime = minuteToTime(schedule.startMinute)
+      const endTime = minuteToTime(schedule.endMinute)
+      if (!startTime || !endTime) {
+        continue
+      }
+      staffDetailScheduleMap[dayOfWeek].push({startTime, endTime})
+    }
+    showStaffDetail.value = true
+  })
+}
 
 // op
 const showOperation = ref(false)
@@ -314,7 +421,7 @@ function upsertData() {
   const body = {
     bookTimeStr: upsertBookingTime.value,
     name: upsertName.value,
-    bookProjectName: upsertBookProjectName.value,
+    bookRequirementSkillIdList: upsertSkillIdList.value,
     phone: upsertPhone.value,
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
@@ -394,17 +501,12 @@ function selectData() {
       data.statusName = statusEnum ? statusEnum.name : '未知'
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
       // op flags
-      data.updateOp = true
+      data.updateOp = data.status === 0
       data.assignOp = data.status === 0
+      data.reassignOp = data.status === 1
       data.deleteOp = data.status !== -1
-      // handle bookProjectName
-      if (data.bookProjectName && Array.isArray(data.bookProjectName)) {
-        data.bookProjectNameDisplay = data.bookProjectName.join(',')
-      }
-      // handle skillDtoList for display
-      if (data.skillDtoList && data.skillDtoList.length > 0) {
-        data.skills = data.skillDtoList.map(item => item.name).join(',')
-      }
+      // booking projects (skill names) for MULTI_ROW column
+      data.bookProjectNames = (data.skillDtoList || []).map(item => item.name).join(',')
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
@@ -417,7 +519,7 @@ function loadStaffList() {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    staffSelectOptions.value = res.data.data.records.map(staff => ({
+    staffSelectOptions.value = res.data.data.map(staff => ({
       label: `${staff.name} (${staff.phone || '无电话'})`,
       value: staff.id,
     }))
@@ -431,7 +533,7 @@ function loadSkillList() {
     }
     skillOptions.value = res.data.data.map(skill => ({
       label: skill.name,
-      value: skill.name,
+      value: skill.id,
     }))
   })
 }
