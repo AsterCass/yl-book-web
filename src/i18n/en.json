@@ -632,7 +632,8 @@
       "save_update": "Update",
       "assign_title": "Assign Staff",
       "assign_select_staff": "Select Staff",
-      "assign_confirm": "Confirm Assignment"
+      "assign_confirm": "Confirm Assignment",
+      "assign_empty_hint": "Leave empty and confirm to cancel the staff assignment"
     },
     "dialog": {
       "common": {
@@ -642,11 +643,16 @@
       "delete": {
         "title": "Cancel Booking",
         "content": "Cancel booking for 【{name}】?"
+      },
+      "cancelAssign": {
+        "title": "Cancel Assignment",
+        "content": "Cancel staff assignment for 【{name}】? The time slot will be released."
       }
     },
     "notify": {
       "update_success": "Booking updated successfully",
-      "assign_success": "Staff assigned successfully"
+      "assign_success": "Staff assigned successfully",
+      "cancel_assign_success": "Assignment cancelled successfully"
     },
     "staff_detail": {
       "title": "Staff Details",

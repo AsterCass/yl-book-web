@@ -91,10 +91,11 @@
                               isNew = false;
                               showUpsert = true
                             }
+                            if(name === 'copy') {
+                              copyBooking(row)
+                            }
                             if(name === 'assign') {
-                              assignBookId = row.id
-                              assignBookName = row.name
-                              showAssign = true
+                              openAssign(row)
                             }
                             if(name === 'delete') {
                               toOpId = row.id
@@ -203,9 +204,14 @@
           <h6>{{ $t('book_booking.upsert.assign_select_staff') }}&nbsp;:</h6>
           <q-select v-model="assignStaffId" :menu-offset="[0, 5]" :options="staffSelectOptions"
                     class="component-outline-input-grow q-mt-sm"
+                    clear-icon="fa-solid fa-xmark"
+                    clearable
                     dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                     outlined popup-content-class="component-extra-card-std">
           </q-select>
+          <div class="q-mt-sm q-ml-xs" style="opacity: 0.5; font-size: 0.8rem">
+            {{ $t('book_booking.upsert.assign_empty_hint') }}
+          </div>
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
@@ -297,7 +303,7 @@ import {date} from "quasar";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
+import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -360,6 +366,7 @@ const assignBookId = ref("")
 const assignBookName = ref("")
 const assignStaffId = ref(null)
 const staffSelectOptions = ref([])
+const staffIdNameMap = ref({})
 
 // staff detail (read-only)
 const showStaffDetail = ref(false)
@@ -465,9 +472,31 @@ function upsertData() {
   }
 }
 
+// open the "config assignment" dialog, pre-filling the currently assigned staff (if any)
+function openAssign(row) {
+  assignBookId.value = row.id
+  assignBookName.value = row.name
+  assignStaffId.value = row.staffId
+      ? (staffSelectOptions.value.find(o => o.value === row.staffId) || null)
+      : null
+  showAssign.value = true
+}
+
+// confirm config assignment: empty staff -> cancel assignment, otherwise assign
 function assignData() {
-  if (!assignBookId.value || !assignStaffId.value) {
+  if (!assignBookId.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
+    return
+  }
+  if (!assignStaffId.value) {
+    bookCancelAssign(assignBookId.value).then(res => {
+      if (!res || !res.data) {
+        return
+      }
+      showAssign.value = false
+      notifyTopPositive(t('book_booking.notify.cancel_assign_success'))
+      selectData()
+    })
     return
   }
   bookAssign(assignBookId.value, assignStaffId.value.value).then(res => {
@@ -478,6 +507,33 @@ function assignData() {
     notifyTopPositive(t('book_booking.notify.assign_success'))
     selectData()
   })
+}
+
+// copy an existing booking's data into the add dialog as a new booking
+function copyBooking(row) {
+  clearUpsertParam()
+  upsertBookingTime.value = row.bookingTime || ''
+  upsertName.value = row.name || ''
+  upsertSkillIdList.value = (row.skillDtoList || []).map(s => s.id)
+  upsertPhone.value = row.phone || ''
+  upsertMail.value = row.mail || ''
+  upsertPreferredStaffId.value = row.preferredStaffId || null
+  upsertRemark.value = row.remark || ''
+  upsertSource.value = row.source || BookSourceEnum.WECHAT.code
+  isNew.value = true
+  showUpsert.value = true
+}
+
+// whether the booking has started (now >= bookingTime); op time gates rely on this
+function isStarted(bookingTime) {
+  if (!bookingTime) {
+    return false
+  }
+  const startDate = date.extractDate(bookingTime, 'YYYY-MM-DD HH:mm')
+  if (!startDate || Number.isNaN(startDate.getTime())) {
+    return false
+  }
+  return Date.now() >= startDate.getTime()
 }
 
 function deleteData() {
@@ -514,11 +570,14 @@ function selectData() {
       const statusEnum = BookStatusEnum.fromCode(data.status)
       data.statusName = statusEnum ? statusEnum.name : '未知'
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-      // op flags
-      data.updateOp = data.status === 0
-      data.assignOp = data.status === 0
-      data.reassignOp = data.status === 1
-      data.deleteOp = data.status !== -1
+      // op flags (time gate: config-assign only allowed before booking starts)
+      const notStarted = !isStarted(data.bookingTime)
+      data.updateOp = data.status === 0 && notStarted
+      // config assignment (assign / reassign / cancel-assign) on PRE or WORK before start
+      data.configAssignOp = (data.status === 0 || data.status === 1) && notStarted
+      data.copyOp = true
+      // delete allowed on PRE/WORK/IN_PROGRESS/DONE; not on EXPIRED(4)/CANCEL(-1)
+      data.deleteOp = data.status === 0 || data.status === 1 || data.status === 2 || data.status === 3
       // booking projects (skill names) for MULTI_ROW column
       data.bookProjectNames = (data.skillDtoList || []).map(item => item.name).join(',')
       // creator display: prefer name, fall back to id
@@ -526,6 +585,9 @@ function selectData() {
       // booking source name
       const sourceEnum = BookSourceEnum.fromCode(data.source)
       data.sourceName = sourceEnum ? sourceEnum.name : ''
+      // preferred staff name from staff list lookup
+      data.preferredStaffName = data.preferredStaffId
+          ? (staffIdNameMap.value[data.preferredStaffId] || '') : ''
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
@@ -533,8 +595,8 @@ function selectData() {
 }
 
 function loadStaffList() {
-  // Load staff list for assign dialog
-  staffListSimple().then(res => {
+  // Load staff list for assign dialog & preferred-staff name lookup
+  return staffListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
@@ -542,6 +604,11 @@ function loadStaffList() {
       label: `${staff.name} ( ${staff.phone || ' - '} )`,
       value: staff.id,
     }))
+    const nameMap = {}
+    res.data.data.forEach(staff => {
+      nameMap[staff.id] = staff.name
+    })
+    staffIdNameMap.value = nameMap
   })
 }
 
@@ -558,9 +625,9 @@ function loadSkillList() {
 }
 
 onMounted(() => {
-  selectData()
-  loadStaffList()
   loadSkillList()
+  // load staff first so the booking list can resolve preferred-staff names
+  loadStaffList().then(() => selectData())
 })
 </script>
 

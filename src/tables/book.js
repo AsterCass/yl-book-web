@@ -78,6 +78,12 @@ const tableBookCol = [
         type: ComplexTableColumnTypeEnum.POINT,
     },
     {
+        name: 'preferredStaffName',
+        field: 'preferredStaffName',
+        label: '偏好员工',
+        align: 'center',
+    },
+    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
@@ -136,13 +142,13 @@ export const tableBookOperation = [
         name: 'update',
     },
     {
-        label: '分配员工',
-        condition: 'assignOp',
-        name: 'assign',
+        label: '复制',
+        condition: 'copyOp',
+        name: 'copy',
     },
     {
-        label: '重新分配',
-        condition: 'reassignOp',
+        label: '配置分配',
+        condition: 'configAssignOp',
         name: 'assign',
     },
     {

@@ -45,3 +45,10 @@ export function bookAssign(id, staffId) {
         method: 'post',
     })
 }
+
+export function bookCancelAssign(id) {
+    return serviceShiro({
+        url: `/book/cancelAssign/${id}`,
+        method: 'post',
+    })
+}
