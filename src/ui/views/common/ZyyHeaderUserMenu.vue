@@ -22,11 +22,11 @@
       </div>
 
       <div class="q-mt-sm row justify-center">
-        <q-badge class="q-mx-xs" style="font-size: 11px; padding: 3px 6px;"
+        <q-badge class="q-ma-xs" style="font-size: 11px; padding: 3px 6px;"
                  :color="GenderOptEnum.fromCode(userInfo.userGender).color"
                  :label="GenderOptEnum.fromCode(userInfo.userGender).name">
         </q-badge>
-        <q-badge color="grey-10" v-for="(role, index) in userInfo.userRoleList" :key="index" class="q-mx-xs"
+        <q-badge color="grey-10" v-for="(role, index) in userInfo.userRoleList" :key="index" class="q-ma-xs"
                  style="font-size: 11px; padding: 3px 6px;"
                  :label="role.name ? role.name : $t('role.unknown')">
         </q-badge>
