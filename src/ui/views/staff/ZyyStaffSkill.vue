@@ -32,19 +32,6 @@
                tabindex="0">
       </q-input>
 
-      <div class="q-ml-md">
-        <h6>
-          {{ $t('staff_skill.label.status') }}&nbsp;:
-        </h6>
-      </div>
-      <q-select v-model="selectStatus" :menu-offset="[0, 5]" :options="statusOptions"
-                class="q-ma-md component-outline-input-grow"
-                clear-icon="fa-solid fa-xmark"
-                clearable
-                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                outlined popup-content-class="component-extra-card-std">
-      </q-select>
-
     </div>
 
     <div class="row">
@@ -197,7 +184,6 @@
 </template>
 
 <script setup>
-import {CommonStatusEnum} from "@/constants/enums/common.js";
 import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
@@ -210,15 +196,12 @@ import {staffSkillCreate, staffSkillDelete, staffSkillList, staffSkillUpdate} fr
 const selectId = ref("")
 const selectName = ref("")
 const selectCode = ref("")
-const selectStatus = ref(null)
-const statusOptions = ref(CommonStatusEnum.toSelectForm())
 const {t} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
   selectName.value = ""
   selectCode.value = ""
-  selectStatus.value = null
 }
 
 // create/update
@@ -324,7 +307,6 @@ function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, name: selectName.value, code: selectCode.value,
-    status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
@@ -336,11 +318,8 @@ function selectData() {
     const thisData = res.data.data.records
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
-      const statusEnum = CommonStatusEnum.fromCode(data.status)
-      data.statusName = statusEnum.name;
       data.deleteOp = true
       data.updateOp = true
-      data.statusNameWebColorName = statusEnum.color
       data.aliasList = data.aliasList || []
       data.aliases = ""
       if (data.aliasList && data.aliasList.length > 0) {

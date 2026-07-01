@@ -42,19 +42,6 @@
                 v-model="selectType" :options="typeOptions">
       </q-select>
 
-      <div class="q-ml-md">
-        <h6>
-          {{ $t('user_permission.label.status') }}&nbsp;:
-        </h6>
-      </div>
-      <q-select outlined clearable class="q-ma-md component-outline-input-grow"
-                dropdown-icon="fa-solid fa-caret-down"
-                popup-content-class="component-extra-card-std"
-                clear-icon="fa-solid fa-xmark"
-                menu-anchor="bottom start" :menu-offset="[0, 5]"
-                v-model="selectStatus" :options="statusOptions">
-      </q-select>
-
     </div>
 
     <div class="row">
@@ -170,7 +157,7 @@ import {useI18n} from 'vue-i18n';
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
 import {perCreate, perDelete, perList, perUpdate} from "@/api/permission.js";
-import {CommonStatusEnum, PermissionTypeEnum} from "@/constants/enums/common.js";
+import {PermissionTypeEnum} from "@/constants/enums/common.js";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 
@@ -179,9 +166,7 @@ const selectId = ref("")
 const keyword = ref("")
 const parentId = ref("")
 const selectType = ref(null)
-const selectStatus = ref(null)
 const typeOptions = ref(PermissionTypeEnum.toSelectForm())
-const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
 // create/update 
 const showUpsert = ref(false)
@@ -214,7 +199,6 @@ function clearSearch() {
   keyword.value = ""
   parentId.value = ""
   selectType.value = null
-  selectStatus.value = null
 }
 
 function clearUpsertParam() {
@@ -285,7 +269,6 @@ function selectData() {
   const param = {
     id: selectId.value, keyword: keyword.value, parentId: parentId.value,
     type: selectType.value ? selectType.value.value : null,
-    status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
@@ -298,15 +281,12 @@ function selectData() {
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       const typeEnum = PermissionTypeEnum.fromCode(data.type)
-      const statusEnum = CommonStatusEnum.fromCode(data.status)
       data.typeName = typeEnum.name;
-      data.statusName = statusEnum.name;
       data.deleteOp = true
       data.updateOp = true
       if (data.meta) {
         data.desc = JSON.parse(data.meta).desc
       }
-      data.statusNameWebColorName = statusEnum.color
       data.typeNameWebColorName = typeEnum.color
     });
     tableData.value = thisData

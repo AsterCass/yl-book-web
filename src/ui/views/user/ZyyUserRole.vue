@@ -23,19 +23,6 @@
                tabindex="0">
       </q-input>
 
-      <div class="q-ml-md">
-        <h6>
-          {{ $t('user_role.label.status') }}&nbsp;:
-        </h6>
-      </div>
-      <q-select v-model="selectStatus" :menu-offset="[0, 5]" :options="statusOptions"
-                class="q-ma-md component-outline-input-grow"
-                clear-icon="fa-solid fa-xmark"
-                clearable
-                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                outlined popup-content-class="component-extra-card-std">
-      </q-select>
-
     </div>
 
     <div class="row">
@@ -186,7 +173,6 @@
 
 <script setup>
 import {roleCreate, roleDelete, roleList, roleUpdate, roleUpdatePer} from "@/api/role.js";
-import {CommonStatusEnum} from "@/constants/enums/common.js";
 import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
@@ -199,13 +185,10 @@ import {perListSimple} from "@/api/permission.js";
 const {t} = useI18n()
 const selectId = ref("")
 const keyword = ref("")
-const selectStatus = ref(null)
-const statusOptions = ref(CommonStatusEnum.toSelectForm())
 
 function clearSearch() {
   selectId.value = ""
   keyword.value = ""
-  selectStatus.value = null
 }
 
 // create/update
@@ -335,7 +318,6 @@ function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, keyword: keyword.value,
-    status: selectStatus.value ? selectStatus.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
@@ -347,8 +329,6 @@ function selectData() {
     const thisData = res.data.data.records
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
-      const statusEnum = CommonStatusEnum.fromCode(data.status)
-      data.statusName = statusEnum.name;
       data.deleteOp = true
       data.updateOp = true
       data.getPerOp = true
@@ -361,7 +341,6 @@ function selectData() {
       if (data.meta) {
         data.desc = JSON.parse(data.meta).desc
       }
-      data.statusNameWebColorName = statusEnum.color
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false

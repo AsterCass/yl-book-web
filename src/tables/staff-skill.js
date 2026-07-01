@@ -58,13 +58,6 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
-        name: 'statusName',
-        field: 'statusName',
-        label: '技能状态',
-        align: 'center',
-        type: ComplexTableColumnTypeEnum.ICON_COLOR,
-    },
-    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',

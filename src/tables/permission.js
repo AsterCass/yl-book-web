@@ -58,13 +58,6 @@ const tablePermissionCol = [
         align: 'center',
     },
     {
-        name: 'statusName',
-        field: 'statusName',
-        label: '权限状态',
-        align: 'center',
-        type: ComplexTableColumnTypeEnum.ICON_COLOR,
-    },
-    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',

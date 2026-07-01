@@ -17,8 +17,6 @@
 * imageSize（可选项，默认无限制）
 */
 
-import {ComplexTableColumnTypeEnum} from "@/constants/enums/table.js";
-
 const tableRoleCol = [
     {
         name: 'id',
@@ -43,13 +41,6 @@ const tableRoleCol = [
         field: 'desc',
         label: '角色描述',
         align: 'center',
-    },
-    {
-        name: 'statusName',
-        field: 'statusName',
-        label: '角色状态',
-        align: 'center',
-        type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
         name: 'createTime',
