@@ -71,7 +71,7 @@
               </template>
             </q-input>
 
-            <q-input v-model="inputPassword" tabindex="0" dense outlined type="password"
+            <q-input v-model="inputPassword" tabindex="0" dense outlined :type="showUserPasswd ? 'text' : 'password'"
                      class="q-mt-md q-mx-md component-outline-input-grow-on-semi-trans">
               <template v-slot:prepend>
                 <div class="row items-center justify-between">
@@ -87,6 +87,18 @@
             <div class="q-mx-lg q-mt-sm" style="opacity: .5; font-size: .75rem">
               {{ $t('main_login_passwd_tips') }}
             </div>
+
+            <div class="row q-mx-lg q-mt-sm">
+              <div v-if="showUserPasswd" class=" cask-jump-link-in-text" style="font-size: .75rem"
+                   @click="showUserPasswd = false">
+                {{ $t('main_register_hide_passwd') }}
+              </div>
+              <div v-else class=" cask-jump-link-in-text" style="font-size: .75rem"
+                   @click="showUserPasswd = true">
+                {{ $t('main_register_show_passwd') }}
+              </div>
+            </div>
+
 
           </div>
 
@@ -191,6 +203,7 @@ const inputTenantName = ref("")
 const inputStoreName = ref("")
 
 const isSaveLoginInfo = ref(false)
+const showUserPasswd = ref(false)
 const currentBody = ref({})
 
 function saveLoginInfo() {
