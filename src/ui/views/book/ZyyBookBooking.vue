@@ -315,6 +315,7 @@ import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookUpda
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
+import {truncate} from "@/utils/base-tools.js";
 
 const selectName = ref("")
 const selectPhone = ref("")
@@ -582,6 +583,7 @@ function selectData() {
       const statusEnum = BookStatusEnum.fromCode(data.status)
       data.statusName = statusEnum ? statusEnum.name : '未知'
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
+      data.remarkDisplay = truncate(data.remark)
       // op flags (time gate: config-assign only allowed before booking starts)
       const notStarted = !isStarted(data.bookingTime)
       data.detailOp = true

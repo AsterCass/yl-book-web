@@ -104,4 +104,13 @@ export function togoElementCenter(id) {
 }
 
 
+// 列表长文本截断：超过 30 字符以 ... 代替
+export function truncate(str, max = 30) {
+    if (!str) {
+        return ''
+    }
+    const text = String(str).trim()
+    return text.length > max ? text.slice(0, max) + '...' : text
+}
+
 

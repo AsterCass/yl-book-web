@@ -155,6 +155,7 @@ import {tableBookEmail, tableBookEmailOperation} from "@/tables/book-email.js";
 import {bookEmailGiveup, bookEmailList, bookEmailReparse} from "@/api/book.js";
 import {BookEmailStatusEnum, BookSourceEnum, EmailIntentEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
+import {truncate} from "@/utils/base-tools.js";
 
 const globalState = useGlobalStateStore();
 const {t} = useI18n()
@@ -165,15 +166,6 @@ const statusOptions = ref(BookEmailStatusEnum.toSelectForm())
 function clearSearch() {
   selectBookId.value = ""
   selectStatus.value = null
-}
-
-// 列表长文本截断：超过 30 字符以 ... 代替
-function truncate(str, max = 30) {
-  if (!str) {
-    return ''
-  }
-  const text = String(str).trim()
-  return text.length > max ? text.slice(0, max) + '...' : text
 }
 
 // email detail

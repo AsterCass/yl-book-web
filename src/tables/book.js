@@ -97,7 +97,7 @@ const tableBookCol = [
     },
     {
         name: 'remark',
-        field: 'remark',
+        field: 'remarkDisplay',
         label: '备注',
         align: 'center',
     },

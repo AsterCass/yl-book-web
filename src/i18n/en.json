@@ -721,7 +721,7 @@
       },
       "reparse": {
         "title": "Retry Parsing",
-        "content": "Re-parse this booking email?"
+        "content": "Re-parse this booking email? Data will automatically refresh in about 10 seconds"
       },
       "giveup": {
         "title": "Mark as No Need",
