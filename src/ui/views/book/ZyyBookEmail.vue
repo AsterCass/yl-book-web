@@ -119,9 +119,9 @@
           <q-scroll-area :thumb-style="globalState.curThemeName === 'dark' ?
                          { background: 'white', width: '3px', height: '3px', opacity: '0.3' } :
                           { background: 'black', width: '3px', height: '3px',  opacity: '0.3' }"
-                         style="height: 10rem; white-space: pre-wrap; word-break: break-all; "
-                         class="q-mt-sm" :visible="true">
-            {{ detailEmail.content || '-' }}
+                         style="height: 16rem;"
+                         class="q-mt-sm email-content-box" :visible="true">
+            <div class="email-content">{{ cleanedContent || '-' }}</div>
           </q-scroll-area>
         </div>
 
@@ -139,7 +139,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
@@ -170,6 +170,16 @@ function openEmailDetail(row) {
   detailEmail.value = row
   showEmailDetail.value = true
 }
+
+// 纯文本兜底展示：折叠 3 行以上连续空行、去除行尾/首尾空白（HTML 原文优先用 iframe 渲染）
+const cleanedContent = computed(() => {
+  const raw = detailEmail.value && detailEmail.value.content ? detailEmail.value.content : ''
+  return raw
+      .replace(/\r\n/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+})
 
 // booking detail (shared dialog)
 const showBookDetail = ref(false)
@@ -225,5 +235,19 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+
+.email-content-box {
+  border: 1px solid rgba(128, 128, 128, .3);
+  border-radius: .4rem;
+  background: rgba(128, 128, 128, .06);
+}
+
+.email-content {
+  padding: .6rem .8rem;
+  font-size: .8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
 </style>
