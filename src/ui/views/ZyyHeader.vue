@@ -76,7 +76,7 @@ function checkLogin() {
   //   backToLogin(thisRouter)
   // }
   userIsLogin().then(res => {
-    if (!res || !res.data || !res.data) {
+    if (!res || !res.data || !res.data.data) {
       backToLogin(thisRouter)
     }
   })
