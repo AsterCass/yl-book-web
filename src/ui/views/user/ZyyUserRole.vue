@@ -147,7 +147,6 @@
             tick-strategy="leaf"
             no-connectors
             accordion
-            default-expand-all
             nodeKey="id"
             v-model:ticked="ticked"
         />
