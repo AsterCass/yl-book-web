@@ -1,23 +1,26 @@
 <template>
   <div class="full-width cal-page">
 
-    <!-- 顶部：周导航 -->
-    <div class="row items-center q-mb-md q-mt-sm cal-toolbar">
-      <q-btn round flat dense class="component-none-btn-grow" @click="shiftWeek(-1)">
+    <!-- 顶部：导航 + 视图切换 -->
+    <div class="row items-center q-mb-lg q-mt-sm cal-toolbar">
+      <q-btn round flat dense class="component-none-btn-grow" @click="shift(-1)">
         <q-icon name="fa-solid fa-chevron-left" size=".9rem"/>
       </q-btn>
-      <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shiftWeek(1)">
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(1)">
         <q-icon name="fa-solid fa-chevron-right" size=".9rem"/>
       </q-btn>
-      <div class="cal-title q-ml-md">{{ weekLabel }}</div>
-      <q-btn no-caps unelevated class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="goThisWeek">
-        {{ $t('book_calendar.this_week') }}
+      <div class="cal-title q-ml-md">{{ rangeLabel }}</div>
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="resetView">
+        {{ viewMode === 'week' ? $t('book_calendar.this_week') : $t('book_calendar.today') }}
+      </q-btn>
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="toggleView">
+        {{ viewMode === 'week' ? $t('book_calendar.view_day') : $t('book_calendar.view_week') }}
       </q-btn>
 
       <q-space/>
 
       <!-- 图例 -->
-      <div class="row items-center cal-legend q-mr-sm">
+      <div class="row items-center cal-legend">
         <span class="cal-legend-dot cal-legend-block"/>
         <span class="q-mr-md">{{ $t('book_calendar.legend_block') }}</span>
         <span class="cal-legend-dot cal-legend-blocked"/>
@@ -25,19 +28,24 @@
       </div>
     </div>
 
-    <div class="cal-scroll-x">
-      <div class="cal-grid" :style="{ '--cal-gutter': gutterWidth }">
+    <div v-if="columns.length === 0" class="row flex-center q-py-xl" style="opacity: .6;">
+      <q-icon name="fa-regular fa-folder-open" size="18px" class="q-mr-sm"/>
+      {{ $t('book_calendar.no_data') }}
+    </div>
 
-        <!-- 星期表头 -->
+    <div v-else class="cal-scroll-x">
+      <div class="cal-grid" :style="gridStyle">
+
+        <!-- 表头 -->
         <div class="cal-head-row">
           <div class="cal-corner"/>
-          <div v-for="day in weekDays" :key="day.dateStr" class="cal-day-head" :class="{ 'cal-today': day.isToday }">
-            <div class="cal-day-name">{{ day.name }}</div>
-            <div class="cal-day-num">{{ day.dayNum }}</div>
+          <div v-for="col in columns" :key="col.key" class="cal-day-head" :class="{ 'cal-today': col.highlight }">
+            <div class="cal-day-main">{{ col.headerMain }}</div>
+            <div v-if="col.headerSub" class="cal-day-sub">{{ col.headerSub }}</div>
           </div>
         </div>
 
-        <!-- 日历主体 -->
+        <!-- 主体 -->
         <div class="cal-body-scroll">
           <div class="cal-body" :style="{ height: totalHeight + 'px' }">
 
@@ -48,9 +56,8 @@
               </div>
             </div>
 
-            <!-- 每日列 -->
-            <div v-for="col in dayColumns" :key="col.day.dateStr" class="cal-col"
-                 :class="{ 'cal-col-today': col.day.isToday }">
+            <!-- 列 -->
+            <div v-for="col in columns" :key="col.key" class="cal-col" :class="{ 'cal-col-today': col.highlight }">
 
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
@@ -91,20 +98,29 @@ import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {bookCalendar} from "@/api/book.js";
+import {staffListSimple} from "@/api/staff.js";
 import {BookStatusEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
 
 const HOUR_HEIGHT = 64          // 每小时像素高度
-const DEFAULT_START_HOUR = 8  // 默认最早显示 08:00
-const DEFAULT_END_HOUR = 22    // 默认最晚显示 22:00
+const DEFAULT_START_HOUR = 8    // 默认最早显示 08:00
+const DEFAULT_END_HOUR = 22     // 默认最晚显示 22:00
 const gutterWidth = '4rem'
 
+const viewMode = ref('week')    // week | day
 const bookings = ref([])
 const blocks = ref([])
+const staffList = ref([])
 const weekStart = ref(getMonday(new Date()))
+const dayDate = ref(today())
 
-// 当前周一
+function today() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
 function getMonday(input) {
   const d = new Date(input)
   d.setHours(0, 0, 0, 0)
@@ -112,6 +128,12 @@ function getMonday(input) {
   const diff = day === 0 ? -6 : 1 - day
   d.setDate(d.getDate() + diff)
   return d
+}
+
+// 1=周一..7=周日
+function dayOfWeekOf(input) {
+  const g = new Date(input).getDay()
+  return g === 0 ? 7 : g
 }
 
 function timeToMinutes(hhmm) {
@@ -143,7 +165,7 @@ const weekDays = computed(() => {
     const dateStr = date.formatDate(d, 'YYYY-MM-DD')
     arr.push({
       dateStr,
-      dayOfWeek: i + 1, // 1=周一..7=周日
+      dayOfWeek: i + 1,
       name: t(`staff.schedule.day.${i + 1}`),
       dayNum: date.formatDate(d, 'M/D'),
       isToday: dateStr === todayStr,
@@ -152,9 +174,13 @@ const weekDays = computed(() => {
   return arr
 })
 
-const weekLabel = computed(() => {
-  const days = weekDays.value
-  return `${days[0].dateStr}  ~  ${days[6].dateStr}`
+const rangeLabel = computed(() => {
+  if (viewMode.value === 'week') {
+    const d = weekDays.value
+    return `${d[0].dateStr}  ~  ${d[6].dateStr}`
+  }
+  const ds = date.formatDate(dayDate.value, 'YYYY-MM-DD')
+  return `${ds}  ${t(`staff.schedule.day.${dayOfWeekOf(dayDate.value)}`)}`
 })
 
 // 显示时间范围：默认 8:00-22:00，若有数据超出则自动扩展
@@ -197,7 +223,7 @@ const totalHeight = computed(() => {
   return Math.max(endHour - startHour, 1) * HOUR_HEIGHT
 })
 
-// 同一天重叠预约的分列布局：贪心分配列，簇内平均分配宽度
+// 同一列重叠预约的分列布局：贪心分配列，簇内平均分配宽度
 function layoutEvents(events) {
   const sorted = [...events].sort((a, b) => a.start - b.start || a.end - b.end)
   let cluster = []
@@ -239,47 +265,87 @@ function layoutEvents(events) {
   return sorted
 }
 
-const dayColumns = computed(() => {
+// 某天的 block 段（按 dayOfWeek 匹配，商户级别）
+function buildDayBlocks(dow, toPx) {
+  return blocks.value
+      .filter(bl => Number(bl.dayOfWeek) === dow)
+      .map(bl => ({
+        start: bl.startMinute,
+        end: bl.endMinute,
+        top: toPx(bl.startMinute),
+        height: Math.max((bl.endMinute - bl.startMinute) / 60 * HOUR_HEIGHT, 2),
+      }))
+}
+
+// 构建一列（预约块 + 定位 + 是否落在 block 内）
+function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBlocks, toPx) {
+  const rawEvents = rawBookings.map(b => ({start: b._start, end: b._end, booking: b}))
+  const laid = layoutEvents(rawEvents)
+  const events = laid.map(ev => {
+    const widthPct = 100 / ev.colCount
+    const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
+    return {
+      booking: ev.booking,
+      top: toPx(ev.start),
+      height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
+      leftPct: ev.col * widthPct,
+      widthPct,
+      blocked,
+      cancelled: ev.booking.status === -1,
+      statusColor: ev.booking._statusColor,
+      sub: ev.booking._calSub,
+    }
+  })
+  return {key, headerMain, headerSub, highlight, blocks: dayBlocks, events}
+}
+
+// 周视图：横坐标为日期
+const weekColumns = computed(() => {
   const {startHour} = timeRange.value
   const rangeStart = startHour * 60
-  const toPx = (minute) => (minute - rangeStart) / 60 * HOUR_HEIGHT
-
+  const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
   return weekDays.value.map(day => {
-    // 该天的 block（按 dayOfWeek 匹配）
-    const dayBlocks = blocks.value
-        .filter(bl => Number(bl.dayOfWeek) === day.dayOfWeek)
-        .map(bl => ({
-          start: bl.startMinute,
-          end: bl.endMinute,
-          top: toPx(bl.startMinute),
-          height: Math.max((bl.endMinute - bl.startMinute) / 60 * HOUR_HEIGHT, 2),
-        }))
-
-    // 该天的预约
-    const dayEvents = bookings.value
-        .filter(b => b._dateStr === day.dateStr)
-        .map(b => ({start: b._start, end: b._end, booking: b}))
-
-    const laid = layoutEvents(dayEvents)
-    const events = laid.map(ev => {
-      const widthPct = 100 / ev.colCount
-      const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
-      return {
-        booking: ev.booking,
-        top: toPx(ev.start),
-        height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
-        leftPct: ev.col * widthPct,
-        widthPct,
-        blocked,
-        cancelled: ev.booking.status === -1,
-        statusColor: ev.booking._statusColor,
-        sub: ev.booking._calSub,
-      }
-    })
-
-    return {day, blocks: dayBlocks, events}
+    const dayBlocks = buildDayBlocks(day.dayOfWeek, toPx)
+    const rb = bookings.value.filter(b => b._dateStr === day.dateStr)
+    return buildColumn(day.dateStr, day.name, day.dayNum, day.isToday, rb, dayBlocks, toPx)
   })
 })
+
+// 每日视图：横坐标为雇员，展示当日每个雇员的工作安排
+const staffColumns = computed(() => {
+  const {startHour} = timeRange.value
+  const rangeStart = startHour * 60
+  const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
+  const dayBlocks = buildDayBlocks(dayOfWeekOf(dayDate.value), toPx)
+
+  const byStaff = {}
+  const unassigned = []
+  for (const b of bookings.value) {
+    if (b.staffId) {
+      byStaff[b.staffId] = byStaff[b.staffId] || []
+      byStaff[b.staffId].push(b)
+    } else {
+      unassigned.push(b)
+    }
+  }
+
+  const cols = []
+  if (unassigned.length) {
+    cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx))
+  }
+  for (const s of staffList.value) {
+    cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx))
+  }
+  return cols
+})
+
+const columns = computed(() => viewMode.value === 'week' ? weekColumns.value : staffColumns.value)
+
+const gridStyle = computed(() => ({
+  '--cal-gutter': gutterWidth,
+  '--cal-cols': columns.value.length,
+  minWidth: `calc(${gutterWidth} + ${columns.value.length} * 9rem)`,
+}))
 
 // 详情
 const showDetail = ref(false)
@@ -290,47 +356,86 @@ function openDetail(booking) {
   showDetail.value = true
 }
 
-function shiftWeek(offset) {
-  weekStart.value = date.addToDate(weekStart.value, {days: offset * 7})
-  selectData()
+function shift(offset) {
+  if (viewMode.value === 'week') {
+    weekStart.value = date.addToDate(weekStart.value, {days: offset * 7})
+    loadWeek()
+  } else {
+    dayDate.value = date.addToDate(dayDate.value, {days: offset})
+    loadDay()
+  }
 }
 
-function goThisWeek() {
-  weekStart.value = getMonday(new Date())
-  selectData()
+function resetView() {
+  if (viewMode.value === 'week') {
+    weekStart.value = getMonday(new Date())
+    loadWeek()
+  } else {
+    dayDate.value = today()
+    loadDay()
+  }
 }
 
-function selectData() {
-  // 筛选项必传：本周一 ~ 本周日
-  const param = {
+function toggleView() {
+  if (viewMode.value === 'week') {
+    viewMode.value = 'day'
+    dayDate.value = today()
+    loadDay()
+  } else {
+    viewMode.value = 'week'
+    loadWeek()
+  }
+}
+
+function enrichBooking(b) {
+  b._dateStr = b.bookingTime ? b.bookingTime.substring(0, 10) : ''
+  const startMin = b.bookingTime ? timeToMinutes(b.bookingTime.substring(11, 16)) : 0
+  const dur = b.requiredSkillTime && b.requiredSkillTime > 0 ? b.requiredSkillTime : 60
+  b._start = startMin
+  b._end = startMin + dur
+  const statusEnum = BookStatusEnum.fromCode(b.status)
+  b.statusName = statusEnum ? statusEnum.name : ''
+  b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
+  const skillNames = (b.skillDtoList || []).map(s => s.name).join('、')
+  b._calSub = skillNames || (b.requiredSkillTime ? `${b.requiredSkillTime}min` : '')
+  return b
+}
+
+function applyData(res) {
+  if (!res || !res.data || !res.data.data) {
+    return
+  }
+  const data = res.data.data;
+  (data.list || []).forEach(enrichBooking)
+  bookings.value = data.list || []
+  blocks.value = data.blockList || []
+}
+
+// 筛选项必传：周视图取本周一~周日，日视图取当天
+function loadWeek() {
+  bookCalendar({
     startDateStr: weekDays.value[0].dateStr,
     endDateStr: weekDays.value[6].dateStr,
-  }
-  bookCalendar(param).then(res => {
+  }).then(applyData)
+}
+
+function loadDay() {
+  const ds = date.formatDate(dayDate.value, 'YYYY-MM-DD')
+  bookCalendar({startDateStr: ds, endDateStr: ds}).then(applyData)
+}
+
+function loadStaff() {
+  staffListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    const data = res.data.data
-    const list = data.list || []
-    list.forEach(b => {
-      b._dateStr = b.bookingTime ? b.bookingTime.substring(0, 10) : ''
-      const startMin = b.bookingTime ? timeToMinutes(b.bookingTime.substring(11, 16)) : 0
-      const dur = b.requiredSkillTime && b.requiredSkillTime > 0 ? b.requiredSkillTime : 60
-      b._start = startMin
-      b._end = startMin + dur
-      const statusEnum = BookStatusEnum.fromCode(b.status)
-      b.statusName = statusEnum ? statusEnum.name : ''
-      b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-      const skillNames = (b.skillDtoList || []).map(s => s.name).join('、')
-      b._calSub = skillNames || (b.requiredSkillTime ? `${b.requiredSkillTime}min` : '')
-    })
-    bookings.value = list
-    blocks.value = data.blockList || []
+    staffList.value = res.data.data.map(s => ({id: s.id, name: s.name, phone: s.phone}))
   })
 }
 
 onMounted(() => {
-  selectData()
+  loadStaff()
+  loadWeek()
 })
 </script>
 
@@ -375,7 +480,6 @@ onMounted(() => {
 }
 
 .cal-grid {
-  min-width: 62rem;
   border: 1px solid rgba(128, 128, 128, .18);
   border-radius: .5rem;
   overflow: hidden;
@@ -384,7 +488,7 @@ onMounted(() => {
 .cal-head-row,
 .cal-body {
   display: grid;
-  grid-template-columns: var(--cal-gutter) repeat(7, minmax(0, 1fr));
+  grid-template-columns: var(--cal-gutter) repeat(var(--cal-cols), minmax(0, 1fr));
 }
 
 .cal-head-row {
@@ -397,28 +501,33 @@ onMounted(() => {
 
 .cal-day-head {
   text-align: center;
-  padding: .5rem 0;
+  padding: .5rem .2rem;
   border-right: 1px solid rgba(128, 128, 128, .12);
+  overflow: hidden;
 
   &:last-child {
     border-right: none;
   }
 
-  .cal-day-name {
-    font-size: .8rem;
-    opacity: .7;
-  }
-
-  .cal-day-num {
-    font-size: .95rem;
+  .cal-day-main {
+    font-size: .9rem;
     font-weight: 600;
-    margin-top: .1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  &.cal-today {
-    .cal-day-num {
-      color: rgb(var(--pointer));
-    }
+  .cal-day-sub {
+    font-size: .75rem;
+    opacity: .65;
+    margin-top: .1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.cal-today .cal-day-main {
+    color: rgb(var(--pointer));
   }
 }
 
@@ -438,8 +547,6 @@ onMounted(() => {
     position: relative;
     font-size: .72rem;
     opacity: .6;
-    text-align: right;
-    padding-right: .4rem;
 
     span {
       position: absolute;
@@ -508,12 +615,10 @@ onMounted(() => {
     text-overflow: ellipsis;
   }
 
-  // 被 block 覆盖的预约：半透明，让下层灰色可见
   &.cal-event-blocked {
     opacity: .55;
   }
 
-  // 已取消：置灰 + 删除线
   &.cal-event-cancelled {
     border-left-color: rgb(200, 60, 60) !important;
 
