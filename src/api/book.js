@@ -8,6 +8,16 @@ export function bookList(params) {
     })
 }
 
+// 预约日历：不分页，返回 { list: [预约...], blockList: [{dayOfWeek, startMinute, endMinute}...] }
+// startDateStr / endDateStr 为必传（本周一 ~ 本周日，格式 yyyy-MM-dd）
+export function bookCalendar(params) {
+    return serviceShiro({
+        url: `/book/calendar`,
+        params: params,
+        method: 'get',
+    })
+}
+
 export function bookCreate(body) {
     return serviceShiro({
         url: `/book/create`,

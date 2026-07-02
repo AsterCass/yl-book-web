@@ -738,6 +738,10 @@
     "title": "Booking Calendar",
     "date_start": "Start Date",
     "date_end": "End Date",
+    "this_week": "This Week",
+    "no_name": "Unnamed",
+    "legend_block": "Blocked slot",
+    "legend_blocked": "Booking in blocked slot",
     "button": {
       "query": "Query"
     },
