@@ -77,6 +77,10 @@
                             }
                           }"
                         @operationClick="(name, row) => {
+                            if(name === 'detail') {
+                              detailBook = row
+                              showBookDetail = true
+                            }
                             if(name === 'update') {
                               clearUpsertParam();
                               updateId = row.id
@@ -291,6 +295,9 @@
                           :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
     />
 
+    <!-- Booking Detail Dialog (shared, read-only) -->
+    <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook"/>
+
   </div>
 </template>
 
@@ -302,6 +309,7 @@ import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
 import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
@@ -367,6 +375,10 @@ const assignBookName = ref("")
 const assignStaffId = ref(null)
 const staffSelectOptions = ref([])
 const staffIdNameMap = ref({})
+
+// booking detail (shared read-only dialog)
+const showBookDetail = ref(false)
+const detailBook = ref(null)
 
 // staff detail (read-only)
 const showStaffDetail = ref(false)
@@ -572,6 +584,7 @@ function selectData() {
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
       // op flags (time gate: config-assign only allowed before booking starts)
       const notStarted = !isStarted(data.bookingTime)
+      data.detailOp = true
       data.updateOp = data.status === 0 && notStarted
       // config assignment (assign / reassign / cancel-assign) on PRE or WORK before start
       data.configAssignOp = (data.status === 0 || data.status === 1) && notStarted

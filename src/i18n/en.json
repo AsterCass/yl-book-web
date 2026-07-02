@@ -583,6 +583,7 @@
   "back_home": "Back to Home",
 
   "yl_subsystem_appointment_calendar": "Booking Calendar",
+  "yl_subsystem_appointment_email": "Booking Email",
 
   "book_booking": {
     "title": "Booking Management",
@@ -658,6 +659,58 @@
       "title": "Staff Details",
       "skill": "Skills",
       "close": "Close"
+    },
+    "detail": {
+      "title": "Booking Details",
+      "close": "Close",
+      "id": "Booking ID",
+      "bookingTime": "Booking Time",
+      "name": "Customer Name",
+      "phone": "Customer Phone",
+      "mail": "Customer Email",
+      "status": "Status",
+      "source": "Source",
+      "project": "Project",
+      "requiredSkillTime": "Duration",
+      "requiredSkillTimeMin": "min",
+      "preferredStaff": "Preferred Staff",
+      "staff": "Staff",
+      "bookingUrl": "Booking URL",
+      "remark": "Remark",
+      "createUser": "Created By",
+      "createTime": "Created At",
+      "updateUser": "Updated By",
+      "updateTime": "Updated At"
+    }
+  },
+
+  "book_email": {
+    "title": "Booking Email",
+    "label": {
+      "fromMail": "From",
+      "intent": "Intent",
+      "status": "Status"
+    },
+    "placeholder": {
+      "fromMail": "e.g.: tom\\@mail.com"
+    },
+    "button": {
+      "query": "Query",
+      "clear": "Clear Filters"
+    },
+    "detail": {
+      "title": "Email Details",
+      "close": "Close",
+      "title_field": "Subject",
+      "fromMail": "From",
+      "toMail": "To",
+      "intent": "Intent",
+      "status": "Status",
+      "source": "Source",
+      "retryCount": "Retry Count",
+      "errorMsg": "Error",
+      "createTime": "Received At",
+      "content": "Content"
     }
   },
 

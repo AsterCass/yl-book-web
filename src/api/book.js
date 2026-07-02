@@ -52,3 +52,18 @@ export function bookCancelAssign(id) {
         method: 'post',
     })
 }
+
+export function bookEmailList(params) {
+    return serviceShiro({
+        url: `/book/email/list`,
+        params: params,
+        method: 'get',
+    })
+}
+
+export function bookEmailDetail(id) {
+    return serviceShiro({
+        url: `/book/email/detail/${id}`,
+        method: 'get',
+    })
+}

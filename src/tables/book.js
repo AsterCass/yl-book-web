@@ -137,6 +137,11 @@ export const tableBook = {
  */
 export const tableBookOperation = [
     {
+        label: '详情',
+        condition: 'detailOp',
+        name: 'detail',
+    },
+    {
         label: '编辑',
         condition: 'updateOp',
         name: 'update',

@@ -10,6 +10,7 @@ import ZyySubsystem from "@/ui/views/ZyySubsystem.vue";
 import ZyyBook from "@/ui/views/book/ZyyBook.vue";
 import ZyyBookBooking from "@/ui/views/book/ZyyBookBooking.vue";
 import ZyyBookCalendar from "@/ui/views/book/ZyyBookCalendar.vue";
+import ZyyBookEmail from "@/ui/views/book/ZyyBookEmail.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -98,6 +99,19 @@ const router = createRouter({
                                         label: "yl_subsystem_appointment_calendar",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:calendar'
+                                    },
+                                },
+                                {
+                                    path: "email",
+                                    name: "bookEmail",
+                                    component: ZyyBookEmail,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_email',
+                                        value: "bookEmail",
+                                        header: "yl_subsystem_appointment_email",
+                                        label: "yl_subsystem_appointment_email",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:email'
                                     },
                                 },
                             ]
@@ -304,6 +318,7 @@ const parentRouteMap = {
 
     'bookBooking': 'subsystemMain',
     'bookCalendar': 'subsystemMain',
+    'bookEmail': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'order': 'subsystemMain',

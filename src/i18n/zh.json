@@ -581,6 +581,7 @@
   "back_home": "回到主页",
 
   "yl_subsystem_appointment_calendar": "预约日历",
+  "yl_subsystem_appointment_email": "预约邮件",
 
   "book_booking": {
     "title": "预约管理",
@@ -656,6 +657,58 @@
       "title": "服务人员详情",
       "skill": "技能",
       "close": "关闭"
+    },
+    "detail": {
+      "title": "预约详情",
+      "close": "关闭",
+      "id": "预约编号",
+      "bookingTime": "预约时间",
+      "name": "客户名称",
+      "phone": "客户手机号",
+      "mail": "客户邮箱",
+      "status": "预约状态",
+      "source": "预约来源",
+      "project": "预约项目",
+      "requiredSkillTime": "所需时长",
+      "requiredSkillTimeMin": "分钟",
+      "preferredStaff": "偏好员工",
+      "staff": "服务人员",
+      "bookingUrl": "预约链接",
+      "remark": "备注",
+      "createUser": "创建人",
+      "createTime": "创建时间",
+      "updateUser": "更新人",
+      "updateTime": "更新时间"
+    }
+  },
+
+  "book_email": {
+    "title": "预约邮件",
+    "label": {
+      "fromMail": "发件邮箱",
+      "intent": "判定意图",
+      "status": "处理状态"
+    },
+    "placeholder": {
+      "fromMail": "例如：tom\\@mail.com"
+    },
+    "button": {
+      "query": "查询",
+      "clear": "清空条件"
+    },
+    "detail": {
+      "title": "邮件详情",
+      "close": "关闭",
+      "title_field": "邮件标题",
+      "fromMail": "发件邮箱",
+      "toMail": "收件邮箱",
+      "intent": "判定意图",
+      "status": "处理状态",
+      "source": "来源",
+      "retryCount": "重试次数",
+      "errorMsg": "失败原因",
+      "createTime": "接收时间",
+      "content": "邮件原文"
     }
   },
 

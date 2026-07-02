@@ -22,4 +22,20 @@ export const BookSourceEnum = new Enum({
     BUILDHEALTH: {code: 4, name: 'buildhealth', desc: '', color: 'rgb(230, 126, 34)'},
     AI: {code: 5, name: 'AI预约', desc: '', color: 'rgb(26, 188, 156)'},
     OWN_SITE: {code: 6, name: '本站预约', desc: '', color: 'rgb(241, 196, 15)'},
+    UNKNOW: {code: 100, name: '其他预约', desc: '', color: 'rgb(128, 128, 128)'},
+});
+
+// 预约邮件处理状态
+export const BookEmailStatusEnum = new Enum({
+    UNPROCESSED: {code: 0, name: '未处理', desc: '刚落库，或处理过程中出现瞬时异常，可被重试', color: 'rgb(245, 166, 35)'},
+    PROCESSED: {code: 1, name: '已处理', desc: '解析为预约/取消并成功落库', color: 'rgb(68, 117, 80)'},
+    FAILED: {code: -1, name: '处理失败', desc: '判定为预约/取消，但落库失败', color: 'rgb(200, 60, 60)'},
+    NO_NEED: {code: -2, name: '无需处理', desc: '广告邮件或其他非预约邮件', color: 'rgb(128, 128, 128)'},
+});
+
+// 大模型对邮件意图的判定结果
+export const EmailIntentEnum = new Enum({
+    IGNORE: {code: 0, name: '无需处理', desc: '广告/其他非预约邮件', color: 'rgb(128, 128, 128)'},
+    BOOKING: {code: 1, name: '预约', desc: '预约邮件', color: 'rgb(68, 117, 80)'},
+    CANCEL: {code: 2, name: '取消预约', desc: '取消预约邮件', color: 'rgb(230, 126, 34)'},
 });
