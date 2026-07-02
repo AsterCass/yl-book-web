@@ -28,20 +28,14 @@ const tableBookEmailCol = [
     },
     {
         name: 'title',
-        field: 'title',
+        field: 'titleDisplay',
         label: '邮件标题',
         align: 'center',
     },
     {
-        name: 'fromMail',
-        field: 'fromMail',
-        label: '发件邮箱',
-        align: 'center',
-    },
-    {
-        name: 'toMail',
-        field: 'toMail',
-        label: '收件邮箱',
+        name: 'content',
+        field: 'contentDisplay',
+        label: '邮件内容',
         align: 'center',
     },
     {
@@ -57,6 +51,12 @@ const tableBookEmailCol = [
         label: '处理状态',
         align: 'center',
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        name: 'errorMsg',
+        field: 'errorMsgDisplay',
+        label: '错误原因',
+        align: 'center',
     },
     {
         name: 'sourceName',
@@ -105,5 +105,16 @@ export const tableBookEmailOperation = [
         label: '预约详情',
         condition: 'bookDetailOp',
         name: 'bookDetail',
+    },
+    {
+        label: '重试',
+        condition: 'reparseOp',
+        name: 'reparse',
+    },
+    {
+        label: '无需处理',
+        condition: 'giveupOp',
+        name: 'giveup',
+        color: 'rgb(var(--negative))',
     },
 ]

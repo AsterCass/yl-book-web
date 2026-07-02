@@ -5,26 +5,13 @@
 
       <div class="q-ml-md">
         <h6>
-          {{ $t('book_email.label.fromMail') }}&nbsp;:
+          {{ $t('book_email.label.bookId') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="selectFromMail" class="q-ma-md component-outline-input-std" dense outlined
-               :placeholder="t('book_email.placeholder.fromMail')"
+      <q-input v-model="selectBookId" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('book_email.placeholder.bookId')"
                tabindex="0">
       </q-input>
-
-      <div class="q-ml-md">
-        <h6>
-          {{ $t('book_email.label.intent') }}&nbsp;:
-        </h6>
-      </div>
-      <q-select v-model="selectIntent" :menu-offset="[0, 5]" :options="intentOptions"
-                class="q-ma-md component-outline-input-grow"
-                clear-icon="fa-solid fa-xmark"
-                clearable
-                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                outlined popup-content-class="component-extra-card-std">
-      </q-select>
 
       <div class="q-ml-md">
         <h6>
@@ -63,6 +50,20 @@
                             if(name === 'bookDetail') {
                               detailBook = row.book
                               showBookDetail = true
+                            }
+                            if(name === 'reparse') {
+                              toOpId = row.id
+                              toOpTitle = $t('book_email.dialog.reparse.title')
+                              toOpDesc = $t('book_email.dialog.reparse.content')
+                              toOpFunc = reparseData
+                              showOperation = true
+                            }
+                            if(name === 'giveup') {
+                              toOpId = row.id
+                              toOpTitle = $t('book_email.dialog.giveup.title')
+                              toOpDesc = $t('book_email.dialog.giveup.content')
+                              toOpFunc = giveupData
+                              showOperation = true
                             }
                           }"
                         @toNewPage="(pageObj) => {
@@ -135,31 +136,44 @@
 
     <!-- Booking Detail Dialog (shared, read-only) -->
     <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook"/>
+
+    <cask-dialog-judgment v-model="showOperation"
+                          :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
+                          :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('book_email.dialog.common.cancel'), trueLabel: $t('book_email.dialog.common.confirm') }"
+    />
   </div>
 </template>
 
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBookEmail, tableBookEmailOperation} from "@/tables/book-email.js";
-import {bookEmailList} from "@/api/book.js";
+import {bookEmailGiveup, bookEmailList, bookEmailReparse} from "@/api/book.js";
 import {BookEmailStatusEnum, BookSourceEnum, EmailIntentEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
 const globalState = useGlobalStateStore();
 const {t} = useI18n()
-const selectFromMail = ref("")
+const selectBookId = ref("")
 const selectStatus = ref(null)
-const selectIntent = ref(null)
 const statusOptions = ref(BookEmailStatusEnum.toSelectForm())
-const intentOptions = ref(EmailIntentEnum.toSelectForm())
 
 function clearSearch() {
-  selectFromMail.value = ""
+  selectBookId.value = ""
   selectStatus.value = null
-  selectIntent.value = null
+}
+
+// 列表长文本截断：超过 30 字符以 ... 代替
+function truncate(str, max = 30) {
+  if (!str) {
+    return ''
+  }
+  const text = String(str).trim()
+  return text.length > max ? text.slice(0, max) + '...' : text
 }
 
 // email detail
@@ -185,6 +199,41 @@ const cleanedContent = computed(() => {
 const showBookDetail = ref(false)
 const detailBook = ref(null)
 
+// op confirm (reparse / giveup)
+const showOperation = ref(false)
+const toOpId = ref("")
+const toOpTitle = ref("")
+const toOpDesc = ref("")
+const toOpFunc = ref(null)
+
+function reparseData() {
+  if (!toOpId.value) {
+    notifyTopWarning(t('validation.insufficient_parameters'))
+    return
+  }
+  bookEmailReparse(toOpId.value).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_email.notify.reparse_success'))
+    selectData()
+  })
+}
+
+function giveupData() {
+  if (!toOpId.value) {
+    notifyTopWarning(t('validation.insufficient_parameters'))
+    return
+  }
+  bookEmailGiveup(toOpId.value).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_email.notify.giveup_success'))
+    selectData()
+  })
+}
+
 const tableData = ref([])
 const tableDynamicData = ref(
     {
@@ -198,9 +247,8 @@ const tableDynamicData = ref(
 function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    fromMail: selectFromMail.value,
+    bookId: selectBookId.value,
     status: selectStatus.value ? selectStatus.value.value : null,
-    intent: selectIntent.value ? selectIntent.value.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 
@@ -220,9 +268,16 @@ function selectData() {
       data.intentNameWebColorName = intentEnum ? intentEnum.color : 'rgb(128, 128, 128)'
       const sourceEnum = data.source != null ? BookSourceEnum.fromCode(data.source) : null
       data.sourceName = sourceEnum ? sourceEnum.name : '-'
+      // 列表长文本截断展示（完整值保留在原字段，供详情弹窗使用）
+      data.titleDisplay = truncate(data.title)
+      data.contentDisplay = truncate(data.content)
+      data.errorMsgDisplay = truncate(data.errorMsg)
       // op flags
       data.emailDetailOp = true
       data.bookDetailOp = !!data.book
+      // 重试：未处理(0) / 处理失败(-1)；无需处理：未处理(0) / 处理失败(-1)
+      data.reparseOp = data.status === 0 || data.status === -1
+      data.giveupOp = data.status === 0 || data.status === -1
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false

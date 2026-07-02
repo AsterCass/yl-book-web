@@ -67,3 +67,17 @@ export function bookEmailDetail(id) {
         method: 'get',
     })
 }
+
+export function bookEmailReparse(id) {
+    return serviceShiro({
+        url: `/book/email/reparse/${id}`,
+        method: 'post',
+    })
+}
+
+export function bookEmailGiveup(id) {
+    return serviceShiro({
+        url: `/book/email/giveup/${id}`,
+        method: 'post',
+    })
+}

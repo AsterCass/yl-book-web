@@ -685,11 +685,13 @@
   "book_email": {
     "title": "预约邮件",
     "label": {
+      "bookId": "预约编号",
       "fromMail": "发件邮箱",
       "intent": "判定意图",
       "status": "处理状态"
     },
     "placeholder": {
+      "bookId": "例如：YLB001",
       "fromMail": "例如：tom\\@mail.com"
     },
     "button": {
@@ -709,6 +711,24 @@
       "errorMsg": "失败原因",
       "createTime": "接收时间",
       "content": "邮件原文"
+    },
+    "dialog": {
+      "common": {
+        "cancel": "取消",
+        "confirm": "确认"
+      },
+      "reparse": {
+        "title": "重试解析",
+        "content": "是否要重新解析该预约邮件？"
+      },
+      "giveup": {
+        "title": "标记无需处理",
+        "content": "是否将该邮件标记为无需处理？标记后将不再重试。"
+      }
+    },
+    "notify": {
+      "reparse_success": "已触发重新解析",
+      "giveup_success": "已标记为无需处理"
     }
   },
 

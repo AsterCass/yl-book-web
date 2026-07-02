@@ -687,11 +687,13 @@
   "book_email": {
     "title": "Booking Email",
     "label": {
+      "bookId": "Booking ID",
       "fromMail": "From",
       "intent": "Intent",
       "status": "Status"
     },
     "placeholder": {
+      "bookId": "e.g.: YLB001",
       "fromMail": "e.g.: tom\\@mail.com"
     },
     "button": {
@@ -711,6 +713,24 @@
       "errorMsg": "Error",
       "createTime": "Received At",
       "content": "Content"
+    },
+    "dialog": {
+      "common": {
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "reparse": {
+        "title": "Retry Parsing",
+        "content": "Re-parse this booking email?"
+      },
+      "giveup": {
+        "title": "Mark as No Need",
+        "content": "Mark this email as no-need? It will no longer be retried."
+      }
+    },
+    "notify": {
+      "reparse_success": "Re-parsing triggered",
+      "giveup_success": "Marked as no-need"
     }
   },
 
