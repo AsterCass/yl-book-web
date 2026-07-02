@@ -9,6 +9,13 @@ export function userLogin(body) {
     })
 }
 
+export function userIsLogin() {
+    return serviceShiro({
+        url: `/user/isLogin`,
+        method: 'get',
+    })
+}
+
 export function userLogout() {
     return serviceShiro({
         url: `/user/logout`,

@@ -52,7 +52,6 @@
 <script setup>
 
 import {onMounted} from "vue";
-import {checkLoginFromCookie} from "@/utils/common.js";
 import {backToLogin, toParentPage} from "@/router/index.js";
 import {useRouter} from "vue-router";
 import {notifyTopWarning} from "@/utils/notification-tools.js";
@@ -61,6 +60,7 @@ import {i18n} from "@/i18n/index.js";
 import {switchLanguage} from "@/utils/global-tools.js";
 import ZyyHeaderUserMenu from "@/ui/views/common/ZyyHeaderUserMenu.vue";
 import emitter from "@/utils/bus.js";
+import {userIsLogin} from "@/api/myu.js";
 
 const t = i18n.global.t
 const thisRouter = useRouter()
@@ -75,6 +75,11 @@ function checkLogin() {
   // if (!isLogin) {
   //   backToLogin(thisRouter)
   // }
+  userIsLogin().then(res => {
+    if (!res || !res.data || !res.data) {
+      backToLogin(thisRouter)
+    }
+  })
 }
 
 onMounted(() => {
