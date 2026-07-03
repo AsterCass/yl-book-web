@@ -79,6 +79,8 @@
                      left: `calc(${ev.leftPct}% + 2px)`,
                      width: `calc(${ev.widthPct}% - 4px)`,
                      borderLeftColor: ev.statusColor,
+                     borderTopColor: ev.sourceColor,
+                     background: ev.bgColor,
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)">
                 <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
@@ -125,7 +127,7 @@ import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {bookAdjust, bookCalendar, bookReassign} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
-import {BookStatusEnum} from "@/constants/enums/book.js";
+import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
 
@@ -160,6 +162,19 @@ function getMonday(input) {
 function dayOfWeekOf(input) {
   const g = new Date(input).getDay()
   return g === 0 ? 7 : g
+}
+
+// 'rgb(r, g, b)' -> 'rgba(r, g, b, alpha)'，用于以状态色渲染半透明底色
+function rgbToRgba(color, alpha) {
+  if (!color) {
+    return `rgba(128, 128, 128, ${alpha})`
+  }
+  const m = color.match(/rgba?\(([^)]+)\)/)
+  if (!m) {
+    return color
+  }
+  const parts = m[1].split(',').slice(0, 3).map(s => s.trim())
+  return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`
 }
 
 function timeToMinutes(hhmm) {
@@ -320,6 +335,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       blocked,
       cancelled: ev.booking.status === -1,
       statusColor: ev.booking._statusColor,
+      sourceColor: ev.booking._sourceColor,
+      bgColor: ev.booking._bgColor,
       sub: ev.booking._calSub,
     }
   })
@@ -602,6 +619,10 @@ function enrichBooking(b) {
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
+  // 上边框=来源色；底色=状态色的低透明版本（不影响文字可读性）
+  const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
+  b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
+  b._bgColor = rgbToRgba(b._statusColor, 0.12)
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
   b._calSub = skillNames || (b.requiredSkillTime ? `${b.requiredSkillTime}min` : '')
   return b
@@ -793,6 +814,7 @@ onMounted(() => {
   z-index: 2;
   border-radius: .3rem;
   border-left: 3px solid rgb(128, 128, 128);
+  border-top: 3px solid rgb(128, 128, 128);
   background: rgba(255, 255, 255, .5);
   box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
   padding: .15rem .35rem;
