@@ -396,7 +396,7 @@ function enrichBooking(b) {
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-  const skillNames = (b.skillDtoList || []).map(s => s.name).join('、')
+  const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
   b._calSub = skillNames || (b.requiredSkillTime ? `${b.requiredSkillTime}min` : '')
   return b
 }

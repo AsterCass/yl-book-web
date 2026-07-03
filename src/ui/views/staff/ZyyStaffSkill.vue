@@ -249,7 +249,7 @@ function removeAliasItem(aliasIndex) {
 }
 
 function upsertData() {
-  if (!upsertName.value || !upsertConsumeMinutes.value || !upsertCode.value) {
+  if (!upsertName.value || !upsertCode.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
