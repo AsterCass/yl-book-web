@@ -4,6 +4,16 @@
 
       <div class="q-ml-md">
         <h6>
+          {{ $t('book_booking.label.id') }}&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="selectId" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('book_booking.placeholder.id')"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
           {{ $t('book_booking.label.name') }}&nbsp;:
         </h6>
       </div>
@@ -19,6 +29,16 @@
       </div>
       <q-input v-model="selectPhone" class="q-ma-md component-outline-input-std" dense outlined
                :placeholder="t('book_booking.placeholder.phone')"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_booking.label.mail') }}&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="selectMail" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('book_booking.placeholder.mail')"
                tabindex="0">
       </q-input>
 
@@ -321,8 +341,10 @@ import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 import {truncate} from "@/utils/base-tools.js";
 
+const selectId = ref("")
 const selectName = ref("")
 const selectPhone = ref("")
+const selectMail = ref("")
 const selectStatus = ref(null)
 const selectBookingTimeStart = ref("")
 const selectBookingTimeEnd = ref("")
@@ -331,8 +353,10 @@ const sourceOptions = ref(BookSourceEnum.toSelectForm())
 const {t} = useI18n()
 
 function clearSearch() {
+  selectId.value = ""
   selectName.value = ""
   selectPhone.value = ""
+  selectMail.value = ""
   selectStatus.value = null
   selectBookingTimeStart.value = ""
   selectBookingTimeEnd.value = ""
@@ -584,7 +608,7 @@ function deleteData() {
 function selectData() {
   tableDynamicData.value.inLoading = true
   const param = {
-    name: selectName.value, phone: selectPhone.value,
+    id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,
     status: selectStatus.value ? selectStatus.value.value : null,
     bookingTimeStartStr: selectBookingTimeStart.value ? selectBookingTimeStart.value : null,
     bookingTimeEndStr: selectBookingTimeEnd.value ? selectBookingTimeEnd.value : null,

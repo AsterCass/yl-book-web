@@ -591,6 +591,7 @@
       "id": "Booking ID",
       "name": "Customer Name",
       "phone": "Customer Phone",
+      "mail": "Customer Email",
       "bookingTime": "Booking Time",
       "bookingTimeStart": "Start Time",
       "bookingTimeEnd": "End Time",
@@ -600,8 +601,10 @@
       "bookingUrl": "Booking URL"
     },
     "placeholder": {
+      "id": "e.g.: YLB001",
       "name": "e.g.: Tom",
       "phone": "e.g.: 13811012138",
+      "mail": "e.g.: zs\\@mail.com",
       "bookingTime": "Select booking time",
       "bookingTimeStart": "Select start date",
       "bookingTimeEnd": "Select end date",

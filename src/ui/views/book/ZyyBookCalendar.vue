@@ -79,12 +79,19 @@
                      left: `calc(${ev.leftPct}% + 2px)`,
                      width: `calc(${ev.widthPct}% - 4px)`,
                      borderLeftColor: ev.statusColor,
-                     borderTopColor: ev.sourceColor,
                      background: ev.bgColor,
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)">
                 <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
-                <div v-if="ev.height > 34" class="cal-event-sub">{{ ev.sub }}</div>
+                <!-- 第二行起：预约项目 / 联系方式 / 备注（随卡片高度逐行显示） -->
+                <template v-for="(line, li) in ev.lines" :key="li">
+                  <div v-if="ev.height > 34 + li * 15" class="cal-event-sub">{{ line }}</div>
+                </template>
+
+                <!-- 左下角：预约来源（带来源枚举颜色） -->
+                <div v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
+                  {{ ev.sourceName }}
+                </div>
 
                 <!-- 右下角：已分配显示雇员名；待分配显示自动分配按钮 -->
                 <div class="cal-event-corner">
@@ -103,6 +110,8 @@
                  :style="{
                    top: dragState.top + 'px', height: dragState.height + 'px',
                    left: dragState.left + 'px', width: dragState.width + 'px',
+                   borderLeftColor: dragState.booking._statusColor,
+                   background: dragState.booking._bgColor,
                  }">
               <div class="cal-event-title">{{ dragState.booking.name || $t('book_calendar.no_name') }}</div>
               <div class="cal-event-sub">{{ dragState.label }}</div>
@@ -326,18 +335,22 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
   const events = laid.map(ev => {
     const widthPct = 100 / ev.colCount
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
+    const b = ev.booking
+    // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
+    const lines = [b._calSub, b._contact, b.remark].filter(Boolean)
     return {
-      booking: ev.booking,
+      booking: b,
       top: toPx(ev.start),
       height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
       leftPct: ev.col * widthPct,
       widthPct,
       blocked,
-      cancelled: ev.booking.status === -1,
-      statusColor: ev.booking._statusColor,
-      sourceColor: ev.booking._sourceColor,
-      bgColor: ev.booking._bgColor,
-      sub: ev.booking._calSub,
+      cancelled: b.status === -1,
+      statusColor: b._statusColor,
+      sourceColor: b._sourceColor,
+      sourceName: b._sourceName,
+      bgColor: b._bgColor,
+      lines,
     }
   })
   return {
@@ -619,10 +632,13 @@ function enrichBooking(b) {
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-  // 上边框=来源色；底色=状态色的低透明版本（不影响文字可读性）
+  // 左下角来源文字（带来源色）；底色=状态色的低透明版本（不影响文字可读性）
   const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
   b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
+  b._sourceName = sourceEnum ? sourceEnum.name : ''
   b._bgColor = rgbToRgba(b._statusColor, 0.12)
+  // 客户联系方式：有电话显示电话，否则显示邮件，都没有则为空
+  b._contact = b.phone || b.mail || ''
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
   b._calSub = skillNames || (b.requiredSkillTime ? `${b.requiredSkillTime}min` : '')
   return b
@@ -813,8 +829,7 @@ onMounted(() => {
   position: absolute;
   z-index: 2;
   border-radius: .3rem;
-  border-left: 3px solid rgb(128, 128, 128);
-  border-top: 3px solid rgb(128, 128, 128);
+  border-left: 5px solid rgb(128, 128, 128);
   background: rgba(255, 255, 255, .5);
   box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
   padding: .15rem .35rem;
@@ -853,11 +868,23 @@ onMounted(() => {
     text-overflow: ellipsis;
   }
 
+  .cal-event-source {
+    position: absolute;
+    left: .35rem;
+    bottom: .15rem;
+    max-width: 55%;
+    font-size: .68rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .cal-event-corner {
     position: absolute;
     right: .35rem;
     bottom: .15rem;
-    max-width: calc(100% - .7rem);
+    max-width: 55%;
     text-align: right;
   }
 
@@ -904,11 +931,10 @@ onMounted(() => {
   }
 }
 
-// 拖动时跟随指针的预览块
+// 拖动时跟随指针的预览块（保留状态左边框与状态底色，用更强阴影作为拖动提示）
 .cal-drag-preview {
   z-index: 5;
   pointer-events: none;
-  border-left-color: rgb(var(--pointer)) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
   opacity: .95;
 }
