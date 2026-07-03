@@ -460,10 +460,13 @@ function onPointerMove(e) {
   }
   const dx = e.clientX - dragCtx.startX
   const dy = e.clientY - dragCtx.startY
-  if (!dragCtx.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
-    return
+  if (!dragCtx.moved) {
+    if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+      return
+    }
+    dragCtx.moved = true
+    document.body.classList.add('cal-dragging')
   }
-  dragCtx.moved = true
 
   const bodyEl = bodyRef.value
   if (!bodyEl) {
@@ -500,6 +503,7 @@ function onPointerUp() {
   window.removeEventListener('pointermove', onPointerMove)
   window.removeEventListener('pointerup', onPointerUp)
   document.body.style.userSelect = ''
+  document.body.classList.remove('cal-dragging')
   const ctx = dragCtx
   const ds = dragState.value
   dragCtx = null
@@ -832,4 +836,12 @@ onMounted(() => {
   opacity: .95;
 }
 
+</style>
+
+<!-- 全局：拖动期间强制 grabbing 光标（scoped 无法作用于 body） -->
+<style lang="scss">
+body.cal-dragging,
+body.cal-dragging * {
+  cursor: grabbing !important;
+}
 </style>
