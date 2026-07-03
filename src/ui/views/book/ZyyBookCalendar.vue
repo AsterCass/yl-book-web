@@ -917,7 +917,9 @@ onBeforeUnmount(() => {
   position: absolute;
   z-index: 2;
   display: flex;
-  flex-direction: column;
+  flex-flow: column wrap;        // 高度装不下的行 -> 整行换到第二列
+  align-content: flex-start;     // 防止 wrap 后列被拉伸
+  column-gap: 2rem;              // 把第二列推出右侧裁剪边界(> 右 padding 即可)
   border-radius: .3rem;
   border-left: 5px solid rgb(128, 128, 128);
   background: rgba(255, 255, 255, .5);
@@ -927,6 +929,10 @@ onBeforeUnmount(() => {
   cursor: grab;
   touch-action: none;
   transition: box-shadow .15s ease;
+
+  > * {
+    width: 100%;
+  }
 
   // hover 仅做轻微反馈，完整展开由 teleport 悬浮预览承担（不受容器裁剪）
   &:hover {
