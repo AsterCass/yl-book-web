@@ -240,16 +240,13 @@
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
 
-        <div v-if="staffDetailData" class="q-ma-md" style="min-width: 25rem">
+        <div v-if="staffDetailData" class="q-ma-md" style="min-width: 25rem; max-width: 40rem">
           <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
             <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.name') }}&nbsp;:</h6>
             <div>{{ staffDetailData.name || '-' }}</div>
 
             <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
             <div>{{ staffDetailData.phone || '-' }}</div>
-
-            <h6 style="white-space: nowrap;">{{ $t('staff.upsert.field.priority') }}&nbsp;:</h6>
-            <div>{{ staffDetailData.priority }}</div>
 
             <h6 style="white-space: nowrap; align-self: flex-start;">{{
                 $t('book_booking.staff_detail.skill')

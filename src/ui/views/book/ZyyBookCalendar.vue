@@ -529,8 +529,10 @@ function commitDrag(ctx, ds) {
   const newTime = minutesToTime(ds.newStart)
   const dateStr = targetCol.dateStr || ctx.booking._dateStr
   const bookTimeStr = `${dateStr} ${newTime}`
-  // 日视图：落点列即目标雇员；周视图：不改派
-  const staffId = viewMode.value === 'day' ? (targetCol.staffId || undefined) : undefined
+  // 日视图：落点列即目标雇员；周视图：保留原有雇员（原本为空则为空，不为空则仍传原 staffId）
+  const staffId = viewMode.value === 'day'
+      ? (targetCol.staffId || undefined)
+      : (ctx.booking.staffId || undefined)
 
   const b = ctx.booking
   // 记录回退所需的原值

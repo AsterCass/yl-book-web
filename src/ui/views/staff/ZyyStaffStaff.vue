@@ -60,7 +60,6 @@
                               updateId = row.id
                               upsertName = row.name
                               upsertPhone = row.phone
-                              upsertPriority = row.priority
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               isNew = false;
                               showUpsert = true
@@ -112,10 +111,6 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.phone')"/>
-
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff.upsert.field.priority') }}&nbsp;:</h6>
-          <q-input v-model="upsertPriority" class="component-outline-input-grow" dense outlined
-                   mask="###" :placeholder="t('staff.placeholder.priority')"/>
 
         </div>
 
@@ -238,7 +233,6 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
 const upsertPhone = ref("")
-const upsertPriority = ref(null)
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
   1: [],
@@ -256,7 +250,6 @@ function clearUpsertParam() {
   updateId.value = ""
   upsertName.value = ""
   upsertPhone.value = ""
-  upsertPriority.value = null
   clearScheduleParam()
 }
 
@@ -403,7 +396,7 @@ function upsertData() {
   const body = {
     name: upsertName.value,
     phone: upsertPhone.value,
-    priority: upsertPriority.value,
+    priority: 1,
     scheduleList: scheduleList,
   }
 
