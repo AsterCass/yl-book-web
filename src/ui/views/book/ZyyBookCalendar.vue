@@ -47,17 +47,18 @@
 
         <!-- 主体 -->
         <div class="cal-body-scroll">
-          <div class="cal-body" :style="{ height: totalHeight + 'px' }">
+          <div ref="bodyRef" class="cal-body" :style="{ height: totalHeight + 'px' }">
 
             <!-- 时间刻度 -->
-            <div class="cal-gutter">
+            <div ref="gutterRef" class="cal-gutter">
               <div v-for="h in hours" :key="h" class="cal-hour-label" :style="{ height: HOUR_HEIGHT + 'px' }">
                 <span>{{ formatHour(h) }}</span>
               </div>
             </div>
 
             <!-- 列 -->
-            <div v-for="col in columns" :key="col.key" class="cal-col" :class="{ 'cal-col-today': col.highlight }">
+            <div v-for="(col, colIndex) in columns" :key="col.key" class="cal-col"
+                 :class="{ 'cal-col-today': col.highlight }">
 
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
@@ -66,21 +67,36 @@
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
                    :style="{ top: block.top + 'px', height: block.height + 'px' }"/>
 
-              <!-- 预约块 -->
+              <!-- 预约块（可拖动） -->
               <div v-for="(ev, ei) in col.events" :key="'e' + ei" class="cal-event"
-                   :class="{ 'cal-event-blocked': ev.blocked, 'cal-event-cancelled': ev.cancelled }"
+                   :class="{
+                     'cal-event-blocked': ev.blocked,
+                     'cal-event-cancelled': ev.cancelled,
+                     'cal-event-dragging': dragState && dragState.booking.id === ev.booking.id,
+                   }"
                    :style="{
                      top: ev.top + 'px', height: ev.height + 'px',
                      left: `calc(${ev.leftPct}% + 2px)`,
                      width: `calc(${ev.widthPct}% - 4px)`,
                      borderLeftColor: ev.statusColor,
                    }"
-                   @click="openDetail(ev.booking)">
+                   @pointerdown="onEventPointerDown($event, ev, colIndex)">
                 <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
                 <div v-if="ev.height > 34" class="cal-event-sub">{{ ev.sub }}</div>
               </div>
 
             </div>
+
+            <!-- 拖动预览块 -->
+            <div v-if="dragState" class="cal-event cal-drag-preview"
+                 :style="{
+                   top: dragState.top + 'px', height: dragState.height + 'px',
+                   left: dragState.left + 'px', width: dragState.width + 'px',
+                 }">
+              <div class="cal-event-title">{{ dragState.booking.name || $t('book_calendar.no_name') }}</div>
+              <div class="cal-event-sub">{{ dragState.label }}</div>
+            </div>
+
           </div>
         </div>
 
@@ -96,8 +112,9 @@
 import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
+import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
-import {bookCalendar} from "@/api/book.js";
+import {bookAdjust, bookCalendar} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {BookStatusEnum} from "@/constants/enums/book.js";
 
@@ -278,7 +295,8 @@ function buildDayBlocks(dow, toPx) {
 }
 
 // 构建一列（预约块 + 定位 + 是否落在 block 内）
-function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBlocks, toPx) {
+// extra: { dateStr, staffId } —— 拖拽落点用于计算新的 bookTimeStr / staffId
+function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBlocks, toPx, extra = {}) {
   const rawEvents = rawBookings.map(b => ({start: b._start, end: b._end, booking: b}))
   const laid = layoutEvents(rawEvents)
   const events = laid.map(ev => {
@@ -296,7 +314,11 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       sub: ev.booking._calSub,
     }
   })
-  return {key, headerMain, headerSub, highlight, blocks: dayBlocks, events}
+  return {
+    key, headerMain, headerSub, highlight, blocks: dayBlocks, events,
+    dateStr: extra.dateStr || null,
+    staffId: extra.staffId || null,
+  }
 }
 
 // 周视图：横坐标为日期
@@ -307,7 +329,7 @@ const weekColumns = computed(() => {
   return weekDays.value.map(day => {
     const dayBlocks = buildDayBlocks(day.dayOfWeek, toPx)
     const rb = bookings.value.filter(b => b._dateStr === day.dateStr)
-    return buildColumn(day.dateStr, day.name, day.dayNum, day.isToday, rb, dayBlocks, toPx)
+    return buildColumn(day.dateStr, day.name, day.dayNum, day.isToday, rb, dayBlocks, toPx, {dateStr: day.dateStr})
   })
 })
 
@@ -329,12 +351,15 @@ const staffColumns = computed(() => {
     }
   }
 
+  const dayStr = date.formatDate(dayDate.value, 'YYYY-MM-DD')
   const cols = []
   if (unassigned.length) {
-    cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx))
+    cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx,
+        {dateStr: dayStr, staffId: null}))
   }
   for (const s of staffList.value) {
-    cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx))
+    cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx,
+        {dateStr: dayStr, staffId: s.id}))
   }
   return cols
 })
@@ -385,6 +410,161 @@ function toggleView() {
     viewMode.value = 'week'
     loadWeek()
   }
+}
+
+function reload() {
+  if (viewMode.value === 'week') {
+    loadWeek()
+  } else {
+    loadDay()
+  }
+}
+
+// ===== 拖动调整预约 =====
+const SNAP_MINUTES = 10          // 纵向拖动以 10 分钟为单位
+const DRAG_THRESHOLD = 4         // 小于该位移视为点击
+const bodyRef = ref(null)        // 日历主体（定位基准）
+const gutterRef = ref(null)      // 时间刻度列（用于测量宽度）
+const dragState = ref(null)      // 拖动预览态（响应式，驱动预览块）
+let dragCtx = null               // 拖动过程数据（非响应式）
+
+function minutesToTime(min) {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+function onEventPointerDown(e, ev, colIndex) {
+  if (e.button !== 0) {
+    return
+  }
+  e.preventDefault()
+  const duration = ev.booking._end - ev.booking._start
+  dragCtx = {
+    booking: ev.booking,
+    duration,
+    origStart: ev.booking._start,
+    origColIndex: colIndex,
+    startX: e.clientX,
+    startY: e.clientY,
+    moved: false,
+  }
+  document.body.style.userSelect = 'none'
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+
+function onPointerMove(e) {
+  if (!dragCtx) {
+    return
+  }
+  const dx = e.clientX - dragCtx.startX
+  const dy = e.clientY - dragCtx.startY
+  if (!dragCtx.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+    return
+  }
+  dragCtx.moved = true
+
+  const bodyEl = bodyRef.value
+  if (!bodyEl) {
+    return
+  }
+  const rect = bodyEl.getBoundingClientRect()
+  const gutterPx = gutterRef.value ? gutterRef.value.getBoundingClientRect().width : 64
+  const colCount = columns.value.length
+  const colWidth = (rect.width - gutterPx) / colCount
+
+  let colIndex = Math.floor((e.clientX - rect.left - gutterPx) / colWidth)
+  colIndex = Math.max(0, Math.min(colCount - 1, colIndex))
+
+  const {startHour, endHour} = timeRange.value
+  const rangeStart = startHour * 60
+  const rangeEnd = endHour * 60
+  const deltaMin = dy / HOUR_HEIGHT * 60
+  let newStart = Math.round((dragCtx.origStart + deltaMin) / SNAP_MINUTES) * SNAP_MINUTES
+  newStart = Math.max(rangeStart, Math.min(rangeEnd - dragCtx.duration, newStart))
+
+  dragState.value = {
+    booking: dragCtx.booking,
+    newStart,
+    newColIndex: colIndex,
+    left: gutterPx + colIndex * colWidth + 2,
+    width: colWidth - 4,
+    top: (newStart - rangeStart) / 60 * HOUR_HEIGHT,
+    height: dragCtx.duration / 60 * HOUR_HEIGHT,
+    label: minutesToTime(newStart),
+  }
+}
+
+function onPointerUp() {
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+  document.body.style.userSelect = ''
+  const ctx = dragCtx
+  const ds = dragState.value
+  dragCtx = null
+  dragState.value = null
+  if (!ctx) {
+    return
+  }
+  // 未移动 -> 视为点击，打开详情
+  if (!ctx.moved || !ds) {
+    openDetail(ctx.booking)
+    return
+  }
+  const changedTime = ds.newStart !== ctx.origStart
+  const changedCol = ds.newColIndex !== ctx.origColIndex
+  if (!changedTime && !changedCol) {
+    return
+  }
+  commitDrag(ctx, ds)
+}
+
+function commitDrag(ctx, ds) {
+  const targetCol = columns.value[ds.newColIndex]
+  const newTime = minutesToTime(ds.newStart)
+  const dateStr = targetCol.dateStr || ctx.booking._dateStr
+  const bookTimeStr = `${dateStr} ${newTime}`
+  // 日视图：落点列即目标雇员；周视图：不改派
+  const staffId = viewMode.value === 'day' ? (targetCol.staffId || undefined) : undefined
+
+  const b = ctx.booking
+  // 记录回退所需的原值
+  const prev = {
+    bookingTime: b.bookingTime, staffId: b.staffId, staffName: b.staffName, staffPhone: b.staffPhone,
+    _start: b._start, _end: b._end, _dateStr: b._dateStr,
+  }
+  // 乐观更新：先反映拖动结果
+  b._dateStr = dateStr
+  b._start = ds.newStart
+  b._end = ds.newStart + ctx.duration
+  b.bookingTime = bookTimeStr
+  if (viewMode.value === 'day' && targetCol.staffId) {
+    b.staffId = targetCol.staffId
+    b.staffName = targetCol.headerMain
+    b.staffPhone = targetCol.headerSub
+  }
+
+  bookAdjust(b.id, bookTimeStr, staffId).then(res => {
+    if (!res || !res.data) {
+      revertDrag(b, prev)
+      return
+    }
+    notifyTopPositive(t('book_calendar.adjust_success'))
+    reload()
+  }).catch(() => {
+    revertDrag(b, prev)
+  })
+}
+
+function revertDrag(b, prev) {
+  b.bookingTime = prev.bookingTime
+  b.staffId = prev.staffId
+  b.staffName = prev.staffName
+  b.staffPhone = prev.staffPhone
+  b._start = prev._start
+  b._end = prev._end
+  b._dateStr = prev._dateStr
 }
 
 function enrichBooking(b) {
@@ -591,12 +771,22 @@ onMounted(() => {
   box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
   padding: .15rem .35rem;
   overflow: hidden;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
   transition: box-shadow .15s ease, transform .15s ease;
 
   &:hover {
     box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
     z-index: 3;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // 正在被拖动的原始预约块：淡化
+  &.cal-event-dragging {
+    opacity: .25;
   }
 
   .cal-event-title {
@@ -631,6 +821,15 @@ onMounted(() => {
       text-decoration: line-through;
     }
   }
+}
+
+// 拖动时跟随指针的预览块
+.cal-drag-preview {
+  z-index: 5;
+  pointer-events: none;
+  border-left-color: rgb(var(--pointer)) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+  opacity: .95;
 }
 
 </style>

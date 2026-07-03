@@ -742,6 +742,7 @@
     "view_week": "每周视图",
     "unassigned": "未分配",
     "no_name": "未命名",
+    "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "button": {

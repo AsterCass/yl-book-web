@@ -63,6 +63,19 @@ export function bookCancelAssign(id) {
     })
 }
 
+// 拖动调整预约：bookTimeStr 必传，staffId 可选（改派）
+export function bookAdjust(id, bookTimeStr, staffId) {
+    const params = {bookTimeStr}
+    if (staffId) {
+        params.staffId = staffId
+    }
+    return serviceShiro({
+        url: `/book/adjust/${id}`,
+        params: params,
+        method: 'post',
+    })
+}
+
 export function bookEmailList(params) {
     return serviceShiro({
         url: `/book/email/list`,

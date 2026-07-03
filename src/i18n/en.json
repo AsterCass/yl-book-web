@@ -744,6 +744,7 @@
     "view_week": "Week View",
     "unassigned": "Unassigned",
     "no_name": "Unnamed",
+    "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "button": {
