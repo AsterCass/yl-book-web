@@ -63,6 +63,14 @@ export function bookCancelAssign(id) {
     })
 }
 
+// 自动分配（对未分配预约触发系统自动分配雇员）
+export function bookReassign(id) {
+    return serviceShiro({
+        url: `/book/reassign/${id}`,
+        method: 'post',
+    })
+}
+
 // 拖动调整预约：bookTimeStr 必传，staffId 可选（改派）
 export function bookAdjust(id, bookTimeStr, staffId) {
     const params = {bookTimeStr}

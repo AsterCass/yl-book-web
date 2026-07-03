@@ -83,6 +83,15 @@
                    @pointerdown="onEventPointerDown($event, ev, colIndex)">
                 <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
                 <div v-if="ev.height > 34" class="cal-event-sub">{{ ev.sub }}</div>
+
+                <!-- 右下角：已分配显示雇员名；待分配显示自动分配按钮 -->
+                <div class="cal-event-corner">
+                  <span v-if="ev.booking.staffName" class="cal-event-staff">{{ ev.booking.staffName }}</span>
+                  <span v-else-if="ev.booking.status === 0" class="cal-event-auto"
+                        @pointerdown.stop @click.stop="autoAssignCalendar(ev.booking)">
+                    {{ $t('book_calendar.auto_assign') }}
+                  </span>
+                </div>
               </div>
 
             </div>
@@ -114,7 +123,7 @@ import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
-import {bookAdjust, bookCalendar} from "@/api/book.js";
+import {bookAdjust, bookCalendar, bookReassign} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {BookStatusEnum} from "@/constants/enums/book.js";
 
@@ -379,6 +388,17 @@ const detailBook = ref(null)
 function openDetail(booking) {
   detailBook.value = booking
   showDetail.value = true
+}
+
+// 待分配预约的一键自动分配
+function autoAssignCalendar(booking) {
+  bookReassign(booking.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_calendar.auto_assign_success'))
+    reload()
+  })
 }
 
 function shift(offset) {
@@ -809,6 +829,39 @@ onMounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .cal-event-corner {
+    position: absolute;
+    right: .35rem;
+    bottom: .15rem;
+    max-width: calc(100% - .7rem);
+    text-align: right;
+  }
+
+  .cal-event-staff {
+    display: inline-block;
+    max-width: 100%;
+    font-size: .68rem;
+    opacity: .75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
+
+  .cal-event-auto {
+    font-size: .68rem;
+    color: rgb(var(--pointer));
+    cursor: pointer;
+    padding: .02rem .3rem;
+    border: 1px solid rgb(var(--pointer));
+    border-radius: .25rem;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(var(--pointer), .12);
+    }
   }
 
   &.cal-event-blocked {

@@ -157,6 +157,11 @@ export const tableBookOperation = [
         name: 'assign',
     },
     {
+        label: '自动分配',
+        condition: 'autoAssignOp',
+        name: 'autoAssign',
+    },
+    {
         label: '取消预约',
         condition: 'deleteOp',
         name: 'delete',

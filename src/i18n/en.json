@@ -648,12 +648,17 @@
       "cancelAssign": {
         "title": "Cancel Assignment",
         "content": "Cancel staff assignment for 【{name}】? The time slot will be released."
+      },
+      "autoAssign": {
+        "title": "Auto Assign",
+        "content": "Auto-assign staff for 【{name}】?"
       }
     },
     "notify": {
       "update_success": "Booking updated successfully",
       "assign_success": "Staff assigned successfully",
-      "cancel_assign_success": "Assignment cancelled successfully"
+      "cancel_assign_success": "Assignment cancelled successfully",
+      "auto_assign_success": "Auto-assigned successfully"
     },
     "staff_detail": {
       "title": "Staff Details",
@@ -744,6 +749,8 @@
     "view_week": "Week View",
     "unassigned": "Unassigned",
     "no_name": "Unnamed",
+    "auto_assign": "Auto Assign",
+    "auto_assign_success": "Auto-assigned successfully",
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",

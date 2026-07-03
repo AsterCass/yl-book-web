@@ -646,12 +646,17 @@
       "cancelAssign": {
         "title": "取消分配",
         "content": "是否要取消【{name}】预约的员工分配，取消后该时段将被释放"
+      },
+      "autoAssign": {
+        "title": "自动分配",
+        "content": "是否对【{name}】的预约进行自动分配"
       }
     },
     "notify": {
       "update_success": "更新预约成功",
       "assign_success": "分配员工成功",
-      "cancel_assign_success": "取消分配成功"
+      "cancel_assign_success": "取消分配成功",
+      "auto_assign_success": "自动分配成功"
     },
     "staff_detail": {
       "title": "服务人员详情",
@@ -742,6 +747,8 @@
     "view_week": "每周视图",
     "unassigned": "未分配",
     "no_name": "未命名",
+    "auto_assign": "自动分配",
+    "auto_assign_success": "自动分配成功",
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",

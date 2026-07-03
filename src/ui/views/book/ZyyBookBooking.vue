@@ -101,6 +101,13 @@
                             if(name === 'assign') {
                               openAssign(row)
                             }
+                            if(name === 'autoAssign') {
+                              toOpId = row.id
+                              toOpTitle = $t('book_booking.dialog.autoAssign.title')
+                              toOpDesc = $t('book_booking.dialog.autoAssign.content', { name: row.name })
+                              toOpFunc = autoAssignData
+                              showOperation = true
+                            }
                             if(name === 'delete') {
                               toOpId = row.id
                               toOpTitle = $t('book_booking.dialog.delete.title')
@@ -308,7 +315,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookUpdate} from "@/api/book.js";
+import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookReassign, bookUpdate} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -482,6 +489,21 @@ function upsertData() {
   }
 }
 
+// 自动分配（系统按策略为未分配预约分配雇员）
+function autoAssignData() {
+  if (!toOpId.value) {
+    notifyTopWarning(t('validation.insufficient_parameters'))
+    return
+  }
+  bookReassign(toOpId.value).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_booking.notify.auto_assign_success'))
+    selectData()
+  })
+}
+
 // open the "config assignment" dialog, pre-filling the currently assigned staff (if any)
 function openAssign(row) {
   assignBookId.value = row.id
@@ -587,6 +609,8 @@ function selectData() {
       data.updateOp = data.status !== -1
       // config assignment (assign / reassign / cancel-assign) on PRE or WORK before start
       data.configAssignOp = data.status !== -1
+      // 自动分配：仅未分配（待分配 PRE）预约
+      data.autoAssignOp = data.status === 0
       data.copyOp = true
       // delete allowed on PRE/WORK/IN_PROGRESS/DONE; not on EXPIRED(4)/CANCEL(-1)
       data.deleteOp = data.status !== -1
