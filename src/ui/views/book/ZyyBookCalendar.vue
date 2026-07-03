@@ -81,20 +81,17 @@
                      borderLeftColor: ev.statusColor,
                      background: ev.bgColor,
                    }"
-                   @pointerdown="onEventPointerDown($event, ev, colIndex)">
+                   @pointerdown="onEventPointerDown($event, ev, colIndex)"
+                   @mouseenter="onEventEnter($event, ev, colIndex)">
+                <!-- 第一行：客户名称；第二行起：预约项目 / 联系方式 / 备注 -->
                 <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
-                <!-- 第二行起：预约项目 / 联系方式 / 备注（随卡片高度逐行显示） -->
-                <template v-for="(line, li) in ev.lines" :key="li">
-                  <div v-if="ev.height > 34 + li * 15" class="cal-event-sub">{{ line }}</div>
-                </template>
+                <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
 
-                <!-- 左下角：预约来源（带来源枚举颜色） -->
-                <div v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
-                  {{ ev.sourceName }}
-                </div>
-
-                <!-- 右下角：已分配显示雇员名；待分配显示自动分配按钮 -->
-                <div class="cal-event-corner">
+                <!-- 底部：左=来源（带来源色），右=雇员名/自动分配（flex 布局，绝不重叠） -->
+                <div v-if="ev.sourceName || ev.booking.staffName || ev.booking.status === 0" class="cal-event-footer">
+                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
+                    {{ ev.sourceName }}
+                  </span>
                   <span v-if="ev.booking.staffName" class="cal-event-staff">{{ ev.booking.staffName }}</span>
                   <span v-else-if="ev.booking.status === 0" class="cal-event-auto"
                         @pointerdown.stop @click.stop="autoAssignCalendar(ev.booking)">
@@ -125,11 +122,35 @@
 
     <cask-book-detail-dialog v-model="showDetail" :book="detailBook"/>
 
+    <!-- 悬浮完整预览：teleport 到 body，不受日历容器裁剪，可完整显示（含边缘卡片）。
+         预览块本身可交互：mouseleave 收回、pointerdown 进入拖拽/点击流程、可点击「自动分配」 -->
+    <teleport to="body">
+      <div v-if="hoverCard" class="cal-event cal-hover-card"
+           :class="{ 'cal-event-cancelled': hoverCard.ev.cancelled }"
+           :style="hoverCard.style"
+           @mouseleave="hideHoverCard"
+           @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
+        <div class="cal-event-title">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</div>
+        <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
+        <div v-if="hoverCard.ev.sourceName || hoverCard.ev.booking.staffName || hoverCard.ev.booking.status === 0"
+             class="cal-event-footer">
+          <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
+            {{ hoverCard.ev.sourceName }}
+          </span>
+          <span v-if="hoverCard.ev.booking.staffName" class="cal-event-staff">{{ hoverCard.ev.booking.staffName }}</span>
+          <span v-else-if="hoverCard.ev.booking.status === 0" class="cal-event-auto"
+                @pointerdown.stop @click.stop="autoAssignCalendar(hoverCard.ev.booking)">
+            {{ $t('book_calendar.auto_assign') }}
+          </span>
+        </div>
+      </div>
+    </teleport>
+
   </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
@@ -420,6 +441,42 @@ function openDetail(booking) {
   showDetail.value = true
 }
 
+// 悬浮完整预览（teleport 到 body，不受日历滚动/裁剪容器限制，边缘自动翻转方向）。
+// 预览块完整覆盖原卡片且自身可交互：收回由预览块的 mouseleave 驱动（浏览器原生命中判定，
+// 从任意方向进入均稳定），拖拽/点击/自动分配均可直接在预览块上操作。
+const hoverCard = ref(null)
+
+function onEventEnter(e, ev, colIndex) {
+  if (dragCtx) {
+    return // 拖拽过程中不展开预览
+  }
+  const rect = e.currentTarget.getBoundingClientRect()
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const style = {
+    position: 'fixed',
+    minWidth: rect.width + 'px',
+    minHeight: rect.height + 'px',
+    borderLeftColor: ev.statusColor,
+  }
+  // 靠右/靠下的卡片改为从右/下边缘向左/上生长，保证完整可见
+  if (rect.left > vw * 0.6) {
+    style.right = (vw - rect.right) + 'px'
+  } else {
+    style.left = rect.left + 'px'
+  }
+  if (rect.top > vh * 0.6) {
+    style.bottom = (vh - rect.bottom) + 'px'
+  } else {
+    style.top = rect.top + 'px'
+  }
+  hoverCard.value = {ev, style, colIndex}
+}
+
+function hideHoverCard() {
+  hoverCard.value = null
+}
+
 // 待分配预约的一键自动分配
 function autoAssignCalendar(booking) {
   bookReassign(booking.id).then(res => {
@@ -432,6 +489,7 @@ function autoAssignCalendar(booking) {
 }
 
 function shift(offset) {
+  hideHoverCard()
   if (viewMode.value === 'week') {
     weekStart.value = date.addToDate(weekStart.value, {days: offset * 7})
     loadWeek()
@@ -442,6 +500,7 @@ function shift(offset) {
 }
 
 function resetView() {
+  hideHoverCard()
   if (viewMode.value === 'week') {
     weekStart.value = getMonday(new Date())
     loadWeek()
@@ -452,6 +511,7 @@ function resetView() {
 }
 
 function toggleView() {
+  hideHoverCard()
   if (viewMode.value === 'week') {
     viewMode.value = 'day'
     dayDate.value = today()
@@ -484,11 +544,35 @@ function minutesToTime(min) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+function removeDragListeners() {
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+  window.removeEventListener('keydown', onDragKeyDown)
+}
+
+function onDragKeyDown(e) {
+  if (e.key === 'Escape') {
+    cancelDrag()
+  }
+}
+
+// 取消拖动：清理监听与预览。卡片本就未移动（仅预览跟随指针），清理即回归原位，不调后端
+function cancelDrag() {
+  removeDragListeners()
+  document.body.style.userSelect = ''
+  document.body.classList.remove('cal-dragging')
+  dragCtx = null
+  dragState.value = null
+}
+
+// 事件源可以是列内的原卡片，也可以是悬浮预览块（colIndex 由 hoverCard 携带）。
+// 拖拽坐标全部基于 bodyRef 与指针位置计算，与事件源无关。
 function onEventPointerDown(e, ev, colIndex) {
   if (e.button !== 0) {
     return
   }
   e.preventDefault()
+  hideHoverCard()
   const duration = ev.booking._end - ev.booking._start
   dragCtx = {
     booking: ev.booking,
@@ -502,6 +586,7 @@ function onEventPointerDown(e, ev, colIndex) {
   document.body.style.userSelect = 'none'
   window.addEventListener('pointermove', onPointerMove)
   window.addEventListener('pointerup', onPointerUp)
+  window.addEventListener('keydown', onDragKeyDown)
 }
 
 function onPointerMove(e) {
@@ -550,8 +635,7 @@ function onPointerMove(e) {
 }
 
 function onPointerUp() {
-  window.removeEventListener('pointermove', onPointerMove)
-  window.removeEventListener('pointerup', onPointerUp)
+  removeDragListeners()
   document.body.style.userSelect = ''
   document.body.classList.remove('cal-dragging')
   const ctx = dragCtx
@@ -679,6 +763,10 @@ function loadStaff() {
 onMounted(() => {
   loadStaff()
   loadWeek()
+})
+
+onBeforeUnmount(() => {
+  removeDragListeners()
 })
 </script>
 
@@ -828,6 +916,8 @@ onMounted(() => {
 .cal-event {
   position: absolute;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
   border-radius: .3rem;
   border-left: 5px solid rgb(128, 128, 128);
   background: rgba(255, 255, 255, .5);
@@ -836,8 +926,9 @@ onMounted(() => {
   overflow: hidden;
   cursor: grab;
   touch-action: none;
-  transition: box-shadow .15s ease, transform .15s ease;
+  transition: box-shadow .15s ease;
 
+  // hover 仅做轻微反馈，完整展开由 teleport 悬浮预览承担（不受容器裁剪）
   &:hover {
     box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
     z-index: 3;
@@ -853,6 +944,7 @@ onMounted(() => {
   }
 
   .cal-event-title {
+    flex: 0 0 auto;
     font-size: .78rem;
     font-weight: 600;
     white-space: nowrap;
@@ -861,6 +953,7 @@ onMounted(() => {
   }
 
   .cal-event-sub {
+    flex: 0 0 auto;
     font-size: .7rem;
     opacity: .7;
     white-space: nowrap;
@@ -868,11 +961,20 @@ onMounted(() => {
     text-overflow: ellipsis;
   }
 
+  // 底部行：来源(左) + 雇员/自动分配(右)，flex 布局保证彼此及与上方文字均不重叠
+  .cal-event-footer {
+    flex: 0 0 auto;
+    margin-top: auto; // 有空间时贴底；空间不足时随卡片裁剪（可 hover 展开查看）
+    display: flex;
+    align-items: flex-end;
+    gap: .4rem;
+    padding-top: .1rem;
+    line-height: 1.15;
+  }
+
   .cal-event-source {
-    position: absolute;
-    left: .35rem;
-    bottom: .15rem;
-    max-width: 55%;
+    flex: 0 1 auto;
+    min-width: 0;
     font-size: .68rem;
     font-weight: 500;
     white-space: nowrap;
@@ -880,26 +982,20 @@ onMounted(() => {
     text-overflow: ellipsis;
   }
 
-  .cal-event-corner {
-    position: absolute;
-    right: .35rem;
-    bottom: .15rem;
-    max-width: 55%;
-    text-align: right;
-  }
-
   .cal-event-staff {
-    display: inline-block;
-    max-width: 100%;
+    flex: 0 0 auto;
+    margin-left: auto; // 始终靠右
+    max-width: 65%;
     font-size: .68rem;
     opacity: .75;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    vertical-align: bottom;
   }
 
   .cal-event-auto {
+    flex: 0 0 auto;
+    margin-left: auto;
     font-size: .68rem;
     color: rgb(var(--pointer));
     cursor: pointer;
@@ -939,6 +1035,29 @@ onMounted(() => {
   opacity: .95;
 }
 
+// 悬浮完整预览：固定定位、脱离一切裁剪容器，内容按需向右/下（或翻转向左/上）生长。
+// 自身可交互（拖拽/点击/自动分配），收回由自身 mouseleave 驱动
+.cal-hover-card {
+  position: fixed !important;
+  z-index: 9999;
+  overflow: visible;
+  width: max-content;
+  max-width: 26rem;
+  height: auto;
+  background-color: rgb(var(--full-container-background-color-light));
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .28);
+  cursor: grab;
+
+  // 外扩命中区域：吃掉亚像素误差与边缘 1px 抖动，防止展开↔收回闪烁。
+  // z-index: -1 使其垫在内容之下，不遮挡「自动分配」按钮的点击
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    z-index: -1;
+  }
+}
+
 </style>
 
 <!-- 全局：拖动期间强制 grabbing 光标（scoped 无法作用于 body） -->
@@ -946,5 +1065,11 @@ onMounted(() => {
 body.cal-dragging,
 body.cal-dragging * {
   cursor: grabbing !important;
+}
+
+/* 拖动期间禁用卡片的悬浮展开，避免经过其它卡片时触发放大
+   （.cal-hover-card 同样带 .cal-event 类，此规则也一并使拖动中的预览不可交互） */
+body.cal-dragging .cal-event {
+  pointer-events: none;
 }
 </style>
