@@ -515,7 +515,7 @@
 
   "validation": { "insufficient_parameters": "提供参数不足" },
 
-  "notify": { "delete_success": "删除成功" },
+  "notify": { "delete_success": "删除成功", "cancel_success": "取消成功" },
 
   "staff": {
     "title": "雇员",

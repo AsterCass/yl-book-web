@@ -557,7 +557,7 @@ function deleteData() {
     if (!res || !res.data) {
       return
     }
-    notifyTopPositive(t('notify.delete_success'))
+    notifyTopPositive(t('notify.cancel_success'))
     selectData()
   })
 }
@@ -587,12 +587,12 @@ function selectData() {
       // op flags (time gate: config-assign only allowed before booking starts)
       const notStarted = !isStarted(data.bookingTime)
       data.detailOp = true
-      data.updateOp = data.status === 0 && notStarted
+      data.updateOp = data.status !== -1
       // config assignment (assign / reassign / cancel-assign) on PRE or WORK before start
-      data.configAssignOp = (data.status === 0 || data.status === 1) && notStarted
+      data.configAssignOp = data.status !== -1
       data.copyOp = true
       // delete allowed on PRE/WORK/IN_PROGRESS/DONE; not on EXPIRED(4)/CANCEL(-1)
-      data.deleteOp = data.status === 0 || data.status === 1 || data.status === 2 || data.status === 3
+      data.deleteOp = data.status !== -1
       // booking projects (skill names) for MULTI_ROW column
       data.bookProjectNames = (data.skillDtoList || []).map(item => item.name).join(',')
       // creator display: prefer name, fall back to id

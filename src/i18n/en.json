@@ -517,7 +517,7 @@
 
   "validation": { "insufficient_parameters": "Insufficient parameters provided" },
 
-  "notify": { "delete_success": "Deletion successful" },
+  "notify": { "delete_success": "Deletion successful", "cancel_success": "Cancel successful" },
 
   "staff": {
     "title": "Staff",
