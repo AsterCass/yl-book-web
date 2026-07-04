@@ -514,6 +514,14 @@
     "role_assign": { "title": "Permission Assignment" }
   },
 
+  "user_store": {
+    "label": { "id": "Store ID", "name": "Store Name" },
+    "placeholder": { "id": "e.g.: YLS001", "name": "e.g.: New York 196", "optional": "Optional", "admin_mail": "e.g.: zs01\\@gmail.com", "admin_nick": "Optional, defaults to email", "admin_role_name": "e.g.: Store Admin", "admin_role_code": "e.g.: storeAdmin" },
+    "button": { "query": "Query", "add": "Add Store", "clear": "Clear Filters", "save": "Save" },
+    "upsert": { "title_add": "Add Store", "title_update": "Update Store", "admin_note": "Creating a store also creates an initial store admin account. Default password equals email; the account will be locked if the password is not changed in time.", "field": { "name": "Store Name", "address": "Store Address", "phone": "Store Phone", "desc": "Store Description", "admin_mail": "Admin Email", "admin_nick": "Admin Nickname", "admin_role_name": "Admin Role Name", "admin_role_code": "Admin Role Code" }, "save_add": "Add", "save_update": "Update" },
+    "notify": { "create_success": "Store created successfully", "update_success": "Store updated successfully" }
+  },
+
   "user_setting": { "field": { "old_password": "Old password", "new_password": "New password", "repeat_password": "Repeat password" } },
 
   "role": { "unknown": "Unknown Role" },
@@ -560,6 +568,7 @@
     "button": { "query": "Query", "add": "Add User", "clear": "Clear Filters", "save": "Save" },
     "upsert": { "title_add": "Add User", "title_update": "Update User", "default_password_note": "Default password equals email. Please ensure the user changes password within 3 days to avoid lockout.", "field": { "nick": "User Nickname", "mail": "User Email", "phone": "User Phone", "gender": "User Gender", "birth": "User Birth" }, "save_add": "Add", "save_update": "Update" },
     "role_assign": { "title": "Assign Roles" },
+    "store_assign": { "title": "Assign Stores", "note": "Leave all unchecked to remove restrictions; the user can access all stores of this tenant." },
     "dialog": {
       "common": { "cancel": "Cancel", "confirm": "Confirm" },
       "delete": { "title": "Delete User", "content": "Delete user 【{name}】?" },
@@ -567,7 +576,7 @@
       "enable": { "title": "Enable User", "content": "Enable user 【{name}】?" },
       "unlock": { "title": "Unlock User", "content": "Unlock user 【{name}】?" }
     },
-    "notify": { "update_success": "User updated successfully", "role_assign_success": "Roles updated successfully", "enable_success": "Enabled successfully", "disable_success": "Disabled successfully", "unlock_success": "Unlocked successfully" }
+    "notify": { "update_success": "User updated successfully", "role_assign_success": "Roles updated successfully", "store_assign_success": "Stores updated successfully", "enable_success": "Enabled successfully", "disable_success": "Disabled successfully", "unlock_success": "Unlocked successfully" }
   },
 
   "staff_skill": {

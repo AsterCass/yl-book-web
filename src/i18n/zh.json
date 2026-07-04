@@ -483,7 +483,7 @@
 
   "yl_subsystem_user_role": "角色管理",
   "yl_subsystem_user_permission": "权限管理",
-  "yl_subsystem_user_store": "商户管理",
+  "yl_subsystem_user_store": "门店管理",
   "yl_subsystem_user_tenant": "租户管理",
 
   "error": {
@@ -510,6 +510,14 @@
     "dialog": { "delete": { "title": "删除角色", "content": "是否删除【{name}】角色", "cancel": "取消", "confirm": "确认" } },
     "notify": { "update_success": "更新角色成功", "per_update_success": "配置权限成功" },
     "role_assign": { "title": "权限分配" }
+  },
+
+  "user_store": {
+    "label": { "id": "门店编号", "name": "门店名称" },
+    "placeholder": { "id": "例如：YLS001", "name": "例如：纽约196", "optional": "可为空", "admin_mail": "例如：zs01\\@gmail.com", "admin_nick": "可为空，缺省使用邮箱", "admin_role_name": "例如：门店管理员", "admin_role_code": "例如：storeAdmin" },
+    "button": { "query": "查询", "add": "添加门店", "clear": "清空条件", "save": "保存" },
+    "upsert": { "title_add": "添加门店", "title_update": "更新门店", "admin_note": "创建门店会同时创建初始门店管理员账号，默认密码与邮箱相同，超期未修改密码账号将被锁定，无法登录", "field": { "name": "门店名称", "address": "门店地址", "phone": "门店电话", "desc": "门店描述", "admin_mail": "管理员邮箱", "admin_nick": "管理员昵称", "admin_role_name": "管理员角色名", "admin_role_code": "管理员角色码" }, "save_add": "添加", "save_update": "更新" },
+    "notify": { "create_success": "创建门店成功", "update_success": "更新门店成功" }
   },
 
   "user_setting": { "field": { "old_password": "原密码：", "new_password": "新密码：", "repeat_password": "重复密码：" } },
@@ -558,6 +566,7 @@
     "button": { "query": "查询", "add": "添加用户", "clear": "清空条件", "save": "保存" },
     "upsert": { "title_add": "添加用户", "title_update": "更新用户", "default_password_note": "默认密码和邮箱相同，创建后用户需要在3日内修改密码，否则账号会被锁定，无法登录", "field": { "nick": "用户昵称", "mail": "用户邮箱", "phone": "用户手机号", "gender": "用户性别", "birth": "用户生日" }, "save_add": "添加", "save_update": "更新" },
     "role_assign": { "title": "角色分配" },
+    "store_assign": { "title": "门店分配", "note": "不勾选任何门店表示不限制，该用户可见本租户所有门店" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "delete": { "title": "删除用户", "content": "是否要删除【{name}】用户" },
@@ -565,7 +574,7 @@
       "enable": { "title": "启用用户", "content": "是否要启用【{name}】用户" },
       "unlock": { "title": "解锁用户", "content": "是否要解锁【{name}】用户" }
     },
-    "notify": { "update_success": "更新用户成功", "role_assign_success": "配置角色成功", "enable_success": "启用成功", "disable_success": "禁用成功", "unlock_success": "解锁成功" }
+    "notify": { "update_success": "更新用户成功", "role_assign_success": "配置角色成功", "store_assign_success": "配置门店成功", "enable_success": "启用成功", "disable_success": "禁用成功", "unlock_success": "解锁成功" }
   },
 
   "staff_skill": {

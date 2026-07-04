@@ -63,7 +63,7 @@
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
 
-              <!-- 商户 block 背景（置灰） -->
+              <!-- 门店 block 背景（置灰） -->
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
                    :style="{ top: block.top + 'px', height: block.height + 'px' }"/>
 
@@ -336,7 +336,7 @@ function layoutEvents(events) {
   return sorted
 }
 
-// 某天的 block 段（按 dayOfWeek 匹配，商户级别）
+// 某天的 block 段（按 dayOfWeek 匹配，门店级别）
 function buildDayBlocks(dow, toPx) {
   return blocks.value
       .filter(bl => Number(bl.dayOfWeek) === dow)
