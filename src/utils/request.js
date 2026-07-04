@@ -4,9 +4,28 @@ import {notifyTopWarning} from "@/utils/notification-tools";
 import {i18n} from '@/i18n';
 import {deleteCookie} from "@/utils/common.js";
 import router, {backToLogin} from '@/router'
+import {useGlobalStateStore} from "@/utils/global-state.js";
 
 const t = i18n.global.t
 const BASE_ADD = import.meta.env.VITE_APP_BASE_ADD
+
+// 登录态相关接口不携带租户/门店信息
+const TENANT_FREE_URLS = ['/user/login', '/user/logout', '/user/isLogin', "/user/m"]
+
+const requestConfig = config => {
+    const url = config.url || ''
+    if (TENANT_FREE_URLS.some(path => url.startsWith(path))) {
+        return config
+    }
+    const userData = useGlobalStateStore().userData
+    if (userData && userData.tenantId) {
+        config.headers['X-Tenant-Id'] = userData.tenantId
+    }
+    if (userData && userData.storeId) {
+        config.headers['X-Store-Id'] = userData.storeId
+    }
+    return config
+}
 
 
 const responseConfig = response => {
@@ -62,6 +81,7 @@ const serviceShiro = axios.create({
     }
 })
 
+serviceShiro.interceptors.request.use(requestConfig)
 serviceShiro.interceptors.response.use(responseConfig, responseErrorConfig)
 
 

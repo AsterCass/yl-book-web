@@ -23,6 +23,8 @@ export const useGlobalStateStore = defineStore('globalState', {
         language: '',
         userData: null,
         loginInfo: null,
+        // 页面数据版本号：作为顶层 router-view 的 key，自增即强制重挂载当前页面（重跑 onMounted 内的查询逻辑）
+        dataVersion: 0,
     }),
     getters: {
         // 当前用户拥有的权限码集合（兼容 userData 直接为用户对象或包一层 userData 两种结构）
@@ -57,6 +59,33 @@ export const useGlobalStateStore = defineStore('globalState', {
         },
         updateUserData(data) {
             this.userData = data
+        },
+        refreshPageData() {
+            this.dataVersion++
+        },
+        // tenant 为 tenantList 中的元素（含 tenantId/tenantName/storeList）
+        // 切换租户后原门店已不属于新租户，故重置为新租户的第一个门店（无门店则置空）
+        switchTenant(tenant) {
+            if (!this.userData || !tenant) {
+                return
+            }
+            const storeList = Array.isArray(tenant.storeList) ? tenant.storeList : []
+            const firstStore = storeList.length > 0 ? storeList[0] : null
+            this.userData = {
+                ...this.userData,
+                tenantId: tenant.tenantId,
+                tenantName: tenant.tenantName,
+                storeId: firstStore ? firstStore.storeId : '',
+                storeName: firstStore ? firstStore.storeName : null,
+            }
+            this.refreshPageData()
+        },
+        switchStore(storeId, storeName) {
+            if (!this.userData) {
+                return
+            }
+            this.userData = {...this.userData, storeId, storeName}
+            this.refreshPageData()
         },
         updateLoginInfo(data) {
             this.loginInfo = data
