@@ -102,16 +102,7 @@
                               showBookDetail = true
                             }
                             if(name === 'update') {
-                              clearUpsertParam();
-                              updateId = row.id
-                              upsertBookingTime = row.bookingTime
-                              upsertName = row.name
-                              upsertSkillIdList = (row.skillDtoList || []).map(s => s.id)
-                              upsertPhone = row.phone
-                              upsertMail = row.mail
-                              upsertPreferredStaffId = row.preferredStaffId || null
-                              upsertRemark = row.remark || ''
-                              upsertSource = row.source
+                              upsertBook = row
                               isNew = false;
                               showUpsert = true
                             }
@@ -143,83 +134,10 @@
                           }"
     />
 
-    <!-- Upsert Dialog -->
-    <q-dialog :model-value="showUpsert" transition-hide="fade" no-backdrop-dismiss no-shake
-              transition-show="fade" @hide="showUpsert = false">
-      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
-        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          {{ isNew ? $t('book_booking.upsert.title_add') : $t('book_booking.upsert.title_update') }}
-        </h5>
-
-        <q-separator class="component-separator-base" inset spaced="1rem"/>
-
-        <div class="q-ma-md"
-             style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
-
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.bookingTime') }}&nbsp;:</h6>
-          <cask-date-time-picker v-model="upsertBookingTime" input-class="component-outline-input-grow"
-                                 :placeholder="t('book_booking.placeholder.bookingTime')"/>
-
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.name') }}&nbsp;:</h6>
-          <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
-                   :placeholder="t('book_booking.placeholder.name')"/>
-
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
-            {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
-          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptions"
-                    class="component-outline-input-grow"
-                    clear-icon="fa-solid fa-xmark"
-                    clearable
-                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                    multiple
-                    use-chips
-                    outlined popup-content-class="component-extra-card-std">
-          </q-select>
-
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.phone') }}&nbsp;:</h6>
-          <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
-                   :placeholder="t('book_booking.placeholder.phone')"/>
-
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.mail') }}&nbsp;:</h6>
-          <q-input v-model="upsertMail" class="component-outline-input-grow" dense outlined
-                   placeholder="example@mail.com"/>
-
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('book_booking.upsert.field.preferredStaffId') }}&nbsp;:</h6>
-          <q-select v-model="upsertPreferredStaffId" :menu-offset="[0, 5]" :options="staffSelectOptions"
-                    class="component-outline-input-grow"
-                    clear-icon="fa-solid fa-xmark"
-                    clearable
-                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                    outlined popup-content-class="component-extra-card-std">
-          </q-select>
-
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
-            {{ $t('book_booking.upsert.field.source') }}&nbsp;:</h6>
-          <q-select v-model="upsertSource" :menu-offset="[0, 5]" :options="sourceOptions"
-                    class="component-outline-input-grow"
-                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                    outlined popup-content-class="component-extra-card-std">
-          </q-select>
-
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
-            {{ $t('book_booking.upsert.field.remark') }}&nbsp;:</h6>
-          <q-input v-model="upsertRemark" class="component-outline-input-grow" dense outlined
-                   :placeholder="t('book_booking.placeholder.remark')"/>
-
-
-        </div>
-
-        <div class="row q-mt-xl q-mb-md justify-evenly">
-          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
-            {{ isNew ? $t('book_booking.upsert.save_add') : $t('book_booking.upsert.save_update') }}
-          </q-btn>
-
-          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showUpsert = false">
-            {{ $t('main_setting_cancel') }}
-          </q-btn>
-        </div>
-      </q-card>
-    </q-dialog>
+    <!-- Upsert Dialog (shared with calendar) -->
+    <cask-book-upsert-dialog v-model="showUpsert" :book="upsertBook" :is-new="isNew"
+                             :skill-options="skillOptions" :staff-options="staffSelectOptions"
+                             @saved="selectData(true)"/>
 
     <!-- Assign Dialog -->
     <q-dialog :model-value="showAssign" @hide="showAssign = false"
@@ -326,7 +244,7 @@
 </template>
 
 <script setup>
-import {AssignStrategyEnum, BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
+import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
@@ -335,10 +253,11 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookCancelAssign, bookCreate, bookDelete, bookList, bookReassign, bookUpdate} from "@/api/book.js";
+import {bookAssign, bookCancelAssign, bookDelete, bookList, bookReassign} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
+import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import {truncate} from "@/utils/base-tools.js";
 
 const selectId = ref("")
@@ -349,7 +268,6 @@ const selectStatus = ref(null)
 const selectBookingTimeStart = ref("")
 const selectBookingTimeEnd = ref("")
 const statusOptions = ref(BookStatusEnum.toSelectForm())
-const sourceOptions = ref(BookSourceEnum.toSelectForm())
 const {t} = useI18n()
 
 function clearSearch() {
@@ -362,37 +280,14 @@ function clearSearch() {
   selectBookingTimeEnd.value = ""
 }
 
-// create/update
+// create/update（表单逻辑在 CaskBookUpsertDialog 内，这里只维护打开状态与数据源）
 const showUpsert = ref(false)
 const isNew = ref(false)
-const upsertBookingTime = ref("")
-const upsertName = ref("")
-const upsertSkillIdList = ref([])
-const upsertPhone = ref("")
-const upsertMail = ref("")
-const upsertPreferredStaffId = ref(null)
-const upsertSource = ref(BookSourceEnum.WECHAT.code)
-const upsertRemark = ref("")
+const upsertBook = ref(null)   // 编辑=行数据；新增=null；复制=预填数据
 const skillOptions = ref([])
 
-const updateId = ref("")
-
-function clearUpsertParam() {
-  updateId.value = ""
-  upsertBookingTime.value = ""
-  upsertName.value = ""
-  upsertSkillIdList.value = []
-  upsertPhone.value = ""
-  upsertMail.value = ""
-  upsertPreferredStaffId.value = null
-  upsertSource.value = BookSourceEnum.WECHAT.code
-  upsertRemark.value = ""
-}
-
 function openAddBooking() {
-  clearUpsertParam()
-  // default booking time: 5 minutes from now
-  upsertBookingTime.value = date.formatDate(Date.now() + 5 * 60 * 1000, 'YYYY-MM-DD HH:mm')
+  upsertBook.value = null
   isNew.value = true
   showUpsert.value = true
 }
@@ -468,51 +363,6 @@ const tableDynamicData = ref(
     }
 )
 
-function upsertData() {
-  if (!upsertBookingTime.value || !upsertName.value) {
-    notifyTopWarning(t('validation.insufficient_parameters'))
-    return;
-  }
-
-  if (!updateId.value && !isNew.value) {
-    notifyTopWarning(t('validation.insufficient_parameters'))
-    return;
-  }
-
-  const body = {
-    bookTimeStr: upsertBookingTime.value,
-    name: upsertName.value,
-    bookRequirementSkillIdList: upsertSkillIdList.value,
-    phone: upsertPhone.value,
-    mail: upsertMail.value,
-    preferredStaffId: upsertPreferredStaffId.value,
-    assignStrategy: AssignStrategyEnum.PRIORITY.code,
-    source: upsertSource.value ? upsertSource.value : BookSourceEnum.WECHAT.code,
-    remark: upsertRemark.value,
-  }
-
-  if (isNew.value) {
-    bookCreate(body).then(res => {
-      if (!res || !res.data) {
-        return
-      }
-      clearUpsertParam()
-      showUpsert.value = false
-      selectData(true)
-    })
-  } else {
-    bookUpdate(updateId.value, body).then(res => {
-      if (!res || !res.data) {
-        return
-      }
-      clearUpsertParam()
-      showUpsert.value = false
-      notifyTopPositive(t('book_booking.notify.update_success'))
-      selectData(true)
-    })
-  }
-}
-
 // 自动分配（系统按策略为未分配预约分配雇员）
 function autoAssignData() {
   if (!toOpId.value) {
@@ -567,15 +417,7 @@ function assignData() {
 
 // copy an existing booking's data into the add dialog as a new booking
 function copyBooking(row) {
-  clearUpsertParam()
-  upsertBookingTime.value = row.bookingTime || ''
-  upsertName.value = row.name || ''
-  upsertSkillIdList.value = (row.skillDtoList || []).map(s => s.id)
-  upsertPhone.value = row.phone || ''
-  upsertMail.value = row.mail || ''
-  upsertPreferredStaffId.value = row.preferredStaffId || null
-  upsertRemark.value = row.remark || ''
-  upsertSource.value = row.source || BookSourceEnum.WECHAT.code
+  upsertBook.value = {...row}
   isNew.value = true
   showUpsert.value = true
 }

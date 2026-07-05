@@ -93,10 +93,6 @@
                     {{ ev.sourceName }}
                   </span>
                   <span v-if="ev.booking.staffName" class="cal-event-staff">{{ ev.booking.staffName }}</span>
-                  <span v-else-if="ev.booking.status === 0" class="cal-event-auto"
-                        @pointerdown.stop @click.stop="autoAssignCalendar(ev.booking)">
-                    {{ $t('book_calendar.auto_assign') }}
-                  </span>
                 </div>
               </div>
 
@@ -122,6 +118,10 @@
 
     <cask-book-detail-dialog v-model="showDetail" :book="detailBook"/>
 
+    <!-- 编辑弹窗（与预约列表共用同一组件，保持一致） -->
+    <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="false"
+                             @saved="reload"/>
+
     <!-- 悬浮完整预览：teleport 到 body，不受日历容器裁剪，可完整显示（含边缘卡片）。
          预览块本身可交互：mouseleave 收回、pointerdown 进入拖拽/点击流程、可点击「自动分配」 -->
     <teleport to="body">
@@ -130,7 +130,11 @@
            :style="hoverCard.style"
            @mouseleave="hideHoverCard"
            @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
-        <div class="cal-event-title">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</div>
+        <div class="cal-event-title row justify-between">
+          <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
+          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-pen" size="0.9rem"
+                  class="cal-event-edit " @pointerdown.stop @click.stop="openEdit(hoverCard.ev.booking)"/>
+        </div>
         <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
         <div v-if="hoverCard.ev.sourceName || hoverCard.ev.booking.staffName || hoverCard.ev.booking.status === 0"
              class="cal-event-footer">
@@ -155,6 +159,7 @@ import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
+import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import {bookAdjust, bookCalendar, bookReassign} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
@@ -439,6 +444,16 @@ const detailBook = ref(null)
 function openDetail(booking) {
   detailBook.value = booking
   showDetail.value = true
+}
+
+// 编辑（弹窗与预约列表共用组件；保存成功后刷新当前视图）
+const showEdit = ref(false)
+const editBook = ref(null)
+
+function openEdit(booking) {
+  hideHoverCard()
+  editBook.value = booking
+  showEdit.value = true
 }
 
 // 悬浮完整预览（teleport 到 body，不受日历滚动/裁剪容器限制，边缘自动翻转方向）。
@@ -950,12 +965,27 @@ onBeforeUnmount(() => {
   }
 
   .cal-event-title {
-    flex: 0 0 auto;
     font-size: .78rem;
     font-weight: 600;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+
+    .cal-event-name {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cal-event-edit {
+      pointer-events: none;
+      cursor: pointer;
+      margin: 6px 2px;
+      opacity: 0.8;
+    }
+  }
+
+  &:hover .cal-event-title .cal-event-edit {
+    pointer-events: auto;
   }
 
   .cal-event-sub {
