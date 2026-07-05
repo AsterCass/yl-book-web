@@ -974,13 +974,20 @@ onBeforeUnmount(() => {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-right: 3rem;
     }
 
     .cal-event-edit {
       pointer-events: none;
       cursor: pointer;
-      margin: 6px 2px;
-      opacity: 0.8;
+      // padding 扩大点击命中区域，负 margin 抵消占位使视觉位置不变
+      padding: 8px;
+      margin: -2px -6px -2px -4px;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 
