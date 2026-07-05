@@ -514,8 +514,8 @@
   },
 
   "user_store": {
-    "label": { "id": "门店编号", "name": "门店名称" },
-    "placeholder": { "id": "例如：YLS001", "name": "例如：纽约196", "optional": "可为空", "admin_mail": "例如：zs01\\@gmail.com", "admin_nick": "可为空，缺省使用邮箱", "admin_role_name": "例如：门店管理员", "admin_role_code": "例如：storeAdmin" },
+    "label": { "id": "门店编号", "name": "门店名称", "phone": "门店电话" },
+    "placeholder": { "id": "例如：YLS001", "name": "例如：纽约196", "phone": "例如：13811012138", "optional": "可为空", "admin_mail": "例如：zs01\\@gmail.com", "admin_nick": "可为空，缺省使用邮箱", "admin_role_name": "例如：门店管理员", "admin_role_code": "例如：storeAdmin" },
     "button": { "query": "查询", "add": "添加门店", "clear": "清空条件", "save": "保存" },
     "upsert": { "title_add": "添加门店", "title_update": "更新门店", "admin_note": "创建门店会同时创建初始门店管理员账号，默认密码与邮箱相同，超期未修改密码账号将被锁定，无法登录", "field": { "name": "门店名称", "address": "门店地址", "phone": "门店电话", "desc": "门店描述", "timezone": "门店时区", "admin_mail": "管理员邮箱", "admin_nick": "管理员昵称", "admin_role_name": "管理员角色名", "admin_role_code": "管理员角色码" }, "save_add": "添加", "save_update": "更新" },
     "notify": { "create_success": "创建门店成功", "update_success": "更新门店成功" }

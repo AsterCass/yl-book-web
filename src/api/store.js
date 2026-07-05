@@ -1,9 +1,10 @@
 import {serviceShiro} from "@/utils/request.js";
 
 
-export function storeList() {
+export function storeList(params) {
     return serviceShiro({
         url: `/store/list`,
+        params: params,
         method: 'get',
     })
 }

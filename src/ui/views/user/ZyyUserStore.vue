@@ -18,8 +18,18 @@
           {{ $t('user_store.label.name') }}&nbsp;:
         </h6>
       </div>
-      <q-input v-model="keyword" class="q-ma-md component-outline-input-std" dense outlined
+      <q-input v-model="selectName" class="q-ma-md component-outline-input-std" dense outlined
                :placeholder="t('user_store.placeholder.name')"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('user_store.label.phone') }}&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="selectPhone" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('user_store.placeholder.phone')"
                tabindex="0">
       </q-input>
 
@@ -61,6 +71,7 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
+                            selectData(true)
                           }"
     />
 
@@ -173,11 +184,13 @@ import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
 
 const {t} = useI18n()
 const selectId = ref("")
-const keyword = ref("")
+const selectName = ref("")
+const selectPhone = ref("")
 
 function clearSearch() {
   selectId.value = ""
-  keyword.value = ""
+  selectName.value = ""
+  selectPhone.value = ""
 }
 
 // create/update
@@ -278,12 +291,19 @@ function selectData(keepPage = false) {
     tableDynamicData.value.pageNo = 1
   }
   tableDynamicData.value.inLoading = true
-  storeList().then(res => {
+  const param = {
+    id: selectId.value,
+    name: selectName.value,
+    phone: selectPhone.value,
+    pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
+  }
+  storeList(param).then(res => {
     if (!res || !res.data || !res.data.data) {
       tableDynamicData.value.inLoading = false
       return
     }
-    const thisData = res.data.data
+    const thisData = res.data.data.records
+    tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       const statusEnum = CommonStatusEnum.fromCode(data.status)
       data.statusName = statusEnum.name
