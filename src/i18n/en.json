@@ -466,6 +466,7 @@
   "main_header_switch_tenant": "Switch tenant",
   "main_header_switch_store": "Switch store",
   "main_header_switch_success": "Switched successfully",
+  "main_header_todo": { "empty": "No pending to-dos", "level": { "1": "User", "2": "Tenant", "3": "Store" } },
 
   "yl_warning_passwd_init": "This is the initial password. Please change your password by clicking the avatar in the top right corner as soon as possible; otherwise, your account will be locked and you will be unable to log in",
 

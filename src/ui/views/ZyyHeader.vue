@@ -3,7 +3,7 @@
 
     <div class="top-semi-trans-header-base-content row justify-between items-center top-semi-trans-header-base-no-top">
 
-      <div class="row items-center justify-start col-3">
+      <div class="row items-center justify-start col">
         <q-btn no-caps unelevated class="component-none-btn-grow q-mx-xs"
                @click="upOneLevel">
           <div class="row items-center">
@@ -12,13 +12,15 @@
             </div>
           </div>
         </q-btn>
+
+        <zyy-header-todo/>
       </div>
 
-      <div class="row items-center justify-center col-6" style="font-size: 1.15rem; font-weight: 500">
+      <div class="row items-center justify-center " style="font-size: 1.15rem; font-weight: 500">
         {{ $t(thisRouter.currentRoute.value.meta.header)}}
       </div>
 
-      <div class="row items-center justify-end col-3">
+      <div class="row items-center justify-end col">
 
         <zyy-header-tenant-store/>
 
@@ -61,6 +63,7 @@ import {i18n} from "@/i18n/index.js";
 import {switchLanguage} from "@/utils/global-tools.js";
 import ZyyHeaderUserMenu from "@/ui/views/common/ZyyHeaderUserMenu.vue";
 import ZyyHeaderTenantStore from "@/ui/views/common/ZyyHeaderTenantStore.vue";
+import ZyyHeaderTodo from "@/ui/views/common/ZyyHeaderTodo.vue";
 import emitter from "@/utils/bus.js";
 import {userIsLogin} from "@/api/myu.js";
 

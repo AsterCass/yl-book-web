@@ -54,6 +54,13 @@ export const PermissionTypeEnum = new Enum({
     LOCKED: {code: 3, name: '接口', desc: '', color: 'rgb(142, 68, 173)'}
 });
 
+// 待办层级：1=用户级 2=租户级 3=门店级
+export const TodoLevelEnum = new Enum({
+    USER: {code: 1, name: '用户', desc: '', color: 'rgb(68, 117, 80)'},
+    TENANT: {code: 2, name: '租户', desc: '', color: 'rgb(142, 68, 173)'},
+    STORE: {code: 3, name: '门店', desc: '', color: 'rgb(166, 133, 44)'}
+});
+
 export const GenderOptEnum = new Enum({
     FEMALE: {
         code: 0, name: '女', color: 'pink-7', desc: ''

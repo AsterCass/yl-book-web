@@ -464,6 +464,7 @@
   "main_header_switch_tenant": "切换租户",
   "main_header_switch_store": "切换门店",
   "main_header_switch_success": "切换成功",
+  "main_header_todo": { "empty": "当前无待办", "level": { "1": "用户", "2": "租户", "3": "门店" } },
 
   "yl_warning_passwd_init": "目前为初始密码，请及时点击右上角头像修改密码，否则账号会被锁定，无法登录",
 
