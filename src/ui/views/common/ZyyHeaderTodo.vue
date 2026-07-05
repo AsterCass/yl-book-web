@@ -33,7 +33,7 @@
 
 <script setup>
 
-import {onMounted, ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {todoList} from "@/api/admin.js";
 import {TodoLevelEnum} from "@/constants/enums/common.js";
@@ -43,6 +43,10 @@ const {t} = useI18n()
 const globalState = useGlobalStateStore()
 
 const todos = ref([])
+
+// 每隔 5 分钟轮询刷新待办
+const TODO_REFRESH_INTERVAL = 5 * 60 * 1000
+let refreshTimer = null
 
 function levelName(level) {
   const levelEnum = TodoLevelEnum.fromCode(level)
@@ -74,6 +78,14 @@ watch(() => [
 
 onMounted(() => {
   loadTodo()
+  refreshTimer = setInterval(loadTodo, TODO_REFRESH_INTERVAL)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
 })
 
 </script>
