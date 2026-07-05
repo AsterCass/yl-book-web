@@ -2,12 +2,12 @@
   <div class="bottom-footer-base-simple row items-center justify-center">
 
     <div class="q-mx-md">
-      &copy; 20026-{{ curYear }}&nbsp;&nbsp;&nbsp;{{$t('main_company')}}
+      &copy; 2007-{{ curYear }}&nbsp;&nbsp;&nbsp;{{$t('main_company')}}
     </div>
 
-    <div class="q-mx-md">
-      {{$t('main_footer_dev_mail')}}:&nbsp;&nbsp;&nbsp;astercass@qq.com
-    </div>
+<!--    <div class="q-mx-md">-->
+<!--      {{$t('main_footer_dev_mail')}}:&nbsp;&nbsp;&nbsp;astercass@qq.com-->
+<!--    </div>-->
 
   </div>
 
