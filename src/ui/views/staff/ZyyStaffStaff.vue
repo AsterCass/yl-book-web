@@ -488,6 +488,7 @@ function selectData(keepPage = false) {
     const thisData = res.data.data.records
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
+      data.createUserName = data.createUserName || data.createUserId
       data.deleteOp = true
       data.updateOp = true
       // show skill op

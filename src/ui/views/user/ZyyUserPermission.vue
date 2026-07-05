@@ -286,6 +286,8 @@ function selectData(keepPage = false) {
     thisData.forEach(data => {
       const typeEnum = PermissionTypeEnum.fromCode(data.type)
       data.typeName = typeEnum.name;
+      data.createUserName = data.createUserName || data.createUserId
+      data.updateUserName = data.updateUserName || data.updateUserId
       data.deleteOp = true
       data.updateOp = true
       if (data.meta) {

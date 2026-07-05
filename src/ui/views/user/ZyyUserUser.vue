@@ -466,6 +466,7 @@ function selectData(keepPage = false) {
       const genderEnum = GenderOptEnum.fromCode(data.gender)
       data.statusName = statusEnum.name;
       data.genderName = genderEnum.name;
+      data.createUserName = data.createUserName || data.createUserId
       data.deleteOp = true
       data.updateOp = true
       data.getRoleOp = true
