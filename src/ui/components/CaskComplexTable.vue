@@ -260,6 +260,15 @@ watch(() => props.multipleSelectData, () => {
   selectedData.value = props.multipleSelectData
 })
 
+// 同步父组件对页码/页大小的重置（如查询条件变化后回到第一页），否则分页器仍显示旧页码
+watch(() => props.tableDynamicData.pageNo, (val) => {
+  pageNo.value = val
+})
+
+watch(() => props.tableDynamicData.pageSize, (val) => {
+  pageSize.value = val
+})
+
 const getSplitItems = (str) => {
   if (!str) {
     return []

@@ -35,7 +35,7 @@
     </div>
 
     <div class="row">
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData()">
         {{ $t('staff.button.query') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
@@ -88,7 +88,7 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            selectData()
+                            selectData(true)
                           }"
     />
 
@@ -407,7 +407,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectData()
+      selectData(true)
     })
   } else {
     staffUpdate(updateId.value, body).then(res => {
@@ -417,7 +417,7 @@ function upsertData() {
       clearUpsertParam()
       showUpsert.value = false
       notifyTopPositive(t('staff.notify.update_success'))
-      selectData()
+      selectData(true)
     })
   }
 }
@@ -451,7 +451,7 @@ function updateStaffSkill() {
     }
     showStaffSkill.value = false
     notifyTopPositive(t('staff.notify.skill_assign_success'))
-    selectData()
+    selectData(true)
   })
 
 }
@@ -465,11 +465,15 @@ function deleteData() {
       return
     }
     notifyTopPositive(t('notify.delete_success'))
-    selectData()
+    selectData(true)
   })
 }
 
-function selectData() {
+// 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
+function selectData(keepPage = false) {
+  if (!keepPage) {
+    tableDynamicData.value.pageNo = 1
+  }
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, name: selectName.value, phone: selectPhone.value,

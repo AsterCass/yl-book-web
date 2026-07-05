@@ -27,7 +27,7 @@
 
     <div class="row">
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
-             @click="tableDynamicData.pageNo = 1; selectData()">
+             @click="selectData()">
         {{ $t('user_store.button.query') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
@@ -36,7 +36,7 @@
         {{ $t('user_store.button.add') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
-             unelevated @click="()=> {clearSearch(); tableDynamicData.pageNo = 1; selectData();}">
+             unelevated @click="()=> {clearSearch(); selectData();}">
         {{ $t('user_store.button.clear') }}
       </q-btn>
     </div>
@@ -61,7 +61,6 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            applyFilter()
                           }"
     />
 
@@ -233,7 +232,7 @@ function upsertData() {
       clearUpsertParam()
       showUpsert.value = false
       notifyTopPositive(t('user_store.notify.create_success'))
-      selectData()
+      selectData(true)
     })
   } else {
     if (!updateId.value) {
@@ -253,13 +252,17 @@ function upsertData() {
       clearUpsertParam()
       showUpsert.value = false
       notifyTopPositive(t('user_store.notify.update_success'))
-      selectData()
+      selectData(true)
     })
   }
 }
 
-
-function selectData() {
+// 默认从第一页开始查询；行操作后刷新时传 keepPage = true 保持当前页（翻页走 applyFilter，不重新请求）
+function selectData(keepPage = false) {
+  if (!keepPage) {
+    tableDynamicData.value.pageNo = 1
+  }
+  tableDynamicData.value.inLoading = true
   storeList().then(res => {
     if (!res || !res.data || !res.data.data) {
       tableDynamicData.value.inLoading = false

@@ -74,7 +74,7 @@
     </div>
 
     <div class="row">
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData">
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData()">
         {{ $t('book_booking.button.query') }}
       </q-btn>
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="openAddBooking">
@@ -139,7 +139,7 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            selectData()
+                            selectData(true)
                           }"
     />
 
@@ -498,7 +498,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectData()
+      selectData(true)
     })
   } else {
     bookUpdate(updateId.value, body).then(res => {
@@ -508,7 +508,7 @@ function upsertData() {
       clearUpsertParam()
       showUpsert.value = false
       notifyTopPositive(t('book_booking.notify.update_success'))
-      selectData()
+      selectData(true)
     })
   }
 }
@@ -524,7 +524,7 @@ function autoAssignData() {
       return
     }
     notifyTopPositive(t('book_booking.notify.auto_assign_success'))
-    selectData()
+    selectData(true)
   })
 }
 
@@ -551,7 +551,7 @@ function assignData() {
       }
       showAssign.value = false
       notifyTopPositive(t('book_booking.notify.cancel_assign_success'))
-      selectData()
+      selectData(true)
     })
     return
   }
@@ -561,7 +561,7 @@ function assignData() {
     }
     showAssign.value = false
     notifyTopPositive(t('book_booking.notify.assign_success'))
-    selectData()
+    selectData(true)
   })
 }
 
@@ -601,11 +601,15 @@ function deleteData() {
       return
     }
     notifyTopPositive(t('notify.cancel_success'))
-    selectData()
+    selectData(true)
   })
 }
 
-function selectData() {
+// 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
+function selectData(keepPage = false) {
+  if (!keepPage) {
+    tableDynamicData.value.pageNo = 1
+  }
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,

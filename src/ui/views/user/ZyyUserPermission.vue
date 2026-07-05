@@ -45,7 +45,7 @@
     </div>
 
     <div class="row">
-      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectData" push>
+      <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow" @click="selectData()" push>
         {{ $t('user_permission.button.query') }}
       </q-btn>
       <q-btn no-caps unelevated class="q-ma-md shadow-2 component-full-btn-grow"
@@ -66,7 +66,7 @@
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
-                            selectData()
+                            selectData(true)
                           }"
                         @operationClick="(name, row) => {
                             if(name === 'update') {
@@ -235,7 +235,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectData()
+      selectData(true)
     })
   } else {
     perUpdate(updateId.value, body).then(res => {
@@ -244,7 +244,7 @@ function upsertData() {
       }
       clearUpsertParam()
       showUpsert.value = false
-      selectData()
+      selectData(true)
     })
   }
 
@@ -259,12 +259,16 @@ function deleteData() {
       return
     }
     notifyTopPositive(t('notify.delete_success'))
-    selectData()
+    selectData(true)
   })
 }
 
 
-function selectData() {
+// 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
+function selectData(keepPage = false) {
+  if (!keepPage) {
+    tableDynamicData.value.pageNo = 1
+  }
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, keyword: keyword.value, parentId: parentId.value,
