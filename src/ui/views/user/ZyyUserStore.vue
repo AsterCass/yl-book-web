@@ -109,6 +109,17 @@
                    :placeholder="t('user_store.placeholder.optional')"/>
 
           <template v-if="isNew">
+            <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+                $t('user_store.upsert.field.timezone')
+              }}&nbsp;:</h6>
+            <q-select outlined clearable class="component-outline-input-grow"
+                      dropdown-icon="fa-solid fa-caret-down"
+                      popup-content-class="component-extra-card-std"
+                      clear-icon="fa-solid fa-xmark"
+                      menu-anchor="bottom start" :menu-offset="[0, 5]"
+                      v-model="upsertTimezone" :options="timezoneOptions">
+            </q-select>
+
             <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
               {{ $t('user_store.upsert.field.admin_mail') }}&nbsp;:</h6>
             <q-input v-model="upsertAdminMail" class="component-outline-input-grow" dense outlined
@@ -157,7 +168,7 @@ import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {tableStore, tableStoreOperation} from "@/tables/store.js";
 import {storeCreate, storeList, storeUpdate} from "@/api/store.js";
-import {CommonStatusEnum} from "@/constants/enums/common.js";
+import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
 
 
 const {t} = useI18n()
@@ -176,10 +187,12 @@ const upsertName = ref("")
 const upsertAddress = ref("")
 const upsertPhone = ref("")
 const upsertDesc = ref("")
+const upsertTimezone = ref(null)
 const upsertAdminMail = ref("")
 const upsertAdminNickName = ref("")
 const upsertAdminRoleName = ref("")
 const upsertAdminRoleCode = ref("")
+const timezoneOptions = ref(TimezoneOptEnum.toSelectForm())
 
 const updateId = ref("")
 
@@ -188,6 +201,7 @@ function clearUpsertParam() {
   upsertAddress.value = ""
   upsertPhone.value = ""
   upsertDesc.value = ""
+  upsertTimezone.value = null
   upsertAdminMail.value = ""
   upsertAdminNickName.value = ""
   upsertAdminRoleName.value = ""
@@ -220,6 +234,7 @@ function upsertData() {
       address: upsertAddress.value,
       phone: upsertPhone.value,
       description: upsertDesc.value,
+      timezone: upsertTimezone.value ? upsertTimezone.value.value : null,
       adminMail: upsertAdminMail.value,
       adminNickName: upsertAdminNickName.value,
       adminRoleName: upsertAdminRoleName.value,
@@ -257,7 +272,7 @@ function upsertData() {
   }
 }
 
-// 默认从第一页开始查询；行操作后刷新时传 keepPage = true 保持当前页（翻页走 applyFilter，不重新请求）
+// 默认从第一页开始查询；行操作后刷新时传 keepPage = true 保持当前页
 function selectData(keepPage = false) {
   if (!keepPage) {
     tableDynamicData.value.pageNo = 1
@@ -273,6 +288,9 @@ function selectData(keepPage = false) {
       const statusEnum = CommonStatusEnum.fromCode(data.status)
       data.statusName = statusEnum.name
       data.statusNameWebColorName = statusEnum.color
+      // 未匹配到预设时区时直接展示原始值
+      const timezoneEnum = TimezoneOptEnum.fromCode(data.timezone)
+      data.timezoneName = timezoneEnum ? timezoneEnum.name : (data.timezone || '')
       data.updateOp = true
     })
     tableData.value = thisData

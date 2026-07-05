@@ -35,6 +35,13 @@ export class Enum {
 }
 
 
+// 门店时区，code 为 IANA 时区标识
+export const TimezoneOptEnum = new Enum({
+    SHANGHAI: {code: 'Asia/Shanghai', name: '上海', desc: '', color: ''},
+    NEW_YORK: {code: 'America/New_York', name: '纽约', desc: '', color: ''},
+    CALIFORNIA: {code: 'America/Los_Angeles', name: '加州', desc: '', color: ''},
+});
+
 export const CommonStatusEnum = new Enum({
     NORMAL: {code: 0, name: '正常', desc: '', color: 'rgb(68, 117, 80)'},
     DISABLE: {code: 1, name: '禁用', desc: '', color: 'rgb(200, 60, 60)'},

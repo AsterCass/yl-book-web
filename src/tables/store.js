@@ -51,6 +51,12 @@ const tableStoreCol = [
         align: 'center',
     },
     {
+        name: 'timezoneName',
+        field: 'timezoneName',
+        label: '门店时区',
+        align: 'center',
+    },
+    {
         name: 'statusName',
         field: 'statusName',
         label: '门店状态',
