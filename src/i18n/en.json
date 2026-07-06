@@ -609,6 +609,7 @@
       "bookingTimeStart": "Start Time",
       "bookingTimeEnd": "End Time",
       "status": "Status",
+      "source": "Source",
       "staffName": "Staff",
       "staffPhone": "Staff Phone",
       "bookingUrl": "Booking URL"

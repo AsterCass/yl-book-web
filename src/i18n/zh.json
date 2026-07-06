@@ -607,6 +607,7 @@
       "bookingTimeStart": "预约开始时间",
       "bookingTimeEnd": "预约结束时间",
       "status": "预约状态",
+      "source": "来源渠道",
       "staffName": "服务人员",
       "staffPhone": "服务人员手机号",
       "bookingUrl": "预约链接"
