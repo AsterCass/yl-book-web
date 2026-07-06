@@ -48,10 +48,15 @@ export function bookDetail(id) {
     })
 }
 
+// 人工分配/改派雇员：staffId 可选，不传时等价于取消分配
 export function bookAssign(id, staffId) {
+    const params = {}
+    if (staffId) {
+        params.staffId = staffId
+    }
     return serviceShiro({
         url: `/book/assign/${id}`,
-        params: {staffId: staffId},
+        params: params,
         method: 'post',
     })
 }

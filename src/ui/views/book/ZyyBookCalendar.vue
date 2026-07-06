@@ -418,10 +418,9 @@ const staffColumns = computed(() => {
 
   const dayStr = date.formatDate(dayDate.value, 'YYYY-MM-DD')
   const cols = []
-  if (unassigned.length) {
-    cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx,
-        {dateStr: dayStr, staffId: null}))
-  }
+  // 未分配列始终存在，方便将预约拖入以解除分配（即使当前没有未分配预约）
+  cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx,
+      {dateStr: dayStr, staffId: null}))
   for (const s of staffList.value) {
     cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx,
         {dateStr: dayStr, staffId: s.id}))
@@ -694,10 +693,17 @@ function commitDrag(ctx, ds) {
   b._start = ds.newStart
   b._end = ds.newStart + ctx.duration
   b.bookingTime = bookTimeStr
-  if (viewMode.value === 'day' && targetCol.staffId) {
-    b.staffId = targetCol.staffId
-    b.staffName = targetCol.headerMain
-    b.staffPhone = targetCol.headerSub
+  if (viewMode.value === 'day') {
+    if (targetCol.staffId) {
+      b.staffId = targetCol.staffId
+      b.staffName = targetCol.headerMain
+      b.staffPhone = targetCol.headerSub
+    } else {
+      // 拖入未分配列：乐观清空雇员
+      b.staffId = null
+      b.staffName = null
+      b.staffPhone = null
+    }
   }
 
   bookAdjust(b.id, bookTimeStr, staffId).then(res => {

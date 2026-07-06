@@ -266,7 +266,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookCancelAssign, bookDelete, bookList, bookReassign} from "@/api/book.js";
+import {bookAssign, bookDelete, bookList, bookReassign} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -404,29 +404,19 @@ function openAssign(row) {
   showAssign.value = true
 }
 
-// confirm config assignment: empty staff -> cancel assignment, otherwise assign
+// confirm config assignment: empty staff -> cancel assignment（后端 assign 接口不传 staffId 即取消分配）
 function assignData() {
   if (!assignBookId.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return
   }
-  if (!assignStaffId.value) {
-    bookCancelAssign(assignBookId.value).then(res => {
-      if (!res || !res.data) {
-        return
-      }
-      showAssign.value = false
-      notifyTopPositive(t('book_booking.notify.cancel_assign_success'))
-      selectData(true)
-    })
-    return
-  }
-  bookAssign(assignBookId.value, assignStaffId.value.value).then(res => {
+  const staffId = assignStaffId.value ? assignStaffId.value.value : null
+  bookAssign(assignBookId.value, staffId).then(res => {
     if (!res || !res.data) {
       return
     }
     showAssign.value = false
-    notifyTopPositive(t('book_booking.notify.assign_success'))
+    notifyTopPositive(t(staffId ? 'book_booking.notify.assign_success' : 'book_booking.notify.cancel_assign_success'))
     selectData(true)
   })
 }
