@@ -70,6 +70,32 @@
 
       <div class="q-ml-md">
         <h6>
+          {{ $t('book_booking.label.staffName') }}&nbsp;:
+        </h6>
+      </div>
+      <q-select v-model="selectStaffId" :menu-offset="[0, 5]" :options="staffSelectOptions"
+                class="q-ma-md component-outline-input-grow"
+                clear-icon="fa-solid fa-xmark"
+                clearable
+                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                outlined popup-content-class="component-extra-card-std">
+      </q-select>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_booking.label.bookProject') }}&nbsp;:
+        </h6>
+      </div>
+      <q-select v-model="selectBookProjectId" :menu-offset="[0, 5]" :options="skillOptions"
+                class="q-ma-md component-outline-input-grow"
+                clear-icon="fa-solid fa-xmark"
+                clearable
+                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                outlined popup-content-class="component-extra-card-std">
+      </q-select>
+
+      <div class="q-ml-md">
+        <h6>
           {{ $t('book_booking.label.bookingTimeStart') }}&nbsp;:
         </h6>
       </div>
@@ -279,6 +305,8 @@ const selectPhone = ref("")
 const selectMail = ref("")
 const selectStatus = ref(null)
 const selectSource = ref(null)
+const selectStaffId = ref(null)
+const selectBookProjectId = ref(null)
 const selectBookingTimeStart = ref("")
 const selectBookingTimeEnd = ref("")
 const statusOptions = ref(BookStatusEnum.toSelectForm())
@@ -292,6 +320,8 @@ function clearSearch() {
   selectMail.value = ""
   selectStatus.value = null
   selectSource.value = null
+  selectStaffId.value = null
+  selectBookProjectId.value = null
   selectBookingTimeStart.value = ""
   selectBookingTimeEnd.value = ""
 }
@@ -463,6 +493,8 @@ function selectData(keepPage = false) {
     id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,
     status: selectStatus.value ? selectStatus.value.value : null,
     source: selectSource.value ? selectSource.value.value : null,
+    staffId: selectStaffId.value ? selectStaffId.value.value : null,
+    bookProjectId: selectBookProjectId.value ? selectBookProjectId.value.value : null,
     bookingTimeStartStr: selectBookingTimeStart.value ? selectBookingTimeStart.value : null,
     bookingTimeEndStr: selectBookingTimeEnd.value ? selectBookingTimeEnd.value : null,
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,

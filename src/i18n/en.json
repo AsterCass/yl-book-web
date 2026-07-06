@@ -610,6 +610,7 @@
       "bookingTimeEnd": "End Time",
       "status": "Status",
       "source": "Source",
+      "bookProject": "Booking Project",
       "staffName": "Staff",
       "staffPhone": "Staff Phone",
       "bookingUrl": "Booking URL"

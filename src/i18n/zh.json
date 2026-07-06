@@ -608,6 +608,7 @@
       "bookingTimeEnd": "预约结束时间",
       "status": "预约状态",
       "source": "预约来源",
+      "bookProject": "预约项目",
       "staffName": "服务人员",
       "staffPhone": "服务人员手机号",
       "bookingUrl": "预约链接"
