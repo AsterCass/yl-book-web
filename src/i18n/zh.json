@@ -676,6 +676,12 @@
       "cancel_assign_success": "取消分配成功",
       "auto_assign_success": "自动分配成功"
     },
+    "customer_history": {
+      "title": "客户历史",
+      "hint": "按手机号匹配，点击可回填客户信息",
+      "no_name": "未命名",
+      "total": "共 {count} 次"
+    },
     "staff_detail": {
       "title": "服务人员详情",
       "skill": "技能",

@@ -48,6 +48,16 @@ export function bookDetail(id) {
     })
 }
 
+// 客户历史：按手机号模糊搜索，返回最多 10 个客户（按手机号聚合），
+// 每个客户含总预约次数与最近 3 次预约（含已取消，附时间/项目/来源）
+export function bookCustomerHistory(phone) {
+    return serviceShiro({
+        url: `/book/customer/history`,
+        params: {phone: phone},
+        method: 'get',
+    })
+}
+
 // 人工分配/改派雇员：staffId 可选，不传时等价于取消分配
 export function bookAssign(id, staffId) {
     const params = {}

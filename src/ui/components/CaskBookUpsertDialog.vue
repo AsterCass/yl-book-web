@@ -1,6 +1,7 @@
 <template>
   <q-dialog :model-value="modelValue" transition-hide="fade" no-backdrop-dismiss no-shake
             transition-show="fade" @update:model-value="val => emit('update:modelValue', val)">
+    <div class="cask-upsert-wrap">
     <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
       <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
         {{ isNew ? $t('book_booking.upsert.title_add') : $t('book_booking.upsert.title_update') }}
@@ -80,16 +81,56 @@
         </q-btn>
       </div>
     </q-card>
+
+    <!-- 客户历史：绝对定位浮于表单右侧（主卡片的兄弟节点，独立采样背景以保证磨砂效果） -->
+    <div v-if="customerHistory.length > 0"
+         class="component-cask-dialog-judgement-std cask-customer-history">
+        <h6 style="font-weight: 600!important; margin: .4rem .5rem !important;">
+          {{ $t('book_booking.customer_history.title') }}
+        </h6>
+        <div class="q-mx-sm" style="opacity: .5; font-size: .8rem;">
+          {{ $t('book_booking.customer_history.hint') }}
+        </div>
+        <q-separator class="component-separator-base" inset spaced=".6rem"/>
+
+        <div class="cask-history-scroll">
+          <div v-for="(cust, ci) in customerHistory" :key="ci"
+               class="cask-history-item" @click="pickCustomer(cust)">
+            <div class="row items-center justify-between no-wrap">
+              <div class="text-weight-bold ellipsis">
+                {{ cust.name || $t('book_booking.customer_history.no_name') }}
+              </div>
+              <q-badge outline color="grey-7"
+                       :label="$t('book_booking.customer_history.total', { count: cust.totalCount })"/>
+            </div>
+            <div class="row items-center no-wrap q-mt-xs" style="font-size: .78rem; opacity: .7; gap: .4rem;">
+              <span>{{ cust.phone }}</span>
+              <span v-if="cust.mail" class="ellipsis">· {{ cust.mail }}</span>
+            </div>
+
+            <div v-for="(bk, bi) in (cust.recentBookings || [])" :key="bi" class="cask-history-booking">
+              <span class="cask-history-time">{{ bk.bookingTime }}</span>
+              <span class="cask-history-project ellipsis">{{ projectNames(bk) }}</span>
+              <span class="cask-history-source" :style="{ color: sourceColor(bk.source) }">
+                {{ sourceName(bk.source) }}
+              </span>
+              <q-badge :style="{ backgroundColor: statusColor(bk.status) }"
+                       :label="statusName(bk.status)" style="font-size: 9px;"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </q-dialog>
 </template>
 
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
-import {AssignStrategyEnum, BookSourceEnum} from "@/constants/enums/book.js";
-import {bookCreate, bookUpdate} from "@/api/book.js";
+import {AssignStrategyEnum, BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
+import {bookCreate, bookCustomerHistory, bookUpdate} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -117,6 +158,11 @@ const upsertPreferredStaffId = ref(null)
 const upsertSource = ref(BookSourceEnum.WECHAT.code)
 const upsertRemark = ref("")
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
+
+// 客户历史（按手机号模糊查询，防抖）
+const customerHistory = ref([])
+const HISTORY_DEBOUNCE = 400
+let historyTimer = null
 
 // 选项：优先用父组件传入，否则组件自行加载
 const innerSkillOptions = ref([])
@@ -149,8 +195,74 @@ function populate() {
 watch(() => props.modelValue, (val) => {
   if (val) {
     populate()
+  } else {
+    // 关闭时清空历史与待触发的查询
+    customerHistory.value = []
+    clearHistoryTimer()
   }
 })
+
+// 手机号变化（含用户输入与回填）时，防抖后按手机号模糊查询客户历史
+watch(() => upsertPhone.value, (val) => {
+  clearHistoryTimer()
+  const phone = (val || '').trim()
+  if (!phone) {
+    customerHistory.value = []
+    return
+  }
+  historyTimer = setTimeout(() => loadCustomerHistory(phone), HISTORY_DEBOUNCE)
+})
+
+function clearHistoryTimer() {
+  if (historyTimer) {
+    clearTimeout(historyTimer)
+    historyTimer = null
+  }
+}
+
+function loadCustomerHistory(phone) {
+  bookCustomerHistory(phone).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      customerHistory.value = []
+      return
+    }
+    customerHistory.value = res.data.data
+  })
+}
+
+// 点击客户：回填姓名、手机号，若有邮箱则一并回填
+function pickCustomer(cust) {
+  upsertName.value = cust.name || ''
+  upsertPhone.value = cust.phone || ''
+  if (cust.mail) {
+    upsertMail.value = cust.mail
+  }
+}
+
+// 历史预约展示辅助
+function projectNames(bk) {
+  return (bk.skillDtoList || []).map(s => s.name).join(', ')
+}
+
+function sourceName(source) {
+  const e = source != null ? BookSourceEnum.fromCode(source) : null
+  return e ? e.name : ''
+}
+
+function sourceColor(source) {
+  const e = source != null ? BookSourceEnum.fromCode(source) : null
+  return e ? e.color : 'rgb(128, 128, 128)'
+}
+
+function statusName(status) {
+  const e = BookStatusEnum.fromCode(status)
+  return e ? e.name : ''
+}
+
+function statusColor(status) {
+  const e = BookStatusEnum.fromCode(status)
+  return e ? e.color : 'rgb(128, 128, 128)'
+}
 
 function save() {
   if (!upsertBookingTime.value || !upsertName.value) {
@@ -230,8 +342,84 @@ onMounted(() => {
   loadSkillOptions()
   loadStaffOptions()
 })
+
+onBeforeUnmount(() => {
+  clearHistoryTimer()
+})
 </script>
 
 <style scoped lang="scss">
+
+// 定位容器：仅按主卡片宽度收缩并居中，历史面板作为兄弟节点绝对定位其右侧。
+// Quasar 对 .q-dialog__inner > div 强制 overflow: auto，会把溢出到右侧的历史面板裁剪掉，
+// 这里改回 visible，并把「限高 + 滚动」职责下放给主卡片自身
+.cask-upsert-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: visible !important;
+
+  > .q-card {
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+  }
+}
+
+.cask-customer-history {
+  // 绝对定位到表单右侧，不影响表单自身的居中位置；作为主卡片兄弟节点，backdrop-filter 独立采样背景
+  position: absolute;
+  top: 0;
+  left: calc(100% + 1rem);
+  width: 24rem;
+  max-width: 24rem;
+  padding: .5rem .3rem;
+
+  .cask-history-scroll {
+    max-height: 30rem;
+    overflow-y: auto;
+    padding: 0 .3rem .5rem;
+  }
+
+  .cask-history-item {
+    padding: .6rem .5rem;
+    margin: .2rem 0;
+    border-radius: .4rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color .12s ease, border-color .12s ease;
+
+    &:hover {
+      background-color: rgba(128, 128, 128, .1);
+      border-color: rgba(128, 128, 128, .25);
+    }
+
+    & + .cask-history-item {
+      border-top: 1px solid rgba(128, 128, 128, .12);
+    }
+  }
+
+  .cask-history-booking {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .3rem;
+    font-size: .72rem;
+    opacity: .8;
+
+    .cask-history-time {
+      flex: 0 0 auto;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cask-history-project {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .cask-history-source {
+      flex: 0 0 auto;
+      font-weight: 500;
+    }
+  }
+}
 
 </style>

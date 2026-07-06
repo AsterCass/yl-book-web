@@ -678,6 +678,12 @@
       "cancel_assign_success": "Assignment cancelled successfully",
       "auto_assign_success": "Auto-assigned successfully"
     },
+    "customer_history": {
+      "title": "Customer History",
+      "hint": "Matched by phone; click to fill customer info",
+      "no_name": "Unnamed",
+      "total": "{count} total"
+    },
     "staff_detail": {
       "title": "Staff Details",
       "skill": "Skills",
