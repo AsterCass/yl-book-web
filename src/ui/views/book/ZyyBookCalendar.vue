@@ -3,11 +3,18 @@
 
     <!-- 顶部：导航 + 视图切换 -->
     <div class="row items-center q-mb-lg q-mt-sm cal-toolbar">
-      <q-btn round flat dense class="component-none-btn-grow" @click="shift(-1)">
+      <!-- 周视图：双箭头=按周移动(±7天)，单箭头=按天移动(±1天)；日视图：单箭头=按天移动 -->
+      <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow" @click="shift(-7)">
+        <q-icon name="fa-solid fa-angles-left" size=".9rem"/>
+      </q-btn>
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(-1)">
         <q-icon name="fa-solid fa-chevron-left" size=".9rem"/>
       </q-btn>
       <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(1)">
         <q-icon name="fa-solid fa-chevron-right" size=".9rem"/>
+      </q-btn>
+      <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(7)">
+        <q-icon name="fa-solid fa-angles-right" size=".9rem"/>
       </q-btn>
       <div class="cal-title q-ml-md">{{ rangeLabel }}</div>
       <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="resetView">
@@ -20,12 +27,12 @@
       <q-space/>
 
       <!-- 图例 -->
-      <div class="row items-center cal-legend">
-        <span class="cal-legend-dot cal-legend-block"/>
-        <span class="q-mr-md">{{ $t('book_calendar.legend_block') }}</span>
-        <span class="cal-legend-dot cal-legend-blocked"/>
-        <span>{{ $t('book_calendar.legend_blocked') }}</span>
-      </div>
+<!--      <div class="row items-center cal-legend">-->
+<!--        <span class="cal-legend-dot cal-legend-block"/>-->
+<!--        <span class="q-mr-md">{{ $t('book_calendar.legend_block') }}</span>-->
+<!--        <span class="cal-legend-dot cal-legend-blocked"/>-->
+<!--        <span>{{ $t('book_calendar.legend_blocked') }}</span>-->
+<!--      </div>-->
     </div>
 
     <div v-if="columns.length === 0" class="row flex-center q-py-xl" style="opacity: .6;">
@@ -175,7 +182,7 @@ const viewMode = ref('week')    // week | day
 const bookings = ref([])
 const blocks = ref([])
 const staffList = ref([])
-const weekStart = ref(getMonday(new Date()))
+const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 
 function today() {
@@ -184,12 +191,11 @@ function today() {
   return d
 }
 
-function getMonday(input) {
+// 周视图默认窗口起点：前一天（如今天周一，则窗口为上周日 ~ 本周六）
+function getWeekViewStart(input) {
   const d = new Date(input)
   d.setHours(0, 0, 0, 0)
-  const day = d.getDay() // 0=周日..6=周六
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
+  d.setDate(d.getDate() - 1)
   return d
 }
 
@@ -232,17 +238,18 @@ function formatHour(h) {
   return `${String(h).padStart(2, '0')}:00`
 }
 
-// 一周 7 天（周一 ~ 周日）
+// 从 weekStart 起连续 7 天（滚动窗口，起点任意；dayOfWeek 按真实星期计算）
 const weekDays = computed(() => {
   const todayStr = date.formatDate(new Date(), 'YYYY-MM-DD')
   const arr = []
   for (let i = 0; i < 7; i++) {
     const d = date.addToDate(weekStart.value, {days: i})
     const dateStr = date.formatDate(d, 'YYYY-MM-DD')
+    const dow = dayOfWeekOf(d)
     arr.push({
       dateStr,
-      dayOfWeek: i + 1,
-      name: t(`staff.schedule.day.${i + 1}`),
+      dayOfWeek: dow,
+      name: t(`staff.schedule.day.${dow}`),
       dayNum: date.formatDate(d, 'M/D'),
       isToday: dateStr === todayStr,
     })
@@ -502,10 +509,11 @@ function autoAssignCalendar(booking) {
   })
 }
 
+// offset 为天数：周视图单箭头传 ±1（按天滚动）、双箭头传 ±7（按周滚动）；日视图单箭头传 ±1
 function shift(offset) {
   hideHoverCard()
   if (viewMode.value === 'week') {
-    weekStart.value = date.addToDate(weekStart.value, {days: offset * 7})
+    weekStart.value = date.addToDate(weekStart.value, {days: offset})
     loadWeek()
   } else {
     dayDate.value = date.addToDate(dayDate.value, {days: offset})
@@ -516,7 +524,7 @@ function shift(offset) {
 function resetView() {
   hideHoverCard()
   if (viewMode.value === 'week') {
-    weekStart.value = getMonday(new Date())
+    weekStart.value = getWeekViewStart(new Date())
     loadWeek()
   } else {
     dayDate.value = today()
