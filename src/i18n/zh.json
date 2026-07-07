@@ -647,6 +647,7 @@
       },
       "save_add": "添加",
       "save_update": "更新",
+      "consume_total": "预计耗时：{minutes} 分钟",
       "assign_title": "分配员工",
       "assign_select_staff": "选择员工",
       "assign_confirm": "确认分配",

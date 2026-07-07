@@ -649,6 +649,7 @@
       },
       "save_add": "Add",
       "save_update": "Update",
+      "consume_total": "Estimated duration: {minutes} min",
       "assign_title": "Assign Staff",
       "assign_select_staff": "Select Staff",
       "assign_confirm": "Confirm Assignment",

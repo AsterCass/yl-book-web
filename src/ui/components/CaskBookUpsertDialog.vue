@@ -23,15 +23,21 @@
 
         <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
-        <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionList"
-                  class="component-outline-input-grow"
-                  clear-icon="fa-solid fa-xmark"
-                  clearable
-                  dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                  multiple
-                  use-chips
-                  outlined popup-content-class="component-extra-card-std">
-        </q-select>
+        <div>
+          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionList"
+                    class="component-outline-input-grow"
+                    clear-icon="fa-solid fa-xmark"
+                    clearable
+                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                    multiple
+                    use-chips
+                    outlined popup-content-class="component-extra-card-std"
+                    :popup-content-style="{ maxHeight: '15rem' }">
+          </q-select>
+          <div v-if="totalConsumeMinutes > 0" style="opacity: .6; font-size: .78rem; margin: .3rem 0 0 .2rem;">
+            {{ $t('book_booking.upsert.consume_total', {minutes: totalConsumeMinutes}) }}
+          </div>
+        </div>
 
         <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
             $t('book_booking.upsert.field.phone')
@@ -125,7 +131,7 @@
 </template>
 
 <script setup>
-import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
@@ -174,6 +180,13 @@ function syncOptionLists() {
   skillOptionList.value = props.skillOptions || innerSkillOptions.value
   staffOptionList.value = props.staffOptions || innerStaffOptions.value
 }
+
+// 已选项目的预计总耗时（选项带 consumeMinutes，来自 /staff/skill/list/simple）
+const totalConsumeMinutes = computed(() =>
+    upsertSkillIdList.value.reduce((sum, skillId) => {
+      const opt = skillOptionList.value.find(o => o.value === skillId)
+      return sum + (opt && opt.consumeMinutes ? opt.consumeMinutes : 0)
+    }, 0))
 
 // 弹窗打开时用 book 填充表单（新增无 book 时给默认预约时间=当前+5分钟）
 function populate() {
@@ -314,7 +327,11 @@ function loadSkillOptions() {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    innerSkillOptions.value = res.data.data.map(skill => ({label: skill.name, value: skill.id}))
+    innerSkillOptions.value = res.data.data.map(skill => ({
+      label: skill.name,
+      value: skill.id,
+      consumeMinutes: skill.consumeMinutes,
+    }))
     syncOptionLists()
   })
 }

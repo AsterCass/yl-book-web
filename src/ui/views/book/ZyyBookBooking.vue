@@ -565,6 +565,7 @@ function loadSkillList() {
     skillOptions.value = res.data.data.map(skill => ({
       label: skill.name,
       value: skill.id,
+      consumeMinutes: skill.consumeMinutes,
     }))
   })
 }
