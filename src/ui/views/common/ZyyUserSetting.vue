@@ -32,7 +32,7 @@
                     </h6>
                     <q-select outlined clearable class="component-outline-input-mini-grow q-mr-xl" style="opacity: .92"
                               dropdown-icon="fa-solid fa-caret-down"
-                              popup-content-class="component-extra-card-std shadow-0"
+                              popup-content-class="component-extra-card-std-limit shadow-0"
                               clear-icon="fa-solid fa-xmark"
                               menu-anchor="bottom start" :menu-offset="[0, 5]"
                               v-model="userSettingData.genderObj" :options="genderOptions">

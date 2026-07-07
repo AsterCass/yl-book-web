@@ -52,7 +52,7 @@
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                outlined popup-content-class="component-extra-card-std">
+                outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
 
     </div>
@@ -176,7 +176,7 @@
             }}&nbsp;:</h6>
           <q-select outlined clearable class="component-outline-input-grow"
                     dropdown-icon="fa-solid fa-caret-down"
-                    popup-content-class="component-extra-card-std"
+                    popup-content-class="component-extra-card-std-limit"
                     clear-icon="fa-solid fa-xmark"
                     menu-anchor="bottom start" :menu-offset="[0, 5]"
                     v-model="upsertGender" :options="genderOptions">

@@ -23,7 +23,7 @@
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                outlined popup-content-class="component-extra-card-std">
+                outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
 
     </div>

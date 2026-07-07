@@ -36,7 +36,7 @@
       </div>
       <q-select outlined clearable class="q-ma-md component-outline-input-grow"
                 dropdown-icon="fa-solid fa-caret-down"
-                popup-content-class="component-extra-card-std"
+                popup-content-class="component-extra-card-std-limit"
                 clear-icon="fa-solid fa-xmark"
                 menu-anchor="bottom start" :menu-offset="[0, 5]"
                 v-model="selectType" :options="typeOptions">
@@ -115,7 +115,7 @@
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_permission.upsert.field.type') }}&nbsp;:</h6>
           <q-select outlined clearable class="component-outline-input-grow"
                     dropdown-icon="fa-solid fa-caret-down"
-                    popup-content-class="component-extra-card-std"
+                    popup-content-class="component-extra-card-std-limit"
                     clear-icon="fa-solid fa-xmark"
                     menu-anchor="bottom start" :menu-offset="[0, 5]"
                     v-model="upsertType" :options="typeOptions">

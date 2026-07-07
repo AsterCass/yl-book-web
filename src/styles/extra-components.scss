@@ -16,6 +16,30 @@
 
 }
 
+.component-extra-card-std-limit {
+  border-radius: 4px !important;
+  color: rgb(var(--container-text-color)) !important;
+  background-color: rgb(var(--container-background-color)) !important;
+  backdrop-filter: saturate(200%) blur(30px) !important;
+  max-height: 20rem;
+
+  .q-item--active {
+    color: inherit !important;
+  }
+
+  &::-webkit-scrollbar {
+    overflow: visible;
+    background: transparent;
+    height: 13px;
+    width: 13px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--text-color-select));
+  }
+
+}
+
 .component-extra-card-std-angle {
 
   &::after {

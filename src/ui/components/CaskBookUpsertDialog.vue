@@ -31,8 +31,7 @@
                     dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
                     multiple
                     use-chips
-                    outlined popup-content-class="component-extra-card-std"
-                    :popup-content-style="{ maxHeight: '15rem' }">
+                    outlined popup-content-class="component-extra-card-std-limit">
           </q-select>
           <div v-if="totalConsumeMinutes > 0" style="opacity: .6; font-size: .78rem; margin: .3rem 0 0 .2rem;">
             {{ $t('book_booking.upsert.consume_total', {minutes: totalConsumeMinutes}) }}
@@ -58,7 +57,7 @@
                   clear-icon="fa-solid fa-xmark"
                   clearable
                   dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                  outlined popup-content-class="component-extra-card-std">
+                  outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
         <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
@@ -66,7 +65,7 @@
         <q-select v-model="upsertSource" :menu-offset="[0, 5]" :options="sourceOptions"
                   class="component-outline-input-grow"
                   dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                  outlined popup-content-class="component-extra-card-std">
+                  outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
