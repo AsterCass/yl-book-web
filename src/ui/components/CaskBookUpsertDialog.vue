@@ -24,7 +24,7 @@
         <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
         <div>
-          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionsNow"
+          <q-select ref="skillOptionRef" v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionsNow"
                     class="component-outline-input-grow"
                     clear-icon="fa-solid fa-xmark"
                     clearable
@@ -34,6 +34,7 @@
                     use-input
                     input-debounce="200"
                     @filter="filterFn"
+                    @update:model-value="onSelect"
                     outlined popup-content-class="component-extra-card-std-limit">
           </q-select>
           <div v-if="totalConsumeMinutes > 0" style="opacity: .6; font-size: .78rem; margin: .3rem 0 0 .2rem;">
@@ -173,6 +174,7 @@ const HISTORY_DEBOUNCE = 400
 let historyTimer = null
 
 // 选项：优先用父组件传入，否则组件自行加载
+const skillOptionRef = ref(null)
 const innerSkillOptions = ref([])
 const innerStaffOptions = ref([])
 const skillOptionList = ref([])
@@ -195,6 +197,14 @@ function filterFn(val, update) {
       )
     }
   })
+}
+
+function onSelect() {
+  // 选中后清空输入框
+  if(skillOptionRef && skillOptionRef.value) {
+    skillOptionRef.value.updateInputValue('')
+  }
+
 }
 
 // 已选项目的预计总耗时（选项带 consumeMinutes，来自 /staff/skill/list/simple）

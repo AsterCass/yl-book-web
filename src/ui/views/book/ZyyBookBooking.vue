@@ -416,7 +416,6 @@ const tableDynamicData = ref(
 // 自动过滤
 function filterFn(val, update) {
   update(() => {
-    console.log(skillOptions.value)
     if (val === '') {
       skillOptionsNow.value = skillOptions.value
     } else {
