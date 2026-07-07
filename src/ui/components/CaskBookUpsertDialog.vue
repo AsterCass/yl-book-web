@@ -24,13 +24,16 @@
         <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.bookProjectName') }}&nbsp;:</h6>
         <div>
-          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionList"
+          <q-select v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionsNow"
                     class="component-outline-input-grow"
                     clear-icon="fa-solid fa-xmark"
                     clearable
                     dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
                     multiple
                     use-chips
+                    use-input
+                    input-debounce="200"
+                    @filter="filterFn"
                     outlined popup-content-class="component-extra-card-std-limit">
           </q-select>
           <div v-if="totalConsumeMinutes > 0" style="opacity: .6; font-size: .78rem; margin: .3rem 0 0 .2rem;">
@@ -173,11 +176,25 @@ let historyTimer = null
 const innerSkillOptions = ref([])
 const innerStaffOptions = ref([])
 const skillOptionList = ref([])
+const skillOptionsNow = ref([])
 const staffOptionList = ref([])
 
 function syncOptionLists() {
   skillOptionList.value = props.skillOptions || innerSkillOptions.value
   staffOptionList.value = props.staffOptions || innerStaffOptions.value
+}
+
+function filterFn(val, update) {
+  update(() => {
+    if (val === '') {
+      skillOptionsNow.value = skillOptionList.value
+    } else {
+      const needle = val.toLowerCase()
+      skillOptionsNow.value = skillOptionList.value.filter(
+          v => v.label.toLowerCase().indexOf(needle) > -1 || v.code.toLowerCase().indexOf(needle) > -1
+      )
+    }
+  })
 }
 
 // 已选项目的预计总耗时（选项带 consumeMinutes，来自 /staff/skill/list/simple）
@@ -329,6 +346,7 @@ function loadSkillOptions() {
     innerSkillOptions.value = res.data.data.map(skill => ({
       label: skill.name,
       value: skill.id,
+      code: skill.code,
       consumeMinutes: skill.consumeMinutes,
     }))
     syncOptionLists()

@@ -86,10 +86,13 @@
           {{ $t('book_booking.label.bookProject') }}&nbsp;:
         </h6>
       </div>
-      <q-select v-model="selectBookProjectId" :menu-offset="[0, 5]" :options="skillOptions"
+      <q-select v-model="selectBookProjectId" :menu-offset="[0, 5]" :options="skillOptionsNow"
                 class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
+                use-input
+                input-debounce="200"
+                @filter="filterFn"
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                 outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
@@ -331,6 +334,7 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertBook = ref(null)   // 编辑=行数据；新增=null；复制=预填数据
 const skillOptions = ref([])
+const skillOptionsNow = ref([])
 
 function openAddBooking() {
   upsertBook.value = null
@@ -408,6 +412,21 @@ const tableDynamicData = ref(
       dataSum: 0,
     }
 )
+
+// 自动过滤
+function filterFn(val, update) {
+  update(() => {
+    console.log(skillOptions.value)
+    if (val === '') {
+      skillOptionsNow.value = skillOptions.value
+    } else {
+      const needle = val.toLowerCase()
+      skillOptionsNow.value = skillOptions.value.filter(
+          v => v.label.toLowerCase().indexOf(needle) > -1 || v.code.toLowerCase().indexOf(needle) > -1
+      )
+    }
+  })
+}
 
 // 自动分配（系统按策略为未分配预约分配雇员）
 function autoAssignData() {
@@ -565,6 +584,7 @@ function loadSkillList() {
     skillOptions.value = res.data.data.map(skill => ({
       label: skill.name,
       value: skill.id,
+      code: skill.code,
       consumeMinutes: skill.consumeMinutes,
     }))
   })
