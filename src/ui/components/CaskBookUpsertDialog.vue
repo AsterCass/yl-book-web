@@ -184,6 +184,9 @@ const staffOptionList = ref([])
 function syncOptionLists() {
   skillOptionList.value = props.skillOptions || innerSkillOptions.value
   staffOptionList.value = props.staffOptions || innerStaffOptions.value
+  // 选项到达时同步到展示列表：skillOptionsNow 初始为空且只在 filterFn 里更新，
+  // 若技能列表晚于弹窗回填到达，map-options 会查不到已选 id 的名称；这里保证不依赖加载顺序
+  skillOptionsNow.value = skillOptionList.value
 }
 
 function filterFn(val, update) {
@@ -193,7 +196,7 @@ function filterFn(val, update) {
     } else {
       const needle = val.toLowerCase()
       skillOptionsNow.value = skillOptionList.value.filter(
-          v => v.label.toLowerCase().indexOf(needle) > -1 || v.code.toLowerCase().indexOf(needle) > -1
+          v => (v.label || '').toLowerCase().indexOf(needle) > -1 || (v.code || '').toLowerCase().indexOf(needle) > -1
       )
     }
   })
@@ -233,6 +236,8 @@ function populate() {
 
 watch(() => props.modelValue, (val) => {
   if (val) {
+    // 重置过滤残留，保证已选项目能映射出名称
+    skillOptionsNow.value = skillOptionList.value
     populate()
   } else {
     // 关闭时清空历史与待触发的查询
