@@ -778,6 +778,7 @@
     "no_name": "未命名",
     "auto_assign": "自动分配",
     "auto_assign_success": "自动分配成功",
+    "cancel_booking": "取消预约",
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",

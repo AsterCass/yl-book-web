@@ -93,15 +93,17 @@
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
-                <!-- 第一行：客户名称；第二行起：预约项目 / 联系方式 / 备注 -->
-                <div class="cal-event-title">{{ ev.booking.name || $t('book_calendar.no_name') }}</div>
-                <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
-
-                <!-- 底部：左=来源（带来源色），右=雇员名/自动分配（flex 布局，绝不重叠） -->
-                <div v-if="ev.sourceName || ev.booking.staffName || ev.booking.status === 0" class="cal-event-footer">
+                <!-- 第一行：客户名称 + 来源（带来源色）；第二行起：预约项目 / 联系方式 / 备注 -->
+                <div class="cal-event-title">
+                  <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
                   <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
                     {{ ev.sourceName }}
                   </span>
+                </div>
+                <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
+
+                <!-- 底部：左=雇员名/自动分配，右=取消预约 -->
+                <div v-if="ev.booking.staffName || ev.booking.status !== -1" class="cal-event-footer">
                   <span v-if="ev.booking.staffName" class="cal-event-staff">{{ ev.booking.staffName }}</span>
                 </div>
               </div>
@@ -132,6 +134,12 @@
     <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="editIsNew"
                              @saved="reload"/>
 
+    <!-- 取消预约确认（复用预约列表的取消文案与逻辑） -->
+    <cask-dialog-judgment v-model="showCancel"
+                          :callback-method="isTrue => { showCancel = false; if (isTrue) cancelData() }"
+                          :dialog-judgment-data="{ title: $t('book_booking.dialog.delete.title'), content: $t('book_booking.dialog.delete.content', { name: cancelBook ? cancelBook.name : '' }), falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
+    />
+
     <!-- 悬浮完整预览：teleport 到 body，不受日历容器裁剪，可完整显示（含边缘卡片）。
          预览块本身可交互：mouseleave 收回、pointerdown 进入拖拽/点击流程、可点击「自动分配」 -->
     <teleport to="body">
@@ -140,21 +148,26 @@
            :style="hoverCard.style"
            @mouseleave="hideHoverCard"
            @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
-        <div class="cal-event-title row justify-between">
+        <div class="cal-event-title">
           <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
-          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-pen" size="0.9rem"
-                  class="cal-event-edit " @pointerdown.stop @click.stop="openEdit(hoverCard.ev.booking)"/>
-        </div>
-        <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
-        <div v-if="hoverCard.ev.sourceName || hoverCard.ev.booking.staffName || hoverCard.ev.booking.status === 0"
-             class="cal-event-footer">
           <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
             {{ hoverCard.ev.sourceName }}
           </span>
+          <q-space/>
+          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-pen" size="0.9rem"
+                  class="cal-event-edit" @pointerdown.stop @click.stop="openEdit(hoverCard.ev.booking)"/>
+        </div>
+        <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
+        <div v-if="hoverCard.ev.booking.staffName || hoverCard.ev.booking.status !== -1"
+             class="cal-event-footer">
           <span v-if="hoverCard.ev.booking.staffName" class="cal-event-staff">{{ hoverCard.ev.booking.staffName }}</span>
           <span v-else-if="hoverCard.ev.booking.status === 0" class="cal-event-auto"
                 @pointerdown.stop @click.stop="autoAssignCalendar(hoverCard.ev.booking)">
             {{ $t('book_calendar.auto_assign') }}
+          </span>
+          <span v-if="hoverCard.ev.booking.status !== -1" class="cal-event-cancel"
+                @pointerdown.stop @click.stop="openCancel(hoverCard.ev.booking)">
+            {{ $t('book_calendar.cancel_booking') }}
           </span>
         </div>
       </div>
@@ -170,7 +183,8 @@ import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
-import {bookAdjust, bookCalendar, bookReassign} from "@/api/book.js";
+import {bookAdjust, bookCalendar, bookDelete, bookReassign} from "@/api/book.js";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 
@@ -508,6 +522,29 @@ function onEventEnter(e, ev, colIndex) {
 
 function hideHoverCard() {
   hoverCard.value = null
+}
+
+// 取消预约（确认后调用，与预约列表的取消逻辑一致）
+const showCancel = ref(false)
+const cancelBook = ref(null)
+
+function openCancel(booking) {
+  hideHoverCard()
+  cancelBook.value = booking
+  showCancel.value = true
+}
+
+function cancelData() {
+  if (!cancelBook.value) {
+    return
+  }
+  bookDelete(cancelBook.value.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('notify.cancel_success'))
+    reload()
+  })
 }
 
 // 待分配预约的一键自动分配
@@ -991,16 +1028,19 @@ onBeforeUnmount(() => {
   }
 
   .cal-event-title {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
     font-size: .78rem;
     font-weight: 600;
     overflow: hidden;
 
     .cal-event-name {
+      flex: 0 1 auto;
       min-width: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-right: 3rem;
     }
 
     .cal-event-edit {
@@ -1030,7 +1070,7 @@ onBeforeUnmount(() => {
     text-overflow: ellipsis;
   }
 
-  // 底部行：来源(左) + 雇员/自动分配(右)，flex 布局保证彼此及与上方文字均不重叠
+  // 底部行：左=雇员名/自动分配，右=取消预约，flex 布局保证彼此及与上方文字均不重叠
   .cal-event-footer {
     flex: 0 0 auto;
     margin-top: auto; // 有空间时贴底；空间不足时随卡片裁剪（可 hover 展开查看）
@@ -1041,8 +1081,10 @@ onBeforeUnmount(() => {
     line-height: 1.15;
   }
 
+  // 来源：跟在标题行客户名称后（带来源色）。
+  // flex-shrink 远大于名称：空间不足时先压缩来源（末尾出省略号），名称保持完整；名称过长时才轮到名称截断
   .cal-event-source {
-    flex: 0 1 auto;
+    flex: 0 999 auto;
     min-width: 0;
     font-size: .68rem;
     font-weight: 500;
@@ -1052,8 +1094,8 @@ onBeforeUnmount(() => {
   }
 
   .cal-event-staff {
-    flex: 0 0 auto;
-    margin-left: auto; // 始终靠右
+    flex: 0 1 auto;
+    min-width: 0;
     max-width: 65%;
     font-size: .68rem;
     opacity: .75;
@@ -1064,7 +1106,6 @@ onBeforeUnmount(() => {
 
   .cal-event-auto {
     flex: 0 0 auto;
-    margin-left: auto;
     font-size: .68rem;
     color: rgb(var(--pointer));
     cursor: pointer;
@@ -1075,6 +1116,23 @@ onBeforeUnmount(() => {
 
     &:hover {
       background: rgba(var(--pointer), .12);
+    }
+  }
+
+  // 取消预约：样式同自动分配，负向色，固定靠右
+  .cal-event-cancel {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-size: .68rem;
+    color: rgb(var(--negative));
+    cursor: pointer;
+    padding: .02rem .3rem;
+    border: 1px solid rgb(var(--negative));
+    border-radius: .25rem;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(var(--negative), .12);
     }
   }
 

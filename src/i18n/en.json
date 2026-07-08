@@ -780,6 +780,7 @@
     "no_name": "Unnamed",
     "auto_assign": "Auto Assign",
     "auto_assign_success": "Auto-assigned successfully",
+    "cancel_booking": "Cancel",
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
