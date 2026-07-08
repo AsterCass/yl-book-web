@@ -93,7 +93,7 @@
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
-                <!-- 第一行：客户名称 + 来源（带来源色）；第二行起：预约项目 / 联系方式 / 备注 -->
+                <!-- 第一行：客户名称 + 来源（带来源色）；第二行起：起止时间 / 预约项目 / 联系方式 / 备注 -->
                 <div class="cal-event-title">
                   <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
                   <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
@@ -387,7 +387,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
     const b = ev.booking
     // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
-    const lines = [b._calSub, b._contact, b.remark].filter(Boolean)
+    const lines = [b._timeRange, b._calSub, b._contact, b.remark].filter(Boolean)
     return {
       booking: b,
       top: toPx(ev.start),
@@ -798,6 +798,9 @@ function enrichBooking(b) {
   const dur = b.requiredSkillTime && b.requiredSkillTime > 0 ? b.requiredSkillTime : 60
   b._start = startMin
   b._end = startMin + dur
+  // 起止时间行（bookingTime / endTime 均为 YYYY-MM-DD HH:mm，仅在两者都有值时展示 HH:mm - HH:mm）
+  b._timeRange = (b.bookingTime && b.endTime)
+      ? `${b.bookingTime.substring(11, 16)} - ${b.endTime.substring(11, 16)}` : ''
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
