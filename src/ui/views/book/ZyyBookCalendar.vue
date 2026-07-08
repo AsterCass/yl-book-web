@@ -761,7 +761,7 @@ function enrichBooking(b) {
   const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
   b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
   b._sourceName = sourceEnum ? sourceEnum.name : ''
-  b._bgColor = rgbToRgba(b._statusColor, 0.12)
+  b._bgColor = rgbToRgba(b._statusColor, 0.25)
   // 客户联系方式：有电话显示电话，否则显示邮件，都没有则为空
   b._contact = b.phone || b.mail || ''
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
