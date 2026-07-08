@@ -26,6 +26,9 @@
 
       <q-space/>
 
+      <q-btn no-caps unelevated  class="q-mr-xl shadow-1 component-full-btn-mini-grow" @click="openAddBooking">
+        {{ $t('book_booking.button.add') }}
+      </q-btn>
       <!-- 图例 -->
 <!--      <div class="row items-center cal-legend">-->
 <!--        <span class="cal-legend-dot cal-legend-block"/>-->
@@ -125,8 +128,8 @@
 
     <cask-book-detail-dialog v-model="showDetail" :book="detailBook"/>
 
-    <!-- 编辑弹窗（与预约列表共用同一组件，保持一致） -->
-    <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="false"
+    <!-- 新增/编辑弹窗（与预约列表共用同一组件，保持一致） -->
+    <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="editIsNew"
                              @saved="reload"/>
 
     <!-- 悬浮完整预览：teleport 到 body，不受日历容器裁剪，可完整显示（含边缘卡片）。
@@ -452,13 +455,22 @@ function openDetail(booking) {
   showDetail.value = true
 }
 
-// 编辑（弹窗与预约列表共用组件；保存成功后刷新当前视图）
+// 新增/编辑（弹窗与预约列表共用组件；保存成功后刷新当前视图）
 const showEdit = ref(false)
 const editBook = ref(null)
+const editIsNew = ref(false)
 
 function openEdit(booking) {
   hideHoverCard()
   editBook.value = booking
+  editIsNew.value = false
+  showEdit.value = true
+}
+
+function openAddBooking() {
+  hideHoverCard()
+  editBook.value = null
+  editIsNew.value = true
   showEdit.value = true
 }
 
