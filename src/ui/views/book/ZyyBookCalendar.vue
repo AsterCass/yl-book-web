@@ -441,11 +441,18 @@ const staffColumns = computed(() => {
   }
 
   const dayStr = date.formatDate(dayDate.value, 'YYYY-MM-DD')
+  const dow = dayOfWeekOf(dayDate.value)
   const cols = []
   // 未分配列始终存在，方便将预约拖入以解除分配（即使当前没有未分配预约）
   cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx,
       {dateStr: dayStr, staffId: null}))
   for (const s of staffList.value) {
+    // 只显示当天有排班的雇员；无排班但当天已有预约的仍显示，避免预约块丢失
+    const scheduledToday = (s.scheduleList || []).some(sc => Number(sc.dayOfWeek) === dow)
+    const hasBookings = (byStaff[s.id] || []).length > 0
+    if (!scheduledToday && !hasBookings) {
+      continue
+    }
     cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx,
         {dateStr: dayStr, staffId: s.id}))
   }
@@ -834,7 +841,10 @@ function loadStaff() {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    staffList.value = res.data.data.map(s => ({id: s.id, name: s.name, phone: s.phone}))
+    staffList.value = res.data.data.map(s => ({
+      id: s.id, name: s.name, phone: s.phone,
+      scheduleList: s.scheduleList || [],
+    }))
   })
 }
 
