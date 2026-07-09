@@ -75,9 +75,12 @@
               </div>
             </div>
 
-            <!-- 列 -->
+            <!-- 列（空白处悬停显示 10 分钟档时间线，点击直接创建该时间的预约） -->
             <div v-for="(col, colIndex) in columns" :key="col.key" class="cal-col"
-                 :class="{ 'cal-col-today': col.highlight }">
+                 :class="{ 'cal-col-today': col.highlight }"
+                 @pointermove="onColPointerMove($event, col)"
+                 @pointerleave="onColPointerLeave"
+                 @click="onColClick($event, col)">
 
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
@@ -85,6 +88,12 @@
               <!-- 门店 block 背景（置灰） -->
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
                    :style="{ top: block.top + 'px', height: block.height + 'px' }"/>
+
+              <!-- 悬停时间提示线（10 分钟一档，点击即以该时间创建预约） -->
+              <div v-if="hoverSlot && hoverSlot.colKey === col.key" class="cal-slot-line"
+                   :style="{ top: hoverSlot.top + 'px' }">
+                <span class="cal-slot-label">{{ hoverSlot.label }}</span>
+              </div>
 
               <!-- 预约块（可拖动） -->
               <div v-for="(ev, ei) in col.events" :key="'e' + ei" class="cal-event"
@@ -568,6 +577,59 @@ function openAddBooking() {
   showEdit.value = true
 }
 
+// ===== 点击空白区域创建预约 =====
+const hoverSlot = ref(null)   // {colKey, top, label, minutes}
+
+// 指针位置 -> 该列时间轴上的分钟数（按 SNAP_MINUTES=10 分钟取档）
+function pointerSlotMinutes(e) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  const {startHour, endHour} = timeRange.value
+  const rangeStart = startHour * 60
+  let minutes = rangeStart + (e.clientY - rect.top) / HOUR_HEIGHT * 60
+  minutes = Math.round(minutes / SNAP_MINUTES) * SNAP_MINUTES
+  return Math.max(rangeStart, Math.min(endHour * 60, minutes))
+}
+
+function onColPointerMove(e, col) {
+  // 拖拽中、或指针位于预约卡片上时不显示空白时间提示线
+  if (dragCtx || (e.target.closest && e.target.closest('.cal-event'))) {
+    hoverSlot.value = null
+    return
+  }
+  const minutes = pointerSlotMinutes(e)
+  const {startHour} = timeRange.value
+  hoverSlot.value = {
+    colKey: col.key,
+    minutes,
+    top: (minutes - startHour * 60) / 60 * HOUR_HEIGHT,
+    label: minutesToTime(minutes),
+  }
+}
+
+function onColPointerLeave() {
+  hoverSlot.value = null
+}
+
+function onColClick(e, col) {
+  // 卡片上的点击（打开详情/按钮）与拖拽结束后的余波点击都不触发创建
+  if (e.target.closest && e.target.closest('.cal-event')) {
+    return
+  }
+  if (Date.now() - lastDragEndTs < 150) {
+    return
+  }
+  const minutes = pointerSlotMinutes(e)
+  const dateStr = col.dateStr || date.formatDate(dayDate.value, 'YYYY-MM-DD')
+  hideHoverCard()
+  // 预填点击位置对应的日期时间；日视图额外带上列雇员作为偏好员工（未分配列为空）
+  editBook.value = {
+    bookingTime: `${dateStr} ${minutesToTime(minutes)}`,
+    preferredStaffId: viewMode.value === 'day' ? (col.staffId || null) : null,
+  }
+  editIsNew.value = true
+  showEdit.value = true
+}
+
 // 悬浮完整预览（teleport 到 body，不受日历滚动/裁剪容器限制，边缘自动翻转方向）。
 // 预览块完整覆盖原卡片且自身可交互：收回由预览块的 mouseleave 驱动（浏览器原生命中判定，
 // 从任意方向进入均稳定），拖拽/点击/自动分配均可直接在预览块上操作。
@@ -688,6 +750,7 @@ const bodyRef = ref(null)        // 日历主体（定位基准）
 const gutterRef = ref(null)      // 时间刻度列（用于测量宽度）
 const dragState = ref(null)      // 拖动预览态（响应式，驱动预览块）
 let dragCtx = null               // 拖动过程数据（非响应式）
+let lastDragEndTs = 0            // 最近一次拖拽结束时间，用于屏蔽拖拽结束后的余波 click
 
 function minutesToTime(min) {
   const h = Math.floor(min / 60)
@@ -712,6 +775,9 @@ function cancelDrag() {
   removeDragListeners()
   document.body.style.userSelect = ''
   document.body.classList.remove('cal-dragging')
+  if (dragCtx && dragCtx.moved) {
+    lastDragEndTs = Date.now()
+  }
   dragCtx = null
   dragState.value = null
 }
@@ -801,6 +867,7 @@ function onPointerUp() {
     openDetail(ctx.booking)
     return
   }
+  lastDragEndTs = Date.now()
   const changedTime = ds.newStart !== ctx.origStart
   const changedCol = ds.newColIndex !== ctx.origColIndex
   if (!changedTime && !changedCol) {
@@ -1080,6 +1147,7 @@ onBeforeUnmount(() => {
 .cal-col {
   position: relative;
   border-right: 1px solid rgba(128, 128, 128, .12);
+  cursor: pointer; // 空白处可点击创建预约（卡片自身覆盖为 grab）
 
   &:last-child {
     border-right: none;
@@ -1101,6 +1169,30 @@ onBeforeUnmount(() => {
   background: rgba(128, 128, 128, .22);
   z-index: 1;
   pointer-events: none;
+}
+
+// 空白处悬停时间提示线（10 分钟一档），仅提示不参与命中
+.cal-slot-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed rgb(var(--full-container-background-color), 0.5);
+  z-index: 3;
+  pointer-events: none;
+
+  .cal-slot-label {
+    position: absolute;
+    top: -1.75rem;
+    left: 0.5rem;
+    font-size: .7rem;
+    font-weight: 600;
+    padding: .05rem .35rem;
+    border-radius: .25rem;
+    color: #fff;
+    background: rgb(var(--full-container-background-color), 0.5);
+    white-space: nowrap;
+  }
 }
 
 // 当前时间线：横跨时间刻度右侧的所有列，悬停加粗并显示当前时间标签
