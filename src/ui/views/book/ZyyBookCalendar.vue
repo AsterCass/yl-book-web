@@ -114,6 +114,16 @@
 
             </div>
 
+            <!-- 当前时间线：今天在视图窗口内且时间落在显示范围内时出现；悬停加粗并跟随指针显示当前时间 -->
+            <div v-if="nowLine" class="cal-now-line" :class="{ 'cal-now-line-hover': nowHover }"
+                 :style="{ top: nowLine.top + 'px' }"
+                 @pointerenter="nowHover = true"
+                 @pointerleave="nowHover = false; nowLabelX = null"
+                 @pointermove="onNowLineMove">
+              <span v-if="nowHover && nowLabelX != null" class="cal-now-label"
+                    :style="{ left: nowLabelX + 'px' }">{{ nowLine.label }}</span>
+            </div>
+
             <!-- 拖动预览块 -->
             <div v-if="dragState" class="cal-event cal-drag-preview"
                  :style="{
@@ -211,6 +221,13 @@ const showCancelled = ref(false)
 // 日/周视图共用的数据源：按开关过滤已取消预约
 const visibleBookings = computed(() =>
     showCancelled.value ? bookings.value : bookings.value.filter(b => b.status !== -1))
+
+// 当前时间线：每 30 秒刷新一次位置
+const NOW_TICK_INTERVAL = 30 * 1000
+const nowTick = ref(Date.now())
+const nowHover = ref(false)
+const nowLabelX = ref(null)
+let nowTimer = null
 
 function today() {
   const d = new Date()
@@ -332,6 +349,33 @@ const totalHeight = computed(() => {
   const {startHour, endHour} = timeRange.value
   return Math.max(endHour - startHour, 1) * HOUR_HEIGHT
 })
+
+// 当前时间线：仅当今天在当前视图窗口内、且当前时间落在显示时间范围内时返回定位信息
+const nowLine = computed(() => {
+  const now = new Date(nowTick.value)
+  const todayStr = date.formatDate(now, 'YYYY-MM-DD')
+  const inView = viewMode.value === 'week'
+      ? weekDays.value.some(d => d.dateStr === todayStr)
+      : date.formatDate(dayDate.value, 'YYYY-MM-DD') === todayStr
+  if (!inView) {
+    return null
+  }
+  const minutes = now.getHours() * 60 + now.getMinutes()
+  const {startHour, endHour} = timeRange.value
+  if (minutes < startHour * 60 || minutes > endHour * 60) {
+    return null
+  }
+  return {
+    top: (minutes - startHour * 60) / 60 * HOUR_HEIGHT,
+    label: minutesToTime(minutes),
+  }
+})
+
+// 标签横向跟随指针（相对时间线自身定位）
+function onNowLineMove(e) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  nowLabelX.value = e.clientX - rect.left
+}
 
 // 同一列重叠预约的分列布局：贪心分配列，簇内平均分配宽度
 function layoutEvents(events) {
@@ -864,10 +908,17 @@ function loadStaff() {
 onMounted(() => {
   loadStaff()
   loadWeek()
+  nowTimer = setInterval(() => {
+    nowTick.value = Date.now()
+  }, NOW_TICK_INTERVAL)
 })
 
 onBeforeUnmount(() => {
   removeDragListeners()
+  if (nowTimer) {
+    clearInterval(nowTimer)
+    nowTimer = null
+  }
 })
 </script>
 
@@ -1012,6 +1063,40 @@ onBeforeUnmount(() => {
   background: rgba(128, 128, 128, .22);
   z-index: 1;
   pointer-events: none;
+}
+
+// 当前时间线：横跨时间刻度右侧的所有列，悬停加粗并显示当前时间标签
+.cal-now-line {
+  position: absolute;
+  left: var(--cal-gutter);
+  right: 0;
+  height: 0;
+  border-top: 2px solid rgb(var(--full-container-background-color), 0.5);
+  z-index: 4;
+  cursor: pointer;
+
+  // 上下外扩几像素的命中区域，方便触摸到这条细线
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -5px;
+    height: 12px;
+  }
+
+  .cal-now-label {
+    position: absolute;
+    top: -1.75rem;
+    transform: translateX(-50%);
+    font-size: .72rem;
+    padding: .08rem .4rem;
+    border-radius: .25rem;
+    color: #fff;
+    background: rgb(var(--full-container-background-color), 0.5);
+    white-space: nowrap;
+    pointer-events: none;
+  }
 }
 
 .cal-event {
@@ -1220,6 +1305,11 @@ body.cal-dragging * {
 /* 拖动期间禁用卡片的悬浮展开，避免经过其它卡片时触发放大
    （.cal-hover-card 同样带 .cal-event 类，此规则也一并使拖动中的预览不可交互） */
 body.cal-dragging .cal-event {
+  pointer-events: none;
+}
+
+/* 拖动期间当前时间线也不参与命中，避免干扰拖拽落点 */
+body.cal-dragging .cal-now-line {
   pointer-events: none;
 }
 </style>
