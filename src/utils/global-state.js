@@ -25,6 +25,8 @@ export const useGlobalStateStore = defineStore('globalState', {
         loginInfo: null,
         // 页面数据版本号：作为顶层 router-view 的 key，自增即强制重挂载当前页面（重跑 onMounted 内的查询逻辑）
         dataVersion: 0,
+        // 预约日历卡片底色透明度（用户偏好，0 ~ 1）
+        calendarBgAlpha: 0.25,
     }),
     getters: {
         // 当前用户拥有的权限码集合（兼容 userData 直接为用户对象或包一层 userData 两种结构）
@@ -89,6 +91,9 @@ export const useGlobalStateStore = defineStore('globalState', {
         },
         updateLoginInfo(data) {
             this.loginInfo = data
+        },
+        updateCalendarBgAlpha(alpha) {
+            this.calendarBgAlpha = alpha
         }
     },
 });

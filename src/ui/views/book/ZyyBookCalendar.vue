@@ -210,8 +210,10 @@ import {bookAdjust, bookCalendar, bookDelete, bookReassign} from "@/api/book.js"
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
+import {useGlobalStateStore} from "@/utils/global-state.js";
 
 const {t} = useI18n()
+const globalState = useGlobalStateStore()
 
 const HOUR_HEIGHT = 64          // 每小时像素高度
 const DEFAULT_START_HOUR = 8    // 默认最早显示 08:00
@@ -226,8 +228,11 @@ const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
 const showCancelled = ref(false)
-// 卡片背景（状态色底色）的透明度，用户可通过工具栏滑条调整
-const bgAlpha = ref(0.25)
+// 卡片背景（状态色底色）的透明度：用户偏好，读写 globalState（随 store 持久化到 localStorage）
+const bgAlpha = computed({
+  get: () => globalState.calendarBgAlpha,
+  set: (alpha) => globalState.updateCalendarBgAlpha(alpha),
+})
 // 滑块形状：20x20 视窗内的扁长圆角方块（16 宽 x 8 高，替代 q-slider 默认圆形）
 const ALPHA_THUMB_PATH = 'M5 6 h10 a3 3 0 0 1 3 3 v2 a3 3 0 0 1 -3 3 h-10 a3 3 0 0 1 -3 -3 v-2 a3 3 0 0 1 3 -3 z'
 
