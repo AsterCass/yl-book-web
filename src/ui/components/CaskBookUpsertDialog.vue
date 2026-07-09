@@ -164,7 +164,7 @@ const upsertSkillIdList = ref([])
 const upsertPhone = ref("")
 const upsertMail = ref("")
 const upsertPreferredStaffId = ref(null)
-const upsertSource = ref(BookSourceEnum.WECHAT.code)
+const upsertSource = ref(BookSourceEnum.PHONE.code)
 const upsertRemark = ref("")
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
 
@@ -230,7 +230,7 @@ function populate() {
   upsertPhone.value = b && b.phone ? b.phone : ''
   upsertMail.value = b && b.mail ? b.mail : ''
   upsertPreferredStaffId.value = b && b.preferredStaffId ? b.preferredStaffId : null
-  upsertSource.value = b && b.source != null ? b.source : BookSourceEnum.WECHAT.code
+  upsertSource.value = b && b.source != null ? b.source : BookSourceEnum.PHONE.code
   upsertRemark.value = b && b.remark ? b.remark : ''
 }
 
@@ -326,7 +326,7 @@ function save() {
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
-    source: upsertSource.value ? upsertSource.value : BookSourceEnum.WECHAT.code,
+    source: upsertSource.value ? upsertSource.value : BookSourceEnum.PHONE.code,
     remark: upsertRemark.value,
   }
 
