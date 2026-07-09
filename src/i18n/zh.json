@@ -781,6 +781,7 @@
     "cancel_booking": "取消预约",
     "show_cancelled": "显示已取消",
     "hide_cancelled": "隐藏已取消",
+    "bg_alpha": "卡片底色深浅：",
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",

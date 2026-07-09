@@ -30,9 +30,14 @@
 
       <q-space/>
 
-      <q-btn no-caps unelevated  class="q-mr-xl shadow-1 component-full-btn-mini-grow" @click="openAddBooking">
-        {{ $t('book_booking.button.add') }}
-      </q-btn>
+      <div class="row items-center no-wrap q-mr-lg cal-alpha-slider">
+        <div class="cal-alpha-label q-mr-sm">
+          {{ $t('book_calendar.bg_alpha') }}&nbsp;&nbsp;
+        </div>
+        <q-slider v-model="bgAlpha" :min="0" :max="1" :step="0.05" dense
+                  label label-color="transparent" label-text-color="transparent"
+                  :thumb-path="ALPHA_THUMB_PATH" style="width: 10rem;"/>
+      </div>
       <!-- 图例 -->
 <!--      <div class="row items-center cal-legend">-->
 <!--        <span class="cal-legend-dot cal-legend-block"/>-->
@@ -106,9 +111,11 @@
                 </div>
                 <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
 
-                <!-- 底部：左=雇员名/自动分配，右=取消预约 -->
+                <!-- 底部：左=雇员名（日视图列头已是雇员，卡片上不重复显示）/自动分配，右=取消预约 -->
                 <div v-if="ev.booking.staffName || ev.booking.status !== -1" class="cal-event-footer">
-                  <span v-if="ev.booking.staffName" class="cal-event-staff">{{ ev.booking.staffName }}</span>
+                  <span v-if="ev.booking.staffName && viewMode !== 'day'" class="cal-event-staff">
+                    {{ ev.booking.staffName }}
+                  </span>
                 </div>
               </div>
 
@@ -130,7 +137,7 @@
                    top: dragState.top + 'px', height: dragState.height + 'px',
                    left: dragState.left + 'px', width: dragState.width + 'px',
                    borderLeftColor: dragState.booking._statusColor,
-                   background: dragState.booking._bgColor,
+                   background: rgbToRgba(dragState.booking._statusColor, bgAlpha),
                  }">
               <div class="cal-event-title">{{ dragState.booking.name || $t('book_calendar.no_name') }}</div>
               <div class="cal-event-sub">{{ dragState.label }}</div>
@@ -174,7 +181,9 @@
         <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
         <div v-if="hoverCard.ev.booking.staffName || hoverCard.ev.booking.status !== -1"
              class="cal-event-footer">
-          <span v-if="hoverCard.ev.booking.staffName" class="cal-event-staff">{{ hoverCard.ev.booking.staffName }}</span>
+          <span v-if="hoverCard.ev.booking.staffName && viewMode !== 'day'" class="cal-event-staff">
+            {{ hoverCard.ev.booking.staffName }}
+          </span>
           <span v-else-if="hoverCard.ev.booking.status === 0" class="cal-event-auto"
                 @pointerdown.stop @click.stop="autoAssignCalendar(hoverCard.ev.booking)">
             {{ $t('book_calendar.auto_assign') }}
@@ -217,6 +226,10 @@ const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
 const showCancelled = ref(false)
+// 卡片背景（状态色底色）的透明度，用户可通过工具栏滑条调整
+const bgAlpha = ref(0.25)
+// 滑块形状：20x20 视窗内的扁长圆角方块（16 宽 x 8 高，替代 q-slider 默认圆形）
+const ALPHA_THUMB_PATH = 'M5 6 h10 a3 3 0 0 1 3 3 v2 a3 3 0 0 1 -3 3 h-10 a3 3 0 0 1 -3 -3 v-2 a3 3 0 0 1 3 -3 z'
 
 // 日/周视图共用的数据源：按开关过滤已取消预约
 const visibleBookings = computed(() =>
@@ -453,7 +466,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       statusColor: b._statusColor,
       sourceColor: b._sourceColor,
       sourceName: b._sourceName,
-      bgColor: b._bgColor,
+      // 底色=状态色的低透明版本，透明度随工具栏滑条实时变化（此处引用 bgAlpha 使列 computed 响应其变化）
+      bgColor: rgbToRgba(b._statusColor, bgAlpha.value),
       lines,
     }
   })
@@ -858,11 +872,10 @@ function enrichBooking(b) {
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-  // 左下角来源文字（带来源色）；底色=状态色的低透明版本（不影响文字可读性）
+  // 来源文字（带来源色）；卡片底色在渲染时按 bgAlpha 实时计算（见 buildColumn），此处不再预生成
   const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
   b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
   b._sourceName = sourceEnum ? sourceEnum.name : ''
-  b._bgColor = rgbToRgba(b._statusColor, 0.25)
   // 客户联系方式：有电话显示电话，否则显示邮件，都没有则为空
   b._contact = b.phone || b.mail || ''
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
@@ -932,6 +945,26 @@ onBeforeUnmount(() => {
   .cal-title {
     font-size: 1.1rem;
     font-weight: 600;
+  }
+
+  // 透明度滑条：跟随主题文字色（与 CaskTime 中 q-slider 的系统约定一致），不用 Quasar 默认主色
+  .cal-alpha-slider {
+    .cal-alpha-label {
+      font-size: 0.85rem;
+    }
+
+    :deep(.q-slider__track) {
+      color: rgb(var(--text-color)) !important;
+    }
+
+    :deep(.q-slider__thumb) {
+      color: rgb(var(--text-color)) !important;
+    }
+
+    // 去掉按压/悬停时放大的光环
+    :deep(.q-slider__focus-ring) {
+      display: none;
+    }
   }
 
   .cal-legend {
