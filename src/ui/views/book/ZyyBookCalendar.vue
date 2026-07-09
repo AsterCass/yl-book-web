@@ -23,6 +23,10 @@
       <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="toggleView">
         {{ viewMode === 'week' ? $t('book_calendar.view_day') : $t('book_calendar.view_week') }}
       </q-btn>
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+             @click="showCancelled = !showCancelled">
+        {{ showCancelled ? $t('book_calendar.hide_cancelled') : $t('book_calendar.show_cancelled') }}
+      </q-btn>
 
       <q-space/>
 
@@ -201,6 +205,12 @@ const blocks = ref([])
 const staffList = ref([])
 const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
+// 是否显示已取消的预约（默认隐藏）
+const showCancelled = ref(false)
+
+// 日/周视图共用的数据源：按开关过滤已取消预约
+const visibleBookings = computed(() =>
+    showCancelled.value ? bookings.value : bookings.value.filter(b => b.status !== -1))
 
 function today() {
   const d = new Date()
@@ -287,7 +297,7 @@ const rangeLabel = computed(() => {
 const timeRange = computed(() => {
   let minM = DEFAULT_START_HOUR * 60
   let maxM = DEFAULT_END_HOUR * 60
-  for (const b of bookings.value) {
+  for (const b of visibleBookings.value) {
     if (b._start != null) {
       minM = Math.min(minM, b._start)
     }
@@ -417,7 +427,7 @@ const weekColumns = computed(() => {
   const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
   return weekDays.value.map(day => {
     const dayBlocks = buildDayBlocks(day.dayOfWeek, toPx)
-    const rb = bookings.value.filter(b => b._dateStr === day.dateStr)
+    const rb = visibleBookings.value.filter(b => b._dateStr === day.dateStr)
     return buildColumn(day.dateStr, day.name, day.dayNum, day.isToday, rb, dayBlocks, toPx, {dateStr: day.dateStr})
   })
 })
@@ -431,7 +441,7 @@ const staffColumns = computed(() => {
 
   const byStaff = {}
   const unassigned = []
-  for (const b of bookings.value) {
+  for (const b of visibleBookings.value) {
     if (b.staffId) {
       byStaff[b.staffId] = byStaff[b.staffId] || []
       byStaff[b.staffId].push(b)
