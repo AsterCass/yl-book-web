@@ -1,6 +1,4 @@
 <template>
-  <!-- 全屏时挪到 body 下：父级 q-scroll-area 的 contain: strict 会把 fixed 后代困在滚动盒内，必须先脱离它 -->
-  <teleport to="body" :disabled="!isFullscreen">
   <div class="full-width cal-page" :class="{ 'cal-page-fullscreen': isFullscreen }">
 
     <!-- 顶部：导航 + 视图切换 -->
@@ -213,11 +211,10 @@
     </teleport>
 
   </div>
-  </teleport>
 </template>
 
 <script setup>
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
@@ -233,8 +230,8 @@ const {t} = useI18n()
 const globalState = useGlobalStateStore()
 
 const HOUR_HEIGHT = 64          // 每小时像素高度
-const DEFAULT_START_HOUR = 8    // 默认最早显示 08:00
-const DEFAULT_END_HOUR = 24     // 默认最晚显示 22:00
+const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
+const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
 
 const viewMode = ref('week')    // week | day
@@ -246,8 +243,15 @@ const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
 const showCancelled = ref(false)
 // 全屏（CSS 固定定位铺满视口，覆盖导航/header/footer；不用原生 Fullscreen API，
-// 否则 teleport 到 body 的弹窗/悬浮预览在全屏子树外将不可见）
+// 否则 teleport 到 body 的弹窗/悬浮预览在全屏子树外将不可见）。
+// 祖先 q-scrollarea 的 contain: strict 会把 fixed 后代困在滚动盒内，
+// 全屏期间通过 body 类 + 全局样式临时解除（不能用 Teleport 脱离：
+// 常驻 Teleport 会触发 transition(out-in) 离场后新页面插入锚点失效的 Vue 缺陷）
 const isFullscreen = ref(false)
+
+watch(() => isFullscreen.value, (val) => {
+  document.body.classList.toggle('cal-fullscreen-active', val)
+})
 
 function onFullscreenKeyDown(e) {
   // 弹窗打开时 Esc 优先关弹窗，不退出全屏
@@ -1025,6 +1029,7 @@ onBeforeUnmount(() => {
     nowTimer = null
   }
   window.removeEventListener('keydown', onFullscreenKeyDown)
+  document.body.classList.remove('cal-fullscreen-active')
 })
 </script>
 
@@ -1477,5 +1482,11 @@ body.cal-dragging .cal-event {
 /* 拖动期间当前时间线也不参与命中，避免干扰拖拽落点 */
 body.cal-dragging .cal-now-line {
   pointer-events: none;
+}
+
+/* 日历全屏期间解除祖先滚动容器的 contain: strict（它会把 fixed 后代困在滚动盒内），
+   退出全屏或离开页面时移除该类即恢复 */
+body.cal-fullscreen-active .q-scrollarea {
+  contain: none !important;
 }
 </style>
