@@ -84,21 +84,22 @@ const tableBookCol = [
         align: 'center',
     },
     {
-        name: 'createTime',
-        field: 'createTime',
-        label: '创建时间',
+        name: 'specialRemarks',
+        field: 'specialRemarks',
+        label: '特殊备注',
         align: 'center',
-    },
-    {
-        name: 'createUserName',
-        field: 'createUserName',
-        label: '创建用户',
-        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
     {
         name: 'remark',
         field: 'remarkDisplay',
         label: '备注',
+        align: 'center',
+    },
+    {
+        name: 'createTime',
+        field: 'createTime',
+        label: '创建时间',
         align: 'center',
     },
     {

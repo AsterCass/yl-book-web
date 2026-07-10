@@ -58,6 +58,9 @@
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.bookingUrl') }}&nbsp;:</h6>
           <div style="word-break: break-all;">{{ book.bookingUrl || '-' }}</div>
 
+          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.specialRemark') }}&nbsp;:</h6>
+          <div>{{ specialRemarksDisplay || '-' }}</div>
+
           <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.remark') }}&nbsp;:</h6>
           <div style="white-space: pre-wrap;">{{ book.remark || '-' }}</div>
 
@@ -108,6 +111,11 @@ const statusEnum = computed(() =>
     props.book ? BookStatusEnum.fromCode(props.book.status) : null)
 const statusName = computed(() => statusEnum.value ? statusEnum.value.name : '-')
 const statusColor = computed(() => statusEnum.value ? statusEnum.value.color : 'rgb(128, 128, 128)')
+
+// 特殊备注：后端返回逗号分隔字符串，详情以空格分割展示
+const specialRemarksDisplay = computed(() =>
+    props.book && props.book.specialRemarks
+        ? props.book.specialRemarks.split(',').filter(item => item).join(' ') : '')
 
 const sourceEnum = computed(() =>
     props.book && props.book.source != null ? BookSourceEnum.fromCode(props.book.source) : null)

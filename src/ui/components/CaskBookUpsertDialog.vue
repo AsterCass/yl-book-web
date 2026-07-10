@@ -72,6 +72,19 @@
                   outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
+        <!-- 特殊备注：选项与选中值都是文案字符串本身，无 id->名称 映射，不受选项加载时序影响 -->
+        <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+          {{ $t('book_booking.upsert.field.specialRemark') }}&nbsp;:</h6>
+        <q-select v-model="upsertSpecialRemarkList" :menu-offset="[0, 5]" :options="specialRemarkOptions"
+                  class="component-outline-input-grow"
+                  clear-icon="fa-solid fa-xmark"
+                  clearable
+                  dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                  multiple
+                  use-chips
+                  outlined popup-content-class="component-extra-card-std-limit">
+        </q-select>
+
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.remark') }}&nbsp;:</h6>
         <q-input v-model="upsertRemark" class="component-outline-input-grow" dense outlined
@@ -139,7 +152,7 @@ import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {AssignStrategyEnum, BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
-import {bookCreate, bookCustomerHistory, bookUpdate} from "@/api/book.js";
+import {bookCreate, bookCustomerHistory, bookSpecialRemarkListSimple, bookUpdate} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -166,7 +179,10 @@ const upsertMail = ref("")
 const upsertPreferredStaffId = ref(null)
 const upsertSource = ref(BookSourceEnum.PHONE.code)
 const upsertRemark = ref("")
+const upsertSpecialRemarkList = ref([])
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
+// 门店特殊备注选项（纯文案字符串，选中值即文案，无需 id 映射）
+const specialRemarkOptions = ref([])
 
 // 客户历史（按手机号模糊查询，防抖）
 const customerHistory = ref([])
@@ -232,6 +248,14 @@ function populate() {
   upsertPreferredStaffId.value = b && b.preferredStaffId ? b.preferredStaffId : null
   upsertSource.value = b && b.source != null ? b.source : BookSourceEnum.PHONE.code
   upsertRemark.value = b && b.remark ? b.remark : ''
+  // 优先取数组；列表行数据只有逗号分隔的 specialRemarks 字符串，需解析回填（否则更新时会误清空）
+  if (b && Array.isArray(b.specialRemarkList)) {
+    upsertSpecialRemarkList.value = [...b.specialRemarkList]
+  } else if (b && b.specialRemarks) {
+    upsertSpecialRemarkList.value = b.specialRemarks.split(',').filter(item => item)
+  } else {
+    upsertSpecialRemarkList.value = []
+  }
 }
 
 watch(() => props.modelValue, (val) => {
@@ -328,6 +352,8 @@ function save() {
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
     source: upsertSource.value ? upsertSource.value : BookSourceEnum.PHONE.code,
     remark: upsertRemark.value,
+    // 始终传数组：空数组=清空（创建时等价于留空）
+    specialRemarkList: upsertSpecialRemarkList.value,
   }
 
   if (props.isNew) {
@@ -386,10 +412,20 @@ function loadStaffOptions() {
 
 watch(() => [props.skillOptions, props.staffOptions], syncOptionLists)
 
+function loadSpecialRemarkOptions() {
+  bookSpecialRemarkListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    specialRemarkOptions.value = res.data.data
+  })
+}
+
 onMounted(() => {
   syncOptionLists()
   loadSkillOptions()
   loadStaffOptions()
+  loadSpecialRemarkOptions()
 })
 
 onBeforeUnmount(() => {

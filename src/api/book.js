@@ -48,6 +48,22 @@ export function bookDetail(id) {
     })
 }
 
+export function bookSpecialRemarkCreate(body) {
+    return serviceShiro({
+        url: `/book/specialRemark/create`,
+        data: body,
+        method: 'post',
+    })
+}
+
+// 门店特殊备注简单列表：返回本门店全部备注文案（字符串数组）
+export function bookSpecialRemarkListSimple() {
+    return serviceShiro({
+        url: `/book/specialRemark/list/simple`,
+        method: 'get',
+    })
+}
+
 // 客户历史：按手机号模糊搜索，返回最多 10 个客户（按手机号聚合），
 // 每个客户含总预约次数与最近 3 次预约（含已取消，附时间/项目/来源）
 export function bookCustomerHistory(phone) {

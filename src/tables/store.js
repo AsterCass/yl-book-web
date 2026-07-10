@@ -115,4 +115,9 @@ export const tableStoreOperation = [
         condition: 'updateOp',
         name: 'update',
     },
+    {
+        label: '特殊备注',
+        condition: 'remarkOp',
+        name: 'remark',
+    },
 ]

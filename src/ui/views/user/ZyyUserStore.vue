@@ -67,6 +67,9 @@
                               isNew = false;
                               showUpsert = true
                             }
+                            if(name === 'remark') {
+                              openRemark()
+                            }
                           }"
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
@@ -168,6 +171,59 @@
       </q-card>
     </q-dialog>
 
+    <!-- 特殊备注配置：整体重建（保存覆盖旧配置，清空列表保存即全部删除） -->
+    <q-dialog :model-value="showRemark" transition-hide="fade" no-backdrop-dismiss no-shake
+              transition-show="fade" @hide="showRemark = false">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('user_store.special_remark.title') }}
+        </h5>
+
+        <div class="q-mx-sm" style="opacity: 0.5; width: 25rem; font-size: 0.85rem">
+          {{ $t('user_store.special_remark.note') }}
+        </div>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-ma-md" style="min-width: 25rem">
+          <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                 @click="addRemarkItem">
+            <div class="row items-center justify-center">
+              <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+              <div class="q-ml-xs" style="font-size: 0.85rem">
+                {{ $t('user_store.special_remark.add') }}
+              </div>
+            </div>
+          </q-btn>
+
+          <div v-if="remarkList.length === 0" class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
+            {{ $t('user_store.special_remark.empty') }}
+          </div>
+
+          <div v-for="(remarkValue, remarkIndex) in remarkList" :key="remarkIndex"
+               class="row items-center q-mt-xs" style="gap: .5rem;">
+            <q-input v-model="remarkList[remarkIndex]" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.special_remark.placeholder')"/>
+            <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeRemarkItem(remarkIndex)">
+              <div class="row items-center">
+                <q-icon name="fa-solid fa-trash" size="1rem"/>
+              </div>
+            </q-btn>
+          </div>
+        </div>
+
+        <div class="row q-mt-xl q-mb-md justify-evenly">
+          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="saveRemark">
+            {{ $t('user_store.button.save') }}
+          </q-btn>
+
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showRemark = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
   </div>
 
 </template>
@@ -179,6 +235,7 @@ import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {tableStore, tableStoreOperation} from "@/tables/store.js";
 import {storeCreate, storeList, storeUpdate} from "@/api/store.js";
+import {bookSpecialRemarkCreate, bookSpecialRemarkListSimple} from "@/api/book.js";
 import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
 
 
@@ -285,6 +342,38 @@ function upsertData() {
   }
 }
 
+// 特殊备注配置（按行门店整体重建：打开时拉取现有备注，保存时全量覆盖）
+const showRemark = ref(false)
+const remarkList = ref([])
+
+function openRemark() {
+  bookSpecialRemarkListSimple().then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    remarkList.value = res.data.data || []
+    showRemark.value = true
+  })
+}
+
+function addRemarkItem() {
+  remarkList.value.push('')
+}
+
+function removeRemarkItem(remarkIndex) {
+  remarkList.value.splice(remarkIndex, 1)
+}
+
+function saveRemark() {
+  bookSpecialRemarkCreate({contents: remarkList.value}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showRemark.value = false
+    notifyTopPositive(t('user_store.special_remark.notify_success'))
+  })
+}
+
 // 默认从第一页开始查询；行操作后刷新时传 keepPage = true 保持当前页
 function selectData(keepPage = false) {
   if (!keepPage) {
@@ -312,6 +401,7 @@ function selectData(keepPage = false) {
       const timezoneEnum = TimezoneOptEnum.fromCode(data.timezone)
       data.timezoneName = timezoneEnum ? timezoneEnum.name : (data.timezone || '')
       data.updateOp = true
+      data.remarkOp = true
     })
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
