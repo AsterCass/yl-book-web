@@ -1,5 +1,7 @@
 <template>
-  <div class="full-width cal-page">
+  <!-- 全屏时挪到 body 下：父级 q-scroll-area 的 contain: strict 会把 fixed 后代困在滚动盒内，必须先脱离它 -->
+  <teleport to="body" :disabled="!isFullscreen">
+  <div class="full-width cal-page" :class="{ 'cal-page-fullscreen': isFullscreen }">
 
     <!-- 顶部：导航 + 视图切换 -->
     <div class="row items-center q-mb-lg q-mt-sm cal-toolbar">
@@ -38,6 +40,11 @@
                   label label-color="transparent" label-text-color="transparent"
                   :thumb-path="ALPHA_THUMB_PATH" style="width: 10rem;"/>
       </div>
+
+      <!-- 全屏：整个日历页（含工具栏）铺满视口，覆盖导航/header/footer；弹窗层级更高不受影响 -->
+      <q-btn round flat dense class="component-none-btn-grow q-mr-md" @click="isFullscreen = !isFullscreen">
+        <q-icon :name="isFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'" size="1rem"/>
+      </q-btn>
       <!-- 图例 -->
 <!--      <div class="row items-center cal-legend">-->
 <!--        <span class="cal-legend-dot cal-legend-block"/>-->
@@ -206,6 +213,7 @@
     </teleport>
 
   </div>
+  </teleport>
 </template>
 
 <script setup>
@@ -226,7 +234,7 @@ const globalState = useGlobalStateStore()
 
 const HOUR_HEIGHT = 64          // 每小时像素高度
 const DEFAULT_START_HOUR = 8    // 默认最早显示 08:00
-const DEFAULT_END_HOUR = 22     // 默认最晚显示 22:00
+const DEFAULT_END_HOUR = 24     // 默认最晚显示 22:00
 const gutterWidth = '4rem'
 
 const viewMode = ref('week')    // week | day
@@ -237,6 +245,17 @@ const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
 const showCancelled = ref(false)
+// 全屏（CSS 固定定位铺满视口，覆盖导航/header/footer；不用原生 Fullscreen API，
+// 否则 teleport 到 body 的弹窗/悬浮预览在全屏子树外将不可见）
+const isFullscreen = ref(false)
+
+function onFullscreenKeyDown(e) {
+  // 弹窗打开时 Esc 优先关弹窗，不退出全屏
+  if (e.key === 'Escape' && isFullscreen.value
+      && !showEdit.value && !showCancel.value && !showDetail.value) {
+    isFullscreen.value = false
+  }
+}
 // 卡片背景（状态色底色）的透明度：用户偏好，读写 globalState（随 store 持久化到 localStorage）
 const bgAlpha = computed({
   get: () => globalState.calendarBgAlpha,
@@ -996,6 +1015,7 @@ onMounted(() => {
   nowTimer = setInterval(() => {
     nowTick.value = Date.now()
   }, NOW_TICK_INTERVAL)
+  window.addEventListener('keydown', onFullscreenKeyDown)
 })
 
 onBeforeUnmount(() => {
@@ -1004,6 +1024,7 @@ onBeforeUnmount(() => {
     clearInterval(nowTimer)
     nowTimer = null
   }
+  window.removeEventListener('keydown', onFullscreenKeyDown)
 })
 </script>
 
@@ -1011,6 +1032,21 @@ onBeforeUnmount(() => {
 
 .cal-page {
   padding: 0 2rem 1rem 0.5rem;
+}
+
+// 全屏态：固定铺满视口，盖住导航/header/footer（z-index 高于 q-header 的 2000，低于弹窗层 6000+）
+.cal-page-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  padding: 1rem 2rem;
+  overflow-y: auto;
+  background: rgb(var(--background-color));
+
+  // 全屏下日历主体尽量占满高度（默认 66vh）
+  .cal-body-scroll {
+    max-height: calc(100vh - 13rem);
+  }
 }
 
 .cal-toolbar {
