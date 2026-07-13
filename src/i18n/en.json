@@ -786,6 +786,8 @@
     "cancel_booking": "Cancel",
     "show_cancelled": "Show Cancelled",
     "hide_cancelled": "Hide Cancelled",
+    "checkin_success": "Checked in",
+    "uncheckin_success": "Check-in cancelled",
     "bg_alpha": "Card background opacity:",
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",

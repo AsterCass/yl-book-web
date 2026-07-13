@@ -48,6 +48,21 @@ export function bookDetail(id) {
     })
 }
 
+// 前台签到标记（checkIn）：仅作展示标记，不联动其他逻辑
+export function bookCheckin(id) {
+    return serviceShiro({
+        url: `/book/checkin/${id}`,
+        method: 'post',
+    })
+}
+
+export function bookUncheckin(id) {
+    return serviceShiro({
+        url: `/book/uncheckin/${id}`,
+        method: 'post',
+    })
+}
+
 export function bookSpecialRemarkCreate(body) {
     return serviceShiro({
         url: `/book/specialRemark/create`,
