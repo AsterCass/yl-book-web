@@ -122,6 +122,9 @@
                   <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
                     {{ ev.sourceName }}
                   </span>
+                  <!-- 前台已签到标记 -->
+                  <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size=".7rem"
+                          class="cal-event-checkin-mark"/>
                 </div>
                 <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
 
@@ -189,6 +192,11 @@
             {{ hoverCard.ev.sourceName }}
           </span>
           <q-space/>
+          <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
+          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-check" size="0.9rem"
+                  class="cal-event-edit"
+                  :class="{ 'cal-event-checkin-on': hoverCard.ev.booking.checkIn }"
+                  @pointerdown.stop @click.stop="toggleCheckin(hoverCard.ev.booking)"/>
           <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-pen" size="0.9rem"
                   class="cal-event-edit" @pointerdown.stop @click.stop="openEdit(hoverCard.ev.booking)"/>
         </div>
@@ -220,7 +228,7 @@ import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
-import {bookAdjust, bookCalendar, bookDelete, bookReassign} from "@/api/book.js";
+import {bookAdjust, bookCalendar, bookCheckin, bookDelete, bookReassign, bookUncheckin} from "@/api/book.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
@@ -708,6 +716,20 @@ function cancelData() {
       return
     }
     notifyTopPositive(t('notify.cancel_success'))
+    reload()
+  })
+}
+
+// 前台签到/取消签到（仅展示标记，不联动其他逻辑）；成功后先本地翻转保证悬浮卡即时反馈，再刷新
+function toggleCheckin(booking) {
+  const target = !booking.checkIn
+  const req = target ? bookCheckin : bookUncheckin
+  req(booking.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    booking.checkIn = target
+    notifyTopPositive(t(target ? 'book_calendar.checkin_success' : 'book_calendar.uncheckin_success'))
     reload()
   })
 }
@@ -1336,6 +1358,18 @@ onBeforeUnmount(() => {
       &:hover {
         opacity: 1;
       }
+    }
+
+    // 右上角「前台已签到」静态对勾
+    .cal-event-checkin-mark {
+      flex: 0 0 auto;
+      margin-left: auto;
+      color: rgb(var(--positive));
+    }
+
+    .cal-event-checkin-on {
+      color: rgb(var(--positive));
+      opacity: 1;
     }
   }
 
