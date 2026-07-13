@@ -123,7 +123,7 @@
                     {{ ev.sourceName }}
                   </span>
                   <!-- 前台已签到标记 -->
-                  <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size=".7rem"
+                  <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
                           class="cal-event-checkin-mark"/>
                 </div>
                 <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
@@ -193,7 +193,7 @@
           </span>
           <q-space/>
           <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
-          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-check" size="0.9rem"
+          <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-check" size="1rem"
                   class="cal-event-edit"
                   :class="{ 'cal-event-checkin-on': hoverCard.ev.booking.checkIn }"
                   @pointerdown.stop @click.stop="toggleCheckin(hoverCard.ev.booking)"/>
@@ -1364,11 +1364,11 @@ onBeforeUnmount(() => {
     .cal-event-checkin-mark {
       flex: 0 0 auto;
       margin-left: auto;
-      color: rgb(var(--positive));
+      color: rgb(var(--pointer));
     }
 
     .cal-event-checkin-on {
-      color: rgb(var(--positive));
+      color: rgb(var(--pointer));
       opacity: 1;
     }
   }
