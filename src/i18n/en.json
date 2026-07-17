@@ -535,9 +535,9 @@
   "staff": {
     "title": "Staff",
     "label": { "id": "Staff ID", "name": "Staff Name", "phone": "Staff Phone", "status": "Staff Status" },
-    "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10" },
+    "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10", "external_name": "Optional" },
     "button": { "query": "Query", "add": "Add Staff", "clear": "Clear Filters", "save": "Save" },
-    "upsert": { "title_add": "Add Staff", "title_update": "Update Staff", "field": { "name": "Staff Name", "phone": "Staff Phone", "priority": "Priority" }, "save_add": "Add", "save_update": "Update" },
+    "upsert": { "title_add": "Add Staff", "title_update": "Update Staff", "field": { "name": "Staff Name", "external_name": "External Name", "phone": "Staff Phone", "priority": "Priority" }, "save_add": "Add", "save_update": "Update" },
     "dialog": { "common": { "cancel": "Cancel", "confirm": "Confirm" }, "delete": { "title": "Delete Staff", "content": "Delete staff 【{name}】?" } },
     "notify": { "update_success": "Staff updated successfully", "skill_assign_success": "Skills assigned successfully" },
     "skill_assign": { "title": "Assign Skills" },

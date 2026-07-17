@@ -33,6 +33,12 @@ const tableStaffCol = [
         align: 'center',
     },
     {
+        name: 'externalName',
+        field: 'externalName',
+        label: '外部名称',
+        align: 'center',
+    },
+    {
         name: 'phone',
         field: 'phone',
         label: '雇员手机号',

@@ -59,6 +59,7 @@
                               clearUpsertParam();
                               updateId = row.id
                               upsertName = row.name
+                              upsertExternalName = row.externalName
                               upsertPhone = row.phone
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               isNew = false;
@@ -107,6 +108,10 @@
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.name')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.external_name') }}&nbsp;:</h6>
+          <q-input v-model="upsertExternalName" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff.placeholder.external_name')"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
@@ -232,6 +237,7 @@ function clearSearch() {
 const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
+const upsertExternalName = ref("")
 const upsertPhone = ref("")
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
@@ -249,6 +255,7 @@ const updateId = ref("")
 function clearUpsertParam() {
   updateId.value = ""
   upsertName.value = ""
+  upsertExternalName.value = ""
   upsertPhone.value = ""
   clearScheduleParam()
 }
@@ -395,6 +402,7 @@ function upsertData() {
 
   const body = {
     name: upsertName.value,
+    externalName: upsertExternalName.value,
     phone: upsertPhone.value,
     priority: 1,
     scheduleList: scheduleList,
