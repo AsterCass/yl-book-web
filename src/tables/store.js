@@ -33,6 +33,12 @@ const tableStoreCol = [
         align: 'center',
     },
     {
+        name: 'externalName',
+        field: 'externalName',
+        label: '外部名称',
+        align: 'center',
+    },
+    {
         name: 'address',
         field: 'address',
         label: '门店地址',
@@ -67,12 +73,6 @@ const tableStoreCol = [
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
-        align: 'center',
-    },
-    {
-        name: 'updateTime',
-        field: 'updateTime',
-        label: '更新时间',
         align: 'center',
     },
     {

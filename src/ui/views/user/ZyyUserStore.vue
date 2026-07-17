@@ -61,6 +61,7 @@
                               clearUpsertParam();
                               updateId = row.id
                               upsertName = row.name
+                              upsertExternalName = row.externalName
                               upsertAddress = row.address
                               upsertPhone = row.phone
                               upsertDesc = row.description
@@ -103,6 +104,12 @@
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_store.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.name')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_store.upsert.field.external_name')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertExternalName" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('user_store.placeholder.optional')"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.address')
@@ -254,6 +261,7 @@ function clearSearch() {
 const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
+const upsertExternalName = ref("")
 const upsertAddress = ref("")
 const upsertPhone = ref("")
 const upsertDesc = ref("")
@@ -268,6 +276,7 @@ const updateId = ref("")
 
 function clearUpsertParam() {
   upsertName.value = ""
+  upsertExternalName.value = ""
   upsertAddress.value = ""
   upsertPhone.value = ""
   upsertDesc.value = ""
@@ -301,6 +310,7 @@ function upsertData() {
     }
     const body = {
       name: upsertName.value,
+      externalName: upsertExternalName.value,
       address: upsertAddress.value,
       phone: upsertPhone.value,
       description: upsertDesc.value,
@@ -326,6 +336,7 @@ function upsertData() {
     }
     const body = {
       name: upsertName.value,
+      externalName: upsertExternalName.value,
       address: upsertAddress.value,
       phone: upsertPhone.value,
       description: upsertDesc.value,
