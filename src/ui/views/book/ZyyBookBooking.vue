@@ -44,6 +44,16 @@
 
       <div class="q-ml-md">
         <h6>
+          {{ $t('book_booking.label.referralCode') }}&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="selectReferralCode" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('book_booking.placeholder.referralCode')"
+               tabindex="0">
+      </q-input>
+
+      <div class="q-ml-md">
+        <h6>
           {{ $t('book_booking.label.status') }}&nbsp;:
         </h6>
       </div>
@@ -305,6 +315,7 @@ const selectId = ref("")
 const selectName = ref("")
 const selectPhone = ref("")
 const selectMail = ref("")
+const selectReferralCode = ref("")
 const selectStatus = ref(null)
 const selectSource = ref(null)
 const selectStaffId = ref(null)
@@ -320,6 +331,7 @@ function clearSearch() {
   selectName.value = ""
   selectPhone.value = ""
   selectMail.value = ""
+  selectReferralCode.value = ""
   selectStatus.value = null
   selectSource.value = null
   selectStaffId.value = null
@@ -519,6 +531,7 @@ function selectData(keepPage = false) {
   tableDynamicData.value.inLoading = true
   const param = {
     id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,
+    referralCode: selectReferralCode.value,
     status: selectStatus.value ? selectStatus.value.value : null,
     source: selectSource.value ? selectSource.value.value : null,
     staffId: selectStaffId.value ? selectStaffId.value.value : null,
