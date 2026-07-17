@@ -48,8 +48,7 @@
                               openEmailDetail(row)
                             }
                             if(name === 'bookDetail') {
-                              detailBook = row.book
-                              showBookDetail = true
+                              openBookDetail(row.book)
                             }
                             if(name === 'reparse') {
                               toOpId = row.id
@@ -152,7 +151,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBookEmail, tableBookEmailOperation} from "@/tables/book-email.js";
-import {bookEmailGiveup, bookEmailList, bookEmailReparse} from "@/api/book.js";
+import {bookDetail, bookEmailGiveup, bookEmailList, bookEmailReparse} from "@/api/book.js";
 import {BookEmailStatusEnum, BookSourceEnum, EmailIntentEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {truncate} from "@/utils/base-tools.js";
@@ -190,6 +189,20 @@ const cleanedContent = computed(() => {
 // booking detail (shared dialog)
 const showBookDetail = ref(false)
 const detailBook = ref(null)
+
+// 详情统一走 /book/detail/{id}：列表内嵌的 book 不含详情独有字段（如按邮箱统计的预约次数）
+function openBookDetail(book) {
+  if (!book || !book.id) {
+    return
+  }
+  bookDetail(book.id).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    detailBook.value = res.data.data
+    showBookDetail.value = true
+  })
+}
 
 // op confirm (reparse / giveup)
 const showOperation = ref(false)

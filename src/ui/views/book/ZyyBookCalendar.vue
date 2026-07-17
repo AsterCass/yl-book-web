@@ -228,7 +228,15 @@ import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
-import {bookAdjust, bookCalendar, bookCheckin, bookDelete, bookReassign, bookUncheckin} from "@/api/book.js";
+import {
+  bookAdjust,
+  bookCalendar,
+  bookCheckin,
+  bookDelete,
+  bookDetail,
+  bookReassign,
+  bookUncheckin
+} from "@/api/book.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
@@ -584,9 +592,15 @@ const gridStyle = computed(() => ({
 const showDetail = ref(false)
 const detailBook = ref(null)
 
+// 详情统一走 /book/detail/{id}：列表/日历数据不含详情独有字段（如按邮箱统计的预约次数）
 function openDetail(booking) {
-  detailBook.value = booking
-  showDetail.value = true
+  bookDetail(booking.id).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    detailBook.value = res.data.data
+    showDetail.value = true
+  })
 }
 
 // 新增/编辑（弹窗与预约列表共用组件；保存成功后刷新当前视图）

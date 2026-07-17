@@ -140,8 +140,7 @@
                           }"
                         @operationClick="(name, row) => {
                             if(name === 'detail') {
-                              detailBook = row
-                              showBookDetail = true
+                              openBookDetail(row.id)
                             }
                             if(name === 'update') {
                               upsertBook = row
@@ -295,7 +294,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookDelete, bookList, bookReassign} from "@/api/book.js";
+import {bookAssign, bookDelete, bookDetail, bookList, bookReassign} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -353,6 +352,17 @@ const staffIdNameMap = ref({})
 // booking detail (shared read-only dialog)
 const showBookDetail = ref(false)
 const detailBook = ref(null)
+
+// 详情统一走 /book/detail/{id}：列表数据不含详情独有字段（如按邮箱统计的预约次数）
+function openBookDetail(id) {
+  bookDetail(id).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    detailBook.value = res.data.data
+    showBookDetail.value = true
+  })
+}
 
 // staff detail (read-only)
 const showStaffDetail = ref(false)
