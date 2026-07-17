@@ -26,6 +26,13 @@
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.mail') }}&nbsp;:</h6>
           <div>{{ book.mail || '-' }}</div>
 
+          <!-- 按邮箱统计的已预约次数（不含已取消），仅详情接口返回；无邮箱时后端返回 0 -->
+          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.customerBookingCountTenant') }}&nbsp;:</h6>
+          <div>{{ book.customerBookingCountTenant != null ? book.customerBookingCountTenant : '-' }}</div>
+
+          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.customerBookingCount') }}&nbsp;:</h6>
+          <div>{{ book.customerBookingCount != null ? book.customerBookingCount : '-' }}</div>
+
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.status') }}&nbsp;:</h6>
           <div :style="`color: ${statusColor}`">{{ statusName }}</div>
 
@@ -55,9 +62,6 @@
             }}
           </div>
 
-          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.bookingUrl') }}&nbsp;:</h6>
-          <div style="word-break: break-all;">{{ book.bookingUrl || '-' }}</div>
-
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.specialRemark') }}&nbsp;:</h6>
           <div>{{ specialRemarksDisplay || '-' }}</div>
 
@@ -69,12 +73,6 @@
 
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.createTime') }}&nbsp;:</h6>
           <div>{{ book.createTime || '-' }}</div>
-
-          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.updateUser') }}&nbsp;:</h6>
-          <div>{{ book.updateUserName || book.updateUserId || '-' }}</div>
-
-          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.updateTime') }}&nbsp;:</h6>
-          <div>{{ book.updateTime || '-' }}</div>
 
         </div>
       </div>

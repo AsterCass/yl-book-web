@@ -698,6 +698,8 @@
       "name": "客户名称",
       "phone": "客户手机号",
       "mail": "客户邮箱",
+      "customerBookingCountTenant": "预约次数",
+      "customerBookingCount": "本店预约次数",
       "status": "预约状态",
       "source": "预约来源",
       "project": "预约项目",

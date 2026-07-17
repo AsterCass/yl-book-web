@@ -700,6 +700,8 @@
       "name": "Customer Name",
       "phone": "Customer Phone",
       "mail": "Customer Email",
+      "customerBookingCountTenant": "Total Bookings",
+      "customerBookingCount": "Bookings at This Store",
       "status": "Status",
       "source": "Source",
       "project": "Project",
