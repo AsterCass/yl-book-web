@@ -21,6 +21,7 @@ export const useGlobalStateStore = defineStore('globalState', {
     state: () => ({
         curThemeName: 'light',
         language: '',
+        loginToken: '',
         userData: null,
         loginInfo: null,
         // 页面数据版本号：作为顶层 router-view 的 key，自增即强制重挂载当前页面（重跑 onMounted 内的查询逻辑）
@@ -88,6 +89,13 @@ export const useGlobalStateStore = defineStore('globalState', {
             }
             this.userData = {...this.userData, storeId, storeName}
             this.refreshPageData()
+        },
+        updateLoginToken(token) {
+            if (token) {
+                this.loginToken = token;
+            } else {
+                this.loginToken = ''
+            }
         },
         updateLoginInfo(data) {
             this.loginInfo = data

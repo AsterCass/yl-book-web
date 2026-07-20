@@ -2,7 +2,6 @@ import axios from 'axios'
 import Qs from 'qs'
 import {notifyTopWarning} from "@/utils/notification-tools";
 import {i18n} from '@/i18n';
-import {deleteCookie} from "@/utils/common.js";
 import router, {backToLogin} from '@/router'
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
@@ -13,11 +12,15 @@ const BASE_ADD = import.meta.env.VITE_APP_BASE_ADD
 const TENANT_FREE_URLS = ['/user/login', '/user/logout', '/user/isLogin', "/user/m"]
 
 const requestConfig = config => {
+    const globalState = useGlobalStateStore()
+    if (globalState.loginToken) {
+        config.headers.set('Yl-Token', globalState.loginToken)
+    }
     const url = config.url || ''
     if (TENANT_FREE_URLS.some(path => url.startsWith(path))) {
         return config
     }
-    const userData = useGlobalStateStore().userData
+    const userData = globalState.userData
     if (userData && userData.tenantId) {
         config.headers['X-Tenant-Id'] = userData.tenantId
     }
@@ -36,7 +39,7 @@ const responseConfig = response => {
             bizStatus = serverData.status
             if (600 === bizStatus) {
                 notifyTopWarning(t('no_login'))
-                deleteCookie()
+                globalState.updateLoginToken(null)
                 backToLogin(router)
                 return null
             }

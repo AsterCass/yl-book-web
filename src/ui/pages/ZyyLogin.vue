@@ -226,12 +226,16 @@ function userLoginMethod() {
     // 前端字段
     isSaveLoginInfo: isSaveLoginInfo.value,
   }
-
   userLogin(currentBody.value).then(res => {
     if (!res || !res.data || !res.data.data) {
       return
     }
+    const token = res.headers.get("Yl-Token")
+    if (!token) {
+      return
+    }
     globalState.updateUserData(res.data.data)
+    globalState.updateLoginToken(token)
     saveLoginInfo()
     notifyTopPositive(t('main_login_success'))
     if (currentBody.value.mail === currentBody.value.password) {

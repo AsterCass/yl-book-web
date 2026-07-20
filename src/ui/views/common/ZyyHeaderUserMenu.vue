@@ -64,7 +64,6 @@ import {useRouter} from "vue-router";
 import {notifyTopPositive} from "@/utils/notification-tools";
 import {useI18n} from "vue-i18n";
 import {userLogout} from "@/api/myu";
-import {deleteCookie} from "@/utils/common.js";
 import {GenderOptEnum} from "@/constants/enums/common.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import emitter from "@/utils/bus";
@@ -125,7 +124,7 @@ function logoutMethod() {
     if (!res || !res.data) {
       return
     }
-    deleteCookie()
+    globalState.updateLoginToken(null)
     globalState.updateUserData(null)
     notifyTopPositive(t('main_login_success_logout'))
     backToLogin(thisRouter)

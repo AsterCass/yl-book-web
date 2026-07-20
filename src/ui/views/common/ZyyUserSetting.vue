@@ -191,7 +191,6 @@ import {GenderOptEnum} from "@/constants/enums/common.js";
 import emitter from "@/utils/bus";
 import {mDetail, mPasswd, mUpdate} from "@/api/myu.js";
 import {checkIsPasswd} from "@/utils/format-check.js";
-import {deleteCookie} from "@/utils/common.js";
 import {backToLogin} from "@/router/index.js";
 import {useRouter} from "vue-router";
 
@@ -304,7 +303,7 @@ function saveNewPasswd() {
     notifyTopPositive(t('main_space_setting_account_passwd_suc'))
     showUserSetting.value = false
     // logout
-    deleteCookie()
+    globalState.updateLoginToken(null)
     globalState.updateUserData(null)
     backToLogin(thisRouter)
   })
