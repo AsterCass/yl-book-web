@@ -39,7 +39,8 @@ const responseConfig = response => {
             bizStatus = serverData.status
             if (600 === bizStatus) {
                 notifyTopWarning(t('no_login'))
-                globalState.updateLoginToken(null)
+                // 响应拦截器有独立作用域，需在此重新获取 store（不能复用 requestConfig 内的局部变量）
+                useGlobalStateStore().updateLoginToken(null)
                 backToLogin(router)
                 return null
             }

@@ -232,6 +232,7 @@ function userLoginMethod() {
     }
     const token = res.headers.get("Yl-Token")
     if (!token) {
+      notifyTopWarning(t('main_login_no_token'))
       return
     }
     globalState.updateUserData(res.data.data)

@@ -84,6 +84,7 @@
   "main_login_message_empty": "租户，门店，邮箱，密码字段不能为空",
   "main_login_success": "登录成功",
   "main_login_failed": "登录失败，请重试",
+  "main_login_no_token": "登录异常：未获取到登录凭证，请重试或联系管理员",
   "main_login_success_logout": "登出成功",
   "main_login_success_copy": "复制成功",
   "main_login_success_star_file": "添加成功",
