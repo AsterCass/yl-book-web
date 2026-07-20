@@ -59,6 +59,7 @@
                               clearUpsertParam();
                               updateId = row.id
                               upsertName = row.name
+                              upsertExternalName = row.externalName
                               upsertCode = row.code
                               upsertDesc = row.description
                               upsertConsumeMinutes = row.consumeMinutes
@@ -101,6 +102,12 @@
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff_skill.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff_skill.placeholder.name')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('staff_skill.upsert.field.external_name')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertExternalName" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff_skill.placeholder.external_name')"/>
 
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
@@ -208,6 +215,7 @@ function clearSearch() {
 const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
+const upsertExternalName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
 const upsertConsumeMinutes = ref(null)
@@ -217,6 +225,7 @@ const updateId = ref("")
 
 function clearUpsertParam() {
   upsertName.value = ""
+  upsertExternalName.value = ""
   upsertCode.value = ""
   upsertDesc.value = ""
   upsertConsumeMinutes.value = null
@@ -261,6 +270,7 @@ function upsertData() {
 
   const body = {
     name: upsertName.value,
+    externalName: upsertExternalName.value,
     code: upsertCode.value,
     description: upsertDesc.value,
     consumeMinutes: upsertConsumeMinutes.value,

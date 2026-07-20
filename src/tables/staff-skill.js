@@ -33,6 +33,12 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        name: 'externalName',
+        field: 'externalName',
+        label: '对外名称',
+        align: 'center',
+    },
+    {
         name: 'code',
         field: 'code',
         label: '技能码',
