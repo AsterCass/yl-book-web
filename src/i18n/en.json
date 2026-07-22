@@ -584,7 +584,7 @@
 
   "staff_skill": {
     "label": { "id": "Skill ID", "name": "Skill Name", "code": "Skill Code", "status": "Skill Status" },
-    "placeholder": { "id": "e.g. YLSS001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70", "alias": "e.g. Foot Spa", "external_name": "Optional", "serviceAmount": "Optional, e.g. 128" },
+    "placeholder": { "id": "e.g. YLSS001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70", "alias": "e.g. Foot Spa", "external_name": "Optional", "serviceAmount": "e.g. 128" },
     "button": { "query": "Search", "add": "Add Skill", "clear": "Clear Filters", "save": "Save" },
     "upsert": { "title_add": "Add Skill", "title_update": "Update Skill", "field": { "name": "Skill Name", "external_name": "External Name", "code": "Skill Code", "desc": "Skill Description", "consumeMinutes": "Duration", "serviceAmount": "Service Amount", "aliasList": "Skill Alias" }, "alias_note": "This alias field is used during third-party appointment API calls to determine whether it refers to the same skill.", "alias_add": "Add Alias", "alias_empty": "No alias", "save_add": "Add", "save_update": "Update" },
     "dialog": {

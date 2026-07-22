@@ -131,7 +131,7 @@
                    mask="###"
                    :placeholder="t('staff_skill.placeholder.consumeMinutes')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
               $t('staff_skill.upsert.field.serviceAmount')
             }}&nbsp;:</h6>
           <q-input v-model="upsertServiceAmount" class="component-outline-input-grow" dense outlined
@@ -269,7 +269,8 @@ function removeAliasItem(aliasIndex) {
 }
 
 function upsertData() {
-  if (!upsertName.value || !upsertCode.value) {
+  if (!upsertName.value || !upsertCode.value
+      || upsertServiceAmount.value === "" || upsertServiceAmount.value == null) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
@@ -285,7 +286,7 @@ function upsertData() {
     code: upsertCode.value,
     description: upsertDesc.value,
     consumeMinutes: upsertConsumeMinutes.value,
-    serviceAmount: upsertServiceAmount.value !== "" ? upsertServiceAmount.value : null,
+    serviceAmount: upsertServiceAmount.value,
     aliasList: upsertAliasList.value,
   }
 
