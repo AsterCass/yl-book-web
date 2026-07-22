@@ -63,6 +63,7 @@
                               upsertCode = row.code
                               upsertDesc = row.description
                               upsertConsumeMinutes = row.consumeMinutes
+                              upsertServiceAmount = row.serviceAmount
                               upsertAliasList = row.aliasList
                               isNew = false;
                               showUpsert = true
@@ -129,6 +130,14 @@
           <q-input v-model="upsertConsumeMinutes" class="component-outline-input-grow" dense outlined
                    mask="###"
                    :placeholder="t('staff_skill.placeholder.consumeMinutes')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('staff_skill.upsert.field.serviceAmount')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertServiceAmount" class="component-outline-input-grow" dense outlined
+                   mask="#.##"
+                   reverse-fill-mask
+                   :placeholder="t('staff_skill.placeholder.serviceAmount')"/>
 
 
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
@@ -219,6 +228,7 @@ const upsertExternalName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
 const upsertConsumeMinutes = ref(null)
+const upsertServiceAmount = ref(null)
 const upsertAliasList = ref([])
 
 const updateId = ref("")
@@ -229,6 +239,7 @@ function clearUpsertParam() {
   upsertCode.value = ""
   upsertDesc.value = ""
   upsertConsumeMinutes.value = null
+  upsertServiceAmount.value = null
   upsertAliasList.value = []
 }
 
@@ -274,6 +285,7 @@ function upsertData() {
     code: upsertCode.value,
     description: upsertDesc.value,
     consumeMinutes: upsertConsumeMinutes.value,
+    serviceAmount: upsertServiceAmount.value !== "" ? upsertServiceAmount.value : null,
     aliasList: upsertAliasList.value,
   }
 

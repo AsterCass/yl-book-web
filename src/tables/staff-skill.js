@@ -64,6 +64,12 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        name: 'serviceAmount',
+        field: 'serviceAmount',
+        label: '服务金额',
+        align: 'center',
+    },
+    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
