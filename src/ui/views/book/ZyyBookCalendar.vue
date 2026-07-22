@@ -242,7 +242,32 @@ import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
+
+// 时间展示：英文用 12 小时制（含 AM/PM），其他语言用 24 小时制。仅用于展示，
+// 提交后端的 bookTimeStr 仍走 minutesToTime 的 24 小时制
+function formatTimeDisplay(h, m) {
+  if (locale.value === 'en') {
+    const period = h < 12 ? 'AM' : 'PM'
+    const hour12 = h % 12 === 0 ? 12 : h % 12
+    return `${hour12}:${String(m).padStart(2, '0')} ${period}`
+  }
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+// 分钟数 -> 展示时间
+function formatMinutesDisplay(min) {
+  return formatTimeDisplay(Math.floor(min / 60), min % 60)
+}
+
+// 'HH:mm' 字符串 -> 展示时间
+function formatHmDisplay(hm) {
+  if (!hm) {
+    return ''
+  }
+  const parts = hm.split(':')
+  return formatTimeDisplay(Number(parts[0]), Number(parts[1]))
+}
 const globalState = useGlobalStateStore()
 
 const HOUR_HEIGHT = 64          // 每小时像素高度
@@ -345,7 +370,7 @@ function timeToMinutes(hhmm) {
 }
 
 function formatHour(h) {
-  return `${String(h).padStart(2, '0')}:00`
+  return formatTimeDisplay(h, 0)
 }
 
 // 从 weekStart 起连续 7 天（滚动窗口，起点任意；dayOfWeek 按真实星期计算）
@@ -433,7 +458,7 @@ const nowLine = computed(() => {
   }
   return {
     top: (minutes - startHour * 60) / 60 * HOUR_HEIGHT,
-    label: minutesToTime(minutes),
+    label: formatMinutesDisplay(minutes),
   }
 })
 
@@ -507,7 +532,9 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
     const b = ev.booking
     // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
-    const lines = [b._timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, b.remark].filter(Boolean)
+    const timeRange = (b._startHm && b._endHm)
+        ? `${formatHmDisplay(b._startHm)} - ${formatHmDisplay(b._endHm)}` : ''
+    const lines = [timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, b.remark].filter(Boolean)
     return {
       booking: b,
       top: toPx(ev.start),
@@ -647,7 +674,7 @@ function onColPointerMove(e, col) {
     colKey: col.key,
     minutes,
     top: (minutes - startHour * 60) / 60 * HOUR_HEIGHT,
-    label: minutesToTime(minutes),
+    label: formatMinutesDisplay(minutes),
   }
 }
 
@@ -906,7 +933,7 @@ function onPointerMove(e) {
     width: colWidth - 4,
     top: (newStart - rangeStart) / 60 * HOUR_HEIGHT,
     height: dragCtx.duration / 60 * HOUR_HEIGHT,
-    label: minutesToTime(newStart),
+    label: formatMinutesDisplay(newStart),
   }
 }
 
@@ -997,9 +1024,10 @@ function enrichBooking(b) {
   const dur = b.requiredSkillTime && b.requiredSkillTime > 0 ? b.requiredSkillTime : 60
   b._start = startMin
   b._end = startMin + dur
-  // 起止时间行（bookingTime / endTime 均为 YYYY-MM-DD HH:mm，仅在两者都有值时展示 HH:mm - HH:mm）
-  b._timeRange = (b.bookingTime && b.endTime)
-      ? `${b.bookingTime.substring(11, 16)} - ${b.endTime.substring(11, 16)}` : ''
+  // 起止时间原始 HH:mm（bookingTime / endTime 均为 YYYY-MM-DD HH:mm）；
+  // 展示格式化放在 buildColumn 内按当前语言生成，切换语言即时生效
+  b._startHm = b.bookingTime ? b.bookingTime.substring(11, 16) : ''
+  b._endHm = b.endTime ? b.endTime.substring(11, 16) : ''
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
   b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
@@ -1270,7 +1298,6 @@ onBeforeUnmount(() => {
     top: -1.75rem;
     left: 0.5rem;
     font-size: .7rem;
-    font-weight: 600;
     padding: .05rem .35rem;
     border-radius: .25rem;
     color: #fff;
