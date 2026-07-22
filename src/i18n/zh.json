@@ -614,6 +614,7 @@
       "source": "预约来源",
       "bookProject": "预约项目",
       "staffName": "服务人员",
+      "preferredStaff": "偏好员工",
       "staffPhone": "服务人员手机号",
       "bookingUrl": "预约链接"
     },
