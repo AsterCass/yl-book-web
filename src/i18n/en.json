@@ -602,6 +602,7 @@
 
   "book_booking": {
     "title": "Booking Management",
+    "amount_unconfigured": "Contains service skills without a configured amount",
     "label": {
       "id": "Booking ID",
       "name": "Customer Name",
@@ -655,6 +656,7 @@
       "save_add": "Add",
       "save_update": "Update",
       "consume_total": "Estimated duration: {minutes} min",
+      "amount_total": "Estimated amount: {amount}",
       "assign_title": "Assign Staff",
       "assign_select_staff": "Select Staff",
       "assign_confirm": "Confirm Assignment",
@@ -712,6 +714,7 @@
       "requiredSkillTimeMin": "min",
       "preferredStaff": "Preferred Staff",
       "staff": "Staff",
+      "amount": "Amount",
       "bookingUrl": "Booking URL",
       "specialRemark": "Special Remarks",
       "remark": "Remark",
@@ -774,6 +777,7 @@
 
   "book_calendar": {
     "title": "Booking Calendar",
+    "amount_prefix": "Amount: ",
     "date_start": "Start Date",
     "date_end": "End Date",
     "this_week": "This Week",

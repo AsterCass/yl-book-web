@@ -62,6 +62,12 @@
             }}
           </div>
 
+          <!-- 预约金额：为 null 时提示包含未配置金额的服务技能 -->
+          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.amount') }}&nbsp;:</h6>
+          <div :style="book.amount == null ? 'color: rgb(var(--negative));' : ''">
+            {{ book.amount != null ? book.amount : $t('book_booking.amount_unconfigured') }}
+          </div>
+
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.specialRemark') }}&nbsp;:</h6>
           <div>{{ specialRemarksDisplay || '-' }}</div>
 

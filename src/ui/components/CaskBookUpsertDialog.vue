@@ -40,6 +40,11 @@
           <div v-if="totalConsumeMinutes > 0" style="opacity: .6; font-size: .78rem; margin: .3rem 0 0 .2rem;">
             {{ $t('book_booking.upsert.consume_total', {minutes: totalConsumeMinutes}) }}
           </div>
+          <!-- 总金额：任一所选技能未配置金额则提示，否则合计 -->
+          <div v-if="upsertSkillIdList.length > 0" style="opacity: .6; font-size: .78rem; margin: .2rem 0 0 .2rem;">
+            <span v-if="hasUnconfiguredAmount">{{ $t('book_booking.amount_unconfigured') }}</span>
+            <span v-else>{{ $t('book_booking.upsert.amount_total', {amount: totalServiceAmount}) }}</span>
+          </div>
         </div>
 
         <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
@@ -233,6 +238,20 @@ const totalConsumeMinutes = computed(() =>
       return sum + (opt && opt.consumeMinutes ? opt.consumeMinutes : 0)
     }, 0))
 
+// 已选技能里是否存在未配置金额（serviceAmount 为 null/undefined）的项
+const hasUnconfiguredAmount = computed(() =>
+    upsertSkillIdList.value.some(skillId => {
+      const opt = skillOptionList.value.find(o => o.value === skillId)
+      return !opt || opt.serviceAmount == null
+    }))
+
+// 已选技能的总金额（仅在全部已配置金额时有意义）
+const totalServiceAmount = computed(() =>
+    upsertSkillIdList.value.reduce((sum, skillId) => {
+      const opt = skillOptionList.value.find(o => o.value === skillId)
+      return sum + (opt && opt.serviceAmount != null ? Number(opt.serviceAmount) : 0)
+    }, 0))
+
 // 弹窗打开时用 book 填充表单（新增无 book 时给默认预约时间=当前+5分钟）
 function populate() {
   const b = props.book
@@ -389,6 +408,7 @@ function loadSkillOptions() {
       value: skill.id,
       code: skill.code,
       consumeMinutes: skill.consumeMinutes,
+      serviceAmount: skill.serviceAmount,
     }))
     syncOptionLists()
   })

@@ -608,6 +608,7 @@ function loadSkillList() {
       value: skill.id,
       code: skill.code,
       consumeMinutes: skill.consumeMinutes,
+      serviceAmount: skill.serviceAmount,
     }))
   })
 }

@@ -600,6 +600,7 @@
 
   "book_booking": {
     "title": "预约管理",
+    "amount_unconfigured": "包含未配置金额的服务技能",
     "label": {
       "id": "预约编号",
       "name": "客户名称",
@@ -653,6 +654,7 @@
       "save_add": "添加",
       "save_update": "更新",
       "consume_total": "预计耗时：{minutes} 分钟",
+      "amount_total": "预计金额：{amount}",
       "assign_title": "分配员工",
       "assign_select_staff": "选择员工",
       "assign_confirm": "确认分配",
@@ -710,6 +712,7 @@
       "requiredSkillTimeMin": "分钟",
       "preferredStaff": "偏好员工",
       "staff": "服务人员",
+      "amount": "预约金额",
       "bookingUrl": "预约链接",
       "specialRemark": "特殊备注",
       "remark": "备注",
@@ -772,6 +775,7 @@
 
   "book_calendar": {
     "title": "预约日历",
+    "amount_prefix": "金额：",
     "date_start": "开始日期",
     "date_end": "结束日期",
     "this_week": "回到本周",

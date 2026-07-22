@@ -507,7 +507,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
     const b = ev.booking
     // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
-    const lines = [b._timeRange, b._calSub, b._specialRemarks, b._contact, b.remark].filter(Boolean)
+    const lines = [b._timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, b.remark].filter(Boolean)
     return {
       booking: b,
       top: toPx(ev.start),
@@ -1010,6 +1010,10 @@ function enrichBooking(b) {
   // 特殊备注：后端为逗号分隔字符串，卡片上以空格分割展示为一行
   b._specialRemarks = b.specialRemarks
       ? b.specialRemarks.split(',').filter(item => item).join(' ') : ''
+  // 预约金额：为 null 时提示包含未配置金额的服务技能
+  b._amountLine = b.amount != null
+      ? `${t('book_calendar.amount_prefix')}${b.amount}`
+      : t('book_booking.amount_unconfigured')
   // 客户联系方式：有电话显示电话，否则显示邮件，都没有则为空
   b._contact = b.phone || b.mail || ''
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')
