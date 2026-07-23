@@ -47,6 +47,10 @@
              unelevated @click="()=> {clearSearch(); selectData();}">
         {{ $t('staff.button.clear') }}
       </q-btn>
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
+             unelevated @click="openDisplayPriority">
+        {{ $t('staff.button.adjust_priority') }}
+      </q-btn>
     </div>
 
     <cask-complex-table :custom-table-operation="tableStaffOperation" :table-base-info="tableStaff"
@@ -202,6 +206,51 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog :model-value="showDisplayPriority" @hide="showDisplayPriority = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('staff.display_priority.title') }}
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-mt-sm q-mx-md" style="opacity: 0.5; width: 25rem; font-size: 0.85rem">
+          {{ $t('staff.display_priority.note') }}
+        </div>
+
+        <div class="q-mx-md q-mt-md" style="width: 25rem; max-height: 24rem; overflow-y: auto">
+          <div v-if="priorityStaffList.length === 0" style="opacity: .5; font-size: .85rem;">
+            {{ $t('staff.display_priority.empty') }}
+          </div>
+          <div v-for="(staffItem, staffIndex) in priorityStaffList" :key="staffItem.id"
+               class="row items-center priority-drag-item"
+               :class="{ 'priority-drag-item-active': priorityDragIndex === staffIndex }"
+               draggable="true"
+               @dragstart="onPriorityDragStart(staffIndex, $event)"
+               @dragover.prevent="onPriorityDragOver(staffIndex)"
+               @drop.prevent
+               @dragend="onPriorityDragEnd">
+            <q-icon class="q-mr-sm" name="fa-solid fa-grip-vertical" size="0.9rem"/>
+            <div class="priority-drag-index">{{ staffIndex + 1 }}</div>
+            <div class="q-ml-sm" style="font-weight: 500">{{ staffItem.name }}</div>
+            <q-space/>
+            <div style="font-size: .8rem">{{ staffItem.phone }}</div>
+          </div>
+        </div>
+
+        <div class="row q-mt-xl q-mb-md justify-evenly">
+          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="updateDisplayPriority">
+            {{ $t('staff.button.save') }}
+          </q-btn>
+
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showDisplayPriority = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
     <cask-dialog-judgment v-model="showOperation"
                           :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
                           :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('staff.dialog.common.cancel'), trueLabel: $t('staff.dialog.common.confirm') }"
@@ -218,7 +267,15 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskTimePicker from "@/ui/components/CaskTimePicker.vue";
 import {tableStaff, tableStaffOperation} from "@/tables/staff.js";
-import {staffCreate, staffDelete, staffList, staffUpdate, staffUpdateSkill} from "@/api/staff.js";
+import {
+  staffCreate,
+  staffDelete,
+  staffList,
+  staffListSimple,
+  staffUpdate,
+  staffUpdateDisplayPriority,
+  staffUpdateSkill
+} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 
 
@@ -366,6 +423,64 @@ function buildScheduleListForSubmit() {
 const showStaffSkill = ref(false)
 const allSkillList = ref([])
 const staffSkillMap = reactive({})
+
+// display priority（预约日历日视图的雇员列顺序），列表顺序即优先级
+const showDisplayPriority = ref(false)
+const priorityStaffList = ref([])
+const priorityDragIndex = ref(-1)
+
+function openDisplayPriority() {
+  priorityStaffList.value = []
+  priorityDragIndex.value = -1
+  showDisplayPriority.value = true
+  staffListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    priorityStaffList.value = res.data.data.map(s => ({id: s.id, name: s.name, phone: s.phone}))
+  })
+}
+
+function onPriorityDragStart(index, event) {
+  priorityDragIndex.value = index
+  // Firefox 需要 setData 才会触发拖拽
+  if (event && event.dataTransfer) {
+    event.dataTransfer.setData('text/plain', '')
+    event.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+// 拖动经过其他行时实时交换位置，松手即为最终顺序
+function onPriorityDragOver(index) {
+  const from = priorityDragIndex.value
+  if (from === -1 || from === index) {
+    return
+  }
+  const moved = priorityStaffList.value.splice(from, 1)[0]
+  priorityStaffList.value.splice(index, 0, moved)
+  priorityDragIndex.value = index
+}
+
+function onPriorityDragEnd() {
+  priorityDragIndex.value = -1
+}
+
+function updateDisplayPriority() {
+  if (priorityStaffList.value.length === 0) {
+    showDisplayPriority.value = false
+    return
+  }
+  const body = {
+    staffIdList: priorityStaffList.value.map(s => s.id)
+  }
+  staffUpdateDisplayPriority(body).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showDisplayPriority.value = false
+    notifyTopPositive(t('staff.notify.display_priority_success'))
+  })
+}
 
 // op
 const showOperation = ref(false)
@@ -539,6 +654,30 @@ onMounted(() => {
 
 <style scoped lang="scss">
 
+.priority-drag-item {
+  padding: .5rem .75rem;
+  margin-bottom: .5rem;
+  border: 2px solid rgba(var(--text-color));
+  border-radius: 4px;
+  cursor: grab;
+  transition: border-color .2s ease;
 
+  &:hover {
+    border-color: rgb(var(--text-color));
+  }
+
+  &.priority-drag-item-active {
+    border-style: dashed;
+    border-color: rgb(var(--text-color));
+    cursor: grabbing;
+  }
+}
+
+.priority-drag-index {
+  min-width: 1.5rem;
+  text-align: center;
+  font-size: .85rem;
+  font-weight: 600;
+}
 
 </style>

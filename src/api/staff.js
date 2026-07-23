@@ -46,6 +46,14 @@ export function staffUpdateSkill(id, body) {
     })
 }
 
+export function staffUpdateDisplayPriority(body) {
+    return serviceShiro({
+        url: `/staff/update/display-priority`,
+        data: body,
+        method: 'post',
+    })
+}
+
 
 export function staffDelete(id) {
     return serviceShiro({
