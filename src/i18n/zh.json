@@ -801,6 +801,7 @@
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
+    "preferred_prefix": "偏好：",
     "store_block": {
       "manage": "屏蔽时段管理",
       "note": "门店屏蔽时段内全店不接受新预约，不影响已有预约；最多可屏蔽未来 2 周内的时段",

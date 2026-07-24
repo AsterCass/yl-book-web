@@ -128,6 +128,10 @@
                   <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
                     {{ ev.sourceName }}
                   </span>
+                  <!-- 日视图：偏好员工放首行（周视图放备注上一行，见 lines） -->
+                  <span v-if="viewMode === 'day' && ev.preferredName" class="cal-event-preferred">
+                    {{ $t('book_calendar.preferred_prefix') }}{{ ev.preferredName }}
+                  </span>
                   <!-- 前台已签到标记 -->
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
                           class="cal-event-checkin-mark"/>
@@ -199,6 +203,9 @@
           <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
           <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
             {{ hoverCard.ev.sourceName }}
+          </span>
+          <span v-if="viewMode === 'day' && hoverCard.ev.preferredName" class="cal-event-preferred">
+            {{ $t('book_calendar.preferred_prefix') }}{{ hoverCard.ev.preferredName }}
           </span>
           <q-space/>
           <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
@@ -289,6 +296,14 @@ const viewMode = ref('week')    // week | day
 const bookings = ref([])
 const blocks = ref([])
 const staffList = ref([])
+// 雇员 id -> 名称（simple 列表），用于偏好员工展示（映射不到时回退显示 id）
+const staffNameById = computed(() => {
+  const map = {}
+  for (const s of staffList.value) {
+    map[s.id] = s.name
+  }
+  return map
+})
 const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
@@ -585,9 +600,16 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
     const timeRange = (b._startHm && b._endHm)
         ? `${formatHmDisplay(b._startHm)} - ${formatHmDisplay(b._endHm)}` : ''
-    const lines = [timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, b.remark].filter(Boolean)
+    // 偏好员工：日视图放首行（模板内联展示），周视图作为独立行插在备注上一行
+    const preferredName = b.preferredStaffId
+        ? (staffNameById.value[b.preferredStaffId] || b.preferredStaffId) : ''
+    const preferredLine = viewMode.value === 'week' && preferredName
+        ? `${t('book_calendar.preferred_prefix')}${preferredName}` : ''
+    const lines = [timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark]
+        .filter(Boolean)
     return {
       booking: b,
+      preferredName,
       top: toPx(ev.start),
       height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
       leftPct: ev.col * widthPct,
@@ -1537,6 +1559,17 @@ onBeforeUnmount(() => {
     min-width: 0;
     font-size: .68rem;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 偏好员工（日视图首行）：与来源同款截断策略，中性色不抢状态/来源色
+  .cal-event-preferred {
+    flex: 0 999 auto;
+    min-width: 0;
+    font-size: .68rem;
+    opacity: .75;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

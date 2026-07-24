@@ -803,6 +803,7 @@
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
+    "preferred_prefix": "Preferred: ",
     "store_block": {
       "manage": "Store Blocks",
       "note": "During a blocked period the whole store accepts no new bookings; existing bookings are not affected. Only dates within the next 2 weeks can be blocked",
