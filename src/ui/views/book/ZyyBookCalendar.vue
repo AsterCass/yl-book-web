@@ -332,6 +332,10 @@ const nowHover = ref(false)
 const nowLabelX = ref(null)
 let nowTimer = null
 
+// 数据定时刷新：每 5 分钟按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次
+const DATA_REFRESH_INTERVAL = 5 * 60 * 1000
+let refreshTimer = null
+
 function today() {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
@@ -1147,6 +1151,12 @@ onMounted(() => {
   nowTimer = setInterval(() => {
     nowTick.value = Date.now()
   }, NOW_TICK_INTERVAL)
+  refreshTimer = setInterval(() => {
+    if (dragCtx) {
+      return
+    }
+    reload()
+  }, DATA_REFRESH_INTERVAL)
   window.addEventListener('keydown', onFullscreenKeyDown)
 })
 
@@ -1155,6 +1165,10 @@ onBeforeUnmount(() => {
   if (nowTimer) {
     clearInterval(nowTimer)
     nowTimer = null
+  }
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
   }
   window.removeEventListener('keydown', onFullscreenKeyDown)
   document.body.classList.remove('cal-fullscreen-active')
