@@ -27,10 +27,10 @@
              @click="showCancelled = !showCancelled">
         {{ showCancelled ? $t('book_calendar.hide_cancelled') : $t('book_calendar.show_cancelled') }}
       </q-btn>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
-             @click="showStoreBlock = true">
-        {{ $t('book_calendar.store_block.manage') }}
-      </q-btn>
+<!--      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"-->
+<!--             @click="showStoreBlock = true">-->
+<!--        {{ $t('book_calendar.store_block.manage') }}-->
+<!--      </q-btn>-->
 
       <q-space/>
 
