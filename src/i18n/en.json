@@ -803,6 +803,25 @@
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
+    "store_block": {
+      "manage": "Store Blocks",
+      "note": "During a blocked period the whole store accepts no new bookings; existing bookings are not affected. Only dates within the next 2 weeks can be blocked",
+      "list_range_note": "Only blocked periods within 2 weeks around today are listed",
+      "empty": "No blocked periods",
+      "tab_list": "Existing",
+      "tab_add": "Add New",
+      "start": "Start Time:",
+      "end": "End Time:",
+      "reason": "Reason / Note:",
+      "reason_placeholder": "e.g. store closed (optional)",
+      "add_success": "Blocked period added",
+      "delete_success": "Blocked period deleted",
+      "delete_title": "Delete Blocked Period",
+      "delete_content": "Delete the blocked period {time}? New bookings will be accepted again in that window.",
+      "time_required": "Please fill in complete start and end time",
+      "time_order": "End time must be later than start time",
+      "time_window": "Cannot block dates more than 2 weeks ahead"
+    },
     "button": {
       "query": "Query"
     },

@@ -8,7 +8,7 @@ export function bookList(params) {
     })
 }
 
-// 预约日历：不分页，返回 { list: [预约...], blockList: [{dayOfWeek, startMinute, endMinute}...] }
+// 预约日历：不分页，返回 { list: [预约...], blockList: [{id, staffId, storeBlock, startTime, endTime, reason}...] }
 // startDateStr / endDateStr 为必传（本周一 ~ 本周日，格式 yyyy-MM-dd）
 export function bookCalendar(params) {
     return serviceShiro({
@@ -60,6 +60,31 @@ export function bookUncheckin(id) {
     return serviceShiro({
         url: `/book/uncheckin/${id}`,
         method: 'post',
+    })
+}
+
+// block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
+export function bookBlockList(params) {
+    return serviceShiro({
+        url: `/book/block/list`,
+        params: params,
+        method: 'get',
+    })
+}
+
+// 创建 block：staffId 不传即门店 block；startTimeStr/endTimeStr 为 yyyy-MM-dd HH:mm
+export function bookBlockCreate(body) {
+    return serviceShiro({
+        url: `/book/block/create`,
+        data: body,
+        method: 'post',
+    })
+}
+
+export function bookBlockDelete(id) {
+    return serviceShiro({
+        url: `/book/block/delete/${id}`,
+        method: 'delete',
     })
 }
 

@@ -801,6 +801,25 @@
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
+    "store_block": {
+      "manage": "屏蔽时段管理",
+      "note": "门店屏蔽时段内全店不接受新预约，不影响已有预约；最多可屏蔽未来 2 周内的时段",
+      "list_range_note": "列表仅显示今天前后两周内的屏蔽时段",
+      "empty": "暂无屏蔽时段",
+      "tab_list": "已有时段",
+      "tab_add": "新增时段",
+      "start": "开始时间：",
+      "end": "结束时间：",
+      "reason": "备注/原因：",
+      "reason_placeholder": "如：店休（可空）",
+      "add_success": "新增屏蔽时段成功",
+      "delete_success": "已删除屏蔽时段",
+      "delete_title": "删除屏蔽时段",
+      "delete_content": "确定删除 {time} 的屏蔽时段吗？删除后该时段恢复接受新预约。",
+      "time_required": "请填写完整的开始与结束时间",
+      "time_order": "结束时间需晚于开始时间",
+      "time_window": "不可屏蔽 2 周以外的日期"
+    },
     "button": {
       "query": "查询"
     },

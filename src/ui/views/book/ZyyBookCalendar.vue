@@ -27,6 +27,10 @@
              @click="showCancelled = !showCancelled">
         {{ showCancelled ? $t('book_calendar.hide_cancelled') : $t('book_calendar.show_cancelled') }}
       </q-btn>
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+             @click="showStoreBlock = true">
+        {{ $t('book_calendar.store_block.manage') }}
+      </q-btn>
 
       <q-space/>
 
@@ -90,9 +94,11 @@
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
 
-              <!-- 门店 block 背景（置灰） -->
+              <!-- block 背景（斜纹置灰）：周视图=门店 block；日视图=门店 block + 该列雇员自己的 block -->
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
-                   :style="{ top: block.top + 'px', height: block.height + 'px' }"/>
+                   :style="{ top: block.top + 'px', height: block.height + 'px' }">
+                <span v-if="block.reason" class="cal-block-reason">{{ block.reason }}</span>
+              </div>
 
               <!-- 悬停时间提示线（10 分钟一档，点击即以该时间创建预约） -->
               <div v-if="hoverSlot && hoverSlot.colKey === col.key" class="cal-slot-line"
@@ -112,7 +118,7 @@
                      left: `calc(${ev.leftPct}% + 2px)`,
                      width: `calc(${ev.widthPct}% - 4px)`,
                      borderLeftColor: ev.statusColor,
-                     background: ev.bgColor,
+                     background: cardBg(ev.bgColor),
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
@@ -154,7 +160,7 @@
                    top: dragState.top + 'px', height: dragState.height + 'px',
                    left: dragState.left + 'px', width: dragState.width + 'px',
                    borderLeftColor: dragState.booking._statusColor,
-                   background: rgbToRgba(dragState.booking._statusColor, bgAlpha),
+                   background: cardBg(rgbToRgba(dragState.booking._statusColor, bgAlpha)),
                  }">
               <div class="cal-event-title">{{ dragState.booking.name || $t('book_calendar.no_name') }}</div>
               <div class="cal-event-sub">{{ dragState.label }}</div>
@@ -171,6 +177,9 @@
     <!-- 新增/编辑弹窗（与预约列表共用同一组件，保持一致） -->
     <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="editIsNew"
                              @saved="reload"/>
+
+    <!-- 门店屏蔽时段管理（查看/新增/删除门店 block），变更后刷新日历 -->
+    <cask-store-block-dialog v-model="showStoreBlock" @changed="reload"/>
 
     <!-- 取消预约确认（复用预约列表的取消文案与逻辑） -->
     <cask-dialog-judgment v-model="showCancel"
@@ -228,6 +237,7 @@ import {date} from "quasar";
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
+import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
 import {
   bookAdjust,
   bookCalendar,
@@ -283,6 +293,8 @@ const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
 const showCancelled = ref(false)
+// 门店屏蔽时段管理弹窗
+const showStoreBlock = ref(false)
 // 全屏（CSS 固定定位铺满视口，覆盖导航/header/footer；不用原生 Fullscreen API，
 // 否则 teleport 到 body 的弹窗/悬浮预览在全屏子树外将不可见）。
 // 祖先 q-scrollarea 的 contain: strict 会把 fixed 后代困在滚动盒内，
@@ -338,6 +350,12 @@ function getWeekViewStart(input) {
 function dayOfWeekOf(input) {
   const g = new Date(input).getDay()
   return g === 0 ? 7 : g
+}
+
+// 卡片底色：半透明状态色层叠在不透明页面底色上——卡片整体不透明，
+// 垫在下层的 block 斜纹不会透过卡片显示（block 恒在卡片下方），观感与空白区域的卡片一致
+function cardBg(tint) {
+  return `linear-gradient(${tint}, ${tint}), rgb(var(--background-color))`
 }
 
 // 'rgb(r, g, b)' -> 'rgba(r, g, b, alpha)'，用于以状态色渲染半透明底色
@@ -413,12 +431,24 @@ const timeRange = computed(() => {
       maxM = Math.max(maxM, b._end)
     }
   }
+  // block 段扩展显示范围：周视图只算门店 block（雇员 block 不渲染）；日视图门店+雇员都算
+  const viewDates = viewMode.value === 'week'
+      ? weekDays.value.map(d => d.dateStr)
+      : [date.formatDate(dayDate.value, 'YYYY-MM-DD')]
   for (const bl of blocks.value) {
-    if (bl.startMinute != null) {
-      minM = Math.min(minM, bl.startMinute)
+    if (viewMode.value === 'week' && !bl.storeBlock) {
+      continue
     }
-    if (bl.endMinute != null) {
-      maxM = Math.max(maxM, bl.endMinute)
+    for (const ds of viewDates) {
+      if (ds < bl.startDateStr || ds > bl.endDateStr) {
+        continue
+      }
+      const s = ds === bl.startDateStr ? bl.startMin : 0
+      const e = ds === bl.endDateStr ? bl.endMin : 1440
+      if (e > s) {
+        minM = Math.min(minM, s)
+        maxM = Math.max(maxM, e)
+      }
     }
   }
   return {
@@ -510,16 +540,33 @@ function layoutEvents(events) {
   return sorted
 }
 
-// 某天的 block 段（按 dayOfWeek 匹配，门店级别）
-function buildDayBlocks(dow, toPx) {
-  return blocks.value
-      .filter(bl => Number(bl.dayOfWeek) === dow)
-      .map(bl => ({
-        start: bl.startMinute,
-        end: bl.endMinute,
-        top: toPx(bl.startMinute),
-        height: Math.max((bl.endMinute - bl.startMinute) / 60 * HOUR_HEIGHT, 2),
-      }))
+// 某日期与 block 的重叠段（当日分钟）：门店 block 恒包含；staffId 非空时额外包含该雇员自己的 block。
+// block 为跨天时间段，按日期裁剪出当日部分（起点前的日子 0 起、终点后的日子 1440 止）
+function blockSegmentsForDate(dateStr, staffId) {
+  const segs = []
+  for (const bl of blocks.value) {
+    if (!bl.storeBlock && (!staffId || bl.staffId !== staffId)) {
+      continue
+    }
+    if (dateStr < bl.startDateStr || dateStr > bl.endDateStr) {
+      continue
+    }
+    const start = dateStr === bl.startDateStr ? bl.startMin : 0
+    const end = dateStr === bl.endDateStr ? bl.endMin : 1440
+    if (end > start) {
+      segs.push({start, end, reason: bl.reason})
+    }
+  }
+  return segs
+}
+
+// 某列的 block 渲染段（定位到像素）
+function buildDayBlocks(dateStr, staffId, toPx) {
+  return blockSegmentsForDate(dateStr, staffId).map(seg => ({
+    ...seg,
+    top: toPx(seg.start),
+    height: Math.max((seg.end - seg.start) / 60 * HOUR_HEIGHT, 2),
+  }))
 }
 
 // 构建一列（预约块 + 定位 + 是否落在 block 内）
@@ -564,7 +611,7 @@ const weekColumns = computed(() => {
   const rangeStart = startHour * 60
   const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
   return weekDays.value.map(day => {
-    const dayBlocks = buildDayBlocks(day.dayOfWeek, toPx)
+    const dayBlocks = buildDayBlocks(day.dateStr, null, toPx)
     const rb = visibleBookings.value.filter(b => b._dateStr === day.dateStr)
     return buildColumn(day.dateStr, day.name, day.dayNum, day.isToday, rb, dayBlocks, toPx, {dateStr: day.dateStr})
   })
@@ -575,7 +622,6 @@ const staffColumns = computed(() => {
   const {startHour} = timeRange.value
   const rangeStart = startHour * 60
   const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
-  const dayBlocks = buildDayBlocks(dayOfWeekOf(dayDate.value), toPx)
 
   const byStaff = {}
   const unassigned = []
@@ -591,9 +637,9 @@ const staffColumns = computed(() => {
   const dayStr = date.formatDate(dayDate.value, 'YYYY-MM-DD')
   const dow = dayOfWeekOf(dayDate.value)
   const cols = []
-  // 未分配列始终存在，方便将预约拖入以解除分配（即使当前没有未分配预约）
-  cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned, dayBlocks, toPx,
-      {dateStr: dayStr, staffId: null}))
+  // 未分配列始终存在，方便将预约拖入以解除分配（即使当前没有未分配预约）；只垫门店 block
+  cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned,
+      buildDayBlocks(dayStr, null, toPx), toPx, {dateStr: dayStr, staffId: null}))
   for (const s of staffList.value) {
     // 只显示当天有排班的雇员；无排班但当天已有预约的仍显示，避免预约块丢失
     const scheduledToday = (s.scheduleList || []).some(sc => Number(sc.dayOfWeek) === dow)
@@ -601,8 +647,9 @@ const staffColumns = computed(() => {
     if (!scheduledToday && !hasBookings) {
       continue
     }
-    cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [], dayBlocks, toPx,
-        {dateStr: dayStr, staffId: s.id}))
+    // 雇员列：门店 block + 该雇员自己的 block
+    cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [],
+        buildDayBlocks(dayStr, s.id, toPx), toPx, {dateStr: dayStr, staffId: s.id}))
   }
   return cols
 })
@@ -1056,7 +1103,17 @@ function applyData(res) {
   const data = res.data.data;
   (data.list || []).forEach(enrichBooking)
   bookings.value = data.list || []
-  blocks.value = data.blockList || []
+  // block（startTime/endTime 为 yyyy-MM-dd HH:mm）：预解析为日期 + 当日分钟，便于按列裁剪渲染
+  blocks.value = (data.blockList || []).map(bl => ({
+    id: bl.id,
+    staffId: bl.staffId || null,
+    storeBlock: !!bl.storeBlock,
+    reason: bl.reason || '',
+    startDateStr: bl.startTime ? bl.startTime.substring(0, 10) : '',
+    endDateStr: bl.endTime ? bl.endTime.substring(0, 10) : '',
+    startMin: bl.startTime ? timeToMinutes(bl.startTime.substring(11, 16)) : 0,
+    endMin: bl.endTime ? timeToMinutes(bl.endTime.substring(11, 16)) : 0,
+  }))
 }
 
 // 筛选项必传：周视图取本周一~周日，日视图取当天
@@ -1274,13 +1331,30 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid rgba(128, 128, 128, .1);
 }
 
+// block 时段底色：斜纹置灰 + 上下虚线边界，与普通空白/预约卡片明显区分；不参与命中（点击穿透可创建预约）
 .cal-block {
   position: absolute;
   left: 0;
   right: 0;
-  background: rgba(128, 128, 128, .22);
+  background: repeating-linear-gradient(-45deg,
+      rgba(128, 128, 128, .28) 0, rgba(128, 128, 128, .28) 6px,
+      rgba(128, 128, 128, .1) 6px, rgba(128, 128, 128, .1) 12px);
+  border-top: 1px dashed rgba(128, 128, 128, .55);
+  border-bottom: 1px dashed rgba(128, 128, 128, .55);
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
+
+  .cal-block-reason {
+    display: inline-block;
+    max-width: 100%;
+    padding: .05rem .35rem;
+    font-size: .68rem;
+    opacity: .75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 // 空白处悬停时间提示线（10 分钟一档），仅提示不参与命中
@@ -1497,8 +1571,11 @@ onBeforeUnmount(() => {
     }
   }
 
+  // 落在屏蔽时段的预约（冻结态）：不能整卡半透明——会让下层 block 斜纹透出、内容不可读；
+  // 改用不影响透明度的虚线描边标识
   &.cal-event-blocked {
-    opacity: .55;
+    outline: 2px dashed rgba(128, 128, 128, .75);
+    outline-offset: -2px;
   }
 
   &.cal-event-cancelled {

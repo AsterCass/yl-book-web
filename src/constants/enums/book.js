@@ -16,7 +16,7 @@ export const AssignStrategyEnum = new Enum({
 });
 
 // 本站预约及其子渠道统一使用同一颜色
-const OWN_SITE_COLOR = 'rgb(241, 196, 15)'
+const OWN_SITE_COLOR = 'rgb(211, 95, 33)'
 
 export const BookSourceEnum = new Enum({
     NATURAL: {code: 1, name: '自然流', desc: '', color: 'rgb(68, 117, 80)'},
