@@ -36,8 +36,6 @@
         <div>
           <q-select ref="skillOptionRef" v-model="upsertSkillIdList" :menu-offset="[0, 5]" :options="skillOptionsNow"
                     class="component-outline-input-grow"
-                    clear-icon="fa-solid fa-xmark"
-                    clearable
                     dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
                     multiple
                     use-chips
