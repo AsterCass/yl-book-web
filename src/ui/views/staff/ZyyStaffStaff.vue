@@ -65,6 +65,7 @@
                               upsertName = row.name
                               upsertExternalName = row.externalName
                               upsertPhone = row.phone
+                              upsertMail = row.mail
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               isNew = false;
                               showUpsert = true
@@ -120,6 +121,10 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.phone')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.mail') }}&nbsp;:</h6>
+          <q-input v-model="upsertMail" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff.placeholder.mail')"/>
 
         </div>
 
@@ -296,6 +301,8 @@ const isNew = ref(false)
 const upsertName = ref("")
 const upsertExternalName = ref("")
 const upsertPhone = ref("")
+// 通知邮箱（点钟得/失/取消通知）；空 = 不发送
+const upsertMail = ref("")
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
   1: [],
@@ -314,6 +321,7 @@ function clearUpsertParam() {
   upsertName.value = ""
   upsertExternalName.value = ""
   upsertPhone.value = ""
+  upsertMail.value = ""
   clearScheduleParam()
 }
 
@@ -519,6 +527,7 @@ function upsertData() {
     name: upsertName.value,
     externalName: upsertExternalName.value,
     phone: upsertPhone.value,
+    mail: upsertMail.value,
     priority: 1,
     scheduleList: scheduleList,
   }

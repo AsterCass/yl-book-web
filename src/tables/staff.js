@@ -45,6 +45,12 @@ const tableStaffCol = [
         align: 'center',
     },
     {
+        name: 'mail',
+        field: 'mail',
+        label: '通知邮箱',
+        align: 'center',
+    },
+    {
         name: 'skills',
         field: 'skills',
         label: '雇员技能',
