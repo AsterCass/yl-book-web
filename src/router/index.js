@@ -70,24 +70,11 @@ const router = createRouter({
                             path: "book",
                             name: "book",
                             component: ZyyBook,
-                            redirect: {name: 'bookBooking'},
+                            redirect: {name: 'bookCalendar'},
                             meta: {
                                 permission: 'book'
                             },
                             children: [
-                                {
-                                    path: "booking",
-                                    name: "bookBooking",
-                                    component: ZyyBookBooking,
-                                    meta: {
-                                        title: 'yl_subsystem_appointment',
-                                        value: "bookBooking",
-                                        header: "yl_subsystem_appointment",
-                                        label: "yl_subsystem_appointment",
-                                        color: 'rgb(var(--full-container-background-color))',
-                                        permission: 'book:book'
-                                    },
-                                },
                                 {
                                     path: "calendar",
                                     name: "bookCalendar",
@@ -99,6 +86,19 @@ const router = createRouter({
                                         label: "yl_subsystem_appointment_calendar",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:calendar'
+                                    },
+                                },
+                                {
+                                    path: "booking",
+                                    name: "bookBooking",
+                                    component: ZyyBookBooking,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment',
+                                        value: "bookBooking",
+                                        header: "yl_subsystem_appointment",
+                                        label: "yl_subsystem_appointment",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:book'
                                     },
                                 },
                                 {
