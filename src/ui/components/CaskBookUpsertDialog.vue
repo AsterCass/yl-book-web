@@ -17,6 +17,16 @@
         <cask-date-time-picker v-model="upsertBookingTime" input-class="component-outline-input-grow"
                                :placeholder="t('book_booking.placeholder.bookingTime')"/>
 
+        <!-- 预约来源在客户名称上方；无默认值，选自然流/电话预约且名称为空时按当前语言自动回填名称 -->
+        <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
+          {{ $t('book_booking.upsert.field.source') }}&nbsp;:</h6>
+        <q-select v-model="upsertSource" :menu-offset="[0, 5]" :options="sourceOptions"
+                  class="component-outline-input-grow"
+                  dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                  @update:model-value="onSourceChange"
+                  outlined popup-content-class="component-extra-card-std-limit">
+        </q-select>
+
         <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('book_booking.upsert.field.name') }}&nbsp;:</h6>
         <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
                  :placeholder="t('book_booking.placeholder.name')"/>
@@ -65,14 +75,6 @@
                   class="component-outline-input-grow"
                   clear-icon="fa-solid fa-xmark"
                   clearable
-                  dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                  outlined popup-content-class="component-extra-card-std-limit">
-        </q-select>
-
-        <h6 class="cask-litter-title-asterisk" style="white-space: nowrap; align-self: flex-start;">
-          {{ $t('book_booking.upsert.field.source') }}&nbsp;:</h6>
-        <q-select v-model="upsertSource" :menu-offset="[0, 5]" :options="sourceOptions"
-                  class="component-outline-input-grow"
                   dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
                   outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
@@ -162,7 +164,7 @@ import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 
-const {t} = useI18n()
+const {t, availableLocales} = useI18n()
 
 const props = defineProps({
   modelValue: {type: Boolean, default: false},
@@ -265,7 +267,8 @@ function populate() {
   upsertPhone.value = b && b.phone ? b.phone : ''
   upsertMail.value = b && b.mail ? b.mail : ''
   upsertPreferredStaffId.value = b && b.preferredStaffId ? b.preferredStaffId : null
-  upsertSource.value = b && b.source != null ? b.source : BookSourceEnum.PHONE.code
+  // 来源不设默认值：新增必须显式选择（保存时校验）
+  upsertSource.value = b && b.source != null ? b.source : null
   upsertRemark.value = b && b.remark ? b.remark : ''
   // 优先取数组；列表行数据只有逗号分隔的 specialRemarks 字符串，需解析回填（否则更新时会误清空）
   if (b && Array.isArray(b.specialRemarkList)) {
@@ -331,6 +334,35 @@ function projectNames(bk) {
   return (bk.skillDtoList || []).map(s => s.name).join(', ')
 }
 
+// 来源联动自动填充客户名（自然流/电话预约），文案走 i18n、随当前系统语言；
+// 仅当名称为空、或仍是上一次自动填充值（用户未手改）时写入，不覆盖用户输入
+const SOURCE_AUTO_NAME_KEYS = {
+  [BookSourceEnum.NATURAL.code]: 'book_booking.upsert.auto_name_natural',
+  [BookSourceEnum.PHONE.code]: 'book_booking.upsert.auto_name_phone',
+}
+
+// 全部语言下的自动填充文案集合（识别「仍是自动填充值」需覆盖所有语言，防中途切换语言后漏判）
+function autoNameValues() {
+  const values = []
+  for (const key of Object.values(SOURCE_AUTO_NAME_KEYS)) {
+    for (const l of availableLocales) {
+      values.push(t(key, {}, {locale: l}))
+    }
+  }
+  return values
+}
+
+function onSourceChange(code) {
+  const current = (upsertName.value || '').trim()
+  if (current && !autoNameValues().includes(current)) {
+    return
+  }
+  const autoNameKey = SOURCE_AUTO_NAME_KEYS[code]
+  if (autoNameKey) {
+    upsertName.value = t(autoNameKey)
+  }
+}
+
 function sourceName(source) {
   const e = source != null ? BookSourceEnum.fromCode(source) : null
   return e ? e.name : ''
@@ -352,7 +384,7 @@ function statusColor(status) {
 }
 
 function save() {
-  if (!upsertBookingTime.value || !upsertName.value) {
+  if (!upsertBookingTime.value || !upsertName.value || upsertSource.value == null) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return
   }
@@ -369,7 +401,7 @@ function save() {
     mail: upsertMail.value,
     preferredStaffId: upsertPreferredStaffId.value,
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
-    source: upsertSource.value ? upsertSource.value : BookSourceEnum.PHONE.code,
+    source: upsertSource.value,
     remark: upsertRemark.value,
     // 始终传数组：空数组=清空（创建时等价于留空）
     specialRemarkList: upsertSpecialRemarkList.value,

@@ -659,6 +659,8 @@
       "save_update": "Update",
       "consume_total": "Estimated duration: {minutes} min",
       "amount_total": "Estimated amount: {amount}",
+      "auto_name_natural": "Walk in",
+      "auto_name_phone": "Phone call",
       "assign_title": "Assign Staff",
       "assign_select_staff": "Select Staff",
       "assign_confirm": "Confirm Assignment",
