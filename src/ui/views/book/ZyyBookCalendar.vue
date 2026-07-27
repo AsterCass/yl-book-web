@@ -347,8 +347,8 @@ const nowHover = ref(false)
 const nowLabelX = ref(null)
 let nowTimer = null
 
-// 数据定时刷新：每 5 分钟按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次
-const DATA_REFRESH_INTERVAL = 5 * 60 * 1000
+// 数据定时刷新：每 2 分钟按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次
+const DATA_REFRESH_INTERVAL = 2 * 60 * 1000
 let refreshTimer = null
 
 function today() {
