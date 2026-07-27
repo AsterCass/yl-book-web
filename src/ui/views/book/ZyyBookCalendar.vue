@@ -292,7 +292,7 @@ const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
 const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
 
-const viewMode = ref('week')    // week | day
+const viewMode = ref('day')     // week | day，默认日视图
 const bookings = ref([])
 const blocks = ref([])
 const staffList = ref([])
@@ -1169,7 +1169,7 @@ function loadStaff() {
 
 onMounted(() => {
   loadStaff()
-  loadWeek()
+  reload()
   nowTimer = setInterval(() => {
     nowTick.value = Date.now()
   }, NOW_TICK_INTERVAL)
