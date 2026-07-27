@@ -125,12 +125,12 @@
                 <!-- 第一行：客户名称 + 来源（带来源色）；第二行起：起止时间 / 预约项目 / 联系方式 / 备注 -->
                 <div class="cal-event-title">
                   <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
-                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
-                    {{ ev.sourceName }}
-                  </span>
                   <!-- 日视图：偏好员工放首行（周视图放备注上一行，见 lines） -->
                   <span v-if="viewMode === 'day' && ev.preferredName" class="cal-event-preferred">
                     {{ $t('book_calendar.preferred_prefix') }}{{ ev.preferredName }}
+                  </span>
+                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
+                    {{ ev.sourceName }}
                   </span>
                   <!-- 前台已签到标记 -->
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
