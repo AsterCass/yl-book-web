@@ -397,7 +397,9 @@ function save() {
     bookRequirementSkillIdList: upsertSkillIdList.value,
     phone: upsertPhone.value,
     mail: upsertMail.value,
-    preferredStaffId: upsertPreferredStaffId.value,
+    // 编辑时清空偏好雇员需传空串（后端将 null 视为不修改）
+    preferredStaffId: upsertPreferredStaffId.value != null
+        ? upsertPreferredStaffId.value : (props.isNew ? null : ''),
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
     source: upsertSource.value,
     remark: upsertRemark.value,

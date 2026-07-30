@@ -766,10 +766,9 @@ function onColClick(e, col) {
   const minutes = pointerSlotMinutes(e)
   const dateStr = col.dateStr || date.formatDate(dayDate.value, 'YYYY-MM-DD')
   hideHoverCard()
-  // 预填点击位置对应的日期时间；日视图额外带上列雇员作为偏好员工（未分配列为空）
+  // 预填点击位置对应的日期时间（不默认带入列雇员作为偏好员工）
   editBook.value = {
     bookingTime: `${dateStr} ${minutesToTime(minutes)}`,
-    preferredStaffId: viewMode.value === 'day' ? (col.staffId || null) : null,
   }
   editIsNew.value = true
   showEdit.value = true
