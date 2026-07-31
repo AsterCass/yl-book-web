@@ -66,6 +66,7 @@
                               upsertExternalName = row.externalName
                               upsertPhone = row.phone
                               upsertMail = row.mail
+                              upsertGoogleCalendarId = row.googleCalendarId
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               isNew = false;
                               showUpsert = true
@@ -125,6 +126,10 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.mail') }}&nbsp;:</h6>
           <q-input v-model="upsertMail" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.mail')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.google_calendar_id') }}&nbsp;:</h6>
+          <q-input v-model="upsertGoogleCalendarId" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff.placeholder.google_calendar_id')"/>
 
         </div>
 
@@ -303,6 +308,8 @@ const upsertExternalName = ref("")
 const upsertPhone = ref("")
 // 通知邮箱（点钟得/失/取消通知）；空 = 不发送
 const upsertMail = ref("")
+// 谷歌日历ID（门店 block 同步 ClassPass 用）；空 = 不参与同步
+const upsertGoogleCalendarId = ref("")
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
   1: [],
@@ -322,6 +329,7 @@ function clearUpsertParam() {
   upsertExternalName.value = ""
   upsertPhone.value = ""
   upsertMail.value = ""
+  upsertGoogleCalendarId.value = ""
   clearScheduleParam()
 }
 
@@ -528,6 +536,8 @@ function upsertData() {
     externalName: upsertExternalName.value,
     phone: upsertPhone.value,
     mail: upsertMail.value,
+    // 空串=清空（后端 MP NOT_NULL 更新语义，同 externalName/mail）
+    googleCalendarId: upsertGoogleCalendarId.value,
     priority: 1,
     scheduleList: scheduleList,
   }

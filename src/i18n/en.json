@@ -536,9 +536,9 @@
   "staff": {
     "title": "Staff",
     "label": { "id": "Staff ID", "name": "Staff Name", "phone": "Staff Phone", "status": "Staff Status" },
-    "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10", "external_name": "Optional", "mail": "Optional; notified on requested-booking changes" },
+    "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10", "external_name": "Optional", "mail": "Optional; notified on requested-booking changes", "google_calendar_id": "Optional, e.g. xxx\\@group.calendar.google.com; store blocks are synced to this calendar" },
     "button": { "query": "Query", "add": "Add Staff", "clear": "Clear Filters", "save": "Save", "adjust_priority": "Adjust Display Priority" },
-    "upsert": { "title_add": "Add Staff", "title_update": "Update Staff", "field": { "name": "Staff Name", "external_name": "External Name", "phone": "Staff Phone", "mail": "Notification Email", "priority": "Priority" }, "save_add": "Add", "save_update": "Update" },
+    "upsert": { "title_add": "Add Staff", "title_update": "Update Staff", "field": { "name": "Staff Name", "external_name": "External Name", "phone": "Staff Phone", "mail": "Notification Email", "google_calendar_id": "Google Calendar ID", "priority": "Priority" }, "save_add": "Add", "save_update": "Update" },
     "dialog": { "common": { "cancel": "Cancel", "confirm": "Confirm" }, "delete": { "title": "Delete Staff", "content": "Delete staff 【{name}】?" } },
     "notify": { "update_success": "Staff updated successfully", "skill_assign_success": "Skills assigned successfully", "display_priority_success": "Display priority updated successfully" },
     "skill_assign": { "title": "Assign Skills" },
