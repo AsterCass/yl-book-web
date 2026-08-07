@@ -3,6 +3,7 @@
   <!--todo 支持自动卡片形态-->
 
   <div class="row">
+    <!-- 全屏状态受控（v-model:fullscreen）：q-table 为模拟全屏、Esc 原生无效，配合下方键监听支持 Esc 退出 -->
     <q-table card-class="col-12 component-cask-complex-table-std"
              table-header-class="component-cask-complex-table-std-header"
              :loading="tableDynamicData.inLoading"
@@ -11,6 +12,7 @@
              :row-key="tableBaseInfo.tableKey"
              :pagination="{rowsPerPage: 0}"
              v-model:selected="selectedData"
+             v-model:fullscreen="inFullscreen"
              class="shadow-0"
              :selection="tableBaseInfo.selectType"
              :visible-columns="visibleColumns"
@@ -186,7 +188,7 @@
 
 <script setup>
 
-import {defineEmits, defineProps, onMounted, ref, watch} from "vue";
+import {defineEmits, defineProps, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {
   ComplexTableColumnIconSiteEnum,
   ComplexTableColumnTypeEnum,
@@ -293,6 +295,9 @@ const buildCustomSlot = () => {
           imageSize: column.imageSize,
         })
       }
+      // 列可见性：tableColumns 可选属性 defaultVisible，未设/true=默认显示；
+      // false=初始隐藏（【列可见性调整】里为非勾选态），用户勾选后才显示
+      const defaultVisible = column.defaultVisible !== false
       allRowSlot.value.push({
         align: column.align ? column.align : 'center',
         name: column.name,
@@ -300,9 +305,11 @@ const buildCustomSlot = () => {
         slotName: `header-cell-${column.name}`,
         sortableLite: column.sortableLite,
         sortStatus: ComplexTableSortedStatus.DEFAULT,
-        visible: true,
+        visible: defaultVisible,
       })
-      visibleColumns.value.push(column.name)
+      if (defaultVisible) {
+        visibleColumns.value.push(column.name)
+      }
     }
   }
 }
@@ -342,6 +349,27 @@ const updatePageSize = (updatePageSize) => {
   pageNo.value = 1
   toNewPage()
 }
+
+// 表格全屏 + Esc 退出：仅全屏期间挂键监听，多实例互不影响（各自只响应自己的全屏态）
+const inFullscreen = ref(false)
+
+const onKeydownEsc = (e) => {
+  if (e.key === 'Escape' && inFullscreen.value) {
+    inFullscreen.value = false
+  }
+}
+
+watch(inFullscreen, (val) => {
+  if (val) {
+    window.addEventListener('keydown', onKeydownEsc)
+  } else {
+    window.removeEventListener('keydown', onKeydownEsc)
+  }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydownEsc)
+})
 
 onMounted(() => {
   buildCustomSlot()
