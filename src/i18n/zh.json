@@ -647,6 +647,7 @@
         "phone": "客户手机号",
         "mail": "客户邮箱",
         "preferredStaffId": "偏好员工",
+        "assignedStaffId": "分配雇员",
         "assignStrategy": "分配策略",
         "bookingUrl": "预约链接",
         "source": "预约来源",

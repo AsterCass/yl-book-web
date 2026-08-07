@@ -77,6 +77,20 @@
                   outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
+        <!-- 分配雇员（仅创建）：硬指定，填了则跳过自动分配直接分给该雇员（不合法后端直接报错），
+             此时偏好员工仅作记录字段；留空维持全自动分配。编辑时改「谁做的」走列表/日历的分配操作 -->
+        <template v-if="isNew">
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">
+            {{ $t('book_booking.upsert.field.assignedStaffId') }}&nbsp;:</h6>
+          <q-select v-model="upsertAssignedStaffId" :menu-offset="[0, 5]" :options="staffOptionList"
+                    class="component-outline-input-grow"
+                    clear-icon="fa-solid fa-xmark"
+                    clearable
+                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                    outlined popup-content-class="component-extra-card-std-limit">
+          </q-select>
+        </template>
+
         <!-- 特殊备注：选项与选中值都是文案字符串本身，无 id->名称 映射，不受选项加载时序影响 -->
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.specialRemark') }}&nbsp;:</h6>
@@ -98,7 +112,8 @@
       </div>
 
       <div class="row q-mt-xl q-mb-md justify-evenly">
-        <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="save">
+        <!-- 提交中禁用并转 loading，防快速重复点击重复建单 -->
+        <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated :loading="saving" @click="save">
           {{ isNew ? $t('book_booking.upsert.save_add') : $t('book_booking.upsert.save_update') }}
         </q-btn>
 
@@ -182,6 +197,7 @@ const upsertSkillIdList = ref([])
 const upsertPhone = ref("")
 const upsertMail = ref("")
 const upsertPreferredStaffId = ref(null)
+const upsertAssignedStaffId = ref(null)
 const upsertSource = ref(BookSourceEnum.PHONE.code)
 const upsertRemark = ref("")
 const upsertSpecialRemarkList = ref([])
@@ -265,6 +281,8 @@ function populate() {
   upsertPhone.value = b && b.phone ? b.phone : ''
   upsertMail.value = b && b.mail ? b.mail : ''
   upsertPreferredStaffId.value = b && b.preferredStaffId ? b.preferredStaffId : null
+  // 分配雇员仅创建时生效：日历日视图从雇员列点开时预填该列雇员
+  upsertAssignedStaffId.value = b && b.assignedStaffId ? b.assignedStaffId : null
   // 来源不设默认值：新增必须显式选择（保存时校验）
   upsertSource.value = b && b.source != null ? b.source : null
   upsertRemark.value = b && b.remark ? b.remark : ''
@@ -381,7 +399,13 @@ function statusColor(status) {
   return e ? e.color : 'rgb(128, 128, 128)'
 }
 
+// 提交中标记：按钮 loading + 拦截重复触发（回车/连点），请求结束（含失败）恢复可点
+const saving = ref(false)
+
 function save() {
+  if (saving.value) {
+    return
+  }
   if (!upsertBookingTime.value || !upsertName.value || upsertSource.value == null) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return
@@ -400,6 +424,8 @@ function save() {
     // 编辑时清空偏好雇员需传空串（后端将 null 视为不修改）
     preferredStaffId: upsertPreferredStaffId.value != null
         ? upsertPreferredStaffId.value : (props.isNew ? null : ''),
+    // 分配雇员：仅创建时生效（硬指定，后端跳过自动分配；不合法直接报错）
+    assignedStaffId: props.isNew ? upsertAssignedStaffId.value : null,
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
     source: upsertSource.value,
     remark: upsertRemark.value,
@@ -407,6 +433,7 @@ function save() {
     specialRemarkList: upsertSpecialRemarkList.value,
   }
 
+  saving.value = true
   if (props.isNew) {
     bookCreate(body).then(res => {
       if (!res || !res.data) {
@@ -414,6 +441,8 @@ function save() {
       }
       emit('update:modelValue', false)
       emit('saved')
+    }).finally(() => {
+      saving.value = false
     })
   } else {
     bookUpdate(props.book.id, body).then(res => {
@@ -423,6 +452,8 @@ function save() {
       emit('update:modelValue', false)
       notifyTopPositive(t('book_booking.notify.update_success'))
       emit('saved')
+    }).finally(() => {
+      saving.value = false
     })
   }
 }

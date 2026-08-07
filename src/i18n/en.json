@@ -649,6 +649,7 @@
         "phone": "Customer Phone",
         "mail": "Customer Email",
         "preferredStaffId": "Preferred Staff",
+        "assignedStaffId": "Assigned Staff",
         "assignStrategy": "Assignment Strategy",
         "bookingUrl": "Booking URL",
         "source": "Booking Source",
