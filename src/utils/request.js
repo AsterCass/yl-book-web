@@ -78,9 +78,12 @@ const serviceShiro = axios.create({
     // sends cookies for authentication/session
     withCredentials: true,
     timeout: 20000,
+    // axios 1.x 取的是 paramsSerializer.serialize；写成 paramsSerializer.paramsSerializer 会被静默忽略，
+    // 数组会退化成 a[]=1&a[]=2，后端 List 入参（如 /book/list 的 statusList/sourceList）无法绑定。
+    // skipNulls 保持与 axios 默认行为一致：null 参数不上送（后端 <if> 按缺省处理）
     paramsSerializer: {
-        paramsSerializer: function (params) {
-            return Qs.stringify(params, {arrayFormat: 'repeat'})
+        serialize: function (params) {
+            return Qs.stringify(params, {arrayFormat: 'repeat', skipNulls: true})
         }
     }
 })

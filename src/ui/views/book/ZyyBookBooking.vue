@@ -61,6 +61,7 @@
                 class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
+                multiple use-chips
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                 outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
@@ -74,6 +75,7 @@
                 class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
+                multiple use-chips
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                 outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
@@ -329,8 +331,9 @@ const selectName = ref("")
 const selectPhone = ref("")
 const selectMail = ref("")
 const selectReferralCode = ref("")
-const selectStatus = ref(null)
-const selectSource = ref(null)
+// 状态/来源为多选（multiple），model 用数组；点清除图标 Quasar 会置 null，取值处已兼容
+const selectStatus = ref([])
+const selectSource = ref([])
 const selectStaffId = ref(null)
 const selectPreferredStaffId = ref(null)
 const selectBookProjectId = ref(null)
@@ -346,8 +349,8 @@ function clearSearch() {
   selectPhone.value = ""
   selectMail.value = ""
   selectReferralCode.value = ""
-  selectStatus.value = null
-  selectSource.value = null
+  selectStatus.value = []
+  selectSource.value = []
   selectStaffId.value = null
   selectPreferredStaffId.value = null
   selectBookProjectId.value = null
@@ -547,8 +550,11 @@ function selectData(keepPage = false) {
   const param = {
     id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,
     referralCode: selectReferralCode.value,
-    status: selectStatus.value ? selectStatus.value.value : null,
-    source: selectSource.value ? selectSource.value.value : null,
+    // 状态/来源多选：取选项 code 列表，空选=不过滤（传 null 不上送）
+    statusList: selectStatus.value && selectStatus.value.length
+        ? selectStatus.value.map(opt => opt.value) : null,
+    sourceList: selectSource.value && selectSource.value.length
+        ? selectSource.value.map(opt => opt.value) : null,
     staffId: selectStaffId.value ? selectStaffId.value.value : null,
     preferredStaffId: selectPreferredStaffId.value ? selectPreferredStaffId.value.value : null,
     bookProjectId: selectBookProjectId.value ? selectBookProjectId.value.value : null,
