@@ -573,7 +573,8 @@
       "reason": "Reason (optional)",
       "add": "Add Block",
       "confirm": "Confirm",
-      "time_required": "Please fill in the start and end time"
+      "time_required": "Please fill in the start and end time",
+      "unconfirmed": "There is an unconfirmed blocked time slot. Please click \"Confirm\" to add it, or clear the start/end time before updating"
     }
   },
 

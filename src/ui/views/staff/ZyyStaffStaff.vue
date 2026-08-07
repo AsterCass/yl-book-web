@@ -195,7 +195,7 @@
             <div class="row items-center no-wrap q-mt-sm q-ml-md" style="gap: .5rem;">
               <q-input v-model="newBlockReason" class="component-outline-input-grow col" dense outlined
                        :placeholder="t('staff.block.reason')"/>
-              <q-btn no-caps unelevated class="component-none-btn-mini-grow" @click="addStaffBlock">
+              <q-btn no-caps unelevated class="component-full-btn-mini-grow" @click="addStaffBlock">
                 <div class="row items-center justify-center">
                   <q-icon name="fa-solid fa-check" size="0.9rem"/>
                   <div class="q-ml-xs" style="font-size: 0.85rem">
@@ -670,6 +670,13 @@ function upsertData() {
 
   if (!updateId.value && !isNew.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
+    return;
+  }
+
+  // 防误操作：屏蔽时段填写框展开且填了开始/结束时间但未点「确认添加」，直接更新时先提示
+  // （屏蔽时段是即时接口操作、不随更新提交，静默丢弃会让用户误以为已保存）
+  if (!isNew.value && showBlockAdd.value && (newBlockStart.value || newBlockEnd.value)) {
+    notifyTopWarning(t('staff.block.unconfirmed'))
     return;
   }
 
