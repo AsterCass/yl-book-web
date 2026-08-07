@@ -108,8 +108,12 @@
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
 
-        <div class="q-ma-md"
-             style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
+        <!-- 两列布局：左=基础信息，右=计划工作时间（排班行数多，单列会把弹窗拉得过长、展示效果差）。
+             no-wrap 强制并排：弹窗宽度由两列内容撑开（卡片 max-width 已放宽），不会换行退化成单列 -->
+        <div class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
+
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem;
+                    align-items: center; align-content: start; flex: 1 1 auto; min-width: 24rem;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
@@ -133,11 +137,11 @@
 
         </div>
 
-        <div class="q-mx-md q-mb-md">
+        <div style="flex: 1 1 auto; min-width: 26rem;">
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
             {{ $t('staff.schedule.title') }}
           </h6>
-          <div class="q-mt-sm q-ml-md" style="opacity: 0.5; width: 25rem; font-size: 0.85rem">
+          <div class="q-mt-sm q-ml-md" style="opacity: 0.5; max-width: 25rem; font-size: 0.85rem">
             {{ $t('staff.schedule.note') }}
           </div>
 
@@ -176,6 +180,7 @@
 
             </div>
           </div>
+        </div>
         </div>
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
