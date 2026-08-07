@@ -563,6 +563,17 @@
         "invalid_time": "Invalid time format. Please check and try again",
         "invalid_range": "Invalid range: end time must be later than start time"
       }
+    },
+    "block": {
+      "title": "Blocked Time Slots :",
+      "note": "Only blocks within the past/next two weeks are shown; new blocks can be at most two weeks ahead.",
+      "empty": "No blocked time slots",
+      "start": "2020-01-01 10:00",
+      "end": "2020-08-01 14:00",
+      "reason": "Reason (optional)",
+      "add": "Add Block",
+      "confirm": "Confirm",
+      "time_required": "Please fill in the start and end time"
     }
   },
 

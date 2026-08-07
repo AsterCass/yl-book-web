@@ -68,6 +68,7 @@
                               upsertMail = row.mail
                               upsertGoogleCalendarId = row.googleCalendarId
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
+                              loadStaffBlocks()
                               isNew = false;
                               showUpsert = true
                             }
@@ -112,8 +113,9 @@
              no-wrap 强制并排：弹窗宽度由两列内容撑开（卡片 max-width 已放宽），不会换行退化成单列 -->
         <div class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
 
-        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem;
-                    align-items: center; align-content: start; flex: 1 1 auto; min-width: 24rem;">
+        <div style="flex: 1 1 auto; min-width: 24rem;">
+
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
@@ -134,6 +136,76 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.google_calendar_id') }}&nbsp;:</h6>
           <q-input v-model="upsertGoogleCalendarId" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.google_calendar_id')"/>
+
+        </div>
+
+        <!-- 屏蔽时间段（个人 block，仅编辑态，需已有雇员 id）：默认仅展示前后两周，可直接添加/删除；
+             仅同步该雇员谷歌日历（未配置则只在本系统生效），后端尽力而为。
+             标题补 12px 左边距与上方非必填字段标签的文字起点对齐（必填标签由星号占位） -->
+        <div v-if="!isNew" class="q-mt-lg">
+          <div class="row items-center">
+            <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.block.title') }}</h6>
+          </div>
+          <div class="q-mt-sm" style="opacity: .5; max-width: 25rem; font-size: .85rem; margin-left: 12px">
+            {{ $t('staff.block.note') }}
+          </div>
+
+          <!-- 列表样式与预约日历「门店已屏蔽时段」一致（store-block-item 同款）：
+               边框行卡片，首行时间加粗、次行原因，右侧圆形删除钮；超高滚动 -->
+          <div class="q-mt-sm" style="overflow-y: auto; max-height: 16rem; margin-left: 12px">
+            <div v-if="staffBlockList.length === 0" style="opacity: .5; font-size: .85rem">
+              {{ $t('staff.block.empty') }}
+            </div>
+            <div v-for="blk in staffBlockList" :key="blk.id" class="row items-center staff-block-item">
+              <div style="min-width: 0">
+                <div style="font-weight: 500">{{ blk.startTime }} ~ {{ blk.endTime }}</div>
+                <div v-if="blk.reason" class="component-max-line-text"
+                     style="opacity: .6; font-size: .78rem">{{ blk.reason }}</div>
+              </div>
+              <q-space/>
+              <q-btn round flat dense class="component-none-btn-grow" @click="deleteStaffBlock(blk)">
+                <q-icon name="fa-solid fa-trash" size=".9rem"/>
+              </q-btn>
+            </div>
+          </div>
+
+          <!-- 与右侧「添加时间段」同款按钮：点击才展开填写框，再点收起 -->
+          <div class="row justify-center q-my-sm">
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                   @click="showBlockAdd = !showBlockAdd">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('staff.block.add') }}
+                </div>
+              </div>
+            </q-btn>
+          </div>
+
+
+          <!-- 填写框：点击上方「添加屏蔽时段」后才显示 -->
+          <template v-if="showBlockAdd">
+            <div class="row items-center no-wrap q-mt-sm q-ml-md" style="gap: .5rem;">
+              <cask-date-time-picker v-model="newBlockStart" input-class="component-outline-input-mini-grow"
+                                     :placeholder="t('staff.block.start')"/>
+              <div>~</div>
+              <cask-date-time-picker v-model="newBlockEnd" input-class="component-outline-input-mini-grow"
+                                     :placeholder="t('staff.block.end')"/>
+            </div>
+            <div class="row items-center no-wrap q-mt-sm q-ml-md" style="gap: .5rem;">
+              <q-input v-model="newBlockReason" class="component-outline-input-grow col" dense outlined
+                       :placeholder="t('staff.block.reason')"/>
+              <q-btn no-caps unelevated class="component-none-btn-mini-grow" @click="addStaffBlock">
+                <div class="row items-center justify-center">
+                  <q-icon name="fa-solid fa-check" size="0.9rem"/>
+                  <div class="q-ml-xs" style="font-size: 0.85rem">
+                    {{ $t('staff.block.confirm') }}
+                  </div>
+                </div>
+              </q-btn>
+            </div>
+          </template>
+        </div>
 
         </div>
 
@@ -281,6 +353,7 @@ import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskTimePicker from "@/ui/components/CaskTimePicker.vue";
+import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 import {tableStaff, tableStaffOperation} from "@/tables/staff.js";
 import {
   staffCreate,
@@ -292,6 +365,7 @@ import {
   staffUpdateSkill
 } from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
+import {bookBlockCreate, bookBlockDelete, bookBlockList} from "@/api/book.js";
 
 
 const selectId = ref("")
@@ -328,6 +402,13 @@ const upsertScheduleMap = reactive({
 
 const updateId = ref("")
 
+// 屏蔽时间段（个人 block，仅编辑态）：列表 + 新增输入（填写框点「添加屏蔽时段」才展开）
+const staffBlockList = ref([])
+const showBlockAdd = ref(false)
+const newBlockStart = ref("")
+const newBlockEnd = ref("")
+const newBlockReason = ref("")
+
 function clearUpsertParam() {
   updateId.value = ""
   upsertName.value = ""
@@ -335,7 +416,68 @@ function clearUpsertParam() {
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertGoogleCalendarId.value = ""
+  staffBlockList.value = []
+  showBlockAdd.value = false
+  newBlockStart.value = ""
+  newBlockEnd.value = ""
+  newBlockReason.value = ""
   clearScheduleParam()
+}
+
+// 浏览器本地日期 + 偏移天数 → yyyy-MM-dd（后端会再按门店时区钳制到 ±14 天，轻微时区差异无影响）
+function fmtDateOffset(offsetDays) {
+  const d = new Date(Date.now() + offsetDays * 86400000)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// 查询该雇员前后两周内的个人 block（不带日期入口，窗口固定，界面有对应提示）
+function loadStaffBlocks() {
+  if (!updateId.value) {
+    return
+  }
+  bookBlockList({
+    staffId: updateId.value,
+    startDateStr: fmtDateOffset(-14),
+    endDateStr: fmtDateOffset(14),
+  }).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      staffBlockList.value = []
+      return
+    }
+    staffBlockList.value = res.data.data
+  })
+}
+
+function addStaffBlock() {
+  if (!newBlockStart.value || !newBlockEnd.value) {
+    notifyTopWarning(t('staff.block.time_required'))
+    return
+  }
+  bookBlockCreate({
+    staffId: updateId.value,
+    startTimeStr: newBlockStart.value,
+    endTimeStr: newBlockEnd.value,
+    reason: newBlockReason.value || null,
+  }).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showBlockAdd.value = false
+    newBlockStart.value = ""
+    newBlockEnd.value = ""
+    newBlockReason.value = ""
+    loadStaffBlocks()
+  })
+}
+
+function deleteStaffBlock(blk) {
+  bookBlockDelete(blk.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    loadStaffBlocks()
+  })
 }
 
 function minuteToTime(minute) {
@@ -677,6 +819,14 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+
+// 与预约日历 CaskStoreBlockDialog 的 .store-block-item 同款
+.staff-block-item {
+  padding: .5rem .75rem;
+  margin-bottom: .5rem;
+  border: 2px solid rgba(var(--text-color));
+  border-radius: 4px;
+}
 
 .priority-drag-item {
   padding: .5rem .75rem;
