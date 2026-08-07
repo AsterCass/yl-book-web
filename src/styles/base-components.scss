@@ -628,6 +628,13 @@
   );
 }
 
+.component-outline-input-long-grow {
+  @include component-outline-input-base(
+          $thisWidth: auto,
+          $thisMinWidth: 24rem,
+  );
+}
+
 .component-outline-input-mini-grow {
   @include component-outline-input-base(
           $thisWidth: auto,

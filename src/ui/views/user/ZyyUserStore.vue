@@ -65,6 +65,7 @@
                               upsertAddress = row.address
                               upsertPhone = row.phone
                               upsertDesc = row.description
+                              upsertGoogleCalendarIdList = row.googleCalendarIdList || []
                               isNew = false;
                               showUpsert = true
                             }
@@ -128,6 +129,44 @@
             }}&nbsp;:</h6>
           <q-input v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
+
+          <!-- 门店自身谷歌日历列表（仅编辑时展示）：逐条添加/删除，样式同技能别名维护；
+               门店 block 时除各雇员日历外同时屏蔽这些日历 -->
+          <template v-if="!isNew">
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+                $t('user_store.upsert.field.google_calendar_ids')
+              }}&nbsp;:</h6>
+            <div>
+              <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+                {{ $t('user_store.upsert.google_calendar_ids_hint') }}
+              </div>
+              <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                     @click="addCalendarIdItem">
+                <div class="row items-center justify-center">
+                  <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                  <div class="q-ml-xs" style="font-size: 0.85rem">
+                    {{ $t('user_store.upsert.google_calendar_ids_add') }}
+                  </div>
+                </div>
+              </q-btn>
+
+              <div v-if="upsertGoogleCalendarIdList.length === 0" class="q-mt-xs"
+                   style="opacity: .5; font-size: .75rem;">
+                {{ $t('user_store.upsert.google_calendar_ids_empty') }}
+              </div>
+
+              <div v-for="(calValue, calIndex) in upsertGoogleCalendarIdList" :key="calIndex"
+                   class="row items-center q-mt-xs" style="gap: .5rem;">
+                <q-input v-model="upsertGoogleCalendarIdList[calIndex]" class="component-outline-input-long-grow"
+                         dense outlined :placeholder="t('user_store.placeholder.google_calendar_ids')"/>
+                <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeCalendarIdItem(calIndex)">
+                  <div class="row items-center">
+                    <q-icon name="fa-solid fa-trash" size="1rem"/>
+                  </div>
+                </q-btn>
+              </div>
+            </div>
+          </template>
 
           <template v-if="isNew">
             <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
@@ -265,6 +304,16 @@ const upsertExternalName = ref("")
 const upsertAddress = ref("")
 const upsertPhone = ref("")
 const upsertDesc = ref("")
+// 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
+const upsertGoogleCalendarIdList = ref([])
+
+function addCalendarIdItem() {
+  upsertGoogleCalendarIdList.value.push('')
+}
+
+function removeCalendarIdItem(calIndex) {
+  upsertGoogleCalendarIdList.value.splice(calIndex, 1)
+}
 const upsertTimezone = ref(null)
 const upsertAdminMail = ref("")
 const upsertAdminNickName = ref("")
@@ -280,6 +329,7 @@ function clearUpsertParam() {
   upsertAddress.value = ""
   upsertPhone.value = ""
   upsertDesc.value = ""
+  upsertGoogleCalendarIdList.value = []
   upsertTimezone.value = null
   upsertAdminMail.value = ""
   upsertAdminNickName.value = ""
@@ -340,6 +390,8 @@ function upsertData() {
       address: upsertAddress.value,
       phone: upsertPhone.value,
       description: upsertDesc.value,
+      // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
+      googleCalendarIdList: upsertGoogleCalendarIdList.value,
     }
     storeUpdate(updateId.value, body).then(res => {
       if (!res || !res.data) {
