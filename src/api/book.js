@@ -63,6 +63,16 @@ export function bookUncheckin(id) {
     })
 }
 
+// 办卡信息（会员储值卡充值记录，第三方接口有限流，用户确认后才查询；不分页，一次返回全部）
+// params: {startDateStr, endDateStr, sourceList?}；门店身份查本店，租户级（总门店）跨自己有权限的全部门店
+export function bookCardInfo(params) {
+    return serviceShiro({
+        url: `/book/cardInfo`,
+        params: params,
+        method: 'get',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({

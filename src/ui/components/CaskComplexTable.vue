@@ -32,14 +32,17 @@
       <template v-slot:bottom="props">
         <div class="component-cask-complex-table-std-bottom">
           <div class="row justify-between items-center q-mx-lg">
-            <div class="row justify-start items-center q-mb-md">
+            <!-- 无分页模式（tableBaseInfo.noPagination）：数据一次性全量展示，隐藏单页容量与分页器，
+                 保留总条数/列设置/全屏 -->
+            <div v-if="!tableBaseInfo.noPagination" class="row justify-start items-center q-mb-md">
               <div>
                 {{ $t('complex_table_page_size') }} :
               </div>
-              <q-btn v-for="val in [5, 10, 20, 30, 50]" :key="val"
+              <q-btn v-for="val in [5, 10, 20, 30, 50, 100, 500]" :key="val"
                      :class="pageSize === val ? 'component-cask-complex-table-std-bottom-contain shadow-2' : ''"
                      flat round dense class="q-mx-sm" :label="val" @click="updatePageSize(val)"/>
             </div>
+            <div v-else/>
 
             <div class="row justify-end items-center q-mb-md">
               <q-btn v-if="tableBaseInfo.showTableSetting" no-caps unelevated
@@ -84,7 +87,7 @@
               <div class="q-mr-md">
                 {{ $t('complex_table_total_data') }} : {{ tableDynamicData.dataSum }}
               </div>
-              <div>
+              <div v-if="!tableBaseInfo.noPagination">
                 <q-pagination
                     v-model="pageNo" :max="Math.ceil(tableDynamicData.dataSum / pageSize)" :max-pages="8"
                     boundary-numbers directionLinks size=".85rem"

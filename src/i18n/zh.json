@@ -610,6 +610,17 @@
 
   "yl_subsystem_appointment_calendar": "预约日历",
   "yl_subsystem_appointment_email": "预约邮件",
+  "yl_subsystem_appointment_card_info": "办卡信息",
+
+  "book_card_info": {
+    "label": { "start_date": "开始日期", "end_date": "结束日期", "source": "预约来源" },
+    "button": { "query": "查询" },
+    "referral_prefix": "推荐码:",
+    "rate_limit_note": "该接口存在调用频率限制，请谨慎规划查询次数",
+    "dialog": { "title": "查询确认", "content": "该接口存在调用频率限制，请谨慎规划查询次数。确认现在发起查询吗？", "cancel": "取消", "confirm": "确认查询" },
+    "notify": { "date_required": "请选择开始日期和结束日期", "date_order": "结束日期不能早于开始日期" },
+    "change_type": { "consume": "消费", "purchase": "充值", "refund": "退款" }
+  },
 
   "book_booking": {
     "title": "预约管理",

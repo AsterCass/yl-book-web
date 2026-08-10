@@ -169,3 +169,52 @@ export const tableBookOperation = [
         color: 'rgb(var(--negative))',
     },
 ]
+
+
+// 办卡信息（充值记录查询）：按手机号归并的行，姓名/预约历史/充值明细按行展示（MULTI_ROW 按逗号拆行）
+const tableCardInfoCol = [
+    {
+        name: 'phone',
+        field: 'phone',
+        label: '手机号',
+        align: 'center',
+    },
+    {
+        name: 'names',
+        field: 'names',
+        label: '用户名称列表',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
+        name: 'bookLines',
+        field: 'bookLines',
+        label: '历史预约数据列表',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
+        // 当前筛选区间内按交易类型聚合：充值累加、退款扣减、消费忽略
+        name: 'totalRecharge',
+        field: 'totalRecharge',
+        label: '总充值金额',
+        align: 'center',
+    },
+    {
+        name: 'rechargeLines',
+        field: 'rechargeLines',
+        label: '充值数据列表',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+]
+
+export const tableCardInfo = {
+    tableColumns: tableCardInfoCol,
+    tableKey: "phone",
+    selectType: 'none',
+    showFullSize: true,
+    showTableSetting: true,
+    // 无分页：一次性全量展示（隐藏单页容量与分页器，保留总条数/列设置/全屏）
+    noPagination: true,
+}

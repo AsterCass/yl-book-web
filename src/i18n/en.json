@@ -612,6 +612,17 @@
 
   "yl_subsystem_appointment_calendar": "Booking Calendar",
   "yl_subsystem_appointment_email": "Booking Email",
+  "yl_subsystem_appointment_card_info": "Card Info",
+
+  "book_card_info": {
+    "label": { "start_date": "Start Date", "end_date": "End Date", "source": "Booking Source" },
+    "button": { "query": "Query" },
+    "referral_prefix": "Ref:",
+    "rate_limit_note": "This interface is rate-limited. Please plan your queries carefully.",
+    "dialog": { "title": "Confirm Query", "content": "This interface is rate-limited. Please plan your queries carefully. Query now?", "cancel": "Cancel", "confirm": "Query" },
+    "notify": { "date_required": "Please select the start and end date", "date_order": "End date must not be earlier than start date" },
+    "change_type": { "consume": "Consume", "purchase": "Recharge", "refund": "Refund" }
+  },
 
   "book_booking": {
     "title": "Booking Management",

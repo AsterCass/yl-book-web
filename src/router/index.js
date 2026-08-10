@@ -11,6 +11,7 @@ import ZyyBook from "@/ui/views/book/ZyyBook.vue";
 import ZyyBookBooking from "@/ui/views/book/ZyyBookBooking.vue";
 import ZyyBookCalendar from "@/ui/views/book/ZyyBookCalendar.vue";
 import ZyyBookEmail from "@/ui/views/book/ZyyBookEmail.vue";
+import ZyyBookCardInfo from "@/ui/views/book/ZyyBookCardInfo.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -112,6 +113,20 @@ const router = createRouter({
                                         label: "yl_subsystem_appointment_email",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:email'
+                                    },
+                                },
+                                {
+                                    // 办卡信息（充值记录查询，第三方有限流）：权限与预约查询相同
+                                    path: "cardInfo",
+                                    name: "bookCardInfo",
+                                    component: ZyyBookCardInfo,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_card_info',
+                                        value: "bookCardInfo",
+                                        header: "yl_subsystem_appointment_card_info",
+                                        label: "yl_subsystem_appointment_card_info",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:book'
                                     },
                                 },
                             ]
@@ -319,6 +334,7 @@ const parentRouteMap = {
     'bookBooking': 'subsystemMain',
     'bookCalendar': 'subsystemMain',
     'bookEmail': 'subsystemMain',
+    'bookCardInfo': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'order': 'subsystemMain',
