@@ -582,7 +582,7 @@
     "button": { "query": "查询", "add": "添加用户", "clear": "清空条件", "save": "保存" },
     "upsert": { "title_add": "添加用户", "title_update": "更新用户", "default_password_note": "默认密码和邮箱相同，创建后用户需要在3日内修改密码，否则账号会被锁定，无法登录", "field": { "nick": "用户昵称", "mail": "用户邮箱", "phone": "用户手机号", "gender": "用户性别", "birth": "用户生日" }, "save_add": "添加", "save_update": "更新" },
     "role_assign": { "title": "角色分配" },
-    "store_assign": { "title": "门店分配", "note": "不勾选任何门店表示不限制，该用户可见本租户所有门店" },
+    "store_assign": { "title": "分配门店", "note": "只能分配你自己拥有的门店；取消勾选即收回你授予的门店，其他人授予的门店不受影响", "empty": "你名下暂无可分配的门店", "success": "分配门店成功" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "delete": { "title": "删除用户", "content": "是否要删除【{name}】用户" },

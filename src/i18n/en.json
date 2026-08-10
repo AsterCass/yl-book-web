@@ -584,7 +584,7 @@
     "button": { "query": "Query", "add": "Add User", "clear": "Clear Filters", "save": "Save" },
     "upsert": { "title_add": "Add User", "title_update": "Update User", "default_password_note": "Default password equals email. Please ensure the user changes password within 3 days to avoid lockout.", "field": { "nick": "User Nickname", "mail": "User Email", "phone": "User Phone", "gender": "User Gender", "birth": "User Birth" }, "save_add": "Add", "save_update": "Update" },
     "role_assign": { "title": "Assign Roles" },
-    "store_assign": { "title": "Assign Stores", "note": "Leave all unchecked to remove restrictions; the user can access all stores of this tenant." },
+    "store_assign": { "title": "Assign Stores", "note": "You can only assign stores you own; unchecking revokes stores you granted, while stores granted by others are unaffected.", "empty": "You have no stores to assign", "success": "Stores assigned successfully" },
     "dialog": {
       "common": { "cancel": "Cancel", "confirm": "Confirm" },
       "delete": { "title": "Delete User", "content": "Delete user 【{name}】?" },

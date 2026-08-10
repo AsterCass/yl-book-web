@@ -32,6 +32,16 @@ export function userUpdateRole(id, body) {
     })
 }
 
+// body: {storeIdList}：目标应拥有的门店列表（仅限操作者自己拥有的门店；空数组=收回自己名下授予的全部）。
+// 操作者与目标都须为租户级账号
+export function userUpdateStore(id, body) {
+    return serviceShiro({
+        url: `/user/update/${id}/store`,
+        data: body,
+        method: 'post',
+    })
+}
+
 export function userUpdateDisable(id, data) {
     return serviceShiro({
         url: `/user/update/${id}/disable`,

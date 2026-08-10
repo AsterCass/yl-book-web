@@ -99,6 +99,9 @@
                               }
                               showUserRole = true
                             }
+                            if (name === 'assignStore') {
+                              openAssignStore(row)
+                            }
                             if(name === 'delete') {
                               toOpId = row.id
                               toOpTitle = $t('user_user.dialog.delete.title')
@@ -228,6 +231,39 @@
       </q-card>
     </q-dialog>
 
+    <!-- 分配门店：勾选项 = 操作者自己拥有（可见）的门店，回显目标现有授权；
+         取消勾选即收回自己名下授予的门店，他人授予的不受影响 -->
+    <q-dialog :model-value="showAssignStore" @hide="showAssignStore = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('user_user.store_assign.title') }}
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-px-sm" style="opacity: .5; font-size: .85rem; width: 25rem">
+          {{ $t('user_user.store_assign.note') }}
+        </div>
+
+        <div class="row q-px-sm q-mt-sm" style="width: 25rem">
+          <div v-if="assignStoreList.length === 0" style="opacity: .5; font-size: .85rem">
+            {{ $t('user_user.store_assign.empty') }}
+          </div>
+          <div v-for="storeItem in assignStoreList" :key="storeItem.id">
+            <q-checkbox class="q-ma-xs" color="grey-10" size="37px" v-model="assignStoreMap[storeItem.id]"
+                        :label="storeItem.name"/>
+          </div>
+        </div>
+
+        <div class="row q-mt-xl q-mb-md justify-center">
+          <q-btn no-caps unelevated class="shadow-1 component-full-btn-grow" @click="updateUserStoreData">
+            {{ $t('user_user.button.save') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
 
     <cask-dialog-judgment v-model="showOperation"
                           :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
@@ -252,10 +288,12 @@ import {
   userUpdate,
   userUpdateDisable,
   userUpdateLock,
-  userUpdateRole
+  userUpdateRole,
+  userUpdateStore
 } from "@/api/user.js";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {roleListSimple} from "@/api/role.js";
+import {storeList} from "@/api/store.js";
 
 
 const selectId = ref("")
@@ -298,6 +336,45 @@ function clearUpsertParam() {
 const showUserRole = ref(false)
 const allRoleList = ref([])
 const userRoleMap = reactive({})
+
+// 分配门店：候选 = 操作者自己拥有（可见）的门店，勾选态回显目标现有授权
+const showAssignStore = ref(false)
+const assignStoreList = ref([])
+const assignStoreMap = reactive({})
+
+function openAssignStore(row) {
+  updateId.value = row.id
+  const grantedIds = (row.grantedStoreList || []).map(s => s.storeId)
+  // /store/list 对租户级账户只返回自己被授权的门店，天然即「自己拥有的门店」
+  storeList({pageNo: 1, pageSize: 100}).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    const myStores = res.data.data.records || []
+    assignStoreList.value = myStores
+    Object.keys(assignStoreMap).forEach(key => delete assignStoreMap[key])
+    myStores.forEach(s => {
+      assignStoreMap[s.id] = grantedIds.includes(s.id)
+    })
+    showAssignStore.value = true
+  })
+}
+
+function updateUserStoreData() {
+  if (!updateId.value) {
+    notifyTopWarning(t('validation.insufficient_parameters'))
+    return;
+  }
+  const storeIdList = assignStoreList.value.filter(s => assignStoreMap[s.id]).map(s => s.id)
+  userUpdateStore(updateId.value, {storeIdList}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showAssignStore.value = false
+    notifyTopPositive(t('user_user.store_assign.success'))
+    selectData(true)
+  })
+}
 
 // op
 const showOperation = ref(false)
@@ -488,6 +565,10 @@ function selectData(keepPage = false) {
       } else {
         data.simpleRoleList = []
       }
+      // 拥有门店（门店可见范围）：仅租户级账户有值，逗号串供 MULTI_ROW 列按行展示
+      data.grantedStores = (data.grantedStoreList || []).map(s => s.storeName).join(',')
+      // 分配门店：仅对租户级账户（非门店账户）提供入口
+      data.assignStoreOp = !data.storeId
       data.statusNameWebColorName = statusEnum.color
     });
     tableData.value = thisData

@@ -51,6 +51,14 @@ const tableUserCol = [
         align: 'center',
     },
     {
+        // 门店可见范围（仅租户级账户有值）：逗号串按行展示
+        name: 'grantedStores',
+        field: 'grantedStores',
+        label: '拥有门店',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
         name: 'genderName',
         field: 'genderName',
         label: '性别',
@@ -125,6 +133,12 @@ export const tableUserOperation = [
         label: '修改角色',
         condition: 'updateRoleOp',
         name: 'updateRole',
+    },
+    {
+        // 仅租户级账户（非门店账户）可被分配门店
+        label: '分配门店',
+        condition: 'assignStoreOp',
+        name: 'assignStore',
     },
     {
         label: '删除',
