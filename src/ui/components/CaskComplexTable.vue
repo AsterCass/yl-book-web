@@ -160,6 +160,14 @@
               </div>
             </div>
           </div>
+          <!-- 长文本：渲染换行符并限制最大宽度（列配置 maxWidth，默认 20rem）；
+               inline-block 保持在单元格内居中定位，内部文本左对齐换行 -->
+          <div v-else-if="thisSlot.slotType === ComplexTableColumnTypeEnum.TEXT"
+               style="display: inline-block; text-align: left; white-space: pre-wrap;
+                      overflow-wrap: anywhere; vertical-align: middle;"
+               :style="{maxWidth: thisSlot.maxWidth}">
+            {{ props.row[thisSlot.name] }}
+          </div>
           <div v-else>
             {{ props.row[thisSlot.name] }}
           </div>
@@ -296,6 +304,8 @@ const buildCustomSlot = () => {
           slotType: column.type,
           iconSite: column.iconSite ? column.iconSite : ComplexTableColumnIconSiteEnum.START,
           imageSize: column.imageSize,
+          // TEXT 类型的最大宽度（可配置，默认 20rem）
+          maxWidth: column.maxWidth ? column.maxWidth : '20rem',
         })
       }
       // 列可见性：tableColumns 可选属性 defaultVisible，未设/true=默认显示；

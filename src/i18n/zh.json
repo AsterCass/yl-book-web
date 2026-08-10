@@ -611,6 +611,14 @@
   "yl_subsystem_appointment_calendar": "预约日历",
   "yl_subsystem_appointment_email": "预约邮件",
   "yl_subsystem_appointment_card_info": "办卡信息",
+  "yl_subsystem_appointment_feedback": "客户反馈",
+
+  "book_feedback": {
+    "note": "匿名反馈将在客户提交后 1-3 天（随机）才进入列表，且不展示预约、雇员与提交时间，无法追踪到具体提交人；非匿名反馈实时可见，可点击预约编号 / 雇员名称查看详情。",
+    "staff_detail_title": "雇员详情",
+    "staff_field": { "name": "雇员名称", "external_name": "外部名称", "phone": "雇员手机号", "mail": "通知邮箱" },
+    "notify": { "handle_success": "反馈状态更新成功" }
+  },
 
   "book_card_info": {
     "label": { "start_date": "开始日期", "end_date": "结束日期", "source": "预约来源" },

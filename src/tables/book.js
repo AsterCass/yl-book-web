@@ -12,9 +12,10 @@
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
 *      可选项：content, title, subscript, footerRight, footerLeft, footerMiddle
 * type（可选，默认 'default'）：该列渲染方式，
-*      可选项：default, point, iconWithColor, image
+*      可选项：default, point, iconWithColor, image, multiRow, text
 * iconSite（可选项，默认 'start'）：type=iconWithColor有效，可选项：start, end
 * imageSize（可选项，默认无限制）
+* maxWidth（可选项，默认 '20rem'）：type=text 有效，长文本最大宽度（渲染换行符、超宽自动折行）
 */
 
 import {ComplexTableColumnTypeEnum} from "@/constants/enums/table.js";
@@ -218,3 +219,90 @@ export const tableCardInfo = {
     // 无分页：一次性全量展示（隐藏单页容量与分页器，保留总条数/列设置/全屏）
     noPagination: true,
 }
+
+
+// 客户反馈（服务评价）：匿名行的 预约ID/服务雇员名称/提交时间 由后端脱敏为空（前端同样不展示、不可点击）
+const tableFeedbackCol = [
+    {
+        name: 'id',
+        field: 'id',
+        label: '反馈编号',
+        align: 'center',
+    },
+    {
+        // 非匿名可点击查看预约详情
+        name: 'bookId',
+        field: 'bookId',
+        label: '预约编号',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.POINT,
+    },
+    {
+        // 非匿名可点击查看雇员详情
+        name: 'staffName',
+        field: 'staffName',
+        label: '服务雇员名称',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.POINT,
+    },
+    {
+        name: 'scoreShow',
+        field: 'scoreShow',
+        label: '客户评分',
+        align: 'center',
+    },
+    {
+        // 长文本：渲染客户换行、限宽 30rem
+        name: 'content',
+        field: 'content',
+        label: '客户评价',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '30rem',
+    },
+    {
+        name: 'handleStatusName',
+        field: 'handleStatusName',
+        label: '反馈状态',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        name: 'createTime',
+        field: 'createTime',
+        label: '提交时间',
+        align: 'center',
+    },
+    {
+        name: 'operation',
+        field: 'operation',
+        label: '操作',
+        align: 'center',
+    },
+]
+
+export const tableFeedback = {
+    tableColumns: tableFeedbackCol,
+    tableKey: "id",
+    selectType: 'none',
+    showFullSize: true,
+    showTableSetting: true,
+}
+
+export const tableFeedbackOperation = [
+    {
+        label: '标记已处理',
+        condition: 'handledOp',
+        name: 'markHandled',
+    },
+    {
+        label: '无需处理',
+        condition: 'noNeedOp',
+        name: 'markNoNeed',
+    },
+    {
+        label: '标记未处理',
+        condition: 'unhandledOp',
+        name: 'markUnhandled',
+    },
+]

@@ -4,6 +4,8 @@ export const ComplexTableColumnTypeEnum = Object.freeze({
     ICON_COLOR: 2,
     IMAGE: 3,
     MULTI_ROW: 4,
+    // 长文本：渲染换行符（pre-wrap），限制最大宽度（列配置 maxWidth，默认 20rem）
+    TEXT: 5,
 });
 
 export const ComplexTableColumnIconSiteEnum = Object.freeze({

@@ -34,6 +34,13 @@ export const BookSourceEnum = new Enum({
     UNKNOW: {code: 100, name: '其他预约', desc: '', color: 'rgb(128, 128, 128)'},
 });
 
+// 客户反馈处理状态
+export const BookFeedbackHandleStatusEnum = new Enum({
+    UNHANDLED: {code: 0, name: '未处理', desc: '默认状态，待运营跟进', color: 'rgb(245, 166, 35)'},
+    HANDLED: {code: 1, name: '已处理', desc: '运营已跟进处理', color: 'rgb(68, 117, 80)'},
+    NO_NEED: {code: 2, name: '无需处理', desc: '无需跟进', color: 'rgb(127, 140, 141)'},
+});
+
 // 预约邮件处理状态
 export const BookEmailStatusEnum = new Enum({
     UNPROCESSED: {code: 0, name: '未处理', desc: '刚落库，或处理过程中出现瞬时异常，可被重试', color: 'rgb(245, 166, 35)'},

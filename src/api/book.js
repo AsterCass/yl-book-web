@@ -73,6 +73,25 @@ export function bookCardInfo(params) {
     })
 }
 
+// 客户反馈（服务评价）列表：分页，仅返回已到可见时间的反馈（匿名 = 提交后 1-3 天随机延迟）
+// params: {pageNo, pageSize}
+export function bookFeedbackList(params) {
+    return serviceShiro({
+        url: `/book/feedback/list`,
+        params: params,
+        method: 'get',
+    })
+}
+
+// 反馈处理状态流转：0=未处理 / 1=已处理 / 2=无需处理
+export function bookFeedbackHandle(id, handleStatus) {
+    return serviceShiro({
+        url: `/book/feedback/handle/${id}`,
+        params: {handleStatus: handleStatus},
+        method: 'post',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({

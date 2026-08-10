@@ -12,6 +12,7 @@ import ZyyBookBooking from "@/ui/views/book/ZyyBookBooking.vue";
 import ZyyBookCalendar from "@/ui/views/book/ZyyBookCalendar.vue";
 import ZyyBookEmail from "@/ui/views/book/ZyyBookEmail.vue";
 import ZyyBookCardInfo from "@/ui/views/book/ZyyBookCardInfo.vue";
+import ZyyBookFeedback from "@/ui/views/book/ZyyBookFeedback.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -125,6 +126,20 @@ const router = createRouter({
                                         value: "bookCardInfo",
                                         header: "yl_subsystem_appointment_card_info",
                                         label: "yl_subsystem_appointment_card_info",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:book'
+                                    },
+                                },
+                                {
+                                    // 客户反馈（服务评价）：权限与预约查询相同
+                                    path: "feedback",
+                                    name: "bookFeedback",
+                                    component: ZyyBookFeedback,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_feedback',
+                                        value: "bookFeedback",
+                                        header: "yl_subsystem_appointment_feedback",
+                                        label: "yl_subsystem_appointment_feedback",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:book'
                                     },
@@ -335,6 +350,7 @@ const parentRouteMap = {
     'bookCalendar': 'subsystemMain',
     'bookEmail': 'subsystemMain',
     'bookCardInfo': 'subsystemMain',
+    'bookFeedback': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'order': 'subsystemMain',
