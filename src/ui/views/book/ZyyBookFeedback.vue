@@ -44,6 +44,11 @@
              @click="() => {clearSearch(); selectData();}">
         {{ $t('book_feedback.button.clear') }}
       </q-btn>
+      <!-- 导出 xlsx：按当前筛选条件全量导出（不分页），导出中禁用防重复点击 -->
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             :loading="exporting" :disable="exporting" @click="exportData">
+        {{ $t('book_feedback.button.export') }}
+      </q-btn>
     </div>
 
     <div class="q-ml-md q-mt-sm" style="max-width: 80%; opacity: .5; font-size: .85rem">
@@ -122,12 +127,18 @@
 
 import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
-import {notifyTopPositive} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableFeedback, tableFeedbackOperation} from "@/tables/book.js";
-import {bookDetail, bookFeedbackHandle, bookFeedbackList, bookFeedbackRemark} from "@/api/book.js";
+import {
+  bookDetail,
+  bookFeedbackExport,
+  bookFeedbackHandle,
+  bookFeedbackList,
+  bookFeedbackRemark
+} from "@/api/book.js";
 import {staffDetail} from "@/api/staff.js";
 import {BookFeedbackHandleStatusEnum} from "@/constants/enums/book.js";
 
@@ -242,6 +253,49 @@ function onColumnClick(name, row) {
       showStaffDetail.value = true
     })
   }
+}
+
+// ===== 导出 xlsx =====
+
+// 导出中：按钮禁用+loading，防重复点击
+const exporting = ref(false)
+
+function exportData() {
+  if (exporting.value) {
+    return
+  }
+  exporting.value = true
+  bookFeedbackExport({
+    startDateStr: selectStartDate.value || null,
+    endDateStr: selectEndDate.value || null,
+    handleStatus: selectHandleStatus.value ? selectHandleStatus.value.value : null,
+  }).then(async res => {
+    if (!res || !res.data) {
+      return
+    }
+    const blob = res.data
+    // 后端业务错误（如日期格式非法）会以 JSON 返回：blob 形态需解析后提示，不触发下载
+    if (blob.type && blob.type.includes('application/json')) {
+      try {
+        const errorObj = JSON.parse(await blob.text())
+        notifyTopWarning(errorObj.message || t('error_request'))
+      } catch (e) {
+        notifyTopWarning(t('error_request'))
+      }
+      return
+    }
+    // 文件名优先取响应头（后端为 customer-feedback-{时间戳}.xlsx），取不到用兜底
+    const disposition = res.headers ? res.headers['content-disposition'] : ''
+    const match = disposition ? disposition.match(/filename=([^;]+)/) : null
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = match ? match[1].trim() : 'customer-feedback.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }).finally(() => {
+    exporting.value = false
+  })
 }
 
 // ===== 运营备注编辑 =====

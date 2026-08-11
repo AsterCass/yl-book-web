@@ -104,6 +104,16 @@ export function bookFeedbackRemark(id, body) {
     })
 }
 
+// 导出反馈 xlsx（条件同列表，不分页）：blob 响应；后端业务错误时返回 JSON（调用方需按 blob.type 区分）
+export function bookFeedbackExport(params) {
+    return serviceShiro({
+        url: `/book/feedback/export`,
+        params: params,
+        method: 'get',
+        responseType: 'blob',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({

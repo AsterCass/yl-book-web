@@ -617,7 +617,7 @@
 
   "book_feedback": {
     "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status" },
-    "button": { "query": "Query", "clear": "Clear Filters" },
+    "button": { "query": "Query", "clear": "Clear Filters", "export": "Export" },
     "note": "Anonymous feedback appears in this list only after a random delay of 1-3 days, without booking or staff info, and its submission time shown is the delayed appearance time, so it cannot be traced back to the submitter. Non-anonymous feedback is visible immediately; click the booking ID / staff name for details.",
     "staff_detail_title": "Staff Details",
     "staff_field": { "name": "Staff Name", "external_name": "External Name", "phone": "Staff Phone", "mail": "Notification Email" },
