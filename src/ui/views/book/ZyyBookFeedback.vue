@@ -46,7 +46,7 @@
       </q-btn>
     </div>
 
-    <div class="q-ml-md q-mt-sm" style="opacity: .5; font-size: .85rem">
+    <div class="q-ml-md q-mt-sm" style="max-width: 80%; opacity: .5; font-size: .85rem">
       {{ $t('book_feedback.note') }}
     </div>
 
@@ -63,6 +63,35 @@
                             selectData(true)
                           }"
     />
+
+    <!-- 编辑运营备注：保存空内容即清空 -->
+    <q-dialog :model-value="showRemarkEdit" transition-hide="fade" no-backdrop-dismiss no-shake
+              transition-show="fade" @hide="showRemarkEdit = false">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('book_feedback.remark_dialog.title') }}
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-ma-md" style="min-width: 36rem">
+          <q-input v-model="remarkEditContent"
+                   dense outlined class="component-outline-input-grow"
+                   :placeholder="t('book_feedback.remark_dialog.placeholder')"/>
+        </div>
+
+        <div class="row q-mt-lg q-mb-md justify-evenly">
+          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated :loading="remarkSaving"
+                 @click="saveRemark">
+            {{ $t('main_setting_save') }}
+          </q-btn>
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated
+                 @click="showRemarkEdit = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
 
     <!-- 预约详情（复用预约列表的详情弹窗） -->
     <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook"/>
@@ -98,7 +127,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableFeedback, tableFeedbackOperation} from "@/tables/book.js";
-import {bookDetail, bookFeedbackHandle, bookFeedbackList} from "@/api/book.js";
+import {bookDetail, bookFeedbackHandle, bookFeedbackList, bookFeedbackRemark} from "@/api/book.js";
 import {staffDetail} from "@/api/staff.js";
 import {BookFeedbackHandleStatusEnum} from "@/constants/enums/book.js";
 
@@ -153,6 +182,9 @@ function selectData(keepPage = false) {
         bookId: row.bookId || '',
         staffName: row.staffName || '',
         createTime: row.createTime || '',
+        remark: row.remark || '',
+        // 编辑备注：所有行可用
+        remarkOp: true,
         scoreShow: row.score != null ? `${row.score} ★` : '',
         handleStatusName: statusEnum ? statusEnum.name : '',
         handleStatusNameWebColorName: statusEnum ? statusEnum.color : 'rgb(128, 128, 128)',
@@ -212,9 +244,45 @@ function onColumnClick(name, row) {
   }
 }
 
+// ===== 运营备注编辑 =====
+
+const showRemarkEdit = ref(false)
+const remarkEditId = ref("")
+const remarkEditContent = ref("")
+// 保存中：按钮 loading 防重复提交
+const remarkSaving = ref(false)
+
+function openRemarkEdit(row) {
+  remarkEditId.value = row.id
+  remarkEditContent.value = row.remark || ''
+  showRemarkEdit.value = true
+}
+
+function saveRemark() {
+  if (remarkSaving.value) {
+    return
+  }
+  remarkSaving.value = true
+  // 空内容原样提交=清空备注
+  bookFeedbackRemark(remarkEditId.value, {remark: remarkEditContent.value}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    showRemarkEdit.value = false
+    notifyTopPositive(t('book_feedback.notify.remark_success'))
+    selectData(true)
+  }).finally(() => {
+    remarkSaving.value = false
+  })
+}
+
 // ===== 处理状态流转 =====
 
 function onOperationClick(name, row) {
+  if (name === 'editRemark') {
+    openRemarkEdit(row)
+    return
+  }
   let handleStatus = null
   if (name === 'markHandled') {
     handleStatus = BookFeedbackHandleStatusEnum.HANDLED.code

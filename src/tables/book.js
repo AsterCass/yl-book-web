@@ -275,6 +275,14 @@ const tableFeedbackCol = [
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
+        // 运营备注：长文本渲染换行、限宽 20rem；经「编辑备注」操作维护
+        name: 'remark',
+        field: 'remark',
+        label: '备注',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+    },
+    {
         name: 'createTime',
         field: 'createTime',
         label: '提交时间',
@@ -297,6 +305,11 @@ export const tableFeedback = {
 }
 
 export const tableFeedbackOperation = [
+    {
+        label: '编辑备注',
+        condition: 'remarkOp',
+        name: 'editRemark',
+    },
     {
         label: '标记已处理',
         condition: 'handledOp',

@@ -95,6 +95,15 @@ export function bookFeedbackHandle(id, handleStatus) {
     })
 }
 
+// 编辑反馈运营备注（跟进记录/处理说明）：body {remark}，传空串=清空
+export function bookFeedbackRemark(id, body) {
+    return serviceShiro({
+        url: `/book/feedback/remark/${id}`,
+        data: body,
+        method: 'post',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({
