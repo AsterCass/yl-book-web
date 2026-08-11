@@ -41,10 +41,13 @@ export function bookDelete(id) {
     })
 }
 
-export function bookDetail(id) {
+// storeId 可选：总门店视角（未选定门店）下按数据行所属门店携带 X-Store-Id 调用
+//（/book/detail 要求门店上下文；已选定门店时请求拦截器会用当前门店覆盖，语义一致）
+export function bookDetail(id, storeId) {
     return serviceShiro({
         url: `/book/detail/${id}`,
         method: 'get',
+        headers: storeId ? {'X-Store-Id': storeId} : undefined,
     })
 }
 

@@ -1,12 +1,53 @@
 <template>
   <div class="full-width">
 
-    <!-- 客户反馈（服务评价）：匿名行的预约/雇员/提交时间由后端脱敏，不展示、不可点击；
-         匿名反馈在提交后 1-3 天（随机）才进入列表 -->
+    <!-- 客户反馈（服务评价）：匿名行的预约/雇员由后端脱敏，不展示、不可点击；
+         提交时间为展示口径（匿名 = 提交后 1-3 天随机延迟的「出现时间」），筛选同口径 -->
     <div class="row items-center">
-      <div class="q-ml-md q-mt-md" style="opacity: .5; font-size: .85rem">
-        {{ $t('book_feedback.note') }}
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_feedback.label.start_date') }}&nbsp;:
+        </h6>
       </div>
+      <cask-date-picker v-model="selectStartDate" class="q-ma-md"
+                        input-class="component-outline-input-std"/>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_feedback.label.end_date') }}&nbsp;:
+        </h6>
+      </div>
+      <cask-date-picker v-model="selectEndDate" class="q-ma-md"
+                        input-class="component-outline-input-std"/>
+
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_feedback.label.status') }}&nbsp;:
+        </h6>
+      </div>
+      <q-select v-model="selectHandleStatus" :menu-offset="[0, 5]" :options="handleStatusOptions"
+                class="q-ma-md component-outline-input-std"
+                clear-icon="fa-solid fa-xmark"
+                clearable
+                dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                outlined popup-content-class="component-extra-card-std-limit">
+      </q-select>
+
+    </div>
+
+    <div class="row items-center">
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData()">
+        {{ $t('book_feedback.button.query') }}
+      </q-btn>
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             @click="() => {clearSearch(); selectData();}">
+        {{ $t('book_feedback.button.clear') }}
+      </q-btn>
+    </div>
+
+    <div class="q-ml-md q-mt-sm" style="opacity: .5; font-size: .85rem">
+      {{ $t('book_feedback.note') }}
     </div>
 
     <cask-complex-table :custom-table-operation="tableFeedbackOperation" :table-base-info="tableFeedback"
@@ -55,12 +96,25 @@ import {useI18n} from 'vue-i18n'
 import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
+import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableFeedback, tableFeedbackOperation} from "@/tables/book.js";
 import {bookDetail, bookFeedbackHandle, bookFeedbackList} from "@/api/book.js";
 import {staffDetail} from "@/api/staff.js";
 import {BookFeedbackHandleStatusEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
+
+// 筛选：提交日期区间（展示口径，匿名=出现时间）+ 处理状态（单选，空=不过滤）
+const selectStartDate = ref("")
+const selectEndDate = ref("")
+const selectHandleStatus = ref(null)
+const handleStatusOptions = ref(BookFeedbackHandleStatusEnum.toSelectForm())
+
+function clearSearch() {
+  selectStartDate.value = ""
+  selectEndDate.value = ""
+  selectHandleStatus.value = null
+}
 
 const tableData = ref([])
 const tableDynamicData = ref(
@@ -82,6 +136,9 @@ function selectData(keepPage = false) {
   bookFeedbackList({
     pageNo: tableDynamicData.value.pageNo,
     pageSize: tableDynamicData.value.pageSize,
+    startDateStr: selectStartDate.value || null,
+    endDateStr: selectEndDate.value || null,
+    handleStatus: selectHandleStatus.value ? selectHandleStatus.value.value : null,
   }).then(res => {
     if (!res || !res.data || !res.data.data) {
       tableDynamicData.value.inLoading = false
@@ -134,8 +191,9 @@ function onColumnClick(name, row) {
   if (row.anonymous) {
     return
   }
+  // row.storeId：总门店视角（未选定门店）下按行所属门店携带 X-Store-Id（详情接口要求门店上下文）
   if (name === 'bookId' && row.bookId) {
-    bookDetail(row.bookId).then(res => {
+    bookDetail(row.bookId, row.storeId).then(res => {
       if (!res || !res.data || !res.data.data) {
         return
       }
@@ -144,7 +202,7 @@ function onColumnClick(name, row) {
     })
   }
   if (name === 'staffName' && row.staffId) {
-    staffDetail(row.staffId).then(res => {
+    staffDetail(row.staffId, row.storeId).then(res => {
       if (!res || !res.data || !res.data.data) {
         return
       }

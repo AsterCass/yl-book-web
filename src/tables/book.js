@@ -230,6 +230,13 @@ const tableFeedbackCol = [
         align: 'center',
     },
     {
+        // 门店名称：匿名行也展示（门店粒度不定位提交人，运营需知道反馈针对哪家门店）
+        name: 'storeName',
+        field: 'storeName',
+        label: '门店名称',
+        align: 'center',
+    },
+    {
         // 非匿名可点击查看预约详情
         name: 'bookId',
         field: 'bookId',

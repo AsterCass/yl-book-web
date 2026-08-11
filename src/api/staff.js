@@ -15,10 +15,12 @@ export function staffListSimple() {
     })
 }
 
-export function staffDetail(id) {
+// storeId 可选：总门店视角（未选定门店）下按数据行所属门店携带 X-Store-Id 调用
+export function staffDetail(id, storeId) {
     return serviceShiro({
         url: `/staff/detail/${id}`,
         method: 'get',
+        headers: storeId ? {'X-Store-Id': storeId} : undefined,
     })
 }
 
