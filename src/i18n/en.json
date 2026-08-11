@@ -671,7 +671,8 @@
       "query": "Query",
       "add": "Add Booking",
       "clear": "Clear Filters",
-      "save": "Save"
+      "save": "Save",
+      "export": "Export"
     },
     "upsert": {
       "title_add": "Add Booking",

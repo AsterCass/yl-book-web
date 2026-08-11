@@ -151,6 +151,11 @@
              unelevated @click="()=> {clearSearch(); selectData();}">
         {{ $t('book_booking.button.clear') }}
       </q-btn>
+      <!-- 导出 xlsx：按当前筛选条件全量导出（不分页，超 3000 后端报错），导出中禁用防重复点击 -->
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             :loading="exporting" :disable="exporting" @click="exportData">
+        {{ $t('book_booking.button.export') }}
+      </q-btn>
     </div>
 
     <cask-complex-table :custom-table-operation="tableBookOperation" :table-base-info="tableBook"
@@ -319,7 +324,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookDelete, bookDetail, bookList, bookReassign} from "@/api/book.js";
+import {bookAssign, bookDelete, bookDetail, bookExport, bookList, bookReassign} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
@@ -541,13 +546,9 @@ function deleteData() {
   })
 }
 
-// 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
-function selectData(keepPage = false) {
-  if (!keepPage) {
-    tableDynamicData.value.pageNo = 1
-  }
-  tableDynamicData.value.inLoading = true
-  const param = {
+// 当前筛选条件（列表查询与导出共用，导出不带分页参数）
+function buildFilterParam() {
+  return {
     id: selectId.value, name: selectName.value, phone: selectPhone.value, mail: selectMail.value,
     referralCode: selectReferralCode.value,
     // 状态/来源多选：取选项 code 列表，空选=不过滤（传 null 不上送）
@@ -560,6 +561,56 @@ function selectData(keepPage = false) {
     bookProjectId: selectBookProjectId.value ? selectBookProjectId.value.value : null,
     bookingTimeStartStr: selectBookingTimeStart.value ? selectBookingTimeStart.value : null,
     bookingTimeEndStr: selectBookingTimeEnd.value ? selectBookingTimeEnd.value : null,
+  }
+}
+
+// ===== 导出 xlsx =====
+
+// 导出中：按钮禁用+loading，防重复点击
+const exporting = ref(false)
+
+function exportData() {
+  if (exporting.value) {
+    return
+  }
+  exporting.value = true
+  bookExport(buildFilterParam()).then(async res => {
+    if (!res || !res.data) {
+      return
+    }
+    const blob = res.data
+    // 后端业务错误（如超 3000 行）会以 JSON 返回：blob 形态需解析后提示，不触发下载
+    if (blob.type && blob.type.includes('application/json')) {
+      try {
+        const errorObj = JSON.parse(await blob.text())
+        notifyTopWarning(errorObj.message || t('error_request'))
+      } catch (e) {
+        notifyTopWarning(t('error_request'))
+      }
+      return
+    }
+    // 文件名优先取响应头（后端为 bookings-{时间戳}.xlsx），取不到用兜底
+    const disposition = res.headers ? res.headers['content-disposition'] : ''
+    const match = disposition ? disposition.match(/filename=([^;]+)/) : null
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = match ? match[1].trim() : 'bookings.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }).finally(() => {
+    exporting.value = false
+  })
+}
+
+// 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
+function selectData(keepPage = false) {
+  if (!keepPage) {
+    tableDynamicData.value.pageNo = 1
+  }
+  tableDynamicData.value.inLoading = true
+  const param = {
+    ...buildFilterParam(),
     pageNo: tableDynamicData.value.pageNo, pageSize: tableDynamicData.value.pageSize,
   }
 

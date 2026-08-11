@@ -669,7 +669,8 @@
       "query": "查询",
       "add": "添加预约",
       "clear": "清空条件",
-      "save": "保存"
+      "save": "保存",
+      "export": "导出"
     },
     "upsert": {
       "title_add": "添加预约",
