@@ -41,6 +41,11 @@
              :loading="querying" :disable="querying" @click="askQuery">
         {{ $t('book_card_info.button.query') }}
       </q-btn>
+      <!-- 导出：与查询同一条后端链路（含第三方调用与其限流约束），同样先过限流确认弹窗 -->
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             :loading="exporting" :disable="exporting" @click="askExport">
+        {{ $t('book_card_info.button.export') }}
+      </q-btn>
     </div>
 
     <!-- 无分页表格：一次性全量展示，总条数=聚合后的手机号行数 -->
@@ -75,7 +80,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableCardInfo} from "@/tables/book.js";
-import {bookCardInfo} from "@/api/book.js";
+import {bookCardInfo, bookCardInfoExport} from "@/api/book.js";
 import {BookSourceEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
@@ -93,8 +98,11 @@ const selectSourceList = ref([])
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
 
 const showConfirm = ref(false)
-// 查询中：按钮禁用+loading，防重复点击（第三方有限流）
+// 确认弹窗的动作：'query' 查询 / 'export' 导出（两者都消耗第三方限流额度，共用确认）
+const confirmAction = ref('query')
+// 查询/导出中：按钮禁用+loading，防重复点击（第三方有限流）
 const querying = ref(false)
+const exporting = ref(false)
 
 const tableData = ref([])
 // 无分页：dataSum = 聚合后的手机号行数；pageNo/pageSize 仅为组件必需的占位
@@ -108,15 +116,31 @@ const tableDynamicData = ref(
     }
 )
 
-function askQuery() {
+function validateDates() {
   if (!selectStartDate.value || !selectEndDate.value) {
     notifyTopWarning(t('book_card_info.notify.date_required'))
-    return
+    return false
   }
   if (selectEndDate.value < selectStartDate.value) {
     notifyTopWarning(t('book_card_info.notify.date_order'))
+    return false
+  }
+  return true
+}
+
+function askQuery() {
+  if (!validateDates()) {
     return
   }
+  confirmAction.value = 'query'
+  showConfirm.value = true
+}
+
+function askExport() {
+  if (!validateDates()) {
+    return
+  }
+  confirmAction.value = 'export'
   showConfirm.value = true
 }
 
@@ -125,7 +149,11 @@ function onConfirmQuery(confirmed) {
   if (!confirmed) {
     return
   }
-  doQuery()
+  if (confirmAction.value === 'export') {
+    doExport()
+  } else {
+    doQuery()
+  }
 }
 
 // 交易类型映射：consume=消费 / purchase=充值 / refund=退款，未知原样展示
@@ -189,6 +217,45 @@ function doQuery() {
   }).finally(() => {
     querying.value = false
     tableDynamicData.value.inLoading = false
+  })
+}
+
+// 导出 xlsx：与查询同一条后端链路（含第三方调用与其限流约束），blob 下载
+function doExport() {
+  if (exporting.value) {
+    return
+  }
+  exporting.value = true
+  bookCardInfoExport({
+    startDateStr: selectStartDate.value,
+    endDateStr: selectEndDate.value,
+    sourceList: selectSourceList.value && selectSourceList.value.length
+        ? selectSourceList.value.map(opt => opt.value) : null,
+  }).then(async res => {
+    if (!res || !res.data) {
+      return
+    }
+    const blob = res.data
+    // 后端业务错误（如限流/日期非法）会以 JSON 返回：解析后提示，不触发下载
+    if (blob.type && blob.type.includes('application/json')) {
+      try {
+        const errorObj = JSON.parse(await blob.text())
+        notifyTopWarning(errorObj.message || t('error_request'))
+      } catch (e) {
+        notifyTopWarning(t('error_request'))
+      }
+      return
+    }
+    const disposition = res.headers ? res.headers['content-disposition'] : ''
+    const match = disposition ? disposition.match(/filename=([^;]+)/) : null
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = match ? match[1].trim() : 'card-info.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }).finally(() => {
+    exporting.value = false
   })
 }
 

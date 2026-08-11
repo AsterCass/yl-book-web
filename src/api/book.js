@@ -87,6 +87,16 @@ export function bookCardInfo(params) {
     })
 }
 
+// 导出办卡信息 xlsx（与查询同一条链路，含第三方调用与其限流约束；列与列表一致）：blob 响应
+export function bookCardInfoExport(params) {
+    return serviceShiro({
+        url: `/book/cardInfo/export`,
+        params: params,
+        method: 'get',
+        responseType: 'blob',
+    })
+}
+
 // 客户反馈（服务评价）列表：分页，仅返回已到可见时间的反馈（匿名 = 提交后 1-3 天随机延迟）
 // params: {pageNo, pageSize}
 export function bookFeedbackList(params) {

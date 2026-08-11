@@ -627,7 +627,7 @@
 
   "book_card_info": {
     "label": { "start_date": "Start Date", "end_date": "End Date", "source": "Booking Source" },
-    "button": { "query": "Query" },
+    "button": { "query": "Query", "export": "Export" },
     "referral_prefix": "Ref:",
     "rate_limit_note": "This interface is rate-limited. Please plan your queries carefully.",
     "dialog": { "title": "Confirm Query", "content": "This interface is rate-limited. Please plan your queries carefully. Query now?", "cancel": "Cancel", "confirm": "Query" },
