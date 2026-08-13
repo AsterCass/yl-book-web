@@ -13,6 +13,7 @@ import ZyyBookCalendar from "@/ui/views/book/ZyyBookCalendar.vue";
 import ZyyBookEmail from "@/ui/views/book/ZyyBookEmail.vue";
 import ZyyBookCardInfo from "@/ui/views/book/ZyyBookCardInfo.vue";
 import ZyyBookFeedback from "@/ui/views/book/ZyyBookFeedback.vue";
+import ZyyBookPhoneRequest from "@/ui/views/book/ZyyBookPhoneRequest.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -140,6 +141,20 @@ const router = createRouter({
                                         value: "bookFeedback",
                                         header: "yl_subsystem_appointment_feedback",
                                         label: "yl_subsystem_appointment_feedback",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:book'
+                                    },
+                                },
+                                {
+                                    // 电话需求（AI 电话记录的非预约类客户诉求）：权限与预约查询相同
+                                    path: "phoneRequest",
+                                    name: "bookPhoneRequest",
+                                    component: ZyyBookPhoneRequest,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_phone_request',
+                                        value: "bookPhoneRequest",
+                                        header: "yl_subsystem_appointment_phone_request",
+                                        label: "yl_subsystem_appointment_phone_request",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:book'
                                     },
@@ -351,6 +366,7 @@ const parentRouteMap = {
     'bookEmail': 'subsystemMain',
     'bookCardInfo': 'subsystemMain',
     'bookFeedback': 'subsystemMain',
+    'bookPhoneRequest': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'order': 'subsystemMain',

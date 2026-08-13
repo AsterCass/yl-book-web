@@ -326,3 +326,109 @@ export const tableFeedbackOperation = [
         name: 'markUnhandled',
     },
 ]
+
+
+// 电话需求（AI 电话记录的非预约类客户诉求）：未指定门店的行门店名称以「-」占位
+const tablePhoneRequestCol = [
+    {
+        name: 'id',
+        field: 'id',
+        label: '需求编号',
+        align: 'center',
+    },
+    {
+        name: 'storeName',
+        field: 'storeName',
+        label: '门店名称',
+        align: 'center',
+    },
+    {
+        name: 'phone',
+        field: 'phone',
+        label: '联系电话',
+        align: 'center',
+    },
+    {
+        // 需求类型：AI 自拟的简短分类标签（自由文本，无枚举），直接展示
+        name: 'type',
+        field: 'type',
+        label: '需求类型',
+        align: 'center',
+    },
+    {
+        // 长文本：渲染换行、限宽
+        name: 'summary',
+        field: 'summary',
+        label: '简述',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '20rem',
+    },
+    {
+        name: 'detail',
+        field: 'detail',
+        label: '详细描述',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '30rem',
+    },
+    {
+        name: 'handleStatusName',
+        field: 'handleStatusName',
+        label: '处理状态',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        // 运营备注：经「编辑备注」操作维护
+        name: 'remark',
+        field: 'remark',
+        label: '备注',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+    },
+    {
+        name: 'createTime',
+        field: 'createTime',
+        label: '记录时间',
+        align: 'center',
+    },
+    {
+        name: 'operation',
+        field: 'operation',
+        label: '操作',
+        align: 'center',
+    },
+]
+
+export const tablePhoneRequest = {
+    tableColumns: tablePhoneRequestCol,
+    tableKey: "id",
+    selectType: 'none',
+    showFullSize: true,
+    showTableSetting: true,
+}
+
+// 操作与客户反馈一致：编辑备注 + 三态流转
+export const tablePhoneRequestOperation = [
+    {
+        label: '编辑备注',
+        condition: 'remarkOp',
+        name: 'editRemark',
+    },
+    {
+        label: '标记已处理',
+        condition: 'handledOp',
+        name: 'markHandled',
+    },
+    {
+        label: '无需处理',
+        condition: 'noNeedOp',
+        name: 'markNoNeed',
+    },
+    {
+        label: '标记未处理',
+        condition: 'unhandledOp',
+        name: 'markUnhandled',
+    },
+]

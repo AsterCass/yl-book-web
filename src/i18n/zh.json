@@ -612,6 +612,15 @@
   "yl_subsystem_appointment_email": "预约邮件",
   "yl_subsystem_appointment_card_info": "办卡信息",
   "yl_subsystem_appointment_feedback": "客户反馈",
+  "yl_subsystem_appointment_phone_request": "电话需求",
+
+  "book_phone_request": {
+    "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态" },
+    "button": { "query": "查询", "clear": "清空条件" },
+    "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉 / 其他），客户已被告知需求已记录、必要时将回访。与具体门店无关的需求仅在总门店视角（未选择门店）下可见，门店名称以「-」展示；存在未处理需求时会出现在顶部待办提醒中。",
+    "remark_dialog": { "title": "编辑备注", "placeholder": "跟进 / 回访记录（可为空，保存空内容即清空备注）" },
+    "notify": { "handle_success": "需求状态更新成功", "remark_success": "备注更新成功" }
+  },
 
   "book_feedback": {
     "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "反馈状态" },

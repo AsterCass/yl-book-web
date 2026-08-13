@@ -135,6 +135,34 @@ export function bookFeedbackExport(params) {
     })
 }
 
+// 电话需求（AI 电话记录的非预约类客户诉求）列表：分页；总门店视角额外含「未指定门店」的行
+// params: {pageNo, pageSize, startDateStr, endDateStr, handleStatus}
+export function bookPhoneRequestList(params) {
+    return serviceShiro({
+        url: `/book/phone-request/list`,
+        params: params,
+        method: 'get',
+    })
+}
+
+// 电话需求处理状态流转：0=未处理 / 1=已处理 / 2=无需处理
+export function bookPhoneRequestHandle(id, handleStatus) {
+    return serviceShiro({
+        url: `/book/phone-request/handle/${id}`,
+        params: {handleStatus: handleStatus},
+        method: 'post',
+    })
+}
+
+// 编辑电话需求运营备注（跟进/回访记录）：body {remark}，传空串=清空
+export function bookPhoneRequestRemark(id, body) {
+    return serviceShiro({
+        url: `/book/phone-request/remark/${id}`,
+        data: body,
+        method: 'post',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({
