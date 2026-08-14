@@ -135,7 +135,7 @@ export function bookFeedbackExport(params) {
     })
 }
 
-// 电话需求（AI 电话记录的非预约类客户诉求）列表：分页；总门店视角额外含「未指定门店」的行
+// 电话需求（AI 电话记录的非预约类客户诉求）列表：分页，可见门店范围内
 // params: {pageNo, pageSize, startDateStr, endDateStr, handleStatus}
 export function bookPhoneRequestList(params) {
     return serviceShiro({

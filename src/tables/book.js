@@ -328,7 +328,7 @@ export const tableFeedbackOperation = [
 ]
 
 
-// 电话需求（AI 电话记录的非预约类客户诉求）：未指定门店的行门店名称以「-」占位
+// 电话需求（AI 电话记录的非预约类客户诉求，每条归属具体门店）
 const tablePhoneRequestCol = [
     {
         name: 'id',

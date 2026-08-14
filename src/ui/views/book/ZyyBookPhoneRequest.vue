@@ -1,8 +1,8 @@
 <template>
   <div class="full-width">
 
-    <!-- 电话需求：AI 电话接线员在通话中采集的非预约类客户诉求（遗失物品/投诉/其他）。
-         未指定门店的行仅总门店视角可见（门店名称以「-」占位）；状态操作逻辑同客户反馈 -->
+    <!-- 电话需求：AI 电话接线员在通话中采集的非预约类客户诉求（遗失物品/投诉等），
+         每条归属具体门店；状态操作逻辑同客户反馈 -->
     <div class="row items-center">
 
       <div class="q-ml-md">
@@ -153,7 +153,6 @@ function selectData(keepPage = false) {
       const statusEnum = PhoneRequestHandleStatusEnum.fromCode(row.handleStatus)
       return {
         ...row,
-        // 未指定门店（与具体门店无关的诉求，仅总门店视角可见）：门店名称以「-」占位
         storeName: row.storeName || '-',
         // 需求类型：AI 自拟的自由文本标签，原样展示
         type: row.type || '',
