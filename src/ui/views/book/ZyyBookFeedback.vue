@@ -44,7 +44,9 @@
              @click="() => {clearSearch(); selectData();}">
         {{ $t('book_feedback.button.clear') }}
       </q-btn>
-      <!-- 导出 xlsx：按当前筛选条件全量导出（不分页），导出中禁用防重复点击 -->
+      <!-- 导出 xlsx：按当前筛选条件全量导出（不分页），导出中禁用防重复点击。
+           导出为全量口径：含尚未到展示时间的匿名反馈、匿名行不脱敏、另带「创建时间」列（实际提交时刻），
+           日期筛选项语义不变（仍按展示口径 visible_time） -->
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
              :loading="exporting" :disable="exporting" @click="exportData">
         {{ $t('book_feedback.button.export') }}

@@ -142,7 +142,7 @@ const router = createRouter({
                                         header: "yl_subsystem_appointment_feedback",
                                         label: "yl_subsystem_appointment_feedback",
                                         color: 'rgb(var(--full-container-background-color))',
-                                        permission: 'book:book'
+                                        permission: 'book:feedback'
                                     },
                                 },
                                 {
