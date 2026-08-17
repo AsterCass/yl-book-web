@@ -134,6 +134,7 @@ import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableFeedback, tableFeedbackOperation} from "@/tables/book.js";
 import {
   bookDetail,
+  bookFeedbackDetail,
   bookFeedbackExport,
   bookFeedbackHandle,
   bookFeedbackList,
@@ -196,6 +197,7 @@ function selectData(keepPage = false) {
         remark: row.remark || '',
         // 编辑备注：所有行可用
         remarkOp: true,
+        detailOp: true,
         scoreShow: row.score != null ? `${row.score} ★` : '',
         handleStatusName: statusEnum ? statusEnum.name : '',
         handleStatusNameWebColorName: statusEnum ? statusEnum.color : 'rgb(128, 128, 128)',
@@ -333,6 +335,17 @@ function saveRemark() {
 // ===== 处理状态流转 =====
 
 function onOperationClick(name, row) {
+  if (name === 'showBookDetail') {
+    // 按反馈 id 取预约详情：匿名行同样可看（后端按反馈定位所属门店，前端无需带 X-Store-Id）
+    bookFeedbackDetail(row.id).then(res => {
+      if (!res || !res.data || !res.data.data) {
+        return
+      }
+      detailBook.value = res.data.data
+      showBookDetail.value = true
+    })
+    return
+  }
   if (name === 'editRemark') {
     openRemarkEdit(row)
     return

@@ -107,6 +107,15 @@ export function bookFeedbackList(params) {
     })
 }
 
+// 反馈对应的预约详情（匿名反馈同样返回，独立权限 book:feedback:detail）
+// 不需要门店上下文：后端按反馈 id 在可见门店范围内定位其所属门店
+export function bookFeedbackDetail(id) {
+    return serviceShiro({
+        url: `/book/feedback/detail/${id}`,
+        method: 'get',
+    })
+}
+
 // 反馈处理状态流转：0=未处理 / 1=已处理 / 2=无需处理
 export function bookFeedbackHandle(id, handleStatus) {
     return serviceShiro({

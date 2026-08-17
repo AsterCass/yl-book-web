@@ -306,6 +306,11 @@ export const tableFeedback = {
 
 export const tableFeedbackOperation = [
     {
+        label: '详情',
+        condition: 'detailOp',
+        name: 'showBookDetail',
+    },
+    {
         label: '编辑备注',
         condition: 'remarkOp',
         name: 'editRemark',
