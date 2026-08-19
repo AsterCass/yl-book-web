@@ -386,12 +386,21 @@ const tablePhoneRequestCol = [
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
-        // 运营备注：经「编辑备注」操作维护
+        // 运营备注：经「编辑」弹窗维护，仅内部可见
         name: 'remark',
         field: 'remark',
         label: '备注',
         align: 'center',
         type: ComplexTableColumnTypeEnum.TEXT,
+    },
+    {
+        // 门店答复：经「编辑」弹窗维护，客户可见——客户来电查询需求进展时 AI 会读给客户
+        name: 'comment',
+        field: 'comment',
+        label: '答复',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '20rem',
     },
     {
         name: 'createTime',
@@ -415,26 +424,11 @@ export const tablePhoneRequest = {
     showTableSetting: true,
 }
 
-// 操作与客户反馈一致：编辑备注 + 三态流转
+// 单一「编辑」操作：弹窗内一次编辑备注（仅内部）/答复 comment（客户可见）/处理状态
 export const tablePhoneRequestOperation = [
     {
-        label: '编辑备注',
-        condition: 'remarkOp',
-        name: 'editRemark',
-    },
-    {
-        label: '标记已处理',
-        condition: 'handledOp',
-        name: 'markHandled',
-    },
-    {
-        label: '无需处理',
-        condition: 'noNeedOp',
-        name: 'markNoNeed',
-    },
-    {
-        label: '标记未处理',
-        condition: 'unhandledOp',
-        name: 'markUnhandled',
+        label: '编辑',
+        condition: 'editOp',
+        name: 'edit',
     },
 ]

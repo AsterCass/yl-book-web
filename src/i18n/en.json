@@ -619,9 +619,17 @@
   "book_phone_request": {
     "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status" },
     "button": { "query": "Query", "clear": "Clear Filters" },
-    "note": "Non-booking customer requests (lost items, complaints, etc.) recorded by the AI phone receptionist during calls; customers have been told the request is recorded and may get a callback if necessary. Every request belongs to a specific store, and the type is a short label written by the AI; unhandled requests appear in the todo reminder at the top.",
-    "remark_dialog": { "title": "Edit Remark", "placeholder": "Follow-up / callback notes (optional; saving empty content clears the remark)" },
-    "notify": { "handle_success": "Request status updated", "remark_success": "Remark updated" }
+    "note": "Non-booking customer requests (lost items, complaints, etc.) recorded by the AI phone receptionist during calls; customers have been told the request is recorded and may get a callback if necessary. Every request belongs to a specific store, and the type is a short label written by the AI; requests that are unhandled or in progress appear in the todo reminder at the top. The Reply column is visible to customers — the AI reads it to them when they call to ask about progress; the remark stays internal.",
+    "edit_dialog": {
+      "title": "Edit Request",
+      "status_label": "Status",
+      "remark_label": "Remark (internal only)",
+      "remark_placeholder": "Follow-up / callback notes (optional; saving empty content clears it)",
+      "comment_label": "Reply (visible to customers)",
+      "comment_placeholder": "Reply / progress note for the customer (optional; saving empty content clears it)",
+      "comment_hint": "Visible to the customer: when they call to ask about this request, the AI receptionist reads this to them."
+    },
+    "notify": { "update_success": "Request updated" }
   },
 
   "book_feedback": {

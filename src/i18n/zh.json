@@ -617,9 +617,17 @@
   "book_phone_request": {
     "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态" },
     "button": { "query": "查询", "clear": "清空条件" },
-    "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉等），客户已被告知需求已记录、必要时将回访。每条需求归属具体门店，需求类型为 AI 自拟的简短标签；存在未处理需求时会出现在顶部待办提醒中。",
-    "remark_dialog": { "title": "编辑备注", "placeholder": "跟进 / 回访记录（可为空，保存空内容即清空备注）" },
-    "notify": { "handle_success": "需求状态更新成功", "remark_success": "备注更新成功" }
+    "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉等），客户已被告知需求已记录、必要时将回访。每条需求归属具体门店，需求类型为 AI 自拟的简短标签；存在未处理或处理中的需求时会出现在顶部待办提醒中。「答复」栏内容客户可见——客户来电查询进展时 AI 会读给客户听，备注仅内部可见。",
+    "edit_dialog": {
+      "title": "编辑需求",
+      "status_label": "处理状态",
+      "remark_label": "备注（仅内部可见）",
+      "remark_placeholder": "跟进 / 回访记录（可为空，保存空内容即清空）",
+      "comment_label": "答复（客户可见）",
+      "comment_placeholder": "给客户的答复 / 进展说明（可为空，保存空内容即清空）",
+      "comment_hint": "此内容对客户可见：客户来电查询该需求的进展时，AI 接线员会把它读给客户听。"
+    },
+    "notify": { "update_success": "需求更新成功" }
   },
 
   "book_feedback": {

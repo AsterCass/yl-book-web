@@ -154,19 +154,12 @@ export function bookPhoneRequestList(params) {
     })
 }
 
-// 电话需求处理状态流转：0=未处理 / 1=已处理 / 2=无需处理
-export function bookPhoneRequestHandle(id, handleStatus) {
+// 电话需求统一编辑（编辑弹窗一次提交）：body {handleStatus, remark, comment}。
+// handleStatus：0=未处理 / 1=已处理 / 2=无需处理 / 3=处理中；
+// remark 仅内部可见，comment 客户可见（AI 电话查询会读给客户）；空=清空
+export function bookPhoneRequestUpdate(id, body) {
     return serviceShiro({
-        url: `/book/phone-request/handle/${id}`,
-        params: {handleStatus: handleStatus},
-        method: 'post',
-    })
-}
-
-// 编辑电话需求运营备注（跟进/回访记录）：body {remark}，传空串=清空
-export function bookPhoneRequestRemark(id, body) {
-    return serviceShiro({
-        url: `/book/phone-request/remark/${id}`,
+        url: `/book/phone-request/update/${id}`,
         data: body,
         method: 'post',
     })
