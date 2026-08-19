@@ -172,7 +172,7 @@ export const tableBookOperation = [
 ]
 
 
-// 办卡信息（充值记录查询）：按手机号归并的行，姓名/预约历史/充值明细按行展示（MULTI_ROW 按逗号拆行）
+// 办卡信息（充值记录查询）：按手机号归并的行，姓名/预约历史/充值明细/消费明细按行展示（MULTI_ROW 按逗号拆行）
 const tableCardInfoCol = [
     {
         name: 'phone',
@@ -195,16 +195,25 @@ const tableCardInfoCol = [
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
     {
-        // 当前筛选区间内按交易类型聚合：充值累加、退款扣减、消费忽略
+        // 当前筛选区间内按交易类型聚合：充值累加、退款扣减；消费不计入（明细见「消费数据列表」列）
         name: 'totalRecharge',
         field: 'totalRecharge',
         label: '总充值金额',
         align: 'center',
     },
     {
+        // 充值/退款流水（不含消费，消费见下一列）
         name: 'rechargeLines',
         field: 'rechargeLines',
         label: '充值数据列表',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
+        // 消费流水（第三方 changeType=consume）：单列展示，不计入总充值金额
+        name: 'consumeLines',
+        field: 'consumeLines',
+        label: '消费数据列表',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },

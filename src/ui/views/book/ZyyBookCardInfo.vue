@@ -168,6 +168,17 @@ function noComma(str) {
   return (str || '').replaceAll(',', '，')
 }
 
+// 充值/消费流水行：门店 | 交易类型 | $金额 | 时间（空项自动省略）
+function rechargeLine(item) {
+  const parts = [
+    noComma(item.compName),
+    changeTypeName(item.changeType),
+    item.changePrice != null ? `$${item.changePrice}` : '',
+    item.createDate,
+  ]
+  return parts.filter(p => p).join(' | ')
+}
+
 function doQuery() {
   if (querying.value) {
     return
@@ -201,18 +212,12 @@ function doQuery() {
         ]
         return parts.filter(p => p).join(' | ')
       }).join(','),
-      // 总充值金额（后端已按交易类型聚合：充值加、退款减、消费忽略）
+      // 总充值金额（后端已按交易类型聚合：充值加、退款减、消费不计入）
       totalRecharge: `$${row.totalRechargeAmount != null ? row.totalRechargeAmount : 0}`,
-      // 行格式：门店 | 交易类型 | $金额 | 时间
-      rechargeLines: (row.rechargeList || []).map(item => {
-        const parts = [
-          noComma(item.compName),
-          changeTypeName(item.changeType),
-          item.changePrice != null ? `$${item.changePrice}` : '',
-          item.createDate,
-        ]
-        return parts.filter(p => p).join(' | ')
-      }).join(','),
+      // 充值/退款流水，行格式：门店 | 交易类型 | $金额 | 时间
+      rechargeLines: (row.rechargeList || []).map(rechargeLine).join(','),
+      // 消费流水（后端单列返回，不与充值混排），行格式同上
+      consumeLines: (row.consumeList || []).map(rechargeLine).join(','),
     }))
   }).finally(() => {
     querying.value = false

@@ -627,7 +627,7 @@
       "remark_placeholder": "Follow-up / callback notes (optional; saving empty content clears it)",
       "comment_label": "Reply (visible to customers)",
       "comment_placeholder": "Reply / progress note for the customer (optional; saving empty content clears it)",
-      "comment_hint": "Visible to the customer: when they call to ask about this request, the AI receptionist reads this to them."
+      "comment_hint": "Visible to the customer: when they call to ask about this request, the AI receptionist relays its content in the language the customer is speaking (write it in English or Chinese — it is paraphrased, not read out verbatim)."
     },
     "notify": { "update_success": "Request updated" }
   },
