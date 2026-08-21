@@ -200,7 +200,7 @@ function selectData(keepPage = false) {
         handleStatusNameWebColorName: statusEnum ? statusEnum.color : 'rgb(128, 128, 128)',
         // 统一编辑（状态/备注/答复）：所有行可用
         editOp: true,
-        // 拨打电话：所有行可用（无门店呼出电话时点了给提示，不静默禁用——否则店员不知道为什么没有按钮）
+        // 拨打电话：所有行可用（门店号码没配全时点了给提示，不静默禁用——否则店员不知道为什么没有按钮）
         // 先隐藏
         // callOp: true,
         // 回访记录：次数 + 最近一次（谁、什么时候），TEXT 列渲染换行
@@ -266,14 +266,20 @@ const callConfirmContent = ref("")
 const calling = ref(false)
 
 function openCallConfirm(row) {
+  // 门店电话（店员接听的一端）与呼出电话（主叫显示，本店 Twilio 号码）缺一不可，
+  // 后端同样会拒绝，这里先给出可操作的提示
+  if (!row.storePhone) {
+    notifyTopWarning(t('book_phone_request.notify.no_store_phone'))
+    return
+  }
   if (!row.storeOutboundPhone) {
-    // 该门店没配呼出电话，后端也会拒绝，这里先给出可操作的提示
     notifyTopWarning(t('book_phone_request.notify.no_outbound_phone'))
     return
   }
   callRow.value = row
   callConfirmContent.value = t('book_phone_request.call_dialog.content', {
     phone: row.phone,
+    store: row.storePhone,
     outbound: row.storeOutboundPhone,
   })
   showCallConfirm.value = true
@@ -291,7 +297,7 @@ function onConfirmCall(confirmed) {
       return
     }
     notifyTopPositive(t('book_phone_request.notify.call_success', {
-      outbound: res.data.data.outboundPhone,
+      store: res.data.data.storePhone,
     }))
     // 回访次数/最近一次回访即时刷新
     selectData(true)

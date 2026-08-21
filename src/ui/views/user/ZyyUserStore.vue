@@ -125,7 +125,8 @@
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
 
-          <!-- 呼出电话：回访客户时 Twilio 先拨通的本店号码（前台座机/店员手机均可），空=本店不能发起回访 -->
+          <!-- 呼出电话：本店已购的 Twilio 号码，回访客户时作为主叫显示（先呼上面的门店电话、
+               店员接起后桥接客户，两端看到的来电显示都是它）；空=本店不能发起回访 -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.upsert.field.outbound_phone')
             }}&nbsp;:</h6>
