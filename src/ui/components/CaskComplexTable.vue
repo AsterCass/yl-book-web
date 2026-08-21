@@ -210,7 +210,7 @@ import {notifyTopWarning} from "@/utils/notification-tools";
 import {useI18n} from 'vue-i18n'
 
 const {t} = useI18n()
-const emit = defineEmits(['columnClick', 'operationClick', 'toNewPage', 'toSort', 'multipleUpdate']);
+const emit = defineEmits(['columnClick', 'operationClick', 'toNewPage', 'toSort', 'multipleUpdate', 'enterSearch']);
 const props = defineProps({
   //表基本参数
   tableBaseInfo: {
@@ -380,12 +380,41 @@ watch(inFullscreen, (val) => {
   }
 })
 
+// 回车即查询：带表格的页面统一把回车当作点击【查询】，父组件监听 enterSearch 即可。
+// 以下场景回车归属其他控件，不触发查询：输入法组合态、带修饰键、多行文本、
+// 按钮/链接（回车等于点击自身）、下拉选择（回车用于选中选项/展开菜单）、
+// 以及任意弹窗与浮层（q-dialog / q-menu）打开期间
+const onKeydownEnter = (e) => {
+  if (e.key !== 'Enter' || e.isComposing === true || e.keyCode === 229) {
+    return
+  }
+  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
+    return
+  }
+  const target = e.target
+  if (target) {
+    const tagName = target.tagName
+    if (tagName === 'TEXTAREA' || tagName === 'BUTTON' || tagName === 'A' || target.isContentEditable === true) {
+      return
+    }
+    if (target.closest && target.closest('.q-select') !== null) {
+      return
+    }
+  }
+  if (document.querySelector('.q-dialog, .q-menu') !== null) {
+    return
+  }
+  emit('enterSearch')
+}
+
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydownEsc)
+  window.removeEventListener('keydown', onKeydownEnter)
 })
 
 onMounted(() => {
   buildCustomSlot()
+  window.addEventListener('keydown', onKeydownEnter)
 })
 
 

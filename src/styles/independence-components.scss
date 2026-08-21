@@ -32,6 +32,19 @@
   z-index: 0;
 }
 
+//==================== cask picker mask ====================
+
+// 选择器遮罩：z-index 与 q-dialog(fullscreen) 同为 6000，且晚于弹窗挂载，
+// 因此可以覆盖对话框内容；选择器自身把 z-index 抬到 6001 保持在遮罩之上
+.component-cask-picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 6000;
+}
+
 //==================== cask time ====================
 
 .component-cask-time {

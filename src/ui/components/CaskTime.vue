@@ -80,42 +80,57 @@
 </template>
 
 <script setup>
-import {defineEmits, defineProps, ref} from "vue";
+import {defineEmits, defineProps, ref, watch} from "vue";
 
 const emit = defineEmits(['update:modelValue']);
 const props = defineProps({
   modelValue: {
     type: String,
-    required: true,
-    default: '--:--'
+    required: false,
+    default: ''
   },
 })
 
-const indexOfColon = props.modelValue.indexOf(":")
+// 传入值为空（或不是 HH:mm）时统一按 00:00 起步，避免出现「--:--」这种
+// 拖动一个滑条也凑不出完整时间、因而永远不回存的中间态
+function parseTime(val) {
+  const colonIndex = typeof val === 'string' ? val.indexOf(":") : -1
+  if (colonIndex === -1) {
+    return {hour: 0, minute: 0}
+  }
+  const hour = Number(val.substring(0, colonIndex))
+  const minute = Number(val.substring(colonIndex + 1))
+  return {
+    hour: Number.isFinite(hour) ? Math.min(Math.max(hour, 0), 23) : 0,
+    minute: Number.isFinite(minute) ? Math.min(Math.max(minute, 0), 59) : 0,
+  }
+}
 
-const hourInput = ref(indexOfColon !== -1 ? Number(props.modelValue.substring(0, indexOfColon)) : 0)
-const hourInputStr = ref(indexOfColon !== -1 ? props.modelValue.substring(0, indexOfColon) : "--")
-const minuteInput = ref(indexOfColon !== -1 ? Number(props.modelValue.substring(indexOfColon + 1)) : 0)
-const minuteInputStr = ref(indexOfColon !== -1 ? props.modelValue.substring(indexOfColon + 1) : "--")
-const timeStr = ref(props.modelValue)
-// watch(() => props.modelValue, () => {
-//   timeStr.value = props.modelValue
-// })
+const initTime = parseTime(props.modelValue)
+
+const hourInput = ref(initTime.hour)
+const hourInputStr = ref(String(initTime.hour).padStart(2, '0'))
+const minuteInput = ref(initTime.minute)
+const minuteInputStr = ref(String(initTime.minute).padStart(2, '0'))
+
+// 外部改值（如切换到另一条记录、输入框里手输时间）时同步滑条，
+// 只改本地状态不回抛，不会和下面的 emit 形成回环
+watch(() => props.modelValue, (val) => {
+  const thisTime = parseTime(val)
+  hourInput.value = thisTime.hour
+  hourInputStr.value = String(thisTime.hour).padStart(2, '0')
+  minuteInput.value = thisTime.minute
+  minuteInputStr.value = String(thisTime.minute).padStart(2, '0')
+})
 
 const syncHourStr = ((hour) => {
   hourInputStr.value = String(hour).padStart(2, '0')
-  timeStr.value = hourInputStr.value + ":" + minuteInputStr.value
-  if (!timeStr.value.includes("-")) {
-    emit('update:modelValue', timeStr.value);
-  }
+  emit('update:modelValue', hourInputStr.value + ":" + minuteInputStr.value);
 })
 
 const syncMinuteStr = ((minute) => {
   minuteInputStr.value = String(minute).padStart(2, '0')
-  timeStr.value = hourInputStr.value + ":" + minuteInputStr.value
-  if (!timeStr.value.includes("-")) {
-    emit('update:modelValue', timeStr.value);
-  }
+  emit('update:modelValue', hourInputStr.value + ":" + minuteInputStr.value);
 })
 
 </script>
