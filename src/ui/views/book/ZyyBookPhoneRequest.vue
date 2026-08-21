@@ -56,6 +56,7 @@
                         class="full-width"
                         style="padding: 2rem 5rem 0 0.5rem"
                         @operationClick="onOperationClick"
+                        @enterSearch="selectData()"
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize

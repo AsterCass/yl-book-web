@@ -63,6 +63,7 @@
                         :table-data="tableData"
                         :custom-table-operation="tablePermissionOperation"
                         :table-dynamic-data="tableDynamicData"
+                        @enterSearch="selectData()"
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize

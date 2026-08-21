@@ -54,6 +54,7 @@
                         :table-dynamic-data="tableDynamicData"
                         class="full-width"
                         style="padding: 2rem 5rem 0 0.5rem"
+                        @enterSearch="() => { if (!querying) { askQuery() } }"
     />
 
     <!-- 查询确认：提示第三方限流，谨慎规划查询次数 -->

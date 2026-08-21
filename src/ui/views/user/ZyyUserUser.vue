@@ -131,6 +131,7 @@
                               showOperation = true
                             }
                           }"
+                        @enterSearch="selectData()"
                         @toNewPage="(pageObj) => {
                             tableDynamicData.pageNo = pageObj.pageNo
                             tableDynamicData.pageSize = pageObj.pageSize
