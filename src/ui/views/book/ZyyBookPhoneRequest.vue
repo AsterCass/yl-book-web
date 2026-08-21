@@ -202,8 +202,7 @@ function selectData(keepPage = false) {
         // 统一编辑（状态/备注/答复）：所有行可用
         editOp: true,
         // 拨打电话：所有行可用（门店号码没配全时点了给提示，不静默禁用——否则店员不知道为什么没有按钮）
-        // 先隐藏
-        // callOp: true,
+        callOp: true,
         // 回访记录：次数 + 最近一次（谁、什么时候），TEXT 列渲染换行
         callShow: row.callCount
             ? [t('book_phone_request.call_count', {count: row.callCount}),
