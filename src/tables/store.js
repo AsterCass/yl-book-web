@@ -51,6 +51,13 @@ const tableStoreCol = [
         align: 'center',
     },
     {
+        // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用），未配置该店不能发起回访
+        name: 'outboundPhone',
+        field: 'outboundPhone',
+        label: '呼出电话',
+        align: 'center',
+    },
+    {
         name: 'description',
         field: 'description',
         label: '门店描述',

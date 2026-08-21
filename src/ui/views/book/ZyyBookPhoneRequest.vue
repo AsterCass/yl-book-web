@@ -117,6 +117,17 @@
       </q-card>
     </q-dialog>
 
+    <!-- 拨打确认：明确告知「先拨门店呼出电话、店员接起后自动接通客户」，防误呼 -->
+    <cask-dialog-judgment v-model="showCallConfirm"
+                          :callback-method="onConfirmCall"
+                          :dialog-judgment-data="{
+                            title: t('book_phone_request.call_dialog.title'),
+                            content: callConfirmContent,
+                            falseLabel: t('book_phone_request.call_dialog.cancel'),
+                            trueLabel: t('book_phone_request.call_dialog.confirm'),
+                          }"
+    />
+
   </div>
 </template>
 
@@ -124,11 +135,12 @@
 
 import {onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
-import {notifyTopPositive} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tablePhoneRequest, tablePhoneRequestOperation} from "@/tables/book.js";
-import {bookPhoneRequestList, bookPhoneRequestUpdate} from "@/api/book.js";
+import {bookPhoneRequestCall, bookPhoneRequestList, bookPhoneRequestUpdate} from "@/api/book.js";
 import {PhoneRequestHandleStatusEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
@@ -188,6 +200,15 @@ function selectData(keepPage = false) {
         handleStatusNameWebColorName: statusEnum ? statusEnum.color : 'rgb(128, 128, 128)',
         // 统一编辑（状态/备注/答复）：所有行可用
         editOp: true,
+        // 拨打电话：所有行可用（无门店呼出电话时点了给提示，不静默禁用——否则店员不知道为什么没有按钮）
+        // 先隐藏
+        // callOp: true,
+        // 回访记录：次数 + 最近一次（谁、什么时候），TEXT 列渲染换行
+        callShow: row.callCount
+            ? [t('book_phone_request.call_count', {count: row.callCount}),
+              `${row.lastCallTime || ''} ${row.lastCallOperator || ''}`.trim()]
+                .filter(p => p).join('\n')
+            : '-',
       }
     })
     tableDynamicData.value.inLoading = false
@@ -236,9 +257,55 @@ function saveEdit() {
   })
 }
 
+// ===== 拨打电话（Twilio 回拨桥接：先拨门店呼出电话，店员接起后自动接通客户） =====
+
+const showCallConfirm = ref(false)
+const callRow = ref(null)
+const callConfirmContent = ref("")
+// 呼出中：防重复点击（一次点击=一通真实电话）
+const calling = ref(false)
+
+function openCallConfirm(row) {
+  if (!row.storeOutboundPhone) {
+    // 该门店没配呼出电话，后端也会拒绝，这里先给出可操作的提示
+    notifyTopWarning(t('book_phone_request.notify.no_outbound_phone'))
+    return
+  }
+  callRow.value = row
+  callConfirmContent.value = t('book_phone_request.call_dialog.content', {
+    phone: row.phone,
+    outbound: row.storeOutboundPhone,
+  })
+  showCallConfirm.value = true
+}
+
+function onConfirmCall(confirmed) {
+  showCallConfirm.value = false
+  if (!confirmed || !callRow.value || calling.value) {
+    return
+  }
+  const row = callRow.value
+  calling.value = true
+  bookPhoneRequestCall(row.id).then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    notifyTopPositive(t('book_phone_request.notify.call_success', {
+      outbound: res.data.data.outboundPhone,
+    }))
+    // 回访次数/最近一次回访即时刷新
+    selectData(true)
+  }).finally(() => {
+    calling.value = false
+  })
+}
+
 function onOperationClick(name, row) {
   if (name === 'edit') {
     openEdit(row)
+  }
+  if (name === 'call') {
+    openCallConfirm(row)
   }
 }
 

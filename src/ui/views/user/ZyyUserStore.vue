@@ -64,6 +64,7 @@
                               upsertExternalName = row.externalName
                               upsertAddress = row.address
                               upsertPhone = row.phone
+                              upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
                               isNew = false;
@@ -123,6 +124,18 @@
             }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
+
+          <!-- 呼出电话：回访客户时 Twilio 先拨通的本店号码（前台座机/店员手机均可），空=本店不能发起回访 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.outbound_phone')
+            }}&nbsp;:</h6>
+          <div>
+            <q-input v-model="upsertOutboundPhone" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.placeholder.optional')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.outbound_phone_hint') }}
+            </div>
+          </div>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.desc')
@@ -303,6 +316,8 @@ const upsertName = ref("")
 const upsertExternalName = ref("")
 const upsertAddress = ref("")
 const upsertPhone = ref("")
+// 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
+const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
@@ -328,6 +343,7 @@ function clearUpsertParam() {
   upsertExternalName.value = ""
   upsertAddress.value = ""
   upsertPhone.value = ""
+  upsertOutboundPhone.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
   upsertTimezone.value = null
@@ -363,6 +379,7 @@ function upsertData() {
       externalName: upsertExternalName.value,
       address: upsertAddress.value,
       phone: upsertPhone.value,
+      outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
       timezone: upsertTimezone.value ? upsertTimezone.value.value : null,
       adminMail: upsertAdminMail.value,
@@ -389,6 +406,7 @@ function upsertData() {
       externalName: upsertExternalName.value,
       address: upsertAddress.value,
       phone: upsertPhone.value,
+      outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
       googleCalendarIdList: upsertGoogleCalendarIdList.value,

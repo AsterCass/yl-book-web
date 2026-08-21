@@ -418,6 +418,14 @@ const tablePhoneRequestCol = [
         align: 'center',
     },
     {
+        // 回访情况：次数 + 最近一次（谁在什么时候拨的），无回访展示 '-'
+        name: 'callShow',
+        field: 'callShow',
+        label: '回访记录',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+    },
+    {
         name: 'operation',
         field: 'operation',
         label: '操作',
@@ -435,6 +443,12 @@ export const tablePhoneRequest = {
 
 // 单一「编辑」操作：弹窗内一次编辑备注（仅内部）/答复 comment（客户可见）/处理状态
 export const tablePhoneRequestOperation = [
+    {
+        // 拨打电话：Twilio 回拨桥接（先拨门店呼出电话，店员接起后自动接通客户），点击后二次确认
+        label: '拨打电话',
+        condition: 'callOp',
+        name: 'call',
+    },
     {
         label: '编辑',
         condition: 'editOp',

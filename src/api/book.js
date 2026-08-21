@@ -144,6 +144,15 @@ export function bookFeedbackExport(params) {
     })
 }
 
+// 回访拨号（Twilio 回拨桥接）：先拨该需求所属门店的呼出电话接通店员，店员接起后自动拨通客户
+// 独立权限 book:phone-request:call；前端点击前必须二次确认，避免误呼
+export function bookPhoneRequestCall(id) {
+    return serviceShiro({
+        url: `/book/phone-request/call/${id}`,
+        method: 'post',
+    })
+}
+
 // 电话需求（AI 电话记录的非预约类客户诉求）列表：分页，可见门店范围内
 // params: {pageNo, pageSize, startDateStr, endDateStr, handleStatus}
 export function bookPhoneRequestList(params) {
