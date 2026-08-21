@@ -632,13 +632,13 @@
     "call_count": "Called {count} time(s)",
     "call_dialog": {
       "title": "Confirm Call",
-      "content": "About to call the customer at {phone}. The system rings the store phone {store} first — answer it and hold, and the customer is connected automatically (both sides see this store's outbound number {outbound} as the caller ID). Place the call?",
+      "content": "About to call the customer at {phone}. The system rings the store phone {store} first: answer it, wait about 2 seconds for the prompt, then press 1 to connect the customer (without it the call just hangs up and the customer is never disturbed). Once connected the conversation is recorded, and both sides see this store's outbound number {outbound} as the caller ID. Place the call?",
       "cancel": "Cancel",
       "confirm": "Call"
     },
     "notify": {
       "update_success": "Request updated",
-      "call_success": "Call placed: watch for the incoming call at the store phone {store}; the customer is connected once you answer.",
+      "call_success": "Call placed: watch for the incoming call at the store phone {store}, then press 1 to connect the customer (the call is recorded).",
       "no_store_phone": "This store has no store phone configured. Set it in store management first.",
       "no_outbound_phone": "This store has no outbound phone (its Twilio number) configured. Set it in store management first."
     }
