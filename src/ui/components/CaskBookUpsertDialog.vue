@@ -124,44 +124,22 @@
       </div>
     </q-card>
 
-    <!-- 客户历史：绝对定位浮于表单右侧（主卡片的兄弟节点，独立采样背景以保证磨砂效果） -->
-    <div v-if="customerHistory.length > 0"
-         class="component-cask-dialog-judgement-std cask-customer-history">
-        <h6 style="font-weight: 600!important; margin: .4rem .5rem !important;">
-          {{ $t('book_booking.customer_history.title') }}
-        </h6>
-        <div class="q-mx-sm" style="opacity: .5; font-size: .8rem;">
-          {{ $t('book_booking.customer_history.hint') }}
-        </div>
-        <q-separator class="component-separator-base" inset spaced=".6rem"/>
+    <!-- 姓名、手机号搜索结果相互独立，分别浮于主表单左、右两侧 -->
+    <cask-customer-history-panel
+        v-if="nameCustomerHistory.length > 0"
+        class="cask-customer-history-left"
+        :customers="nameCustomerHistory"
+        :title="$t('book_booking.customer_history.name_title')"
+        :hint="$t('book_booking.customer_history.name_hint')"
+        @select="pickCustomer"/>
 
-        <div class="cask-history-scroll">
-          <div v-for="(cust, ci) in customerHistory" :key="ci"
-               class="cask-history-item" @click="pickCustomer(cust)">
-            <div class="row items-center justify-between no-wrap">
-              <div class="text-weight-bold ellipsis">
-                {{ cust.name || $t('book_booking.customer_history.no_name') }}
-              </div>
-              <q-badge outline color="grey-7"
-                       :label="$t('book_booking.customer_history.total', { count: cust.totalCount })"/>
-            </div>
-            <div class="row items-center no-wrap q-mt-xs" style="font-size: .78rem; opacity: .7; gap: .4rem;">
-              <span>{{ cust.phone }}</span>
-              <span v-if="cust.mail" class="ellipsis">· {{ cust.mail }}</span>
-            </div>
-
-            <div v-for="(bk, bi) in (cust.recentBookings || [])" :key="bi" class="cask-history-booking">
-              <span class="cask-history-time">{{ bk.bookingTime }}</span>
-              <span class="cask-history-project ellipsis">{{ projectNames(bk) }}</span>
-              <span class="cask-history-source" :style="{ color: sourceColor(bk.source) }">
-                {{ sourceName(bk.source) }}
-              </span>
-              <q-badge :style="{ backgroundColor: statusColor(bk.status) }"
-                       :label="statusName(bk.status)" style="font-size: 9px;"/>
-            </div>
-          </div>
-        </div>
-      </div>
+    <cask-customer-history-panel
+        v-if="phoneCustomerHistory.length > 0"
+        class="cask-customer-history-right"
+        :customers="phoneCustomerHistory"
+        :title="$t('book_booking.customer_history.phone_title')"
+        :hint="$t('book_booking.customer_history.phone_hint')"
+        @select="pickCustomer"/>
     </div>
   </q-dialog>
 </template>
@@ -171,11 +149,18 @@ import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
-import {AssignStrategyEnum, BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
-import {bookCreate, bookCustomerHistory, bookSpecialRemarkListSimple, bookUpdate} from "@/api/book.js";
+import {AssignStrategyEnum, BookSourceEnum} from "@/constants/enums/book.js";
+import {
+  bookCreate,
+  bookCustomerHistory,
+  bookCustomerHistoryByName,
+  bookSpecialRemarkListSimple,
+  bookUpdate
+} from "@/api/book.js";
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
+import CaskCustomerHistoryPanel from "@/ui/components/CaskCustomerHistoryPanel.vue";
 
 const {t, availableLocales} = useI18n()
 
@@ -205,10 +190,14 @@ const sourceOptions = ref(BookSourceEnum.toSelectForm())
 // 门店特殊备注选项（纯文案字符串，选中值即文案，无需 id 映射）
 const specialRemarkOptions = ref([])
 
-// 客户历史（按手机号模糊查询，防抖）
-const customerHistory = ref([])
+// 客户历史：姓名和手机号各自维护结果、防抖计时器及请求序号，避免相互覆盖或旧响应回写
+const nameCustomerHistory = ref([])
+const phoneCustomerHistory = ref([])
 const HISTORY_DEBOUNCE = 400
-let historyTimer = null
+let nameHistoryTimer = null
+let phoneHistoryTimer = null
+let nameHistoryRequestId = 0
+let phoneHistoryRequestId = 0
 
 // 选项：优先用父组件传入，否则组件自行加载
 const skillOptionRef = ref(null)
@@ -303,36 +292,71 @@ watch(() => props.modelValue, (val) => {
     populate()
   } else {
     // 关闭时清空历史与待触发的查询
-    customerHistory.value = []
-    clearHistoryTimer()
+    nameCustomerHistory.value = []
+    phoneCustomerHistory.value = []
+    clearNameHistoryTimer()
+    clearPhoneHistoryTimer()
+    // 让已发出的请求响应失效，避免下次打开时短暂显示旧结果
+    nameHistoryRequestId++
+    phoneHistoryRequestId++
   }
 })
 
-// 手机号变化（含用户输入与回填）时，防抖后按手机号模糊查询客户历史
-watch(() => upsertPhone.value, (val) => {
-  clearHistoryTimer()
-  const phone = (val || '').trim()
-  if (!phone) {
-    customerHistory.value = []
+// 姓名变化（含用户输入与回填）时，只更新左侧姓名搜索结果
+watch(() => upsertName.value, (val) => {
+  clearNameHistoryTimer()
+  const requestId = ++nameHistoryRequestId
+  nameCustomerHistory.value = []
+  const name = (val || '').trim()
+  if (!name) {
     return
   }
-  historyTimer = setTimeout(() => loadCustomerHistory(phone), HISTORY_DEBOUNCE)
+  nameHistoryTimer = setTimeout(() => loadNameCustomerHistory(name, requestId), HISTORY_DEBOUNCE)
 })
 
-function clearHistoryTimer() {
-  if (historyTimer) {
-    clearTimeout(historyTimer)
-    historyTimer = null
+// 手机号变化（含用户输入与回填）时，只更新右侧手机号搜索结果
+watch(() => upsertPhone.value, (val) => {
+  clearPhoneHistoryTimer()
+  const requestId = ++phoneHistoryRequestId
+  phoneCustomerHistory.value = []
+  const phone = (val || '').trim()
+  if (!phone) {
+    return
+  }
+  phoneHistoryTimer = setTimeout(() => loadPhoneCustomerHistory(phone, requestId), HISTORY_DEBOUNCE)
+})
+
+function clearNameHistoryTimer() {
+  if (nameHistoryTimer) {
+    clearTimeout(nameHistoryTimer)
+    nameHistoryTimer = null
   }
 }
 
-function loadCustomerHistory(phone) {
-  bookCustomerHistory(phone).then(res => {
-    if (!res || !res.data || !res.data.data) {
-      customerHistory.value = []
+function clearPhoneHistoryTimer() {
+  if (phoneHistoryTimer) {
+    clearTimeout(phoneHistoryTimer)
+    phoneHistoryTimer = null
+  }
+}
+
+function loadNameCustomerHistory(name, requestId) {
+  bookCustomerHistoryByName(name).then(res => {
+    if (requestId !== nameHistoryRequestId) {
       return
     }
-    customerHistory.value = res.data.data
+    nameCustomerHistory.value = res && res.data && Array.isArray(res.data.data)
+        ? res.data.data : []
+  })
+}
+
+function loadPhoneCustomerHistory(phone, requestId) {
+  bookCustomerHistory(phone).then(res => {
+    if (requestId !== phoneHistoryRequestId) {
+      return
+    }
+    phoneCustomerHistory.value = res && res.data && Array.isArray(res.data.data)
+        ? res.data.data : []
   })
 }
 
@@ -343,11 +367,6 @@ function pickCustomer(cust) {
   if (cust.mail) {
     upsertMail.value = cust.mail
   }
-}
-
-// 历史预约展示辅助
-function projectNames(bk) {
-  return (bk.skillDtoList || []).map(s => s.name).join(', ')
 }
 
 // 来源联动自动填充客户名（自然流/电话预约），文案走 i18n、随当前系统语言；
@@ -377,26 +396,6 @@ function onSourceChange(code) {
   if (autoNameKey) {
     upsertName.value = t(autoNameKey)
   }
-}
-
-function sourceName(source) {
-  const e = source != null ? BookSourceEnum.fromCode(source) : null
-  return e ? e.name : ''
-}
-
-function sourceColor(source) {
-  const e = source != null ? BookSourceEnum.fromCode(source) : null
-  return e ? e.color : 'rgb(128, 128, 128)'
-}
-
-function statusName(status) {
-  const e = BookStatusEnum.fromCode(status)
-  return e ? e.name : ''
-}
-
-function statusColor(status) {
-  const e = BookStatusEnum.fromCode(status)
-  return e ? e.color : 'rgb(128, 128, 128)'
 }
 
 // 提交中标记：按钮 loading + 拦截重复触发（回车/连点），请求结束（含失败）恢复可点
@@ -512,14 +511,15 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearHistoryTimer()
+  clearNameHistoryTimer()
+  clearPhoneHistoryTimer()
 })
 </script>
 
 <style scoped lang="scss">
 
-// 定位容器：仅按主卡片宽度收缩并居中，历史面板作为兄弟节点绝对定位其右侧。
-// Quasar 对 .q-dialog__inner > div 强制 overflow: auto，会把溢出到右侧的历史面板裁剪掉，
+// 定位容器：仅按主卡片宽度收缩并居中，两个历史面板作为兄弟节点绝对定位在左右两侧。
+// Quasar 对 .q-dialog__inner > div 强制 overflow: auto，会把溢出到两侧的历史面板裁剪掉，
 // 这里改回 visible，并把「限高 + 滚动」职责下放给主卡片自身
 .cask-upsert-wrap {
   position: relative;
@@ -532,62 +532,18 @@ onBeforeUnmount(() => {
   }
 }
 
-.cask-customer-history {
-  // 绝对定位到表单右侧，不影响表单自身的居中位置；作为主卡片兄弟节点，backdrop-filter 独立采样背景
+.cask-customer-history-left,
+.cask-customer-history-right {
   position: absolute;
   top: 0;
+}
+
+.cask-customer-history-left {
+  right: calc(100% + 1rem);
+}
+
+.cask-customer-history-right {
   left: calc(100% + 1rem);
-  width: 24rem;
-  max-width: 24rem;
-  padding: .5rem .3rem;
-
-  .cask-history-scroll {
-    max-height: 30rem;
-    overflow-y: auto;
-    padding: 0 .3rem .5rem;
-  }
-
-  .cask-history-item {
-    padding: .6rem .5rem;
-    margin: .2rem 0;
-    border-radius: .4rem;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: background-color .12s ease, border-color .12s ease;
-
-    &:hover {
-      background-color: rgba(128, 128, 128, .1);
-      border-color: rgba(128, 128, 128, .25);
-    }
-
-    & + .cask-history-item {
-      border-top: 1px solid rgba(128, 128, 128, .12);
-    }
-  }
-
-  .cask-history-booking {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    margin-top: .3rem;
-    font-size: .72rem;
-    opacity: .8;
-
-    .cask-history-time {
-      flex: 0 0 auto;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .cask-history-project {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    .cask-history-source {
-      flex: 0 0 auto;
-      font-weight: 500;
-    }
-  }
 }
 
 </style>

@@ -758,6 +758,10 @@
     "customer_history": {
       "title": "Customer History",
       "hint": "Matched by phone; click to fill customer info",
+      "name_title": "History Grouped by Name",
+      "name_hint": "Fuzzy-matched and grouped by name; click to fill the latest contact details",
+      "phone_title": "History Grouped by Phone",
+      "phone_hint": "Fuzzy-matched and grouped by phone; click to fill customer info",
       "no_name": "Unnamed",
       "total": "{count} total"
     },

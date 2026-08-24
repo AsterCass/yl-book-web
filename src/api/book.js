@@ -225,6 +225,15 @@ export function bookCustomerHistory(phone) {
     })
 }
 
+// 客户历史：按姓名模糊搜索，返回最多 10 个客户（按姓名聚合）
+export function bookCustomerHistoryByName(name) {
+    return serviceShiro({
+        url: `/book/customer/history/name`,
+        params: {name: name},
+        method: 'get',
+    })
+}
+
 // 人工分配/改派雇员：staffId 可选，不传时等价于取消分配
 export function bookAssign(id, staffId) {
     const params = {}
