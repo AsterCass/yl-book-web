@@ -520,7 +520,8 @@
     "button": { "query": "查询", "add": "添加门店", "clear": "清空条件", "save": "保存" },
     "upsert": { "title_add": "添加门店", "title_update": "更新门店", "admin_note": "创建门店会同时创建初始门店管理员账号，默认密码与邮箱相同，超期未修改密码账号将被锁定，无法登录", "field": { "name": "门店名称", "external_name": "外部名称", "address": "门店地址", "phone": "门店电话", "outbound_phone": "呼出电话", "desc": "门店描述", "google_calendar_ids": "谷歌日历列表", "timezone": "门店时区", "admin_mail": "管理员邮箱", "admin_nick": "管理员昵称", "admin_role_name": "管理员角色名", "admin_role_code": "管理员角色码" }, "outbound_phone_hint": "本店已购的 Twilio 号码：回访客户时作为主叫显示（先呼门店电话、再桥接客户，两端看到的都是它）。为空则本店不能发起回访；同时门店电话也需填写——它是回访时店员实际接听的号码", "google_calendar_ids_hint": "可添加多个门店自身的谷歌日历，门店 block 时将与各雇员日历一并同步屏蔽", "google_calendar_ids_add": "添加日历", "google_calendar_ids_empty": "暂无日历", "save_add": "添加", "save_update": "更新" },
     "notify": { "create_success": "创建门店成功", "update_success": "更新门店成功" },
-    "special_remark": { "title": "特殊备注配置", "note": "门店常用的预约特殊备注（如：指定男技师），创建/更新预约时可直接选用。保存时整体覆盖旧配置，清空列表保存即全部删除", "add": "添加备注", "empty": "暂无特殊备注", "placeholder": "例如：指定男技师", "notify_success": "配置特殊备注成功" }
+    "special_remark": { "title": "特殊备注配置", "note": "门店常用的预约特殊备注（如：指定男技师），创建/更新预约时可直接选用。保存时整体覆盖旧配置，清空列表保存即全部删除", "add": "添加备注", "empty": "暂无特殊备注", "placeholder": "例如：指定男技师", "notify_success": "配置特殊备注成功" },
+    "resource": { "field": "门店资源位", "note": "配置全店共享资源及同时可用数量，例如床位 3、包间 2、停车位 10。资源名称不可重复，数量可设为 0 暂停相关服务。", "add": "添加资源位", "empty": "暂无资源位", "name_placeholder": "资源名称，如床位", "capacity_placeholder": "数量", "invalid": "资源名称不可为空或重复，数量必须为非负整数", "delete_title": "删除门店资源位", "delete_warning": "确定删除资源位【{name}】吗？此操作会同时删除所有技能对该资源位的消耗绑定，请谨慎操作。", "cancel": "取消", "confirm": "确认删除", "delete_success": "删除资源位成功" }
   },
 
   "user_setting": { "field": { "old_password": "原密码：", "new_password": "新密码：", "repeat_password": "重复密码：" } },
@@ -595,9 +596,9 @@
 
   "staff_skill": {
     "label": { "id": "技能编号", "name": "技能名称", "code": "技能码", "status": "技能状态" },
-    "placeholder": { "id": "例如：YLSS001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70", "alias": "例如：足疗", "external_name": "可为空", "serviceAmount": "例如：128"},
+    "placeholder": { "id": "例如：YLSS001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70", "alias": "例如：足疗", "external_name": "可为空", "serviceAmount": "可为空，例如：128"},
     "button": { "query": "查询", "add": "添加技能", "clear": "清空条件", "save": "保存" },
-    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "code": "技能码", "desc": "技能描述", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名"}, "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "save_add": "添加", "save_update": "更新" },
+    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "code": "技能码", "desc": "技能描述", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名", "resourceConsumptionList": "资源位消耗"}, "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "resource_note": "配置一次该技能服务需要同时占用的门店资源数量。", "resource_add": "添加资源消耗", "resource_empty": "该技能暂不消耗门店资源", "resource_unconfigured": "当前门店尚未配置资源位，请先到门店管理中添加。", "resource_count_placeholder": "消耗数量", "resource_over_capacity": "资源位【{name}】的消耗数量超过了门店总量（{capacity}），该技能将永远无法被预约，请先到门店管理中调大容量。", "resource_all_selected": "所有门店资源位均已添加", "resource_invalid": "请选择有效且不重复的资源位，并填写大于 0 的整数消耗数量", "save_add": "添加", "save_update": "更新" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "delete": { "title": "删除技能", "content": "是否要删除【{name}】技能" }

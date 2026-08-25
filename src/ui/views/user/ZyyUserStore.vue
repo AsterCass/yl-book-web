@@ -67,6 +67,7 @@
                               upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
+                              loadStoreResources(row.id)
                               isNew = false;
                               showUpsert = true
                             }
@@ -183,6 +184,44 @@
             </div>
           </template>
 
+          <!-- 门店共享资源位（仅编辑时维护）：名称由用户自定义，数量为全店并发容量 -->
+          <template v-if="!isNew">
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+              {{ $t('user_store.resource.field') }}&nbsp;:</h6>
+            <div>
+              <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 28rem">
+                {{ $t('user_store.resource.note') }}
+              </div>
+              <q-btn no-caps unelevated class="component-none-btn-mini-grow" @click="addResourceItem">
+                <div class="row items-center justify-center">
+                  <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                  <div class="q-ml-xs" style="font-size: 0.85rem">
+                    {{ $t('user_store.resource.add') }}
+                  </div>
+                </div>
+              </q-btn>
+
+              <div v-if="upsertResourceList.length === 0" class="q-mt-xs"
+                   style="opacity: .5; font-size: .75rem;">
+                {{ $t('user_store.resource.empty') }}
+              </div>
+
+              <div v-for="(resourceItem, resourceIndex) in upsertResourceList"
+                   :key="resourceItem.id || `new-${resourceIndex}`"
+                   class="row items-center q-mt-xs" style="gap: .5rem;">
+                <q-input v-model="resourceItem.resourceName" class="component-outline-input-grow" dense outlined
+                         :placeholder="t('user_store.resource.name_placeholder')"/>
+                <q-input v-model.number="resourceItem.capacity" mask="###"  min="0"
+                         class="component-outline-input-std" dense outlined
+                         :placeholder="t('user_store.resource.capacity_placeholder')"/>
+                <q-btn no-caps unelevated class="component-none-btn-grow"
+                       @click="requestRemoveResource(resourceIndex)">
+                  <q-icon name="fa-solid fa-trash" size="1rem"/>
+                </q-btn>
+              </div>
+            </div>
+          </template>
+
           <template v-if="isNew">
             <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
                 $t('user_store.upsert.field.timezone')
@@ -231,6 +270,15 @@
         </div>
       </q-card>
     </q-dialog>
+
+    <cask-dialog-judgment v-model="showResourceDeleteConfirm"
+                          :callback-method="confirmResourceDelete"
+                          :dialog-judgment-data="{
+                            title: $t('user_store.resource.delete_title'),
+                            content: $t('user_store.resource.delete_warning', {name: resourceDeleteName}),
+                            falseLabel: $t('user_store.resource.cancel'),
+                            trueLabel: $t('user_store.resource.confirm')
+                          }"/>
 
     <!-- 特殊备注配置：整体重建（保存覆盖旧配置，清空列表保存即全部删除） -->
     <q-dialog :model-value="showRemark" transition-hide="fade" no-backdrop-dismiss no-shake
@@ -294,9 +342,11 @@ import {onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableStore, tableStoreOperation} from "@/tables/store.js";
 import {storeCreate, storeList, storeUpdate} from "@/api/store.js";
 import {bookSpecialRemarkCreate, bookSpecialRemarkListSimple} from "@/api/book.js";
+import {storeResourceDelete, storeResourceList, storeResourceSave} from "@/api/store-resource.js";
 import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
 
 
@@ -323,6 +373,11 @@ const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
+const upsertResourceList = ref([])
+const loadedResourceSignature = ref('[]')
+const showResourceDeleteConfirm = ref(false)
+const resourceDeleteIndex = ref(-1)
+const resourceDeleteName = ref('')
 
 function addCalendarIdItem() {
   upsertGoogleCalendarIdList.value.push('')
@@ -330,6 +385,61 @@ function addCalendarIdItem() {
 
 function removeCalendarIdItem(calIndex) {
   upsertGoogleCalendarIdList.value.splice(calIndex, 1)
+}
+
+// 资源位与门店字段是两个独立接口：用签名比对，无改动就不发资源保存请求，
+// 避免「只改了门店电话」也去写资源表、以及门店保存失败时留下多余的部分写入
+function resourceSignature(list) {
+  return JSON.stringify((list || []).map(item =>
+      [item.id || '', (item.resourceName || '').trim(), item.capacity]))
+}
+
+function loadStoreResources(storeId) {
+  upsertResourceList.value = []
+  loadedResourceSignature.value = resourceSignature([])
+  storeResourceList(storeId).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    upsertResourceList.value = (res.data.data || []).map(item => ({...item}))
+    loadedResourceSignature.value = resourceSignature(upsertResourceList.value)
+  })
+}
+
+function addResourceItem() {
+  upsertResourceList.value.push({id: null, resourceName: '', capacity: 1})
+}
+
+function requestRemoveResource(index) {
+  const item = upsertResourceList.value[index]
+  if (!item || !item.id) {
+    upsertResourceList.value.splice(index, 1)
+    return
+  }
+  resourceDeleteIndex.value = index
+  resourceDeleteName.value = item.resourceName || ''
+  showResourceDeleteConfirm.value = true
+}
+
+function confirmResourceDelete(confirmed) {
+  showResourceDeleteConfirm.value = false
+  if (!confirmed || resourceDeleteIndex.value < 0) {
+    return
+  }
+  const item = upsertResourceList.value[resourceDeleteIndex.value]
+  if (!item || !item.id) {
+    return
+  }
+  storeResourceDelete(item.id, updateId.value).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    upsertResourceList.value.splice(resourceDeleteIndex.value, 1)
+    // 删除已即时落库，同步基线签名，否则之后保存会把未改动的资源再写一遍
+    loadedResourceSignature.value = resourceSignature(upsertResourceList.value)
+    resourceDeleteIndex.value = -1
+    notifyTopPositive(t('user_store.resource.delete_success'))
+  })
 }
 const upsertTimezone = ref(null)
 const upsertAdminMail = ref("")
@@ -348,6 +458,8 @@ function clearUpsertParam() {
   upsertOutboundPhone.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
+  upsertResourceList.value = []
+  loadedResourceSignature.value = '[]'
   upsertTimezone.value = null
   upsertAdminMail.value = ""
   upsertAdminNickName.value = ""
@@ -413,7 +525,33 @@ function upsertData() {
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
       googleCalendarIdList: upsertGoogleCalendarIdList.value,
     }
-    storeUpdate(updateId.value, body).then(res => {
+    const normalizedResources = upsertResourceList.value.map(item => ({
+      id: item.id || null,
+      resourceName: (item.resourceName || '').trim(),
+      // 清空数量输入框拿到的是空串，Number('') === 0 会被静默存成「停用该资源」，这里必须先挡掉
+      capacity: (item.capacity === '' || item.capacity === null || item.capacity === undefined)
+          ? null : Number(item.capacity),
+    }))
+    const resourceNames = normalizedResources.map(item => item.resourceName.toLowerCase())
+    if (normalizedResources.some(item => !item.resourceName || !Number.isInteger(item.capacity) || item.capacity < 0)
+        || new Set(resourceNames).size !== resourceNames.length) {
+      notifyTopWarning(t('user_store.resource.invalid'))
+      return
+    }
+    // 资源位先在后端事务内校验并保存（删除不走此接口，必须逐项二次确认）；无改动则整个跳过。
+    const resourcesChanged = resourceSignature(normalizedResources) !== loadedResourceSignature.value
+    const savedResources = resourcesChanged
+        ? storeResourceSave({resourceList: normalizedResources}, updateId.value)
+        : Promise.resolve(true)
+    savedResources.then(resourceRes => {
+      if (!resourceRes || (resourcesChanged && !resourceRes.data)) {
+        return null
+      }
+      if (resourcesChanged) {
+        loadedResourceSignature.value = resourceSignature(normalizedResources)
+      }
+      return storeUpdate(updateId.value, body)
+    }).then(res => {
       if (!res || !res.data) {
         return
       }

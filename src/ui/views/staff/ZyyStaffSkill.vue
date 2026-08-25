@@ -65,6 +65,10 @@
                               upsertConsumeMinutes = row.consumeMinutes
                               upsertServiceAmount = row.serviceAmount
                               upsertAliasList = row.aliasList
+                              upsertResourceConsumptionList = (row.resourceConsumptionList || []).map(item => ({
+                                resourceId: item.resourceId,
+                                consumeCount: item.consumeCount
+                              }))
                               isNew = false;
                               showUpsert = true
                             }
@@ -132,7 +136,7 @@
                    mask="###"
                    :placeholder="t('staff_skill.placeholder.consumeMinutes')"/>
 
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('staff_skill.upsert.field.serviceAmount')
             }}&nbsp;:</h6>
           <q-input v-model="upsertServiceAmount" class="component-outline-input-grow" dense outlined
@@ -175,6 +179,50 @@
             </div>
           </div>
 
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('staff_skill.upsert.field.resourceConsumptionList') }}&nbsp;:
+          </h6>
+          <div>
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+              {{ $t('staff_skill.upsert.resource_note') }}
+            </div>
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                   :disable="storeResourceOptions.length === 0"
+                   @click="addResourceConsumptionItem">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('staff_skill.upsert.resource_add') }}
+                </div>
+              </div>
+            </q-btn>
+
+            <div v-if="storeResourceOptions.length === 0" class="q-mt-xs"
+                 style="opacity: .5; font-size: .75rem;">
+              {{ $t('staff_skill.upsert.resource_unconfigured') }}
+            </div>
+            <div v-else-if="upsertResourceConsumptionList.length === 0" class="q-mt-xs"
+                 style="opacity: .5; font-size: .75rem;">
+              {{ $t('staff_skill.upsert.resource_empty') }}
+            </div>
+
+            <div v-for="(item, itemIndex) in upsertResourceConsumptionList" :key="itemIndex"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-select v-model="item.resourceId" :menu-offset="[0, 5]" :options="storeResourceOptions"
+                        class="component-outline-input-grow"
+                        dense dropdown-icon="fa-solid fa-caret-down" emit-value map-options
+                        menu-anchor="bottom start" outlined
+                        popup-content-class="component-extra-card-std-limit"/>
+              <q-input v-model.number="item.consumeCount" mask="###" min="1"
+                       class="component-outline-input-std" dense outlined
+                       :placeholder="t('staff_skill.upsert.resource_count_placeholder')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow"
+                     @click="removeResourceConsumptionItem(itemIndex)">
+                <q-icon name="fa-solid fa-trash" size="1rem"/>
+              </q-btn>
+            </div>
+          </div>
+
 
         </div>
 
@@ -208,6 +256,7 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableStaffSkill, tableStaffSkillOperation} from "@/tables/staff-skill.js";
 import {staffSkillCreate, staffSkillDelete, staffSkillList, staffSkillUpdate} from "@/api/staff-skill.js";
+import {storeResourceList} from "@/api/store-resource.js";
 
 
 const selectId = ref("")
@@ -231,6 +280,8 @@ const upsertDesc = ref("")
 const upsertConsumeMinutes = ref(null)
 const upsertServiceAmount = ref(null)
 const upsertAliasList = ref([])
+const storeResourceOptions = ref([])
+const upsertResourceConsumptionList = ref([])
 
 const updateId = ref("")
 
@@ -242,6 +293,7 @@ function clearUpsertParam() {
   upsertConsumeMinutes.value = null
   upsertServiceAmount.value = null
   upsertAliasList.value = []
+  upsertResourceConsumptionList.value = []
 }
 
 // op
@@ -269,9 +321,36 @@ function removeAliasItem(aliasIndex) {
   upsertAliasList.value.splice(aliasIndex, 1)
 }
 
+function loadStoreResources() {
+  storeResourceList().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    storeResourceOptions.value = res.data.data.map(item => ({
+      label: `${item.resourceName} (${item.capacity})`,
+      value: item.id,
+      resourceName: item.resourceName,
+      capacity: item.capacity,
+    }))
+  })
+}
+
+function addResourceConsumptionItem() {
+  const selectedIds = new Set(upsertResourceConsumptionList.value.map(item => item.resourceId))
+  const nextResource = storeResourceOptions.value.find(option => !selectedIds.has(option.value))
+  if (!nextResource) {
+    notifyTopWarning(t('staff_skill.upsert.resource_all_selected'))
+    return
+  }
+  upsertResourceConsumptionList.value.push({resourceId: nextResource.value, consumeCount: 1})
+}
+
+function removeResourceConsumptionItem(itemIndex) {
+  upsertResourceConsumptionList.value.splice(itemIndex, 1)
+}
+
 function upsertData() {
-  if (!upsertName.value || !upsertCode.value
-      || upsertServiceAmount.value === "" || upsertServiceAmount.value == null) {
+  if (!upsertName.value || !upsertCode.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return;
   }
@@ -281,14 +360,40 @@ function upsertData() {
     return;
   }
 
+  const resourceIds = new Set()
+  for (const item of upsertResourceConsumptionList.value) {
+    const consumeCount = Number(item.consumeCount)
+    if (!item.resourceId || !Number.isInteger(consumeCount) || consumeCount <= 0
+        || resourceIds.has(item.resourceId)) {
+      notifyTopWarning(t('staff_skill.upsert.resource_invalid'))
+      return
+    }
+    // 单次消耗超过门店该资源总量 => 这个技能永远排不进任何时段，保存前拦一下。
+    // 仅前端提示：后端原则上允许（先配技能后扩容等场景不该被挡）。
+    const resource = storeResourceOptions.value.find(option => option.value === item.resourceId)
+    if (resource && consumeCount > resource.capacity) {
+      notifyTopWarning(t('staff_skill.upsert.resource_over_capacity', {
+        name: resource.resourceName, capacity: resource.capacity,
+      }))
+      return
+    }
+    resourceIds.add(item.resourceId)
+  }
+
   const body = {
     name: upsertName.value,
     externalName: upsertExternalName.value,
     code: upsertCode.value,
     description: upsertDesc.value,
     consumeMinutes: upsertConsumeMinutes.value,
-    serviceAmount: upsertServiceAmount.value,
+    // 清空后 mask 留下空串，显式转 null，后端据此把已定价技能改回未定价
+    serviceAmount: (upsertServiceAmount.value === "" || upsertServiceAmount.value == null)
+        ? null : upsertServiceAmount.value,
     aliasList: upsertAliasList.value,
+    resourceConsumptionList: upsertResourceConsumptionList.value.map(item => ({
+      resourceId: item.resourceId,
+      consumeCount: Number(item.consumeCount),
+    })),
   }
 
   if (isNew.value) {
@@ -361,6 +466,7 @@ function selectData(keepPage = false) {
 }
 
 onMounted(() => {
+  loadStoreResources()
   selectData()
 })
 </script>
