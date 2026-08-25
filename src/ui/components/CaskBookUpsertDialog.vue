@@ -77,19 +77,18 @@
                   outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
-        <!-- 分配雇员（仅创建）：硬指定，填了则跳过自动分配直接分给该雇员（不合法后端直接报错），
-             此时偏好员工仅作记录字段；留空维持全自动分配。编辑时改「谁做的」走列表/日历的分配操作 -->
-        <template v-if="isNew">
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">
-            {{ $t('book_booking.upsert.field.assignedStaffId') }}&nbsp;:</h6>
-          <q-select v-model="upsertAssignedStaffId" :menu-offset="[0, 5]" :options="staffOptionList"
-                    class="component-outline-input-grow"
-                    clear-icon="fa-solid fa-xmark"
-                    clearable
-                    dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
-                    outlined popup-content-class="component-extra-card-std-limit">
-          </q-select>
-        </template>
+        <!-- 分配雇员：硬指定，填了则跳过自动分配直接分给该雇员（不合法后端直接报错），
+             此时偏好员工仅作记录字段；留空维持全自动分配。
+             编辑时回填当前已分配雇员：改成别人=改派，清空=退回待分配并交回自动分配 -->
+        <h6 style="white-space: nowrap; margin-left: 12px!important;">
+          {{ $t('book_booking.upsert.field.assignedStaffId') }}&nbsp;:</h6>
+        <q-select v-model="upsertAssignedStaffId" :menu-offset="[0, 5]" :options="staffOptionList"
+                  class="component-outline-input-grow"
+                  clear-icon="fa-solid fa-xmark"
+                  clearable
+                  dropdown-icon="fa-solid fa-caret-down" emit-value map-options menu-anchor="bottom start"
+                  outlined popup-content-class="component-extra-card-std-limit">
+        </q-select>
 
         <!-- 特殊备注：选项与选中值都是文案字符串本身，无 id->名称 映射，不受选项加载时序影响 -->
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
@@ -270,8 +269,11 @@ function populate() {
   upsertPhone.value = b && b.phone ? b.phone : ''
   upsertMail.value = b && b.mail ? b.mail : ''
   upsertPreferredStaffId.value = b && b.preferredStaffId ? b.preferredStaffId : null
-  // 分配雇员仅创建时生效：日历日视图从雇员列点开时预填该列雇员
-  upsertAssignedStaffId.value = b && b.assignedStaffId ? b.assignedStaffId : null
+  // 分配雇员：创建时由日历日视图从雇员列点开预填该列雇员；
+  // 编辑时回填该单当前已分配的雇员（待分配单为空，留空即继续走自动分配）。
+  // staffId 兜底仅限编辑——「复制预约」也是 isNew 且带着源单 staffId，不该被硬指定成同一人
+  upsertAssignedStaffId.value = (b && b.assignedStaffId) ? b.assignedStaffId
+      : ((!props.isNew && b && b.staffId) ? b.staffId : null)
   // 来源不设默认值：新增必须显式选择（保存时校验）
   upsertSource.value = b && b.source != null ? b.source : null
   upsertRemark.value = b && b.remark ? b.remark : ''
@@ -423,8 +425,10 @@ function save() {
     // 编辑时清空偏好雇员需传空串（后端将 null 视为不修改）
     preferredStaffId: upsertPreferredStaffId.value != null
         ? upsertPreferredStaffId.value : (props.isNew ? null : ''),
-    // 分配雇员：仅创建时生效（硬指定，后端跳过自动分配；不合法直接报错）
-    assignedStaffId: props.isNew ? upsertAssignedStaffId.value : null,
+    // 分配雇员（硬指定，后端跳过自动分配；不合法直接报错）。
+    // 编辑时清空需传空串——后端将 null 视为不修改，空串才是「退回待分配并交回自动分配」
+    assignedStaffId: upsertAssignedStaffId.value != null
+        ? upsertAssignedStaffId.value : (props.isNew ? null : ''),
     assignStrategy: AssignStrategyEnum.PRIORITY.code,
     source: upsertSource.value,
     remark: upsertRemark.value,
