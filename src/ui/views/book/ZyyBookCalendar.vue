@@ -122,15 +122,20 @@
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
-                <!-- 第一行：客户名称 + 来源（带来源色）；第二行起：起止时间 / 预约项目 / 联系方式 / 备注 -->
+                <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注——顺序须与下方
+                     悬停卡片一致；第二行起：起止时间+预约项目 / 金额 / 联系方式 / 备注 -->
                 <div class="cal-event-title">
                   <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
+                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
+                    {{ ev.sourceName }}
+                  </span>
                   <!-- 日视图：偏好员工放首行（周视图放备注上一行，见 lines） -->
                   <span v-if="viewMode === 'day' && ev.preferredName" class="cal-event-preferred">
                     {{ $t('book_calendar.preferred_prefix') }}{{ ev.preferredName }}
                   </span>
-                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
-                    {{ ev.sourceName }}
+                  <!-- 特殊备注：日视图放首行（周视图作为独立正文行，见 lines） -->
+                  <span v-if="ev.specialRemarks" class="cal-event-special">
+                    {{ ev.specialRemarks }}
                   </span>
                   <!-- 前台已签到标记 -->
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
@@ -201,11 +206,15 @@
            @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
         <div class="cal-event-title">
           <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
+          <!-- 首行顺序须与上方预约卡片一致：客户名称 / 来源 / 偏好员工 / 特殊备注 -->
           <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
             {{ hoverCard.ev.sourceName }}
           </span>
           <span v-if="viewMode === 'day' && hoverCard.ev.preferredName" class="cal-event-preferred">
             {{ $t('book_calendar.preferred_prefix') }}{{ hoverCard.ev.preferredName }}
+          </span>
+          <span v-if="hoverCard.ev.specialRemarks" class="cal-event-special">
+            {{ hoverCard.ev.specialRemarks }}
           </span>
           <q-space/>
           <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
@@ -597,19 +606,27 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     const widthPct = 100 / ev.colCount
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
     const b = ev.booking
-    // 卡片正文行（第二行起）：预约项目 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
+    // 卡片正文行（第二行起）：起止时间+预约项目 / 金额 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
     const timeRange = (b._startHm && b._endHm)
         ? `${formatHmDisplay(b._startHm)} - ${formatHmDisplay(b._endHm)}` : ''
+    const isDayView = viewMode.value === 'day'
     // 偏好员工：日视图放首行（模板内联展示），周视图作为独立行插在备注上一行
     const preferredName = b.preferredStaffId
         ? (staffNameById.value[b.preferredStaffId] || b.preferredStaffId) : ''
-    const preferredLine = viewMode.value === 'week' && preferredName
+    const preferredLine = !isDayView && preferredName
         ? `${t('book_calendar.preferred_prefix')}${preferredName}` : ''
-    const lines = [timeRange, b._calSub, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark]
+    // 特殊备注：日视图移到首行（模板内联展示）；周视图一屏七列、首行塞不下，仍作为独立正文行
+    const specialRemarks = isDayView ? (b._specialRemarks || '') : ''
+    // 起止时间与预约项目同行，省一行给卡片正文。用「·」而非空格分隔：
+    // .cal-event-sub 是 nowrap，HTML 会把连续空格折叠成一个，拉不开视觉间距
+    const timeAndSkills = [timeRange, b._calSub].filter(Boolean).join(' · ')
+    const lines = [timeAndSkills, b._amountLine,
+      isDayView ? '' : b._specialRemarks, b._contact, preferredLine, b.remark]
         .filter(Boolean)
     return {
       booking: b,
       preferredName,
+      specialRemarks,
       top: toPx(ev.start),
       height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
       leftPct: ev.col * widthPct,
@@ -1571,6 +1588,19 @@ onBeforeUnmount(() => {
     min-width: 0;
     font-size: .68rem;
     opacity: .75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 特殊备注（日视图首行，紧跟来源）：同款截断策略；不透明度高于偏好员工/来源，
+  // 因为它是操作时必须看到的提醒（如「孕妇」「忌重手法」），不是纯参考信息
+  .cal-event-special {
+    flex: 0 999 auto;
+    min-width: 0;
+    font-size: .68rem;
+    font-weight: 500;
+    opacity: .9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
