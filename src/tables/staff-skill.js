@@ -70,6 +70,14 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        // 一行一个「资源名 × 消耗数」，由 ZyyStaffSkill 用逗号拼好
+        name: 'resourceRequirement',
+        field: 'resourceRequirement',
+        label: '资源需求',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',

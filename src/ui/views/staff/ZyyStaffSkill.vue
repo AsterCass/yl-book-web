@@ -459,6 +459,10 @@ function selectData(keepPage = false) {
       if (data.aliasList && data.aliasList.length > 0) {
         data.aliases =  data.aliasList.join(",")
       }
+      // 资源需求：一行一个资源（列为 MULTI_ROW，按逗号切行，同技能别名）
+      data.resourceRequirement = (data.resourceConsumptionList || [])
+          .map(item => `${item.resourceName || item.resourceId} × ${item.consumeCount}`)
+          .join(",")
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false

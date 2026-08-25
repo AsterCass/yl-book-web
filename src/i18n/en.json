@@ -760,11 +760,12 @@
       "title": "Customer History",
       "hint": "Matched by phone; click to fill customer info",
       "name_title": "History Grouped by Name",
-      "name_hint": "Fuzzy-matched and grouped by name; click to fill the latest contact details",
+      "name_hint": "Fuzzy name match over the latest 100 bookings, grouped by name + email; click to fill contact details",
       "phone_title": "History Grouped by Phone",
       "phone_hint": "Fuzzy-matched and grouped by phone; click to fill customer info",
       "no_name": "Unnamed",
-      "total": "{count} total"
+      "total": "{count} total",
+      "no_mail_warning": "No email on file — these bookings may belong to different people with the same name. The phone number will not be filled in."
     },
     "staff_detail": {
       "title": "Staff Details",

@@ -127,6 +127,7 @@
     <cask-customer-history-panel
         v-if="nameCustomerHistory.length > 0"
         class="cask-customer-history-left"
+        mode="name"
         :customers="nameCustomerHistory"
         :title="$t('book_booking.customer_history.name_title')"
         :hint="$t('book_booking.customer_history.name_hint')"
@@ -362,10 +363,14 @@ function loadPhoneCustomerHistory(phone, requestId) {
   })
 }
 
-// 点击客户：回填姓名、手机号，若有邮箱则一并回填
+// 点击客户：回填姓名、手机号，若有邮箱则一并回填。
+// mailMissing（姓名入口无邮箱组）：聚合键只剩姓名，组内可能混了同名不同人的预约，
+// 手机号一律不回填——保持输入框原样，宁可让店员手工确认，也不要把别人的号码带进新单
 function pickCustomer(cust) {
   upsertName.value = cust.name || ''
-  upsertPhone.value = cust.phone || ''
+  if (!cust.mailMissing) {
+    upsertPhone.value = cust.phone || ''
+  }
   if (cust.mail) {
     upsertMail.value = cust.mail
   }
