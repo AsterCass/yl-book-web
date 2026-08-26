@@ -39,6 +39,12 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        name: 'externalNameZh',
+        field: 'externalNameZh',
+        label: '对外名称（中文）',
+        align: 'center',
+    },
+    {
         name: 'code',
         field: 'code',
         label: '技能码',
@@ -56,6 +62,16 @@ const tableStaffSkillCol = [
         field: 'description',
         label: '技能描述',
         align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: "10rem"
+    },
+    {
+        name: 'descriptionZh',
+        field: 'descriptionZh',
+        label: '技能描述（中文）',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: "10rem"
     },
     {
         name: 'consumeMinutes',
@@ -76,18 +92,6 @@ const tableStaffSkillCol = [
         label: '资源需求',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
-    },
-    {
-        name: 'createTime',
-        field: 'createTime',
-        label: '创建时间',
-        align: 'center',
-    },
-    {
-        name: 'createUserName',
-        field: 'createUserName',
-        label: '创建用户',
-        align: 'center',
     },
     {
         name: 'operation',

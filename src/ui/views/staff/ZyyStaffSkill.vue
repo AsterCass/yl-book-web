@@ -60,8 +60,10 @@
                               updateId = row.id
                               upsertName = row.name
                               upsertExternalName = row.externalName
+                              upsertExternalNameZh = row.externalNameZh
                               upsertCode = row.code
                               upsertDesc = row.description
+                              upsertDescZh = row.descriptionZh
                               upsertConsumeMinutes = row.consumeMinutes
                               upsertServiceAmount = row.serviceAmount
                               upsertAliasList = row.aliasList
@@ -115,6 +117,12 @@
           <q-input v-model="upsertExternalName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff_skill.placeholder.external_name')"/>
 
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('staff_skill.upsert.field.external_name_zh')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertExternalNameZh" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff_skill.placeholder.external_name_zh')"/>
+
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
               $t('staff_skill.upsert.field.code')
@@ -128,6 +136,12 @@
             }}&nbsp;:</h6>
           <q-input v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff_skill.placeholder.desc')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('staff_skill.upsert.field.desc_zh')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertDescZh" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff_skill.placeholder.desc_zh')"/>
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{
               $t('staff_skill.upsert.field.consumeMinutes')
@@ -275,8 +289,10 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
 const upsertExternalName = ref("")
+const upsertExternalNameZh = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
+const upsertDescZh = ref("")
 const upsertConsumeMinutes = ref(null)
 const upsertServiceAmount = ref(null)
 const upsertAliasList = ref([])
@@ -288,8 +304,10 @@ const updateId = ref("")
 function clearUpsertParam() {
   upsertName.value = ""
   upsertExternalName.value = ""
+  upsertExternalNameZh.value = ""
   upsertCode.value = ""
   upsertDesc.value = ""
+  upsertDescZh.value = ""
   upsertConsumeMinutes.value = null
   upsertServiceAmount.value = null
   upsertAliasList.value = []
@@ -383,8 +401,10 @@ function upsertData() {
   const body = {
     name: upsertName.value,
     externalName: upsertExternalName.value,
+    externalNameZh: upsertExternalNameZh.value,
     code: upsertCode.value,
     description: upsertDesc.value,
+    descriptionZh: upsertDescZh.value,
     consumeMinutes: upsertConsumeMinutes.value,
     // 清空后 mask 留下空串，显式转 null，后端据此把已定价技能改回未定价
     serviceAmount: (upsertServiceAmount.value === "" || upsertServiceAmount.value == null)
