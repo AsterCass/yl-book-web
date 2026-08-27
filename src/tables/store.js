@@ -39,9 +39,21 @@ const tableStoreCol = [
         align: 'center',
     },
     {
+        name: 'externalNameZh',
+        field: 'externalNameZh',
+        label: '外部名称（中文）',
+        align: 'center',
+    },
+    {
         name: 'address',
         field: 'address',
         label: '门店地址',
+        align: 'center',
+    },
+    {
+        name: 'addressZh',
+        field: 'addressZh',
+        label: '门店地址（中文）',
         align: 'center',
     },
     {
@@ -59,12 +71,6 @@ const tableStoreCol = [
         align: 'center',
     },
     {
-        name: 'description',
-        field: 'description',
-        label: '门店描述',
-        align: 'center',
-    },
-    {
         name: 'timezoneName',
         field: 'timezoneName',
         label: '门店时区',
@@ -76,12 +82,6 @@ const tableStoreCol = [
         label: '门店状态',
         align: 'center',
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
-    },
-    {
-        name: 'createTime',
-        field: 'createTime',
-        label: '创建时间',
-        align: 'center',
     },
     {
         name: 'operation',

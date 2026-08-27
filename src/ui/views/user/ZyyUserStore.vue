@@ -62,7 +62,9 @@
                               updateId = row.id
                               upsertName = row.name
                               upsertExternalName = row.externalName
+                              upsertExternalNameZh = row.externalNameZh
                               upsertAddress = row.address
+                              upsertAddressZh = row.addressZh
                               upsertPhone = row.phone
                               upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
@@ -102,8 +104,13 @@
 
         </div>
 
-        <div class="q-ma-md"
-             style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
+        <!-- 两列布局（同雇员编辑卡片）：左=门店基础信息（新建时含初始管理员），
+             右=谷歌日历 id / 共享资源位两块可增删列表——行数多，塞在单列里会把弹窗拉得很长。
+             右列仅编辑态存在，新建时自然退化为单列。no-wrap 强制并排，宽度由内容撑开 -->
+        <div class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
+
+        <div style="flex: 1 1 auto; min-width: 24rem;">
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('user_store.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
@@ -116,10 +123,22 @@
                    :placeholder="t('user_store.placeholder.optional')"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_store.upsert.field.external_name_zh')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertExternalNameZh" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('user_store.placeholder.optional_zh')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.address')
             }}&nbsp;:</h6>
           <q-input v-model="upsertAddress" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('user_store.upsert.field.address_zh')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertAddressZh" class="component-outline-input-grow" dense outlined
+                   :placeholder="t('user_store.placeholder.optional_zh')"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.phone')
@@ -146,82 +165,9 @@
           <q-input v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
 
-          <!-- 门店自身谷歌日历列表（仅编辑时展示）：逐条添加/删除，样式同技能别名维护；
-               门店 block 时除各雇员日历外同时屏蔽这些日历 -->
-          <template v-if="!isNew">
-            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
-                $t('user_store.upsert.field.google_calendar_ids')
-              }}&nbsp;:</h6>
-            <div>
-              <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
-                {{ $t('user_store.upsert.google_calendar_ids_hint') }}
-              </div>
-              <q-btn no-caps unelevated class="component-none-btn-mini-grow"
-                     @click="addCalendarIdItem">
-                <div class="row items-center justify-center">
-                  <q-icon name="fa-solid fa-plus" size="0.9rem"/>
-                  <div class="q-ml-xs" style="font-size: 0.85rem">
-                    {{ $t('user_store.upsert.google_calendar_ids_add') }}
-                  </div>
-                </div>
-              </q-btn>
 
-              <div v-if="upsertGoogleCalendarIdList.length === 0" class="q-mt-xs"
-                   style="opacity: .5; font-size: .75rem;">
-                {{ $t('user_store.upsert.google_calendar_ids_empty') }}
-              </div>
-
-              <div v-for="(calValue, calIndex) in upsertGoogleCalendarIdList" :key="calIndex"
-                   class="row items-center q-mt-xs" style="gap: .5rem;">
-                <q-input v-model="upsertGoogleCalendarIdList[calIndex]" class="component-outline-input-long-grow"
-                         dense outlined :placeholder="t('user_store.placeholder.google_calendar_ids')"/>
-                <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeCalendarIdItem(calIndex)">
-                  <div class="row items-center">
-                    <q-icon name="fa-solid fa-trash" size="1rem"/>
-                  </div>
-                </q-btn>
-              </div>
-            </div>
-          </template>
-
-          <!-- 门店共享资源位（仅编辑时维护）：名称由用户自定义，数量为全店并发容量 -->
-          <template v-if="!isNew">
-            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
-              {{ $t('user_store.resource.field') }}&nbsp;:</h6>
-            <div>
-              <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 28rem">
-                {{ $t('user_store.resource.note') }}
-              </div>
-              <q-btn no-caps unelevated class="component-none-btn-mini-grow" @click="addResourceItem">
-                <div class="row items-center justify-center">
-                  <q-icon name="fa-solid fa-plus" size="0.9rem"/>
-                  <div class="q-ml-xs" style="font-size: 0.85rem">
-                    {{ $t('user_store.resource.add') }}
-                  </div>
-                </div>
-              </q-btn>
-
-              <div v-if="upsertResourceList.length === 0" class="q-mt-xs"
-                   style="opacity: .5; font-size: .75rem;">
-                {{ $t('user_store.resource.empty') }}
-              </div>
-
-              <div v-for="(resourceItem, resourceIndex) in upsertResourceList"
-                   :key="resourceItem.id || `new-${resourceIndex}`"
-                   class="row items-center q-mt-xs" style="gap: .5rem;">
-                <q-input v-model="resourceItem.resourceName" class="component-outline-input-grow" dense outlined
-                         :placeholder="t('user_store.resource.name_placeholder')"/>
-                <q-input v-model.number="resourceItem.capacity" mask="###"  min="0"
-                         class="component-outline-input-std" dense outlined
-                         :placeholder="t('user_store.resource.capacity_placeholder')"/>
-                <q-btn no-caps unelevated class="component-none-btn-grow"
-                       @click="requestRemoveResource(resourceIndex)">
-                  <q-icon name="fa-solid fa-trash" size="1rem"/>
-                </q-btn>
-              </div>
-            </div>
-          </template>
-
+          <!-- 新建专属：时区与初始管理员。留在左列同一个 grid 里，
+               标签列宽才与上面的基础字段一致（各自独立 grid 会各算各的 max-content） -->
           <template v-if="isNew">
             <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
                 $t('user_store.upsert.field.timezone')
@@ -257,6 +203,89 @@
           </template>
 
         </div>
+        </div>
+
+        <!-- 右列：仅编辑态。两块都是可增删的多行列表，放右侧避免把弹窗纵向拉长 -->
+        <div v-if="!isNew" style="flex: 1 1 auto; min-width: 26rem;">
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: start;">
+
+          <!-- 门店自身谷歌日历列表：逐条添加/删除，样式同技能别名维护；
+               门店 block 时除各雇员日历外同时屏蔽这些日历 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.google_calendar_ids')
+            }}&nbsp;:</h6>
+          <div>
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+              {{ $t('user_store.upsert.google_calendar_ids_hint') }}
+            </div>
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                   @click="addCalendarIdItem">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('user_store.upsert.google_calendar_ids_add') }}
+                </div>
+              </div>
+            </q-btn>
+
+            <div v-if="upsertGoogleCalendarIdList.length === 0" class="q-mt-xs"
+                 style="opacity: .5; font-size: .75rem;">
+              {{ $t('user_store.upsert.google_calendar_ids_empty') }}
+            </div>
+
+            <div v-for="(calValue, calIndex) in upsertGoogleCalendarIdList" :key="calIndex"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-input v-model="upsertGoogleCalendarIdList[calIndex]" class="component-outline-input-long-grow"
+                       dense outlined :placeholder="t('user_store.placeholder.google_calendar_ids')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeCalendarIdItem(calIndex)">
+                <div class="row items-center">
+                  <q-icon name="fa-solid fa-trash" size="1rem"/>
+                </div>
+              </q-btn>
+            </div>
+          </div>
+
+          <!-- 门店共享资源位：名称由用户自定义，数量为全店并发容量 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('user_store.resource.field') }}&nbsp;:</h6>
+          <div>
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 28rem">
+              {{ $t('user_store.resource.note') }}
+            </div>
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow" @click="addResourceItem">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('user_store.resource.add') }}
+                </div>
+              </div>
+            </q-btn>
+
+            <div v-if="upsertResourceList.length === 0" class="q-mt-xs"
+                 style="opacity: .5; font-size: .75rem;">
+              {{ $t('user_store.resource.empty') }}
+            </div>
+
+            <div v-for="(resourceItem, resourceIndex) in upsertResourceList"
+                 :key="resourceItem.id || `new-${resourceIndex}`"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-input v-model="resourceItem.resourceName" class="component-outline-input-grow" dense outlined
+                       :placeholder="t('user_store.resource.name_placeholder')"/>
+              <q-input v-model.number="resourceItem.capacity" mask="###"  min="0"
+                       class="component-outline-input-std" dense outlined
+                       :placeholder="t('user_store.resource.capacity_placeholder')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow"
+                     @click="requestRemoveResource(resourceIndex)">
+                <q-icon name="fa-solid fa-trash" size="1rem"/>
+              </q-btn>
+            </div>
+          </div>
+
+        </div>
+        </div>
+
+        </div>
+
 
         <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="upsertData">
@@ -334,8 +363,8 @@
     </q-dialog>
 
   </div>
-
 </template>
+
 
 <script setup>
 import {onMounted, ref} from "vue";
@@ -366,7 +395,9 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
 const upsertExternalName = ref("")
+const upsertExternalNameZh = ref("")
 const upsertAddress = ref("")
+const upsertAddressZh = ref("")
 const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
 const upsertOutboundPhone = ref("")
@@ -453,7 +484,9 @@ const updateId = ref("")
 function clearUpsertParam() {
   upsertName.value = ""
   upsertExternalName.value = ""
+  upsertExternalNameZh.value = ""
   upsertAddress.value = ""
+  upsertAddressZh.value = ""
   upsertPhone.value = ""
   upsertOutboundPhone.value = ""
   upsertDesc.value = ""
@@ -491,7 +524,9 @@ function upsertData() {
     const body = {
       name: upsertName.value,
       externalName: upsertExternalName.value,
+      externalNameZh: upsertExternalNameZh.value,
       address: upsertAddress.value,
+      addressZh: upsertAddressZh.value,
       phone: upsertPhone.value,
       outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
@@ -518,7 +553,9 @@ function upsertData() {
     const body = {
       name: upsertName.value,
       externalName: upsertExternalName.value,
+      externalNameZh: upsertExternalNameZh.value,
       address: upsertAddress.value,
+      addressZh: upsertAddressZh.value,
       phone: upsertPhone.value,
       outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
