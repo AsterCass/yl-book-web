@@ -42,12 +42,19 @@ export const BookFeedbackHandleStatusEnum = new Enum({
 });
 
 // 电话需求处理状态（口径同客户反馈，多一个「处理中」）；需求类型为 AI 自拟的自由文本标签，无枚举。
-// 未处理与处理中均计入顶部待办；客户来电查询时 AI 会把状态转述给客户
+// 未处理与处理中均计入顶部待办；客户来电查询时 AI 会把状态转述给客户。
+// CUSTOMER_CANCELED 只能由客户来电撤销时经 AI 电话入口写入，管理端选中保存会被后端拒绝
+// （前端不做限制，是有意的：筛选、列表、编辑弹窗都要能显示这个状态）
 export const PhoneRequestHandleStatusEnum = new Enum({
     UNHANDLED: {code: 0, name: '未处理', desc: '默认状态，待运营跟进', color: 'rgb(245, 166, 35)'},
     IN_PROGRESS: {code: 3, name: '处理中', desc: '运营正在跟进，尚未办结', color: 'rgb(74, 124, 168)'},
     HANDLED: {code: 1, name: '已处理', desc: '运营已跟进处理', color: 'rgb(68, 117, 80)'},
     NO_NEED: {code: 2, name: '无需处理', desc: '无需跟进', color: 'rgb(127, 140, 141)'},
+    CUSTOMER_CANCELED: {
+        code: 4, name: '客户已取消',
+        desc: '客户来电主动撤销（取消原因并入详细描述）；不计入待办，运营仍可流转到其他状态',
+        color: 'rgb(150, 100, 160)',
+    },
 });
 
 // 预约邮件处理状态
