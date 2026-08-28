@@ -145,7 +145,14 @@
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
                           class="cal-event-checkin-mark"/>
                 </div>
-                <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
+                <!-- 正文行与首行同口径：日视图放不下就横向滚动，周视图仍省略号。
+                     文字必须裹一层 span——插槽内容若是裸文本，在 flex 容器里会变成匿名 flex item，
+                     text-overflow 对它不生效，周视图就只剩硬裁剪、没有省略号了 -->
+                <div v-for="(line, li) in ev.lines" :key="li" class="cal-event-sub">
+                  <cask-marquee-row :enabled="viewMode === 'day'">
+                    <span class="cal-event-sub-text">{{ line }}</span>
+                  </cask-marquee-row>
+                </div>
 
                 <!-- 底部：左=雇员名（日视图列头已是雇员，卡片上不重复显示）/自动分配，右=取消预约 -->
                 <div v-if="ev.booking.staffName || ev.booking.status !== -1" class="cal-event-footer">
@@ -1517,16 +1524,6 @@ onBeforeUnmount(() => {
     font-weight: 600;
     overflow: hidden;
 
-    // 日视图首行改走横向循环滚动（CaskMarqueeRow，enabled=true 时挂 .cask-marquee-natural）：
-    // 子元素按自然宽度铺开，压缩与省略号一并让位给滚动——否则名称先被截断，滚动也补不回来。
-    // 特异性必须压过下面 .cal-event-name 那条（0,4,0），故这里带上 .cal-event-title 前缀。
-    // 周视图 enabled=false，挂的是 .cask-marquee-plain，不匹配本规则，仍走各自的 ellipsis。
-    :deep(.cask-marquee-natural) .cask-marquee-item > * {
-      flex: 0 0 auto;
-      min-width: 0;
-      overflow: visible;
-      text-overflow: clip;
-    }
 
     .cal-event-name {
       flex: 0 1 auto;
@@ -1573,6 +1570,28 @@ onBeforeUnmount(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    // 正文行文字（裹在 CaskMarqueeRow 里）：周视图靠它出省略号，
+    // 日视图则被下面的「自然宽度」规则改写、交给滚动
+    .cal-event-sub-text {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // 滚动模式（日视图，CaskMarqueeRow 挂 .cask-marquee-natural）：插槽子元素一律按自然宽度铺开，
+  // 压缩与省略号一并让位给滚动——否则内容先被截断，滚动也补不回来。
+  // 首行那条必须压过 .cal-event .cal-event-title .cal-event-name（特异性 4），
+  // 故两条都带上各自的父级前缀，编译后特异性为 5。
+  // 周视图 enabled=false，挂的是 .cask-marquee-plain，不匹配本规则，仍走各自的 ellipsis。
+  .cal-event-title :deep(.cask-marquee-natural) .cask-marquee-item > *,
+  .cal-event-sub :deep(.cask-marquee-natural) .cask-marquee-item > * {
+    flex: 0 0 auto;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   // 底部行：左=雇员名/自动分配，右=取消预约，flex 布局保证彼此及与上方文字均不重叠
