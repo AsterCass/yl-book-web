@@ -125,19 +125,23 @@
                 <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注——顺序须与下方
                      悬停卡片一致；第二行起：起止时间+预约项目 / 金额 / 联系方式 / 备注 -->
                 <div class="cal-event-title">
-                  <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
-                  <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
-                    {{ ev.sourceName }}
-                  </span>
-                  <!-- 日视图：偏好员工放首行（周视图放备注上一行，见 lines） -->
-                  <span v-if="viewMode === 'day' && ev.preferredName" class="cal-event-preferred">
-                    {{ $t('book_calendar.preferred_prefix') }}{{ ev.preferredName }}
-                  </span>
-                  <!-- 特殊备注：日视图放首行（周视图作为独立正文行，见 lines） -->
-                  <span v-if="ev.specialRemarks" class="cal-event-special">
-                    {{ ev.specialRemarks }}
-                  </span>
-                  <!-- 前台已签到标记 -->
+                  <!-- 日视图首行塞了四项，卡片窄时省略号会把偏好/特殊备注截没；改为整行横向循环滚动，
+                       放得下则静止。周视图列窄、卡片多，滚动会很吵，仍用各自的省略号 -->
+                  <cask-marquee-row :enabled="viewMode === 'day'">
+                    <span class="cal-event-name">{{ ev.booking.name || $t('book_calendar.no_name') }}</span>
+                    <span v-if="ev.sourceName" class="cal-event-source" :style="{ color: ev.sourceColor }">
+                      {{ ev.sourceName }}
+                    </span>
+                    <!-- 日视图：偏好员工放首行（周视图放备注上一行，见 lines） -->
+                    <span v-if="viewMode === 'day' && ev.preferredName" class="cal-event-preferred">
+                      {{ $t('book_calendar.preferred_prefix') }}{{ ev.preferredName }}
+                    </span>
+                    <!-- 特殊备注：日视图放首行（周视图作为独立正文行，见 lines） -->
+                    <span v-if="ev.specialRemarks" class="cal-event-special">
+                      {{ ev.specialRemarks }}
+                    </span>
+                  </cask-marquee-row>
+                  <!-- 前台已签到标记：留在滚动区外，始终可见 -->
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
                           class="cal-event-checkin-mark"/>
                 </div>
@@ -254,6 +258,7 @@ import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
+import CaskMarqueeRow from "@/ui/components/CaskMarqueeRow.vue";
 import {
   bookAdjust,
   bookCalendar,
@@ -1511,6 +1516,17 @@ onBeforeUnmount(() => {
     font-size: .78rem;
     font-weight: 600;
     overflow: hidden;
+
+    // 日视图首行改走横向循环滚动（CaskMarqueeRow，enabled=true 时挂 .cask-marquee-natural）：
+    // 子元素按自然宽度铺开，压缩与省略号一并让位给滚动——否则名称先被截断，滚动也补不回来。
+    // 特异性必须压过下面 .cal-event-name 那条（0,4,0），故这里带上 .cal-event-title 前缀。
+    // 周视图 enabled=false，挂的是 .cask-marquee-plain，不匹配本规则，仍走各自的 ellipsis。
+    :deep(.cask-marquee-natural) .cask-marquee-item > * {
+      flex: 0 0 auto;
+      min-width: 0;
+      overflow: visible;
+      text-overflow: clip;
+    }
 
     .cal-event-name {
       flex: 0 1 auto;
