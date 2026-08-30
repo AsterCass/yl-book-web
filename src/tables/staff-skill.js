@@ -21,12 +21,6 @@ import {ComplexTableColumnTypeEnum} from "@/constants/enums/table.js";
 
 const tableStaffSkillCol = [
     {
-        name: 'id',
-        field: 'id',
-        label: '技能编号',
-        align: 'center',
-    },
-    {
         name: 'name',
         field: 'name',
         label: '技能名称',
@@ -45,12 +39,6 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
-        name: 'code',
-        field: 'code',
-        label: '技能码',
-        align: 'center',
-    },
-    {
         name: 'aliases',
         field: 'aliases',
         label: '技能别名',
@@ -63,7 +51,6 @@ const tableStaffSkillCol = [
         label: '技能描述',
         align: 'center',
         type: ComplexTableColumnTypeEnum.TEXT,
-        maxWidth: "10rem"
     },
     {
         name: 'descriptionZh',
@@ -71,7 +58,6 @@ const tableStaffSkillCol = [
         label: '技能描述（中文）',
         align: 'center',
         type: ComplexTableColumnTypeEnum.TEXT,
-        maxWidth: "10rem"
     },
     {
         name: 'consumeMinutes',
