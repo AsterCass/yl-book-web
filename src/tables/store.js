@@ -21,12 +21,6 @@ import {ComplexTableColumnTypeEnum} from "@/constants/enums/table.js";
 
 const tableStoreCol = [
     {
-        name: 'id',
-        field: 'id',
-        label: '门店编号',
-        align: 'center',
-    },
-    {
         name: 'name',
         field: 'name',
         label: '门店名称',
@@ -60,6 +54,13 @@ const tableStoreCol = [
         name: 'phone',
         field: 'phone',
         label: '门店电话',
+        align: 'center',
+    },
+    {
+        // AI 电话：对客公布的 AI 接听号码。客户端展示门店电话时优先用它，为空才回退上面的门店电话
+        name: 'aiPhone',
+        field: 'aiPhone',
+        label: 'AI 电话',
         align: 'center',
     },
     {

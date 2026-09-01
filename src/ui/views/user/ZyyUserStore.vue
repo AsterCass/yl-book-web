@@ -66,6 +66,7 @@
                               upsertAddress = row.address
                               upsertAddressZh = row.addressZh
                               upsertPhone = row.phone
+                              upsertAiPhone = row.aiPhone
                               upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
@@ -128,30 +129,42 @@
           <q-input v-model="upsertExternalNameZh" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional_zh')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.address')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertAddress" class="component-outline-input-grow" dense outlined
+          <q-input v-if="!isNew" v-model="upsertAddress" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.address_zh')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertAddressZh" class="component-outline-input-grow" dense outlined
+          <q-input v-if="!isNew" v-model="upsertAddressZh" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional_zh')"/>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.phone')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
+          <q-input v-if="!isNew" v-model="upsertPhone" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
+
+          <!-- AI 电话：对客公布的 AI 接听号码；客户端展示门店电话时优先用它，空则回退上面的门店电话 -->
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.ai_phone')
+            }}&nbsp;:</h6>
+          <div v-if="!isNew">
+            <q-input v-model="upsertAiPhone" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.placeholder.optional')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.ai_phone_hint') }}
+            </div>
+          </div>
 
           <!-- 呼出电话：本店已购的 Twilio 号码，回访客户时作为主叫显示（先呼上面的门店电话、
                店员接起后桥接客户，两端看到的来电显示都是它）；空=本店不能发起回访 -->
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.upsert.field.outbound_phone')
             }}&nbsp;:</h6>
-          <div>
+          <div v-if="!isNew">
             <q-input v-model="upsertOutboundPhone" class="component-outline-input-grow" dense outlined
                      :placeholder="t('user_store.placeholder.optional')"/>
             <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
@@ -159,10 +172,10 @@
             </div>
           </div>
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.desc')
             }}&nbsp;:</h6>
-          <q-input v-model="upsertDesc" class="component-outline-input-grow" dense outlined
+          <q-input v-if="!isNew" v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
 
 
@@ -400,6 +413,7 @@ const upsertAddress = ref("")
 const upsertAddressZh = ref("")
 const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
+const upsertAiPhone = ref("")
 const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
@@ -488,6 +502,7 @@ function clearUpsertParam() {
   upsertAddress.value = ""
   upsertAddressZh.value = ""
   upsertPhone.value = ""
+  upsertAiPhone.value = ""
   upsertOutboundPhone.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
@@ -528,6 +543,7 @@ function upsertData() {
       address: upsertAddress.value,
       addressZh: upsertAddressZh.value,
       phone: upsertPhone.value,
+      aiPhone: upsertAiPhone.value,
       outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
       timezone: upsertTimezone.value ? upsertTimezone.value.value : null,
@@ -557,6 +573,7 @@ function upsertData() {
       address: upsertAddress.value,
       addressZh: upsertAddressZh.value,
       phone: upsertPhone.value,
+      aiPhone: upsertAiPhone.value,
       outboundPhone: upsertOutboundPhone.value,
       description: upsertDesc.value,
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
