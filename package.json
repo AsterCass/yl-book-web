@@ -11,6 +11,7 @@
   "dependencies": {
     "@fontsource/roboto-slab": "^5.2.8",
     "@quasar/extras": "^1.18.0",
+    "@simonwep/pickr": "^1.10.1",
     "animate.css": "^4.1.1",
     "axios": "^1.16.1",
     "denque": "^2.1.0",

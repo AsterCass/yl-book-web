@@ -195,7 +195,10 @@
     <cask-store-block-dialog v-model="showStoreBlock" @changed="reload"/>
 
     <!-- 卡片配色设置：逐预约状态自定义左边栏/背景/文字三色。改的是草稿，保存才落账号 meta -->
-    <q-dialog v-model="showColorSetting" transition-show="fade" transition-hide="fade">
+    <!-- allow-focus-outside：取色器弹层挂在 body 上、不在弹窗的 Vue 子树里，
+         不放开焦点会被 QDialog 抢回来，取色器的输入框就没法输入 -->
+    <q-dialog v-model="showColorSetting" allow-focus-outside
+              transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std column cal-color-card">
         <h6 style="margin: 0 0 .5rem 0 !important">{{ $t('book_calendar.color.title') }}</h6>
         <div class="cal-color-note">{{ $t('book_calendar.color.note') }}</div>
@@ -209,14 +212,11 @@
             </div>
             <div v-for="part in COLOR_PARTS" :key="part" class="column items-center cal-color-cell">
               <div class="cal-color-cell-label">{{ $t(`book_calendar.color.part.${part}`) }}</div>
-              <!-- 色块本身是取色器的触发区；底衬棋盘格，半透明色也看得出深浅 -->
-              <div class="cal-color-swatch">
-                <div class="cal-color-swatch-fill" :style="{ background: swatchOf(st.code, part) }"/>
-                <q-popup-proxy transition-show="scale" transition-hide="scale">
-                  <q-color :model-value="swatchOf(st.code, part)" format-model="rgba"
-                           @update:model-value="val => setDraftColor(st.code, part, val)"/>
-                </q-popup-proxy>
-              </div>
+              <!-- 未设置该项时色块显示的是「实际渲染出来的默认色」；要退回默认走行末的重置按钮 -->
+              <cask-color-picker :model-value="draftColorOf(st.code, part)"
+                                 :placeholder-color="swatchOf(st.code, part)"
+                                 width="4rem" height="1.9rem"
+                                 @update:model-value="val => setDraftColor(st.code, part, val)"/>
             </div>
             <q-btn round flat dense class="component-none-btn-grow q-ml-sm"
                    @click="resetDraftStatus(st.code)">
@@ -226,7 +226,7 @@
           </div>
         </div>
 
-        <div class="row justify-evenly q-mt-md">
+        <div class="row justify-evenly q-mt-lg">
           <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
                  :loading="colorSaving" :disable="colorSaving" @click="saveColorSetting">
             {{ $t('main_setting_save') }}
@@ -308,6 +308,7 @@ import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
 import CaskMarqueeRow from "@/ui/components/CaskMarqueeRow.vue";
+import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
 import {
   bookAdjust,
   bookCalendar,
@@ -452,7 +453,12 @@ function cardStyle(status, source) {
   }
 }
 
-// 取色器的当前值：草稿里没有该项时给出「实际渲染出来的那个颜色」，避免一打开就是纯黑
+// 草稿里该项的原值，未设置为空串——取色器的 v-model，清除后能退回「未设置」
+function draftColorOf(status, part) {
+  return (colorDraft.value[String(status)] || {})[part] || ''
+}
+
+// 取色器的占位色：草稿里没有该项时给出「实际渲染出来的那个颜色」，避免一打开就是纯黑
 function swatchOf(status, part) {
   const cfg = colorDraft.value[String(status)] || {}
   if (cfg[part]) {
@@ -1884,20 +1890,20 @@ onBeforeUnmount(() => {
   min-width: 40rem;
 
   .cal-color-note {
-    font-size: .78rem;
+    font-size: .82rem;
     opacity: .55;
     max-width: 38rem;
     line-height: 1.5;
   }
 
   .cal-color-list {
-    margin-top: .75rem;
-    max-height: 26rem;
+    margin-top: 1rem;
+    max-height: 32rem;
     overflow-y: auto;
   }
 
   .cal-color-row {
-    padding: .35rem 0;
+    padding: .55rem 0;
     border-bottom: 1px solid rgba(128, 128, 128, .14);
 
     &:last-child {
@@ -1909,43 +1915,20 @@ onBeforeUnmount(() => {
   .cal-color-preview {
     position: static;
     flex: 0 0 auto;
-    width: 11rem;
-    height: 3.2rem;
-    margin-right: 1rem;
+    width: 13rem;
+    height: 3.8rem;
+    margin-right: 1.5rem;
     cursor: default;
     display: block;
   }
 
   .cal-color-cell {
-    width: 4.5rem;
+    width: 6rem;
 
     .cal-color-cell-label {
-      font-size: .7rem;
+      font-size: .78rem;
       opacity: .6;
-      margin-bottom: .25rem;
-    }
-  }
-
-  // 色块：底衬棋盘格，半透明配色也看得出实际深浅
-  .cal-color-swatch {
-    position: relative;
-    width: 3rem;
-    height: 1.4rem;
-    border-radius: .25rem;
-    cursor: pointer;
-    overflow: hidden;
-    border: 1px solid rgba(128, 128, 128, .45);
-    background-image:
-        linear-gradient(45deg, rgba(128, 128, 128, .35) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(128, 128, 128, .35) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, .35) 75%),
-        linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, .35) 75%);
-    background-size: 8px 8px;
-    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
-
-    .cal-color-swatch-fill {
-      position: absolute;
-      inset: 0;
+      margin-bottom: .35rem;
     }
   }
 }

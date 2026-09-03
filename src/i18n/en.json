@@ -15,6 +15,9 @@
   "test_component_multiple_operation": "Multiple selected operation",
 
   "component_search": "Search",
+  "color_picker": {
+    "save": "Save"
+  },
 
   "in_develop": "This feature is under development. Stay tuned",
   "in_develop_simple": "Coming Soon",

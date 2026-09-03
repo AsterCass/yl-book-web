@@ -15,6 +15,9 @@
   "test_component_multiple_operation": "多选后操作",
 
   "component_search": "检索",
+  "color_picker": {
+    "save": "保存"
+  },
 
   "in_develop": "功能开发中，敬请期待",
   "in_develop_simple": "开发中，敬请期待",

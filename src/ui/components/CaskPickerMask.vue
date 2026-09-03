@@ -5,22 +5,38 @@
   <teleport to="body">
     <div v-if="modelValue" class="component-cask-picker-mask"
          @mousedown.stop.prevent @touchstart.stop.prevent
-         @mouseup.stop.prevent @click.stop.prevent @contextmenu.stop.prevent/>
+         @mouseup="onRelease" @click.stop.prevent @contextmenu.stop.prevent/>
   </teleport>
 </template>
 
 <script setup>
 import {defineProps} from "vue";
 
-defineProps({
+const props = defineProps({
   // 遮罩显隐：由选择器的 q-popup-proxy @show / @hide 驱动，
   // @hide 在关闭动画结束后才触发，因此同一次点击的 mouseup / click 也会被遮罩吞掉
   modelValue: {
     type: Boolean,
     required: false,
     default: false
+  },
+  // 是否放行「松开」（mouseup）。默认吞掉；但拖拽型选择器（如 Pickr 取色器）是在
+  // document 上监听 mouseup 来结束拖拽的，吞掉会让它在遮罩上松手后一直以为还在拖，
+  // 这类场景要传 true。click 仍然拦着，底下的组件不会被误触发
+  passRelease: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
+
+function onRelease(e) {
+  if (props.passRelease) {
+    return
+  }
+  e.stopPropagation()
+  e.preventDefault()
+}
 
 </script>
 
