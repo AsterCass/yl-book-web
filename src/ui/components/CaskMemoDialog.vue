@@ -133,14 +133,33 @@ const LEAVE_DURATION = 520
 const memos = ref([])
 const keyword = ref('')
 const wallRef = ref(null)
+// 墙的当前尺寸：便签存的是百分比，渲染要按它换算成像素；窗口缩放/全屏切换后要跟着重算
+const wallSize = ref({width: 0, height: 0})
 // 收起中：便签先播完向上飞走的动画，再真正关闭弹窗
 const leaving = ref(false)
 let leaveTimer = null
 let interactable = null
+let wallObserver = null
 
 // 归一化后的关键字：q-input 的 clearable 点 × 会把 v-model 置成 null
 // （Quasar 的 clearValue 写死 emit(null)，没有可配的清空值），直接 .trim() 会抛错、
 // 渲染一中断就看着像 × 没反应。统一从这里取，别再直接读 keyword
+// 可放置范围 = 墙尺寸 − 便签尺寸。百分比按这个范围取，100% 时便签的右/下边缘刚好贴住墙边，
+// 换任何分辨率打开都完整可见（若按墙本身算，100% 会把便签整个推出视野）
+const placeArea = computed(() => ({
+  width: Math.max(1, wallSize.value.width - NOTE_WIDTH),
+  height: Math.max(1, wallSize.value.height - NOTE_HEIGHT),
+}))
+
+function percentToPx(percent, range) {
+  return Math.round((percent || 0) / 100 * range)
+}
+
+// 存两位小数即可：1000px 的墙上 0.01% ≈ 0.1px，再细没有意义
+function pxToPercent(px, range) {
+  return Math.round(Math.min(100, Math.max(0, px / range * 100)) * 100) / 100
+}
+
 const keywordText = computed(() => (keyword.value || '').trim().toLowerCase())
 
 const matchedCount = computed(() => memos.value.filter(isMatch).length)
@@ -165,16 +184,18 @@ function rotationOf(id) {
 }
 
 function noteStyle(memo, index) {
+  const area = placeArea.value
+  const top = percentToPx(memo.posTopPercent, area.height)
   return {
-    left: memo.posLeft + 'px',
-    top: memo.posTop + 'px',
+    left: percentToPx(memo.posLeftPercent, area.width) + 'px',
+    top: top + 'px',
     zIndex: memo.layerNo,
     background: memo.bgColor,
     color: memo.textColor,
     '--memo-rot': rotationOf(memo.id),
     // 起落点：正好在墙的上边缘之外。用固定距离的话，靠上的便签大半程都被墙裁掉、
-    // 看着像凭空出现；按各自的 posTop 算，每张都是「从墙顶掉到自己的位置」
-    '--memo-drop': `-${memo.posTop + NOTE_HEIGHT + 24}px`,
+    // 看着像凭空出现；按各自的落点算，每张都是「从墙顶掉到自己的位置」
+    '--memo-drop': `-${top + NOTE_HEIGHT + 24}px`,
     // 落下按顺序错开，像一张张贴上去，而不是整面墙一起砸下来
     '--memo-i': index,
   }
@@ -192,12 +213,41 @@ function reload() {
 watch(() => props.modelValue, (val) => {
   if (!val) {
     teardownDrag()
+    stopObserveWall()
     return
   }
   keyword.value = ''
   leaving.value = false
-  reload().then(() => nextTick(setupDrag))
+  reload().then(() => nextTick(() => {
+    observeWall()
+    setupDrag()
+  }))
 })
+
+function measureWall() {
+  if (!wallRef.value) {
+    return
+  }
+  wallSize.value = {width: wallRef.value.clientWidth, height: wallRef.value.clientHeight}
+}
+
+// 墙的尺寸随窗口变，百分比换算的分母也跟着变——挂个 ResizeObserver 让便签位置自动跟上
+function observeWall() {
+  stopObserveWall()
+  if (!wallRef.value) {
+    return
+  }
+  measureWall()
+  wallObserver = new ResizeObserver(measureWall)
+  wallObserver.observe(wallRef.value)
+}
+
+function stopObserveWall() {
+  if (wallObserver) {
+    wallObserver.disconnect()
+    wallObserver = null
+  }
+}
 
 // ===== 拖动（interact.js）=====
 // 位置走 left/top 而不是 transform——transform 留给便签的倾角与落下动画，两边不打架
@@ -250,8 +300,12 @@ function onDragMove(event) {
   if (!memo) {
     return
   }
-  memo.posLeft = Math.max(0, Math.round(memo.posLeft + event.dx))
-  memo.posTop = Math.max(0, Math.round(memo.posTop + event.dy))
+  // interact 给的是像素增量，落到状态里要换回百分比（存的就是百分比）
+  const area = placeArea.value
+  memo.posLeftPercent = pxToPercent(
+      percentToPx(memo.posLeftPercent, area.width) + event.dx, area.width)
+  memo.posTopPercent = pxToPercent(
+      percentToPx(memo.posTopPercent, area.height) + event.dy, area.height)
 }
 
 function onDragEnd(event) {
@@ -259,7 +313,11 @@ function onDragEnd(event) {
   if (!memo) {
     return
   }
-  memoPosition(memo.id, {posLeft: memo.posLeft, posTop: memo.posTop, layerNo: memo.layerNo})
+  memoPosition(memo.id, {
+    posLeftPercent: memo.posLeftPercent,
+    posTopPercent: memo.posTopPercent,
+    layerNo: memo.layerNo,
+  })
 }
 
 // ===== 新建 / 编辑 =====
@@ -291,12 +349,13 @@ function openEdit(memo) {
 
 // 新便签落在下一个网格位：一行排满换下一行，不跟已有便签叠在一起
 function nextPosition() {
-  const wallWidth = wallRef.value ? wallRef.value.clientWidth : 960
-  const cols = Math.max(1, Math.floor((wallWidth - NOTE_GAP) / (NOTE_WIDTH + NOTE_GAP)))
+  const area = placeArea.value
+  const cols = Math.max(1, Math.floor((wallSize.value.width - NOTE_GAP) / (NOTE_WIDTH + NOTE_GAP)))
   const index = memos.value.length
   return {
-    posLeft: NOTE_GAP + (index % cols) * (NOTE_WIDTH + NOTE_GAP),
-    posTop: NOTE_GAP + Math.floor(index / cols) * (NOTE_HEIGHT + NOTE_GAP),
+    posLeftPercent: pxToPercent(NOTE_GAP + (index % cols) * (NOTE_WIDTH + NOTE_GAP), area.width),
+    posTopPercent: pxToPercent(
+        NOTE_GAP + Math.floor(index / cols) * (NOTE_HEIGHT + NOTE_GAP), area.height),
   }
 }
 
@@ -374,6 +433,7 @@ function close() {
 
 onBeforeUnmount(() => {
   teardownDrag()
+  stopObserveWall()
   if (leaveTimer) {
     clearTimeout(leaveTimer)
     leaveTimer = null

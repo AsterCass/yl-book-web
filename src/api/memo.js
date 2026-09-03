@@ -8,7 +8,7 @@ export function memoList() {
     })
 }
 
-// body: {title, content, bgColor, textColor, posLeft, posTop}
+// body: {title, content, bgColor, textColor, posLeftPercent, posTopPercent}
 export function memoCreate(body) {
     return serviceShiro({
         url: `/memo/create`,
@@ -26,7 +26,7 @@ export function memoUpdate(id, body) {
     })
 }
 
-// body: {posLeft, posTop, layerNo}：拖动落位后回存，不带内容
+// body: {posLeftPercent, posTopPercent, layerNo}：拖动落位后回存（百分比），不带内容
 export function memoPosition(id, body) {
     return serviceShiro({
         url: `/memo/position/${id}`,
