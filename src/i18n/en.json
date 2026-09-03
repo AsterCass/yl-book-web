@@ -15,6 +15,29 @@
   "test_component_multiple_operation": "Multiple selected operation",
 
   "component_search": "Search",
+  "memo": {
+    "entry_empty": "No memos",
+    "entry_count": "{count} memos",
+    "create": "New Memo",
+    "edit": "Edit Memo",
+    "close": "Close",
+    "search_placeholder": "Search title or content",
+    "empty": "No memos yet, add one from the top left",
+    "no_match": "No matching memos",
+    "count": "{total} in total",
+    "count_filtered": "{shown} of {total} matched",
+    "field": {
+      "title": "Title",
+      "color": "Note Color",
+      "content": "Content"
+    },
+    "title_required": "Please fill in the title",
+    "create_success": "Memo added",
+    "update_success": "Memo saved",
+    "delete_success": "Memo deleted",
+    "delete_title": "Delete Memo",
+    "delete_content": "Delete “{title}”?"
+  },
   "color_picker": {
     "save": "Save"
   },

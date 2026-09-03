@@ -14,6 +14,7 @@
         </q-btn>
 
         <zyy-header-todo/>
+        <zyy-header-memo/>
       </div>
 
       <div class="row items-center justify-center " style="font-size: 1.15rem; font-weight: 500">
@@ -64,6 +65,7 @@ import {switchLanguage} from "@/utils/global-tools.js";
 import ZyyHeaderUserMenu from "@/ui/views/common/ZyyHeaderUserMenu.vue";
 import ZyyHeaderTenantStore from "@/ui/views/common/ZyyHeaderTenantStore.vue";
 import ZyyHeaderTodo from "@/ui/views/common/ZyyHeaderTodo.vue";
+import ZyyHeaderMemo from "@/ui/views/common/ZyyHeaderMemo.vue";
 import emitter from "@/utils/bus.js";
 import {userIsLogin} from "@/api/myu.js";
 

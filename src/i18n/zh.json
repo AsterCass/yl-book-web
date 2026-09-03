@@ -15,6 +15,29 @@
   "test_component_multiple_operation": "多选后操作",
 
   "component_search": "检索",
+  "memo": {
+    "entry_empty": "当前无备忘",
+    "entry_count": "当前 {count} 条备忘",
+    "create": "新建备忘",
+    "edit": "编辑备忘",
+    "close": "关闭",
+    "search_placeholder": "检索标题或内容",
+    "empty": "还没有备忘录，点左上角新建一条",
+    "no_match": "没有匹配的备忘录",
+    "count": "共 {total} 条",
+    "count_filtered": "命中 {shown} / {total} 条",
+    "field": {
+      "title": "标题",
+      "color": "便签颜色",
+      "content": "内容"
+    },
+    "title_required": "请填写标题",
+    "create_success": "备忘已新建",
+    "update_success": "备忘已保存",
+    "delete_success": "备忘已删除",
+    "delete_title": "删除备忘",
+    "delete_content": "确定删除「{title}」？"
+  },
   "color_picker": {
     "save": "保存"
   },

@@ -121,6 +121,11 @@
   resolved "https://mirrors.cloud.tencent.com/npm/@fontsource/roboto-slab/-/roboto-slab-5.2.8.tgz#557ffa492aeb18eada80bbccc423f788b9967de1"
   integrity sha512-8+iMCsoUZsDwQUe5omwCp7JPNTVdyAgay5AdhmnFZPEVIVabujrmYaFkSuZ1+GUemPEWlzEQ6aQkg2mPL84SAA==
 
+"@interactjs/types@1.10.28":
+  version "1.10.28"
+  resolved "https://mirrors.cloud.tencent.com/npm/@interactjs/types/-/types-1.10.28.tgz#c928ee3a23663136d696f0ca1d5c72e4dd61d5c7"
+  integrity sha512-vPmu4HWmsg0Fub3BPKGk7DuozkhgVK84TVkziY47v8Uh0A14gph55/vVRaQN4oZov0lGNJNK6Jyddim2qd/4vw==
+
 "@intlify/core-base@11.4.4":
   version "11.4.4"
   resolved "https://mirrors.cloud.tencent.com/npm/@intlify/core-base/-/core-base-11.4.4.tgz#ea20ab23eae5e96657fdd006e6b7fd57851fbbc8"
@@ -833,6 +838,13 @@ immutable@^5.1.5:
   version "5.1.5"
   resolved "https://mirrors.cloud.tencent.com/npm/immutable/-/immutable-5.1.5.tgz#93ee4db5c2a9ab42a4a783069f3c5d8847d40165"
   integrity sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==
+
+interactjs@^1.10.28:
+  version "1.10.28"
+  resolved "https://mirrors.cloud.tencent.com/npm/interactjs/-/interactjs-1.10.28.tgz#17f91e61214e4947d16953ba7987f9495b0874d2"
+  integrity sha512-QCa4ksTPd2p/FZ4I6hrH6fogjLqru1TxYywRiKYNuLZtrlAxTIYUa/MYsE7PnUgWZJU3SrGVDjiz065BeaXYng==
+  dependencies:
+    "@interactjs/types" "1.10.28"
 
 is-extglob@^2.1.1:
   version "2.1.1"
