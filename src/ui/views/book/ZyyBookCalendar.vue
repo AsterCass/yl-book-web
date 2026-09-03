@@ -356,9 +356,11 @@ const HOUR_HEIGHT = 64          // 每小时像素高度
 const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
 const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
-// 日视图首列「未分配」：常年空着，给固定宽度即可，剩下的宽度让给真正有卡片的雇员列
+// 日视图首列「未分配」：宽度随内容切换——有卡片时给足宽度看得清，空着时收窄，
+// 把省下的宽度让给真正有排班的雇员列（这一列多数时候是空的）
 const UNASSIGNED_KEY = '__unassigned'
 const UNASSIGNED_COL_WIDTH = '12rem'
+const UNASSIGNED_COL_WIDTH_EMPTY = '6rem'
 const MIN_COL_WIDTH = '9rem'
 
 const viewMode = ref('day')     // week | day，默认日视图
@@ -891,16 +893,26 @@ const staffColumns = computed(() => {
 
 const columns = computed(() => viewMode.value === 'week' ? weekColumns.value : staffColumns.value)
 
-// 列宽轨道：日视图的「未分配」列固定窄宽，其余列等分剩余宽度（周视图各列一律等分）
+// 列宽轨道：日视图的「未分配」列取固定宽度（有卡片 12rem / 空着 6rem），
+// 其余列等分剩余宽度（周视图没有这一列，各列一律等分）
 const gridStyle = computed(() => {
-  const tracks = columns.value.map(
-      col => col.key === UNASSIGNED_KEY ? UNASSIGNED_COL_WIDTH : 'minmax(0, 1fr)')
-  const fixedCount = tracks.filter(track => track === UNASSIGNED_COL_WIDTH).length
-  const flexCount = tracks.length - fixedCount
+  const tracks = []
+  const fixedWidths = []
+  let flexCount = 0
+  for (const col of columns.value) {
+    if (col.key === UNASSIGNED_KEY) {
+      const width = col.events.length > 0 ? UNASSIGNED_COL_WIDTH : UNASSIGNED_COL_WIDTH_EMPTY
+      tracks.push(width)
+      fixedWidths.push(width)
+    } else {
+      tracks.push('minmax(0, 1fr)')
+      flexCount++
+    }
+  }
   return {
     '--cal-gutter': gutterWidth,
     '--cal-tracks': tracks.join(' '),
-    minWidth: `calc(${gutterWidth} + ${fixedCount} * ${UNASSIGNED_COL_WIDTH}`
+    minWidth: `calc(${[gutterWidth, ...fixedWidths].join(' + ')}`
         + ` + ${flexCount} * ${MIN_COL_WIDTH})`,
   }
 })
