@@ -31,17 +31,12 @@
              @click="showStoreBlock = true">
         {{ $t('book_calendar.store_block.manage') }}
       </q-btn>
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+             @click="openColorSetting">
+        {{ $t('book_calendar.color.setting') }}
+      </q-btn>
 
       <q-space/>
-
-      <div class="row items-center no-wrap q-mr-lg cal-alpha-slider">
-        <div class="cal-alpha-label q-mr-sm">
-          {{ $t('book_calendar.bg_alpha') }}&nbsp;&nbsp;
-        </div>
-        <q-slider v-model="bgAlpha" :min="0" :max="1" :step="0.05" dense
-                  label label-color="transparent" label-text-color="transparent"
-                  :thumb-path="ALPHA_THUMB_PATH" style="width: 10rem;"/>
-      </div>
 
       <!-- 全屏：整个日历页（含工具栏）铺满视口，覆盖导航/header/footer；弹窗层级更高不受影响 -->
       <q-btn round flat dense class="component-none-btn-grow q-mr-md" @click="isFullscreen = !isFullscreen">
@@ -117,8 +112,7 @@
                      top: ev.top + 'px', height: ev.height + 'px',
                      left: `calc(${ev.leftPct}% + 2px)`,
                      width: `calc(${ev.widthPct}% - 4px)`,
-                     borderLeftColor: ev.statusColor,
-                     background: cardBg(ev.bgColor),
+                     ...cardStyle(ev.booking.status),
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
@@ -179,8 +173,7 @@
                  :style="{
                    top: dragState.top + 'px', height: dragState.height + 'px',
                    left: dragState.left + 'px', width: dragState.width + 'px',
-                   borderLeftColor: dragState.booking._statusColor,
-                   background: cardBg(rgbToRgba(dragState.booking._statusColor, bgAlpha)),
+                   ...cardStyle(dragState.booking.status),
                  }">
               <div class="cal-event-title">{{ dragState.booking.name || $t('book_calendar.no_name') }}</div>
               <div class="cal-event-sub">{{ dragState.label }}</div>
@@ -200,6 +193,55 @@
 
     <!-- 门店屏蔽时段管理（查看/新增/删除门店 block），变更后刷新日历 -->
     <cask-store-block-dialog v-model="showStoreBlock" @changed="reload"/>
+
+    <!-- 卡片配色设置：逐预约状态自定义左边栏/背景/文字三色。改的是草稿，保存才落账号 meta -->
+    <q-dialog v-model="showColorSetting" transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std column cal-color-card">
+        <h6 style="margin: 0 0 .5rem 0 !important">{{ $t('book_calendar.color.title') }}</h6>
+        <div class="cal-color-note">{{ $t('book_calendar.color.note') }}</div>
+
+        <div class="col cal-color-list">
+          <div v-for="st in STATUS_ROWS" :key="st.code" class="row items-center no-wrap cal-color-row">
+            <!-- 预览块与真实卡片同一套渲染口径（cardStyle），改色即时可见 -->
+            <div class="cal-event cal-color-preview" :style="cardStyle(st.code, colorDraft)">
+              <div class="cal-event-title">{{ st.name }}</div>
+              <div class="cal-event-sub">{{ $t('book_calendar.color.preview') }}</div>
+            </div>
+            <div v-for="part in COLOR_PARTS" :key="part" class="column items-center cal-color-cell">
+              <div class="cal-color-cell-label">{{ $t(`book_calendar.color.part.${part}`) }}</div>
+              <!-- 色块本身是取色器的触发区；底衬棋盘格，半透明色也看得出深浅 -->
+              <div class="cal-color-swatch">
+                <div class="cal-color-swatch-fill" :style="{ background: swatchOf(st.code, part) }"/>
+                <q-popup-proxy transition-show="scale" transition-hide="scale">
+                  <q-color :model-value="swatchOf(st.code, part)" format-model="rgba"
+                           @update:model-value="val => setDraftColor(st.code, part, val)"/>
+                </q-popup-proxy>
+              </div>
+            </div>
+            <q-btn round flat dense class="component-none-btn-grow q-ml-sm"
+                   @click="resetDraftStatus(st.code)">
+              <q-icon name="fa-solid fa-rotate-left" size=".8rem"/>
+              <q-tooltip>{{ $t('book_calendar.color.reset_row') }}</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+
+        <div class="row justify-evenly q-mt-md">
+          <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                 :loading="colorSaving" :disable="colorSaving" @click="saveColorSetting">
+            {{ $t('main_setting_save') }}
+          </q-btn>
+          <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                 @click="colorDraft = {}">
+            {{ $t('book_calendar.color.reset_all') }}
+          </q-btn>
+          <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                 @click="showColorSetting = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
 
     <!-- 取消预约确认（复用预约列表的取消文案与逻辑） -->
     <cask-dialog-judgment v-model="showCancel"
@@ -276,6 +318,7 @@ import {
   bookUncheckin
 } from "@/api/book.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import {mCalendarColor} from "@/api/myu.js";
 import {staffListSimple} from "@/api/staff.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
@@ -312,6 +355,10 @@ const HOUR_HEIGHT = 64          // 每小时像素高度
 const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
 const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
+// 日视图首列「未分配」：常年空着，给固定宽度即可，剩下的宽度让给真正有卡片的雇员列
+const UNASSIGNED_KEY = '__unassigned'
+const UNASSIGNED_COL_WIDTH = '12rem'
+const MIN_COL_WIDTH = '9rem'
 
 const viewMode = ref('day')     // week | day，默认日视图
 const bookings = ref([])
@@ -349,13 +396,133 @@ function onFullscreenKeyDown(e) {
     isFullscreen.value = false
   }
 }
-// 卡片背景（状态色底色）的透明度：用户偏好，读写 globalState（随 store 持久化到 localStorage）
-const bgAlpha = computed({
-  get: () => globalState.calendarBgAlpha,
-  set: (alpha) => globalState.updateCalendarBgAlpha(alpha),
-})
-// 滑块形状：20x20 视窗内的扁长圆角方块（16 宽 x 8 高，替代 q-slider 默认圆形）
-const ALPHA_THUMB_PATH = 'M5 6 h10 a3 3 0 0 1 3 3 v2 a3 3 0 0 1 -3 3 h-10 a3 3 0 0 1 -3 -3 v-2 a3 3 0 0 1 3 -3 z'
+// ===== 卡片配色（按预约状态）=====
+// 账号级偏好：存后端 yl_user.meta.calendarColors，随登录/用户详情下发，不做前端本地设置——
+// 换设备/换浏览器仍是同一套配色。这里只持有服务端下发的那份，弹窗改的是 colorDraft 草稿
+const COLOR_PARTS = ['bar', 'bg', 'text']
+const STATUS_ROWS = BookStatusEnum.getAll()
+// 未配置时的默认底色透明度（等于旧「卡片底色深浅」滑条的默认值）
+const DEFAULT_BG_ALPHA = 0.25
+// 卡片内阴影：用文字色在卡片内缘描一圈，上下紧邻的连续预约即使配色相近也分得开。
+// 窄扩散 + 高不透明度——要的是一道看得清的内缘，不是往卡片中间晕开一大片
+const INSET_ALPHA = 0.6
+const INSET_OFFSET = '0 0 .22rem'
+
+const cardColors = ref({})
+const showColorSetting = ref(false)
+const colorDraft = ref({})
+const colorSaving = ref(false)
+
+// 服务端下发的配色 -> 本地：userData 每次是整体替换，监听引用即可
+function loadCardColors() {
+  const raw = globalState.userData ? globalState.userData.calendarColors : null
+  cardColors.value = raw && typeof raw === 'object' ? JSON.parse(JSON.stringify(raw)) : {}
+}
+
+watch(() => globalState.userData, loadCardColors)
+
+function statusBaseColor(status) {
+  const statusEnum = BookStatusEnum.fromCode(status)
+  return statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
+}
+
+// 某状态的最终三色：逐项回落到内置默认（左边栏=状态色、背景=状态色的低透明版、文字=跟随主题）。
+// source 传弹窗草稿即可预览未保存的配色
+function colorOf(status, source) {
+  const cfg = (source || cardColors.value)[String(status)] || {}
+  const base = statusBaseColor(status)
+  return {
+    bar: cfg.bar || base,
+    bg: cfg.bg || withAlpha(base, DEFAULT_BG_ALPHA),
+    // 文字色留空 = 继承主题色，不写死，切换明暗主题才不会撞色
+    text: cfg.text || '',
+  }
+}
+
+// 卡片的配色内联样式（真实卡片、拖动预览、悬浮预览、配色弹窗预览共用同一口径）
+function cardStyle(status, source) {
+  const color = colorOf(status, source)
+  return {
+    borderLeftColor: color.bar,
+    background: cardBg(color.bg),
+    color: color.text || undefined,
+    // 内阴影颜色跟着文字色走；文字色未配置时用主题文字色
+    '--cal-event-inset': `${INSET_OFFSET} ${color.text
+        ? withAlpha(color.text, INSET_ALPHA) : `rgba(var(--text-color), ${INSET_ALPHA})`}`,
+  }
+}
+
+// 取色器的当前值：草稿里没有该项时给出「实际渲染出来的那个颜色」，避免一打开就是纯黑
+function swatchOf(status, part) {
+  const cfg = colorDraft.value[String(status)] || {}
+  if (cfg[part]) {
+    return cfg[part]
+  }
+  if (part === 'text') {
+    return themeTextColor()
+  }
+  return colorOf(status, colorDraft.value)[part]
+}
+
+// 主题文字色（--text-color 存的是 "r, g, b" 三元组），取不到时兜底中性灰
+function themeTextColor() {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim()
+  return raw ? `rgb(${raw})` : 'rgb(128, 128, 128)'
+}
+
+function openColorSetting() {
+  hideHoverCard()
+  colorDraft.value = JSON.parse(JSON.stringify(cardColors.value))
+  showColorSetting.value = true
+}
+
+function setDraftColor(status, part, value) {
+  const code = String(status)
+  colorDraft.value = {...colorDraft.value, [code]: {...(colorDraft.value[code] || {}), [part]: value}}
+}
+
+// 单个状态恢复默认 = 从草稿里摘掉它（渲染时自然回落到内置默认色）
+function resetDraftStatus(status) {
+  const next = {...colorDraft.value}
+  delete next[String(status)]
+  colorDraft.value = next
+}
+
+// 提交前剔掉空项/空状态：meta 是 yl_user 的整行字段，别拿默认值把它撑大
+function prunedDraft() {
+  const out = {}
+  for (const [code, cfg] of Object.entries(colorDraft.value || {})) {
+    const item = {}
+    for (const part of COLOR_PARTS) {
+      if (cfg && cfg[part]) {
+        item[part] = cfg[part]
+      }
+    }
+    if (Object.keys(item).length > 0) {
+      out[code] = item
+    }
+  }
+  return out
+}
+
+function saveColorSetting() {
+  const colors = prunedDraft()
+  colorSaving.value = true
+  mCalendarColor({colors}).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    cardColors.value = JSON.parse(JSON.stringify(colors))
+    // 同步写回本地用户信息，换页回来无需再请求；不重拉 /user/m/detail——那会把当前门店切换状态一并冲掉
+    if (globalState.userData) {
+      globalState.updateUserData({...globalState.userData, calendarColors: colors})
+    }
+    showColorSetting.value = false
+    notifyTopPositive(t('book_calendar.color.save_success'))
+  }).finally(() => {
+    colorSaving.value = false
+  })
+}
 
 // 日/周视图共用的数据源：按开关过滤已取消预约
 const visibleBookings = computed(() =>
@@ -398,17 +565,27 @@ function cardBg(tint) {
   return `linear-gradient(${tint}, ${tint}), rgb(var(--background-color))`
 }
 
-// 'rgb(r, g, b)' -> 'rgba(r, g, b, alpha)'，用于以状态色渲染半透明底色
-function rgbToRgba(color, alpha) {
+// 任意颜色串 -> 指定透明度的 rgba()。支持 rgb()/rgba() 与 #rgb/#rgba/#rrggbb/#rrggbbaa
+//（取色器出的是 rgba()，hex 分支是给手工写进 meta 的值兜底）；认不出来的原样返回
+function withAlpha(color, alpha) {
   if (!color) {
     return `rgba(128, 128, 128, ${alpha})`
   }
-  const m = color.match(/rgba?\(([^)]+)\)/)
-  if (!m) {
+  const fn = color.match(/rgba?\(([^)]+)\)/)
+  if (fn) {
+    const parts = fn[1].split(',').slice(0, 3).map(s => s.trim())
+    return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`
+  }
+  const hex = color.trim().match(/^#([0-9a-fA-F]{3,8})$/)
+  if (!hex) {
     return color
   }
-  const parts = m[1].split(',').slice(0, 3).map(s => s.trim())
-  return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`
+  let raw = hex[1]
+  if (raw.length === 3 || raw.length === 4) {
+    raw = raw.split('').map(c => c + c).join('')
+  }
+  const num = parseInt(raw.substring(0, 6), 16)
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`
 }
 
 function timeToMinutes(hhmm) {
@@ -645,11 +822,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       widthPct,
       blocked,
       cancelled: b.status === -1,
-      statusColor: b._statusColor,
       sourceColor: b._sourceColor,
       sourceName: b._sourceName,
-      // 底色=状态色的低透明版本，透明度随工具栏滑条实时变化（此处引用 bgAlpha 使列 computed 响应其变化）
-      bgColor: rgbToRgba(b._statusColor, bgAlpha.value),
       lines,
     }
   })
@@ -693,7 +867,7 @@ const staffColumns = computed(() => {
   const dow = dayOfWeekOf(dayDate.value)
   const cols = []
   // 未分配列始终存在，方便将预约拖入以解除分配（即使当前没有未分配预约）；只垫门店 block
-  cols.push(buildColumn('__unassigned', t('book_calendar.unassigned'), '', false, unassigned,
+  cols.push(buildColumn(UNASSIGNED_KEY, t('book_calendar.unassigned'), '', false, unassigned,
       buildDayBlocks(dayStr, null, toPx), toPx, {dateStr: dayStr, staffId: null}))
   for (const s of staffList.value) {
     // 只显示当天有排班的雇员；无排班但当天已有预约的仍显示，避免预约块丢失
@@ -711,11 +885,19 @@ const staffColumns = computed(() => {
 
 const columns = computed(() => viewMode.value === 'week' ? weekColumns.value : staffColumns.value)
 
-const gridStyle = computed(() => ({
-  '--cal-gutter': gutterWidth,
-  '--cal-cols': columns.value.length,
-  minWidth: `calc(${gutterWidth} + ${columns.value.length} * 9rem)`,
-}))
+// 列宽轨道：日视图的「未分配」列固定窄宽，其余列等分剩余宽度（周视图各列一律等分）
+const gridStyle = computed(() => {
+  const tracks = columns.value.map(
+      col => col.key === UNASSIGNED_KEY ? UNASSIGNED_COL_WIDTH : 'minmax(0, 1fr)')
+  const fixedCount = tracks.filter(track => track === UNASSIGNED_COL_WIDTH).length
+  const flexCount = tracks.length - fixedCount
+  return {
+    '--cal-gutter': gutterWidth,
+    '--cal-tracks': tracks.join(' '),
+    minWidth: `calc(${gutterWidth} + ${fixedCount} * ${UNASSIGNED_COL_WIDTH}`
+        + ` + ${flexCount} * ${MIN_COL_WIDTH})`,
+  }
+})
 
 // 详情
 const showDetail = ref(false)
@@ -817,11 +999,12 @@ function onEventEnter(e, ev, colIndex) {
   const rect = e.currentTarget.getBoundingClientRect()
   const vw = window.innerWidth
   const vh = window.innerHeight
+  // 悬浮预览是卡片的完整版，配色须与卡片一致：底色经 cardBg 叠在页面底色上，半透明配色也不透字
   const style = {
     position: 'fixed',
     minWidth: rect.width + 'px',
     minHeight: rect.height + 'px',
-    borderLeftColor: ev.statusColor,
+    ...cardStyle(ev.booking.status),
   }
   // 靠右/靠下的卡片改为从右/下边缘向左/上生长，保证完整可见
   if (rect.left > vw * 0.6) {
@@ -1133,8 +1316,7 @@ function enrichBooking(b) {
   b._endHm = b.endTime ? b.endTime.substring(11, 16) : ''
   const statusEnum = BookStatusEnum.fromCode(b.status)
   b.statusName = statusEnum ? statusEnum.name : ''
-  b._statusColor = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
-  // 来源文字（带来源色）；卡片底色在渲染时按 bgAlpha 实时计算（见 buildColumn），此处不再预生成
+  // 来源文字（带来源色）；卡片三色按状态在渲染时实时计算（见 cardStyle），此处不预生成
   const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
   b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
   b._sourceName = sourceEnum ? sourceEnum.name : ''
@@ -1198,6 +1380,7 @@ function loadStaff() {
 }
 
 onMounted(() => {
+  loadCardColors()
   loadStaff()
   reload()
   nowTimer = setInterval(() => {
@@ -1254,26 +1437,6 @@ onBeforeUnmount(() => {
     font-weight: 600;
   }
 
-  // 透明度滑条：跟随主题文字色（与 CaskTime 中 q-slider 的系统约定一致），不用 Quasar 默认主色
-  .cal-alpha-slider {
-    .cal-alpha-label {
-      font-size: 0.85rem;
-    }
-
-    :deep(.q-slider__track) {
-      color: rgb(var(--text-color)) !important;
-    }
-
-    :deep(.q-slider__thumb) {
-      color: rgb(var(--text-color)) !important;
-    }
-
-    // 去掉按压/悬停时放大的光环
-    :deep(.q-slider__focus-ring) {
-      display: none;
-    }
-  }
-
   .cal-legend {
     font-size: .8rem;
     opacity: .8;
@@ -1311,7 +1474,8 @@ onBeforeUnmount(() => {
 .cal-head-row,
 .cal-body {
   display: grid;
-  grid-template-columns: var(--cal-gutter) repeat(var(--cal-cols), minmax(0, 1fr));
+  // 轨道由 gridStyle 下发：日视图「未分配」列固定窄宽，其余列等分
+  grid-template-columns: var(--cal-gutter) var(--cal-tracks);
 }
 
 .cal-head-row {
@@ -1490,7 +1654,10 @@ onBeforeUnmount(() => {
   border-radius: .3rem;
   border-left: 5px solid rgb(128, 128, 128);
   background: rgba(255, 255, 255, .5);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+  // 内阴影用卡片自身的文字色在内缘描一圈（颜色由 cardStyle 内联下发），
+  // 上下紧邻的连续预约即使配色接近也能一眼看出这是两张卡；未下发时为全透明，等于没有
+  --cal-event-inset: 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: inset var(--cal-event-inset), 0 1px 4px rgba(0, 0, 0, .12);
   padding: .15rem .35rem;
   overflow: hidden;
   cursor: grab;
@@ -1503,7 +1670,7 @@ onBeforeUnmount(() => {
 
   // hover 仅做轻微反馈，完整展开由 teleport 悬浮预览承担（不受容器裁剪）
   &:hover {
-    box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+    box-shadow: inset var(--cal-event-inset), 0 3px 10px rgba(0, 0, 0, .2);
     z-index: 3;
   }
 
@@ -1691,9 +1858,8 @@ onBeforeUnmount(() => {
     outline-offset: -2px;
   }
 
+  // 已取消：只做删除线，左边栏/底色一律交给该状态的配色（CANCEL 也是可自定义的状态之一）
   &.cal-event-cancelled {
-    border-left-color: rgb(200, 60, 60) !important;
-
     .cal-event-title {
       text-decoration: line-through;
       opacity: .6;
@@ -1709,8 +1875,79 @@ onBeforeUnmount(() => {
 .cal-drag-preview {
   z-index: 5;
   pointer-events: none;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+  box-shadow: inset var(--cal-event-inset), 0 4px 14px rgba(0, 0, 0, .28);
   opacity: .95;
+}
+
+// ===== 卡片配色设置弹窗 =====
+.cal-color-card {
+  min-width: 40rem;
+
+  .cal-color-note {
+    font-size: .78rem;
+    opacity: .55;
+    max-width: 38rem;
+    line-height: 1.5;
+  }
+
+  .cal-color-list {
+    margin-top: .75rem;
+    max-height: 26rem;
+    overflow-y: auto;
+  }
+
+  .cal-color-row {
+    padding: .35rem 0;
+    border-bottom: 1px solid rgba(128, 128, 128, .14);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  // 预览块：借用 .cal-event 的配色与内阴影，但不要它的绝对定位/拖拽光标
+  .cal-color-preview {
+    position: static;
+    flex: 0 0 auto;
+    width: 11rem;
+    height: 3.2rem;
+    margin-right: 1rem;
+    cursor: default;
+    display: block;
+  }
+
+  .cal-color-cell {
+    width: 4.5rem;
+
+    .cal-color-cell-label {
+      font-size: .7rem;
+      opacity: .6;
+      margin-bottom: .25rem;
+    }
+  }
+
+  // 色块：底衬棋盘格，半透明配色也看得出实际深浅
+  .cal-color-swatch {
+    position: relative;
+    width: 3rem;
+    height: 1.4rem;
+    border-radius: .25rem;
+    cursor: pointer;
+    overflow: hidden;
+    border: 1px solid rgba(128, 128, 128, .45);
+    background-image:
+        linear-gradient(45deg, rgba(128, 128, 128, .35) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(128, 128, 128, .35) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, .35) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, .35) 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+
+    .cal-color-swatch-fill {
+      position: absolute;
+      inset: 0;
+    }
+  }
 }
 
 // 悬浮完整预览：固定定位、脱离一切裁剪容器，内容按需向右/下（或翻转向左/上）生长。
@@ -1722,8 +1959,7 @@ onBeforeUnmount(() => {
   width: max-content;
   max-width: 26rem;
   height: auto;
-  background-color: rgb(var(--full-container-background-color-light));
-  box-shadow: 0 6px 22px rgba(0, 0, 0, .28);
+  box-shadow: inset var(--cal-event-inset), 0 6px 22px rgba(0, 0, 0, .28);
   cursor: grab;
 
   // 外扩命中区域：吃掉亚像素误差与边缘 1px 抖动，防止展开↔收回闪烁。

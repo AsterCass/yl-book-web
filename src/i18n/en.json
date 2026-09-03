@@ -872,7 +872,20 @@
     "hide_cancelled": "Hide Cancelled",
     "checkin_success": "Checked in",
     "uncheckin_success": "Check-in cancelled",
-    "bg_alpha": "Card background opacity:",
+    "color": {
+      "setting": "Card Colors",
+      "title": "Booking Card Colors",
+      "note": "Customize the left bar, background and text color of the card for each booking status. Colors are saved on your account, so they follow you across devices and browsers.",
+      "part": {
+        "bar": "Left bar",
+        "bg": "Background",
+        "text": "Text"
+      },
+      "preview": "Sample 09:00 - 10:00",
+      "reset_row": "Reset this status to default",
+      "reset_all": "Reset all to default",
+      "save_success": "Colors saved"
+    },
     "adjust_success": "Booking updated successfully",
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",

@@ -31,6 +31,16 @@ export function mUpdate(body) {
     })
 }
 
+// body: {colors}：预约日历卡片配色，状态码字符串 -> {bar, bg, text}。
+// 整组覆盖（传 {} = 全部恢复默认），存当前账号的 yl_user.meta.calendarColors
+export function mCalendarColor(body) {
+    return serviceShiro({
+        url: `/user/m/calendar-color`,
+        method: 'post',
+        data: body
+    })
+}
+
 export function mPasswd(body) {
     return serviceShiro({
         url: `/user/m/passwd`,

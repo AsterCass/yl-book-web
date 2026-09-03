@@ -870,7 +870,20 @@
     "hide_cancelled": "隐藏已取消",
     "checkin_success": "签到成功",
     "uncheckin_success": "已取消签到",
-    "bg_alpha": "卡片底色深浅：",
+    "color": {
+      "setting": "卡片配色",
+      "title": "预约卡片配色",
+      "note": "按预约状态自定义卡片的左边栏、背景与文字颜色。配色存在当前账号下，换设备/换浏览器同样生效。",
+      "part": {
+        "bar": "左边栏",
+        "bg": "背景",
+        "text": "文字"
+      },
+      "preview": "示例 09:00 - 10:00",
+      "reset_row": "恢复该状态默认色",
+      "reset_all": "全部恢复默认",
+      "save_success": "配色已保存"
+    },
     "adjust_success": "修改预约成功",
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
