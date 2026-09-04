@@ -26,7 +26,8 @@
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.mail') }}&nbsp;:</h6>
           <div>{{ book.mail || '-' }}</div>
 
-          <!-- 按邮箱统计的已预约次数（不含已取消），仅详情接口返回；无邮箱时后端返回 0 -->
+          <!-- 按手机号统计的此前已预约次数（不含已取消、不含本单及之后），仅详情接口返回；
+               没有可用手机号时后端返回 null，这里显示「-」而不是 0 -->
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.customerBookingCountTenant') }}&nbsp;:</h6>
           <div>{{ book.customerBookingCountTenant != null ? book.customerBookingCountTenant : '-' }}</div>
 
@@ -38,6 +39,16 @@
 
           <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.source') }}&nbsp;:</h6>
           <div :style="`color: ${sourceColor}`">{{ sourceName }}</div>
+
+          <!-- 是否首次本站预约：按手机号在本租户内判定（含本站预约各渠道分身），无手机号时为 null -->
+          <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.firstOwnSiteBooking') }}&nbsp;:</h6>
+          <div :style="book.firstOwnSiteBooking ? `color: rgb(var(--pointer))` : ''">
+            {{
+              book.firstOwnSiteBooking == null
+                  ? '-'
+                  : (book.firstOwnSiteBooking ? $t('book_booking.detail.yes') : $t('book_booking.detail.no'))
+            }}
+          </div>
 
           <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.project') }}&nbsp;:</h6>
           <div class="row" style="gap: .4rem;">
