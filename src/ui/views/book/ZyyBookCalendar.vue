@@ -16,6 +16,18 @@
       <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(7)">
         <q-icon name="fa-solid fa-angles-right" size=".9rem"/>
       </q-btn>
+      <!-- 直接跳到某一天：要翻到几周前/后时，不必一天天点箭头挪过去 -->
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs">
+        <q-icon name="fa-regular fa-calendar" size="1rem"/>
+        <!-- z-index 抬到 6001：压过同为 6000 的遮罩（与日期/时间选择器同一套做法） -->
+        <q-popup-proxy ref="datePopupRef" transition-show="scale" transition-hide="scale"
+                       style="background-color:transparent; border:0; padding:1rem;
+                                 box-shadow: none; backdrop-filter: none; z-index: 6001"
+                       @show="datePicking = true" @hide="datePicking = false">
+          <q-date :model-value="pickerDate" mask="YYYY-MM-DD" today-btn
+                  @update:model-value="jumpToDate"/>
+        </q-popup-proxy>
+      </q-btn>
       <div class="cal-title q-ml-md">{{ rangeLabel }}</div>
       <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="resetView">
         {{ viewMode === 'week' ? $t('book_calendar.this_week') : $t('book_calendar.today') }}
@@ -185,6 +197,10 @@
       </div>
     </div>
 
+    <!-- 日期选择器展开期间铺满视口挡住指针事件：日历底下全是可点/可拖的卡片与格子，
+         不挡住的话点空白关选择器的同一下会顺手在格子上开出新增预约弹窗 -->
+    <cask-picker-mask :model-value="datePicking"/>
+
     <cask-book-detail-dialog v-model="showDetail" :book="detailBook"/>
 
     <!-- 新增/编辑弹窗（与预约列表共用同一组件，保持一致） -->
@@ -309,6 +325,7 @@ import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
 import CaskMarqueeRow from "@/ui/components/CaskMarqueeRow.vue";
 import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
+import CaskPickerMask from "@/ui/components/CaskPickerMask.vue";
 import {
   bookAdjust,
   bookCalendar,
@@ -381,6 +398,10 @@ const dayDate = ref(today())
 const showCancelled = ref(false)
 // 门店屏蔽时段管理弹窗
 const showStoreBlock = ref(false)
+// 工具栏日历图标里的日期选择器：选完要主动关掉（q-date 自己不关弹窗）；
+// 展开期间挂遮罩（datePicking），把指针事件挡在选择器之外
+const datePopupRef = ref(null)
+const datePicking = ref(false)
 // 全屏（CSS 固定定位铺满视口，覆盖导航/header/footer；不用原生 Fullscreen API，
 // 否则 teleport 到 body 的弹窗/悬浮预览在全屏子树外将不可见）。
 // 祖先 q-scrollarea 的 contain: strict 会把 fixed 后代困在滚动盒内，
@@ -643,6 +664,11 @@ const rangeLabel = computed(() => {
   const ds = date.formatDate(dayDate.value, 'YYYY-MM-DD')
   return `${ds}  ${t(`staff.schedule.day.${dayOfWeekOf(dayDate.value)}`)}`
 })
+
+// 日期选择器的当前值：日视图取所看那天、周视图取窗口首日——
+// 展开时就停在当前所看的日期（并高亮它），不用每次从今天翻起
+const pickerDate = computed(() => date.formatDate(
+    viewMode.value === 'week' ? weekStart.value : dayDate.value, 'YYYY-MM-DD'))
 
 // 显示时间范围：默认 8:00-22:00，若有数据超出则自动扩展
 const timeRange = computed(() => {
@@ -1098,6 +1124,29 @@ function shift(offset) {
     loadWeek()
   } else {
     dayDate.value = date.addToDate(dayDate.value, {days: offset})
+    loadDay()
+  }
+}
+
+/**
+ * 从日期选择器直接跳到某一天：日视图切到该天，周视图切到该天所在的窗口
+ * （窗口起点与「回到本周」同口径，所选日期落在第二列）。
+ * 选中当前已选日期时 q-date 传回 null（取消选中），此时只关弹窗、不动视图。
+ */
+function jumpToDate(val) {
+  if (datePopupRef.value) {
+    datePopupRef.value.hide()
+  }
+  if (!val) {
+    return
+  }
+  hideHoverCard()
+  const picked = date.extractDate(val, 'YYYY-MM-DD')
+  if (viewMode.value === 'week') {
+    weekStart.value = getWeekViewStart(picked)
+    loadWeek()
+  } else {
+    dayDate.value = picked
     loadDay()
   }
 }
