@@ -85,7 +85,7 @@
           <div ref="bodyRef" class="cal-body" :style="{ height: totalHeight + 'px' }">
 
             <!-- 时间刻度 -->
-            <div ref="gutterRef" class="cal-gutter">
+            <div class="cal-gutter">
               <div v-for="h in hours" :key="h" class="cal-hour-label" :style="{ height: HOUR_HEIGHT + 'px' }">
                 <span>{{ formatHour(h) }}</span>
               </div>
@@ -1186,7 +1186,6 @@ function reload() {
 const SNAP_MINUTES = 10          // 纵向拖动以 10 分钟为单位
 const DRAG_THRESHOLD = 4         // 小于该位移视为点击
 const bodyRef = ref(null)        // 日历主体（定位基准）
-const gutterRef = ref(null)      // 时间刻度列（用于测量宽度）
 const dragState = ref(null)      // 拖动预览态（响应式，驱动预览块）
 let dragCtx = null               // 拖动过程数据（非响应式）
 let lastDragEndTs = 0            // 最近一次拖拽结束时间，用于屏蔽拖拽结束后的余波 click
@@ -1195,6 +1194,34 @@ function minutesToTime(min) {
   const h = Math.floor(min / 60)
   const m = min % 60
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+// 量出各列相对日历主体的左边界与宽度。日视图「未分配」列是固定宽（有卡片 12rem / 空着 6rem），
+// 各列并不等宽，不能用「(主体宽 - 时间列宽) / 列数」平均推算，否则命中列与预览块都会整体偏移
+function measureColumns() {
+  const bodyEl = bodyRef.value
+  if (!bodyEl) {
+    return null
+  }
+  const baseLeft = bodyEl.getBoundingClientRect().left
+  const cols = []
+  for (const el of bodyEl.querySelectorAll('.cal-col')) {
+    const rect = el.getBoundingClientRect()
+    cols.push({left: rect.left - baseLeft, width: rect.width})
+  }
+  return cols.length > 0 ? {baseLeft, cols} : null
+}
+
+// 指针横坐标（视口坐标）落在第几列：逐列比对实际边界，落在列区之外时取最近的边界列
+function colIndexAtX(metrics, clientX) {
+  const x = clientX - metrics.baseLeft
+  const {cols} = metrics
+  for (let i = 0; i < cols.length; i++) {
+    if (x < cols[i].left + cols[i].width) {
+      return i
+    }
+  }
+  return cols.length - 1
 }
 
 function removeDragListeners() {
@@ -1259,17 +1286,13 @@ function onPointerMove(e) {
     document.body.classList.add('cal-dragging')
   }
 
-  const bodyEl = bodyRef.value
-  if (!bodyEl) {
+  // 每次移动重新量：列宽随窗口尺寸/内容变化，缓存会失真
+  const metrics = measureColumns()
+  if (!metrics) {
     return
   }
-  const rect = bodyEl.getBoundingClientRect()
-  const gutterPx = gutterRef.value ? gutterRef.value.getBoundingClientRect().width : 64
-  const colCount = columns.value.length
-  const colWidth = (rect.width - gutterPx) / colCount
-
-  let colIndex = Math.floor((e.clientX - rect.left - gutterPx) / colWidth)
-  colIndex = Math.max(0, Math.min(colCount - 1, colIndex))
+  const colIndex = colIndexAtX(metrics, e.clientX)
+  const colRect = metrics.cols[colIndex]
 
   const {startHour, endHour} = timeRange.value
   const rangeStart = startHour * 60
@@ -1282,8 +1305,8 @@ function onPointerMove(e) {
     booking: dragCtx.booking,
     newStart,
     newColIndex: colIndex,
-    left: gutterPx + colIndex * colWidth + 2,
-    width: colWidth - 4,
+    left: colRect.left + 2,
+    width: colRect.width - 4,
     top: (newStart - rangeStart) / 60 * HOUR_HEIGHT,
     height: dragCtx.duration / 60 * HOUR_HEIGHT,
     label: formatMinutesDisplay(newStart),
