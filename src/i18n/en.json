@@ -920,6 +920,8 @@
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",
     "store_block": {
+      "auto_tag": "Auto",
+      "auto_note": "The system found no staff available for this period and has blocked it on third-party channels. To reopen it, adjust the schedule or bookings — it cannot be deleted here.",
       "manage": "Store Blocks",
       "note": "During a blocked period the whole store accepts no new bookings; existing bookings are not affected. Only dates within the next 2 weeks can be blocked",
       "list_range_note": "Only blocked periods within 2 weeks around today are listed",

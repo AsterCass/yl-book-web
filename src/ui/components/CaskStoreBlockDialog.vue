@@ -24,12 +24,21 @@
                 </div>
                 <div v-for="bl in blockList" :key="bl.id" class="row items-center store-block-item">
                   <div style="min-width: 0">
-                    <div style="font-weight: 500">{{ bl.startTime }} ~ {{ bl.endTime }}</div>
-                    <div v-if="bl.reason" class="component-max-line-text"
-                         style="opacity: .6; font-size: .78rem">{{ bl.reason }}</div>
+                    <div class="row items-center" style="font-weight: 500">
+                      <span>{{ bl.startTime }} ~ {{ bl.endTime }}</span>
+                      <span v-if="bl.auto" class="store-block-auto-tag q-ml-sm">
+                        {{ $t('book_calendar.store_block.auto_tag') }}
+                      </span>
+                    </div>
+                    <div v-if="bl.auto || bl.reason" class="component-max-line-text"
+                         style="opacity: .6; font-size: .78rem">
+                      {{ bl.auto ? $t('book_calendar.store_block.auto_note') : bl.reason }}
+                    </div>
                   </div>
                   <q-space/>
-                  <q-btn round flat dense class="component-none-btn-grow" @click="openDelete(bl)">
+                  <!-- 自动 block 不给删：删掉下一轮对账算出来条件还成立就会原样建回来，
+                       徒增第三方调用、还让人以为系统坏了。要放开该时段得去改排班或改预约 -->
+                  <q-btn v-if="!bl.auto" round flat dense class="component-none-btn-grow" @click="openDelete(bl)">
                     <q-icon name="fa-solid fa-trash" size=".9rem"/>
                   </q-btn>
                 </div>
@@ -224,6 +233,17 @@ function deleteBlock() {
 </script>
 
 <style scoped lang="scss">
+
+// 自动 block 标记：与日历上的自动 block 斜纹同色系，一眼对得上
+.store-block-auto-tag {
+  padding: .05rem .35rem;
+  border: 1px solid rgba(204, 118, 45, .6);
+  border-radius: 3px;
+  color: rgb(204, 118, 45);
+  font-size: .68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
 
 .store-block-item {
   padding: .5rem .75rem;

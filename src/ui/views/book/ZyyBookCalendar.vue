@@ -101,10 +101,15 @@
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
 
-              <!-- block 背景（斜纹置灰）：周视图=门店 block；日视图=门店 block + 该列雇员自己的 block -->
+              <!-- block 背景（斜纹置灰）：周视图=门店 block；日视图=门店 block + 该列雇员自己的 block。
+                   自动 block（系统判定该时段全店接不下单、已同步屏蔽第三方渠道）换一套配色区分，
+                   它只是对外镜像、不影响本店排班与改派，所以做得比手动 block 更淡 -->
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
+                   :class="{ 'cal-block-auto': block.auto }"
                    :style="{ top: block.top + 'px', height: block.height + 'px' }">
-                <span v-if="block.reason" class="cal-block-reason">{{ block.reason }}</span>
+                <span v-if="block.auto || block.reason" class="cal-block-reason">
+                  {{ block.auto ? $t('book_calendar.store_block.auto_tag') : block.reason }}
+                </span>
               </div>
 
               <!-- 悬停时间提示线（10 分钟一档，点击即以该时间创建预约） -->
@@ -805,7 +810,7 @@ function blockSegmentsForDate(dateStr, staffId) {
     const start = dateStr === bl.startDateStr ? bl.startMin : 0
     const end = dateStr === bl.endDateStr ? bl.endMin : 1440
     if (end > start) {
-      segs.push({start, end, reason: bl.reason})
+      segs.push({start, end, reason: bl.reason, auto: bl.auto})
     }
   }
   return segs
@@ -1436,6 +1441,8 @@ function applyData(res) {
     id: bl.id,
     staffId: bl.staffId || null,
     storeBlock: !!bl.storeBlock,
+    // 系统按可约性推导、只用于镜像第三方的 block：日历上只读展示，不可删
+    auto: !!bl.auto,
     reason: bl.reason || '',
     startDateStr: bl.startTime ? bl.startTime.substring(0, 10) : '',
     endDateStr: bl.endTime ? bl.endTime.substring(0, 10) : '',
@@ -1652,6 +1659,16 @@ onBeforeUnmount(() => {
 }
 
 // block 时段底色：斜纹置灰 + 上下虚线边界，与普通空白/预约卡片明显区分；不参与命中（点击穿透可创建预约）
+// 自动 block：主色系斜纹，与手动 block 的中性灰区分开。透明度更低——
+// 它不参与本地判定，只是「这段已同步屏蔽给第三方」的提示
+.cal-block-auto {
+  background: repeating-linear-gradient(-45deg,
+      rgba(204, 118, 45, .26) 0, rgba(204, 118, 45, .26) 6px,
+      rgba(204, 118, 45, .08) 6px, rgba(204, 118, 45, .08) 12px) !important;
+  border-top-color: rgba(204, 118, 45, .5) !important;
+  border-bottom-color: rgba(204, 118, 45, .5) !important;
+}
+
 .cal-block {
   position: absolute;
   left: 0;
