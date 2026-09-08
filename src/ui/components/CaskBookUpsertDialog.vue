@@ -140,7 +140,12 @@
         :title="$t('book_booking.customer_history.phone_title')"
         :hint="$t('book_booking.customer_history.phone_hint')"
         @select="pickCustomer"/>
-    </div>
+    
+    <!-- 资源位占用提示：后端不拦截，确认后照常提交 -->
+    <cask-resource-conflict-dialog v-model="showResourceConflict" :detail="resourceDetail" :loading="saving"
+                                   @confirm="submit(pendingBody)"/>
+
+</div>
   </q-dialog>
 </template>
 
@@ -152,6 +157,7 @@ import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js
 import {AssignStrategyEnum, BookSourceEnum} from "@/constants/enums/book.js";
 import {
   bookCreate,
+  bookResourceCheck,
   bookCustomerHistory,
   bookCustomerHistoryByName,
   bookSpecialRemarkListSimple,
@@ -160,6 +166,7 @@ import {
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
+import CaskResourceConflictDialog from "@/ui/components/CaskResourceConflictDialog.vue";
 import CaskCustomerHistoryPanel from "@/ui/components/CaskCustomerHistoryPanel.vue";
 
 const {t, availableLocales} = useI18n()
@@ -407,6 +414,10 @@ function onSourceChange(code) {
 
 // 提交中标记：按钮 loading + 拦截重复触发（回车/连点），请求结束（含失败）恢复可点
 const saving = ref(false)
+// 资源位提示：查出冲突后先弹框，确认「仍然保存」再拿 pendingBody 提交
+const showResourceConflict = ref(false)
+const resourceDetail = ref({})
+const pendingBody = ref(null)
 
 function save() {
   if (saving.value) {
@@ -441,12 +452,38 @@ function save() {
     specialRemarkList: upsertSpecialRemarkList.value,
   }
 
+  // 提交前查一次门店资源位。后端对管理端不拦截容量，这里只是提示——
+  // 冲突就把「谁占着、占到几点」摆出来，由店员决定要不要坚持排
+  saving.value = true
+  bookResourceCheck({
+    bookingId: props.isNew ? undefined : props.book.id,
+    bookTimeStr: body.bookTimeStr,
+    bookRequirementSkillIdList: body.bookRequirementSkillIdList,
+  }).then(res => {
+    const detail = res && res.data ? res.data.data : null
+    // 查不到结果（网络/接口异常）不挡提交：它只是提示，不该变成新的拦路虎
+    if (!detail || detail.ok) {
+      submit(body)
+      return
+    }
+    saving.value = false
+    resourceDetail.value = detail
+    pendingBody.value = body
+    showResourceConflict.value = true
+  }).catch(() => {
+    submit(body)
+  })
+}
+
+// 确认「仍然保存」后走这里；也用于检查通过时的直接提交
+function submit(body) {
   saving.value = true
   if (props.isNew) {
     bookCreate(body).then(res => {
       if (!res || !res.data) {
         return
       }
+      showResourceConflict.value = false
       emit('update:modelValue', false)
       emit('saved')
     }).finally(() => {
@@ -457,6 +494,7 @@ function save() {
       if (!res || !res.data) {
         return
       }
+      showResourceConflict.value = false
       emit('update:modelValue', false)
       notifyTopPositive(t('book_booking.notify.update_success'))
       emit('saved')

@@ -174,6 +174,19 @@ export function bookPhoneRequestUpdate(id, body) {
     })
 }
 
+// 门店共享资源位占用检查（只读，不落库）：管理端建单/改单提交前调一次。
+// body: {bookingId?, bookTimeStr, bookRequirementSkillIdList}
+// 返回 {ok, resourceName, capacity, required, available, conflictStartTime, conflictEndTime,
+//       targetStartTime, targetEndTime, occupied: [{name, startTime, endTime, skillNames, staffName}]}
+// ok=false 只是提示——后端对管理端不拦截容量，确认后照常提交
+export function bookResourceCheck(body) {
+    return serviceShiro({
+        url: `/book/resource/check`,
+        data: body,
+        method: 'post',
+    })
+}
+
 // block（不接受新预约时段）：不传参默认返回尚未结束的 block（门店 + 雇员）
 export function bookBlockList(params) {
     return serviceShiro({

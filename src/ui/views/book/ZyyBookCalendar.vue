@@ -266,6 +266,15 @@
       </q-card>
     </q-dialog>
 
+    <!-- 一键自动分配时的资源位提示 -->
+    <cask-resource-conflict-dialog v-model="showAssignResourceConflict" :detail="assignResourceDetail"
+                                   :loading="assignSubmitting"
+                                   @confirm="applyAutoAssign(pendingAutoAssignId)"/>
+
+    <!-- 拖拽改期时的资源位提示：后端不拦截，确认后照常改 -->
+    <cask-resource-conflict-dialog v-model="showDragResourceConflict" :detail="dragResourceDetail"
+                                   :loading="dragAdjusting" @confirm="confirmDragResource"/>
+
     <!-- 右键新建屏蔽时段：开始时间取自右键落点，只需再填时长，复用 /book/block/create -->
     <q-dialog v-model="showBlockCreate" transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std column cal-block-card">
@@ -386,6 +395,7 @@ import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
 import CaskMarqueeRow from "@/ui/components/CaskMarqueeRow.vue";
 import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
+import CaskResourceConflictDialog from "@/ui/components/CaskResourceConflictDialog.vue";
 import CaskPickerMask from "@/ui/components/CaskPickerMask.vue";
 import {
   bookAdjust,
@@ -395,6 +405,7 @@ import {
   bookCheckin,
   bookDelete,
   bookDetail,
+  bookResourceCheck,
   bookReassign,
   bookUncheckin
 } from "@/api/book.js";
@@ -1095,6 +1106,18 @@ function onColClick(e, col) {
   showEdit.value = true
 }
 
+// 一键自动分配时的资源位提示（待分配单派人 = 开始占资源位）
+const showAssignResourceConflict = ref(false)
+const assignResourceDetail = ref({})
+const pendingAutoAssignId = ref("")
+const assignSubmitting = ref(false)
+
+// 拖拽落库时的资源位提示：冲突则卡片先回原位，确认后再真正移动
+const showDragResourceConflict = ref(false)
+const dragResourceDetail = ref({})
+const pendingDrag = ref(null)
+const dragAdjusting = ref(false)
+
 // ===== 右键屏蔽时段 =====
 // 空白处右键 -> 以落点时间为开始新建 block；已有 block 上右键 -> 确认后取消它。
 // 后端接口与「屏蔽时段管理」弹窗完全共用，这里只是把入口搬到日历上，
@@ -1320,14 +1343,39 @@ function toggleCheckin(booking) {
   })
 }
 
-// 待分配预约的一键自动分配
+// 待分配预约的一键自动分配。
+// 待分配（PRE）单本身不占资源位——派上雇员的那一刻才开始占，所以这里同样要先提示
 function autoAssignCalendar(booking) {
-  bookReassign(booking.id).then(res => {
+  bookResourceCheck({
+    bookingId: booking.id,
+    bookTimeStr: booking.bookingTime,
+    bookRequirementSkillIdList: (booking.requiredSkillIds || '').split(',').filter(Boolean),
+  }).then(res => {
+    const detail = res && res.data ? res.data.data : null
+    // 查不到结果不挡操作：它只是提示
+    if (!detail || detail.ok) {
+      applyAutoAssign(booking.id)
+      return
+    }
+    assignResourceDetail.value = detail
+    pendingAutoAssignId.value = booking.id
+    showAssignResourceConflict.value = true
+  }).catch(() => {
+    applyAutoAssign(booking.id)
+  })
+}
+
+function applyAutoAssign(bookingId) {
+  assignSubmitting.value = true
+  bookReassign(bookingId).then(res => {
     if (!res || !res.data) {
       return
     }
     notifyTopPositive(t('book_calendar.auto_assign_success'))
+    showAssignResourceConflict.value = false
     reload()
+  }).finally(() => {
+    assignSubmitting.value = false
   })
 }
 
@@ -1587,16 +1635,64 @@ function commitDrag(ctx, ds) {
     }
   }
 
+  // 先查资源位。冲突则<b>先把卡片弹回原位</b>再提示——让它停在新位置会让人以为已经生效了，
+  // 取消时又要弹回去。确认后才真正发起 adjust（那时再乐观移动一次）
+  bookResourceCheck({
+    bookingId: b.id,
+    bookTimeStr,
+    bookRequirementSkillIdList: (b.requiredSkillIds || '').split(',').filter(Boolean),
+  }).then(res => {
+    const detail = res && res.data ? res.data.data : null
+    // 查不到结果不挡拖拽：它只是提示
+    if (!detail || detail.ok) {
+      applyDragAdjust(b, prev, bookTimeStr, staffId)
+      return
+    }
+    revertDrag(b, prev)
+    dragResourceDetail.value = detail
+    pendingDrag.value = {b, bookTimeStr, staffId}
+    showDragResourceConflict.value = true
+  }).catch(() => {
+    applyDragAdjust(b, prev, bookTimeStr, staffId)
+  })
+}
+
+/**
+ * 拖拽改期真正落库。prev 为拖拽前的原值（失败时回退）；走确认路径时传 null——
+ * 那时卡片已经回到原位，不需要也不能再回退。
+ */
+function applyDragAdjust(b, prev, bookTimeStr, staffId) {
+  dragAdjusting.value = true
+  // prev 为空 = 走「仍然保存」确认路径，卡片已经回到原位，失败时无需再回退
+  const rollback = () => {
+    if (prev) {
+      revertDrag(b, prev)
+    }
+    showDragResourceConflict.value = false
+  }
   bookAdjust(b.id, bookTimeStr, staffId).then(res => {
     if (!res || !res.data) {
-      revertDrag(b, prev)
+      rollback()
       return
     }
     notifyTopPositive(t('book_calendar.adjust_success'))
+    showDragResourceConflict.value = false
     reload()
-  }).catch(() => {
-    revertDrag(b, prev)
+  }).catch(rollback).finally(() => {
+    dragAdjusting.value = false
   })
+}
+
+/**
+ * 资源位提示里点「仍然保存」：此时卡片已回到原位，重新走一次落库（成功后 reload 会带来新位置）。
+ */
+function confirmDragResource() {
+  const pending = pendingDrag.value
+  if (!pending) {
+    showDragResourceConflict.value = false
+    return
+  }
+  applyDragAdjust(pending.b, null, pending.bookTimeStr, pending.staffId)
 }
 
 function revertDrag(b, prev) {

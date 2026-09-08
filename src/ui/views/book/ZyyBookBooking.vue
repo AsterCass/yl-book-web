@@ -185,6 +185,7 @@
                             }
                             if(name === 'autoAssign') {
                               toOpId = row.id
+                              toOpRow = row
                               toOpTitle = $t('book_booking.dialog.autoAssign.title')
                               toOpDesc = $t('book_booking.dialog.autoAssign.content', { name: row.name })
                               toOpFunc = autoAssignData
@@ -312,7 +313,13 @@
     <!-- Booking Detail Dialog (shared, read-only) -->
     <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook"/>
 
-  </div>
+  
+    <!-- 资源位占用提示：派人 = 待分配单开始占资源位；后端不拦截，确认后照常执行 -->
+    <cask-resource-conflict-dialog v-model="showResourceConflict" :detail="resourceDetail"
+                                   :loading="resourceSubmitting"
+                                   @confirm="pendingResourceAction && pendingResourceAction()"/>
+
+</div>
 </template>
 
 <script setup>
@@ -325,11 +332,20 @@ import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import {tableBook, tableBookOperation} from "@/tables/book.js";
-import {bookAssign, bookDelete, bookDetail, bookExport, bookList, bookReassign} from "@/api/book.js";
+import {
+  bookAssign,
+  bookDelete,
+  bookDetail,
+  bookExport,
+  bookList,
+  bookReassign,
+  bookResourceCheck
+} from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import CaskDateTimePicker from "@/ui/components/CaskDateTimePicker.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
+import CaskResourceConflictDialog from "@/ui/components/CaskResourceConflictDialog.vue";
 import {truncate} from "@/utils/base-tools.js";
 
 const selectId = ref("")
@@ -380,6 +396,7 @@ function openAddBooking() {
 // assign
 const showAssign = ref(false)
 const assignBookId = ref("")
+const assignBookRow = ref(null)
 const assignBookName = ref("")
 const assignStaffId = ref(null)
 const staffSelectOptions = ref([])
@@ -445,6 +462,8 @@ function openStaffDetail(staffId) {
 // op
 const showOperation = ref(false)
 const toOpId = ref("")
+// 资源位 check 需要本单的时间与项目，光有 id 不够
+const toOpRow = ref(null)
 const toOpTitle = ref("")
 const toOpDesc = ref("")
 const toOpFunc = ref(null)
@@ -479,18 +498,28 @@ function autoAssignData() {
     notifyTopWarning(t('validation.insufficient_parameters'))
     return
   }
-  bookReassign(toOpId.value).then(res => {
+  // 待分配（PRE）单本身不占资源位——派上雇员的那一刻才开始占，先提示再执行
+  checkResourceThen(toOpRow.value, () => applyAutoAssign(toOpId.value))
+}
+
+function applyAutoAssign(bookingId) {
+  resourceSubmitting.value = true
+  bookReassign(bookingId).then(res => {
     if (!res || !res.data) {
       return
     }
     notifyTopPositive(t('book_booking.notify.auto_assign_success'))
+    showResourceConflict.value = false
     selectData(true)
+  }).finally(() => {
+    resourceSubmitting.value = false
   })
 }
 
 // open the "config assignment" dialog, pre-filling the currently assigned staff (if any)
 function openAssign(row) {
   assignBookId.value = row.id
+  assignBookRow.value = row
   assignBookName.value = row.name
   assignStaffId.value = row.staffId
       ? (staffSelectOptions.value.find(o => o.value === row.staffId) || null)
@@ -505,13 +534,56 @@ function assignData() {
     return
   }
   const staffId = assignStaffId.value ? assignStaffId.value.value : null
+  // 取消分配是释放资源位，不用提示；派人才要
+  if (!staffId) {
+    applyAssign(staffId)
+    return
+  }
+  checkResourceThen(assignBookRow.value, () => applyAssign(staffId))
+}
+
+function applyAssign(staffId) {
+  resourceSubmitting.value = true
   bookAssign(assignBookId.value, staffId).then(res => {
     if (!res || !res.data) {
       return
     }
     showAssign.value = false
+    showResourceConflict.value = false
     notifyTopPositive(t(staffId ? 'book_booking.notify.assign_success' : 'book_booking.notify.cancel_assign_success'))
     selectData(true)
+  }).finally(() => {
+    resourceSubmitting.value = false
+  })
+}
+
+// 资源位提示的公共入口：够就直接执行，不够先弹框、确认后再执行。
+// 查询失败不挡操作——它只是提示，不该变成新的拦路虎
+const showResourceConflict = ref(false)
+const resourceDetail = ref({})
+const resourceSubmitting = ref(false)
+const pendingResourceAction = ref(null)
+
+function checkResourceThen(row, action) {
+  if (!row) {
+    action()
+    return
+  }
+  bookResourceCheck({
+    bookingId: row.id,
+    bookTimeStr: row.bookingTime,
+    bookRequirementSkillIdList: (row.requiredSkillIds || '').split(',').filter(Boolean),
+  }).then(res => {
+    const detail = res && res.data ? res.data.data : null
+    if (!detail || detail.ok) {
+      action()
+      return
+    }
+    resourceDetail.value = detail
+    pendingResourceAction.value = action
+    showResourceConflict.value = true
+  }).catch(() => {
+    action()
   })
 }
 
