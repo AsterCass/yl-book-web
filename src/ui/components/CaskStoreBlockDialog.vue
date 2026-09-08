@@ -26,6 +26,12 @@
                   <div style="min-width: 0">
                     <div class="row items-center" style="font-weight: 500">
                       <span>{{ bl.startTime }} ~ {{ bl.endTime }}</span>
+                      <!-- 作用范围：雇员 block 标出是谁，门店 block 标明全店生效 -->
+                      <span class="store-block-scope-tag q-ml-sm">
+                        {{ bl.storeBlock
+                          ? $t('book_calendar.store_block.scope_store')
+                          : $t('book_calendar.store_block.scope_staff', {name: bl.staffName || bl.staffId}) }}
+                      </span>
                       <span v-if="bl.auto" class="store-block-auto-tag q-ml-sm">
                         {{ $t('book_calendar.store_block.auto_tag') }}
                       </span>
@@ -94,7 +100,8 @@
   </q-dialog>
 
   <cask-dialog-judgment v-model="showDelete"
-                        :callback-method="isTrue => { showDelete = false; if (isTrue) deleteBlock() }"
+                        :loading="deleting"
+                        :callback-method="onDeleteConfirm"
                         :dialog-judgment-data="{ title: $t('book_calendar.store_block.delete_title'), content: $t('book_calendar.store_block.delete_content', { time: deleteTarget ? `${deleteTarget.startTime} ~ ${deleteTarget.endTime}` : '' }), falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
   />
 </template>
@@ -156,7 +163,9 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-// 按「今天 ±14 天」窗口查询（与后端 list 的窗口钳制一致，列表上方有对应提示）；此处只管理门店 block
+// 按「今天 ±14 天」窗口查询（与后端 list 的窗口钳制一致，列表上方有对应提示）。
+// 门店 block 与雇员 block 一并列出，靠行内标记区分作用范围——雇员 block 只挡某个人，
+// 只列门店的话，店长在这里看不到「小王明天请假」这类同样会影响排单的屏蔽
 function loadBlocks() {
   const now = new Date()
   bookBlockList({
@@ -166,7 +175,7 @@ function loadBlocks() {
     if (!res || !res.data || !res.data.data) {
       return
     }
-    blockList.value = res.data.data.filter(bl => bl.storeBlock)
+    blockList.value = res.data.data
   })
 }
 
@@ -211,16 +220,32 @@ function saveBlock() {
 
 const showDelete = ref(false)
 const deleteTarget = ref(null)
+// 删除中：确认键转圈、弹窗锁住，删 block 要连带反注销第三方屏蔽时段，可能要等一会儿
+const deleting = ref(false)
 
 function openDelete(bl) {
   deleteTarget.value = bl
   showDelete.value = true
 }
 
-function deleteBlock() {
-  if (!deleteTarget.value) {
+// 确认框回调：确认后不立刻关窗，等请求收尾再关，中间保持转圈
+function onDeleteConfirm(isTrue) {
+  if (deleting.value) {
     return
   }
+  if (!isTrue) {
+    showDelete.value = false
+    return
+  }
+  deleteBlock()
+}
+
+function deleteBlock() {
+  if (!deleteTarget.value) {
+    showDelete.value = false
+    return
+  }
+  deleting.value = true
   bookBlockDelete(deleteTarget.value.id).then(res => {
     if (!res || !res.data) {
       return
@@ -228,11 +253,25 @@ function deleteBlock() {
     notifyTopPositive(t('book_calendar.store_block.delete_success'))
     loadBlocks()
     emit('changed')
+  }).finally(() => {
+    deleting.value = false
+    showDelete.value = false
   })
 }
 </script>
 
 <style scoped lang="scss">
+
+// 作用范围标记：中性描边，只交代「挡谁」，不抢自动 block 那个主色标记的注意力
+.store-block-scope-tag {
+  padding: .05rem .35rem;
+  border: 1px solid rgba(var(--text-color), .3);
+  border-radius: 3px;
+  opacity: .7;
+  font-size: .68rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 // 自动 block 标记：与日历上的自动 block 斜纹同色系，一眼对得上
 .store-block-auto-tag {

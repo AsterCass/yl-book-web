@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-dialog :model-value="showDialogJudgment" @hide="closeDialogJudgment"
+              :persistent="loading"
               transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std">
 
@@ -20,11 +21,13 @@
             <div class="q-mx-md">
 
               <q-btn no-caps unelevated class=" shadow-1 component-outline-btn-grow"
+                     :disable="loading"
                      @click="callbackMethod(false)" :label="dialogJudgmentData.falseLabel"/>
 
             </div>
             <div class="q-mx-md">
               <q-btn no-caps unelevated class=" shadow-1 component-full-btn-grow"
+                     :loading="loading" :disable="loading"
                      @click="callbackMethod(true)" :label="dialogJudgmentData.trueLabel"/>
             </div>
           </div>
@@ -57,6 +60,16 @@ const props = defineProps({
   callbackMethod: {
     type: Function,
     required: true,
+  },
+  /**
+   * 执行中：确认键转圈、两个按钮锁住、弹窗改为 persistent（点外部/ESC 关不掉）。
+   * 调用方在 callbackMethod 里置 true，请求收尾时置 false 并关闭弹窗——
+   * 不传则维持原行为（回调里立刻关窗），既有调用点不受影响。
+   */
+  loading: {
+    type: Boolean,
+    required: false,
+    default: false
   },
 })
 

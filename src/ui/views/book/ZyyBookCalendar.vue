@@ -91,12 +91,14 @@
               </div>
             </div>
 
-            <!-- 列（空白处悬停显示 10 分钟档时间线，点击直接创建该时间的预约） -->
+            <!-- 列（空白处悬停显示 10 分钟档时间线，左键创建该时间的预约，
+                 右键在空白处新建屏蔽时段、在已有屏蔽时段上取消它） -->
             <div v-for="(col, colIndex) in columns" :key="col.key" class="cal-col"
                  :class="{ 'cal-col-today': col.highlight }"
                  @pointermove="onColPointerMove($event, col)"
                  @pointerleave="onColPointerLeave"
-                 @click="onColClick($event, col)">
+                 @click="onColClick($event, col)"
+                 @contextmenu.prevent="onColContextMenu($event, col)">
 
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
@@ -264,6 +266,60 @@
       </q-card>
     </q-dialog>
 
+    <!-- 右键新建屏蔽时段：开始时间取自右键落点，只需再填时长，复用 /book/block/create -->
+    <q-dialog v-model="showBlockCreate" transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std column cal-block-card">
+        <h6 style="margin: 0 0 .35rem 0 !important">{{ $t('book_calendar.store_block.quick_title') }}</h6>
+        <div class="cal-block-target">
+          {{ blockForm.staffId
+            ? $t('book_calendar.store_block.target_staff', {name: blockForm.staffName})
+            : $t('book_calendar.store_block.target_store') }}
+        </div>
+
+        <h6 style="margin-top: 1rem !important">{{ $t('book_calendar.store_block.start') }}</h6>
+        <div class="cal-block-start">{{ blockStartStr }}</div>
+
+        <h6 style="margin-top: 1rem !important">{{ $t('book_calendar.store_block.duration') }}</h6>
+        <div class="row items-center no-wrap">
+          <q-input v-model="blockForm.amount" tabindex="0" dense outlined mask="###"
+                   class="component-outline-input-mini-est-short" style="opacity: .92"/>
+          <q-select v-model="blockForm.unit" :menu-offset="[0, 5]" :options="blockUnitOptions"
+                    class="component-outline-input-mini-short q-ml-md" style="opacity: .92"
+                    dense dropdown-icon="fa-solid fa-caret-down" emit-value map-options
+                    menu-anchor="bottom start" outlined
+                    popup-content-class="component-extra-card-std-limit"/>
+        </div>
+        <!-- 实时回显结束时间：单位切换后到底屏蔽到几点，不用心算 -->
+        <div class="cal-block-hint">
+          {{ blockEndStr ? $t('book_calendar.store_block.duration_hint', {end: blockEndStr})
+            : $t('book_calendar.store_block.duration_required') }}
+        </div>
+
+        <h6 style="margin-top: 1rem !important">{{ $t('book_calendar.store_block.reason') }}</h6>
+        <q-input v-model="blockForm.reason" tabindex="0" dense outlined
+                 :placeholder="$t('book_calendar.store_block.reason_placeholder')"
+                 class="component-outline-input-grow" style="opacity: .92"/>
+
+        <div class="row justify-evenly q-mt-lg">
+          <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                 :loading="blockSaving" :disable="blockSaving" @click="saveContextBlock">
+            {{ $t('main_setting_save') }}
+          </q-btn>
+          <q-btn no-caps unelevated class="component-full-btn-mini-grow shadow-2"
+                 @click="showBlockCreate = false">
+            {{ $t('main_setting_cancel') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <!-- 右键落在已有屏蔽时段上：确认后取消它 -->
+    <cask-dialog-judgment v-model="showBlockDelete"
+                          :loading="blockDeleting"
+                          :callback-method="onBlockDeleteConfirm"
+                          :dialog-judgment-data="{ title: $t('book_calendar.store_block.delete_title'), content: blockDeleteContent, falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
+    />
+
     <!-- 取消预约确认（复用预约列表的取消文案与逻辑） -->
     <cask-dialog-judgment v-model="showCancel"
                           :callback-method="isTrue => { showCancel = false; if (isTrue) cancelData() }"
@@ -324,7 +380,7 @@
 import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
-import {notifyTopPositive} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskBookDetailDialog from "@/ui/components/CaskBookDetailDialog.vue";
 import CaskBookUpsertDialog from "@/ui/components/CaskBookUpsertDialog.vue";
 import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
@@ -333,6 +389,8 @@ import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
 import CaskPickerMask from "@/ui/components/CaskPickerMask.vue";
 import {
   bookAdjust,
+  bookBlockCreate,
+  bookBlockDelete,
   bookCalendar,
   bookCheckin,
   bookDelete,
@@ -810,7 +868,8 @@ function blockSegmentsForDate(dateStr, staffId) {
     const start = dateStr === bl.startDateStr ? bl.startMin : 0
     const end = dateStr === bl.endDateStr ? bl.endMin : 1440
     if (end > start) {
-      segs.push({start, end, reason: bl.reason, auto: bl.auto})
+      segs.push({start, end, reason: bl.reason, auto: bl.auto,
+        id: bl.id, staffId: bl.staffId, storeBlock: bl.storeBlock})
     }
   }
   return segs
@@ -1034,6 +1093,157 @@ function onColClick(e, col) {
   }
   editIsNew.value = true
   showEdit.value = true
+}
+
+// ===== 右键屏蔽时段 =====
+// 空白处右键 -> 以落点时间为开始新建 block；已有 block 上右键 -> 确认后取消它。
+// 后端接口与「屏蔽时段管理」弹窗完全共用，这里只是把入口搬到日历上，
+// 并把不好填的「结束时间」换成「时长 + 单位」——右键的落点已经决定了开始时间
+const showBlockCreate = ref(false)
+const blockSaving = ref(false)
+const showBlockDelete = ref(false)
+const blockDeleteTarget = ref(null)
+// 删除中：确认键转圈、弹窗锁住，删 block 要连带反注销第三方屏蔽时段，可能要等一会儿
+const blockDeleting = ref(false)
+const blockForm = ref({dateStr: '', startMinutes: 0, staffId: null, staffName: '', amount: '', unit: 'minute', reason: ''})
+
+// 与后端 BookBlockServiceImpl 的窗口校验同口径（超出直接拒绝），这里先给一句人话
+const MAX_BLOCK_DAYS = 13
+const DEFAULT_BLOCK_AMOUNT = '60'
+
+// 时长单位：与项目其它下拉同款（emit-value + map-options，值为 minute/hour）
+const blockUnitOptions = computed(() => [
+  {label: t('book_calendar.store_block.unit_minute'), value: 'minute'},
+  {label: t('book_calendar.store_block.unit_hour'), value: 'hour'},
+])
+
+const blockStartStr = computed(() => blockForm.value.dateStr
+    ? `${blockForm.value.dateStr} ${minutesToTime(blockForm.value.startMinutes)}` : '')
+
+// 时长换算成分钟；非法（空 / 0）返回 0，由回显与保存校验统一处理
+const blockMinutes = computed(() => {
+  const amount = Number(blockForm.value.amount)
+  if (!amount || amount <= 0) {
+    return 0
+  }
+  return blockForm.value.unit === 'hour' ? amount * 60 : amount
+})
+
+// 结束时间走日期加法，跨零点天然正确
+const blockEndStr = computed(() => {
+  if (!blockStartStr.value || blockMinutes.value <= 0) {
+    return ''
+  }
+  const start = date.extractDate(blockStartStr.value, 'YYYY-MM-DD HH:mm')
+  return date.formatDate(date.addToDate(start, {minutes: blockMinutes.value}), 'YYYY-MM-DD HH:mm')
+})
+
+const blockDeleteContent = computed(() => {
+  const target = blockDeleteTarget.value
+  if (!target) {
+    return ''
+  }
+  return t('book_calendar.store_block.delete_content',
+      {time: `${target.dateStr} ${minutesToTime(target.start)} ~ ${minutesToTime(target.end)}`})
+})
+
+function onColContextMenu(e, col) {
+  // 预约卡片上的右键留给卡片自己（它有编辑/取消入口），不在这里抢
+  if (e.target.closest && e.target.closest('.cal-event')) {
+    return
+  }
+  hideHoverCard()
+  hoverSlot.value = null
+  const minutes = pointerSlotMinutes(e)
+  const dateStr = col.dateStr || date.formatDate(dayDate.value, 'YYYY-MM-DD')
+  // 落点命中已有 block -> 走取消。block 的斜纹层是 pointer-events: none，
+  // 事件落在列上，所以这里按落点分钟数回查，而不是靠命中元素
+  const hit = (col.blocks || []).find(bl => minutes >= bl.start && minutes < bl.end)
+  if (hit) {
+    // 自动 block 由对账任务维护：删了下一轮就建回来，直接说清楚，别让人白点一次
+    if (hit.auto) {
+      notifyTopWarning(t('book_calendar.store_block.auto_note'))
+      return
+    }
+    blockDeleteTarget.value = {...hit, dateStr}
+    showBlockDelete.value = true
+    return
+  }
+  blockForm.value = {
+    dateStr,
+    startMinutes: minutes,
+    // 日视图在雇员列右键 = 建该雇员的 block；「未分配」列与周视图 = 门店 block
+    staffId: viewMode.value === 'day' ? (col.staffId || null) : null,
+    staffName: viewMode.value === 'day' && col.staffId ? col.headerMain : '',
+    amount: DEFAULT_BLOCK_AMOUNT,
+    unit: 'minute',
+    reason: '',
+  }
+  showBlockCreate.value = true
+}
+
+function saveContextBlock() {
+  if (blockMinutes.value <= 0) {
+    notifyTopWarning(t('book_calendar.store_block.duration_required'))
+    return
+  }
+  // 前置窗口校验（后端同样校验）：结束时间恰为 00:00 时该日不算被覆盖
+  const endStr = blockEndStr.value
+  const maxDateStr = date.formatDate(date.addToDate(new Date(), {days: MAX_BLOCK_DAYS}), 'YYYY-MM-DD')
+  const lastDateStr = endStr.substring(11, 16) === '00:00'
+      ? date.formatDate(date.addToDate(date.extractDate(endStr.substring(0, 10), 'YYYY-MM-DD'), {days: -1}), 'YYYY-MM-DD')
+      : endStr.substring(0, 10)
+  if (lastDateStr > maxDateStr) {
+    notifyTopWarning(t('book_calendar.store_block.time_window'))
+    return
+  }
+  blockSaving.value = true
+  bookBlockCreate({
+    staffId: blockForm.value.staffId || undefined,
+    startTimeStr: blockStartStr.value,
+    endTimeStr: endStr,
+    reason: blockForm.value.reason || undefined,
+  }).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_calendar.store_block.add_success'))
+    showBlockCreate.value = false
+    reload()
+  }).finally(() => {
+    blockSaving.value = false
+  })
+}
+
+// 确认框回调：确认后不立刻关窗，等请求收尾再关，中间保持转圈
+function onBlockDeleteConfirm(isTrue) {
+  if (blockDeleting.value) {
+    return
+  }
+  if (!isTrue) {
+    showBlockDelete.value = false
+    return
+  }
+  deleteContextBlock()
+}
+
+function deleteContextBlock() {
+  const target = blockDeleteTarget.value
+  if (!target || !target.id) {
+    showBlockDelete.value = false
+    return
+  }
+  blockDeleting.value = true
+  bookBlockDelete(target.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_calendar.store_block.delete_success'))
+    reload()
+  }).finally(() => {
+    blockDeleting.value = false
+    showBlockDelete.value = false
+  })
 }
 
 // 悬浮完整预览（teleport 到 body，不受日历滚动/裁剪容器限制，边缘自动翻转方向）。
@@ -1987,6 +2197,28 @@ onBeforeUnmount(() => {
 }
 
 // ===== 卡片配色设置弹窗 =====
+// 右键新建屏蔽时段的小弹窗：字段少，按标签 + 值的节奏纵向铺开
+.cal-block-card {
+  min-width: 24rem;
+
+  .cal-block-target {
+    font-size: .82rem;
+    opacity: .6;
+  }
+
+  .cal-block-start {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cal-block-hint {
+    margin-top: .4rem;
+    font-size: .78rem;
+    opacity: .55;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .cal-color-card {
   min-width: 40rem;
 
