@@ -902,6 +902,7 @@
     "next_day": "Next day",
     "view_day": "Day View",
     "view_week": "Week View",
+    "slot_hint": "Left-click to book · right-click to block",
     "unassigned": "Unassigned",
     "no_name": "Unnamed",
     "auto_assign": "Auto Assign",

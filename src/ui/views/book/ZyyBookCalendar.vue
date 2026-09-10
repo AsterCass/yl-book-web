@@ -114,10 +114,14 @@
                 </span>
               </div>
 
-              <!-- 悬停时间提示线（10 分钟一档，点击即以该时间创建预约） -->
+              <!-- 悬停时间提示线（10 分钟一档）。时间后面跟一句操作说明：左右键各能做什么，
+                   否则「右键建屏蔽时段」这个入口没有任何可发现性，只能靠口口相传 -->
               <div v-if="hoverSlot && hoverSlot.colKey === col.key" class="cal-slot-line"
                    :style="{ top: hoverSlot.top + 'px' }">
-                <span class="cal-slot-label">{{ hoverSlot.label }}</span>
+                <span class="cal-slot-label">
+                  {{ hoverSlot.label }}
+                  <span class="cal-slot-hint">{{ $t('book_calendar.slot_hint') }}</span>
+                </span>
               </div>
 
               <!-- 预约块（可拖动） -->
@@ -2052,6 +2056,13 @@ onBeforeUnmount(() => {
     color: #fff;
     background: rgb(var(--full-container-background-color), 0.5);
     white-space: nowrap;
+  }
+
+  // 操作说明：比时间弱一档，时间仍是这个提示的主角
+  .cal-slot-hint {
+    margin-left: .3rem;
+    opacity: .8;
+    font-size: .65rem;
   }
 }
 
