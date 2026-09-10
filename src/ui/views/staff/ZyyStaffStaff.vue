@@ -67,6 +67,7 @@
                               upsertPhone = row.phone
                               upsertMail = row.mail
                               upsertGoogleCalendarId = row.googleCalendarId
+                              upsertClassPassItemId = row.classPassItemId
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               loadStaffBlocks()
                               isNew = false;
@@ -137,6 +138,11 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.google_calendar_id') }}&nbsp;:</h6>
           <q-input v-model="upsertGoogleCalendarId" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.google_calendar_id')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.classpass.field') }}&nbsp;:</h6>
+          <q-input v-model.number="upsertClassPassItemId" mask="##########"
+                   class="component-outline-input-grow" dense outlined
+                   :placeholder="t('staff.classpass.placeholder')"/>
 
         </div>
 
@@ -390,6 +396,8 @@ const upsertPhone = ref("")
 const upsertMail = ref("")
 // 谷歌日历ID（门店 block 同步 ClassPass 用）；空 = 不参与同步
 const upsertGoogleCalendarId = ref("")
+// ClassPass 人员 ID（直连模式下雇员 block 靠它定位到人）；空 = 该雇员不同步
+const upsertClassPassItemId = ref(null)
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
   1: [],
@@ -417,6 +425,7 @@ function clearUpsertParam() {
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertGoogleCalendarId.value = ""
+  upsertClassPassItemId.value = null
   staffBlockList.value = []
   showBlockAdd.value = false
   newBlockStart.value = ""
@@ -693,6 +702,9 @@ function upsertData() {
     mail: upsertMail.value,
     // 空串=清空（后端 MP NOT_NULL 更新语义，同 externalName/mail）
     googleCalendarId: upsertGoogleCalendarId.value,
+    // 留空 -> 0 表示解绑。不能传 null：后端 MP 的 updateById 跳过 null 字段，
+    // 传 null 等于「保持不变」，绑错人之后就再也清不掉了
+    classPassItemId: Number(upsertClassPassItemId.value) || 0,
     priority: 1,
     scheduleList: scheduleList,
   }

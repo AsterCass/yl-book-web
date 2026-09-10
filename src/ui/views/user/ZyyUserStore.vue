@@ -70,6 +70,9 @@
                               upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
+                              upsertClassPassEmail = (row.classPass && row.classPass.email) || ''
+                              upsertClassPassVenueId = (row.classPass && row.classPass.venueId) || ''
+                              upsertClassPassPasswordSet = !!(row.classPass && row.classPass.passwordSet)
                               loadStoreResources(row.id)
                               isNew = false;
                               showUpsert = true
@@ -294,6 +297,74 @@
             </div>
           </div>
 
+          <!-- ClassPass 直连：配了账号密码 + venue，该店的 block 就不再经谷歌日历，
+               而是直接下发到 ClassPass（是否真的走直连还取决于后端 sync-mode） -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('user_store.classpass.title') }}&nbsp;:</h6>
+          <div>
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 28rem">
+              {{ $t('user_store.classpass.note') }}
+            </div>
+
+            <div class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-input v-model="upsertClassPassEmail" class="component-outline-input-long-grow" dense outlined
+                       :label="t('user_store.classpass.email')"
+                       :placeholder="t('user_store.classpass.placeholder.email')"/>
+            </div>
+            <div class="row items-center q-mt-sm" style="gap: .5rem;">
+              <q-input v-model="upsertClassPassPassword" type="password" autocomplete="new-password"
+                       class="component-outline-input-long-grow" dense outlined
+                       :label="t('user_store.classpass.password')"
+                       :placeholder="t('user_store.classpass.placeholder.password')"/>
+            </div>
+            <div class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
+              {{ upsertClassPassPasswordSet ? $t('user_store.classpass.password_set')
+                : $t('user_store.classpass.password_unset') }}
+            </div>
+
+            <div class="row items-center q-mt-sm" style="gap: .5rem;">
+              <q-input v-model="upsertClassPassVenueId" mask="##########"
+                       class="component-outline-input-std" dense outlined
+                       :label="t('user_store.classpass.venue_id')"
+                       :placeholder="t('user_store.classpass.placeholder.venue_id')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow"
+                     :loading="classPassTesting" :disable="classPassTesting"
+                     @click="testClassPass">
+                <div class="row items-center">
+                  <q-icon name="fa-solid fa-plug-circle-check" size="0.9rem"/>
+                  <div class="q-ml-xs" style="font-size: 0.85rem">
+                    {{ classPassTesting ? $t('user_store.classpass.testing') : $t('user_store.classpass.test') }}
+                  </div>
+                </div>
+              </q-btn>
+            </div>
+            <div class="q-mt-xs" style="opacity: .5; font-size: .75rem; max-width: 28rem">
+              {{ $t('user_store.classpass.venue_hint') }}
+            </div>
+
+            <!-- 测试结果：venue 用来核对 id 填得对不对，人员列表用来配雇员绑定 -->
+            <div v-if="classPassResult" class="q-mt-sm" style="font-size: .8rem;">
+              <div :style="{color: classPassResult.ok ? '#21ba45' : '#c10015'}">
+                {{ classPassResult.ok ? $t('user_store.classpass.test_ok')
+                  : ($t('user_store.classpass.test_fail') + ' : ' + (classPassResult.message || '')) }}
+              </div>
+              <div v-if="classPassResult.venues && classPassResult.venues.length"
+                   class="q-mt-xs" style="opacity: .7;">
+                <div>{{ $t('user_store.classpass.venues') }} :</div>
+                <div v-for="v in classPassResult.venues" :key="v.venueId" class="q-ml-sm">
+                  {{ v.venueId }} — {{ v.venueName }}<span v-if="v.timezone"> ({{ v.timezone }})</span>
+                </div>
+              </div>
+              <div v-if="classPassResult.practitioners && classPassResult.practitioners.length"
+                   class="q-mt-xs" style="opacity: .7;">
+                <div>{{ $t('user_store.classpass.practitioners') }} :</div>
+                <div v-for="pr in classPassResult.practitioners" :key="pr.id" class="q-ml-sm">
+                  {{ pr.id }} — {{ pr.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
         </div>
 
@@ -386,7 +457,7 @@ import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableStore, tableStoreOperation} from "@/tables/store.js";
-import {storeCreate, storeList, storeUpdate} from "@/api/store.js";
+import {classPassTestLogin, storeCreate, storeList, storeUpdate} from "@/api/store.js";
 import {bookSpecialRemarkCreate, bookSpecialRemarkListSimple} from "@/api/book.js";
 import {storeResourceDelete, storeResourceList, storeResourceSave} from "@/api/store-resource.js";
 import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
@@ -418,11 +489,39 @@ const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
+// ClassPass 直连凭据。口令只写不读：出参永不回传，故编辑态输入框始终是空的，
+// 留空即「不修改」，upsertClassPassPasswordSet 仅用于告诉操作者后端到底有没有存过
+const upsertClassPassEmail = ref("")
+const upsertClassPassPassword = ref("")
+const upsertClassPassVenueId = ref("")
+const upsertClassPassPasswordSet = ref(false)
+const classPassTesting = ref(false)
+const classPassResult = ref(null)
 const upsertResourceList = ref([])
 const loadedResourceSignature = ref('[]')
 const showResourceDeleteConfirm = ref(false)
 const resourceDeleteIndex = ref(-1)
 const resourceDeleteName = ref('')
+
+/**
+ * 测试 ClassPass 凭据是否可用。
+ * 口令输入框留空时后端会用已保存的那份复验——改完邮箱或 venue 想复核一次，不必重敲口令。
+ * 探测失败（密码错、对方不可达）走 data.ok=false，不是 HTTP 错误，所以这里不用 catch 分支判断。
+ */
+function testClassPass() {
+  classPassTesting.value = true
+  classPassResult.value = null
+  classPassTestLogin({
+    storeId: updateId.value,
+    email: upsertClassPassEmail.value,
+    password: upsertClassPassPassword.value,
+    venueId: Number(upsertClassPassVenueId.value) || null,
+  }).then(res => {
+    classPassResult.value = (res && res.data) ? res.data : {ok: false, message: 'no response'}
+  }).finally(() => {
+    classPassTesting.value = false
+  })
+}
 
 function addCalendarIdItem() {
   upsertGoogleCalendarIdList.value.push('')
@@ -506,6 +605,12 @@ function clearUpsertParam() {
   upsertOutboundPhone.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
+  upsertClassPassEmail.value = ""
+  upsertClassPassPassword.value = ""
+  upsertClassPassVenueId.value = ""
+  upsertClassPassPasswordSet.value = false
+  classPassTesting.value = false
+  classPassResult.value = null
   upsertResourceList.value = []
   loadedResourceSignature.value = '[]'
   upsertTimezone.value = null
@@ -578,6 +683,14 @@ function upsertData() {
       description: upsertDesc.value,
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
       googleCalendarIdList: upsertGoogleCalendarIdList.value,
+      classPass: {
+        email: upsertClassPassEmail.value,
+        // 口令留空 = 不修改（后端 null 才视为不变，空串才是清空）。
+        // 出参从不回传口令，若这里把空串当清空，改一次门店电话就会把凭据抹掉
+        password: upsertClassPassPassword.value === '' ? null : upsertClassPassPassword.value,
+        // 留空 -> 0 表示清空（后端把 <=0 归一成 null）
+        venueId: Number(upsertClassPassVenueId.value) || 0,
+      },
     }
     const normalizedResources = upsertResourceList.value.map(item => ({
       id: item.id || null,

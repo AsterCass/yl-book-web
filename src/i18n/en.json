@@ -543,6 +543,7 @@
   },
 
   "user_store": {
+    "classpass": { "title": "ClassPass direct sync", "note": "Blocks for this store are sent straight to ClassPass instead of going through Google Calendar (requires book.classpass.sync-mode=API on the server)", "email": "ClassPass account", "password": "ClassPass password", "venue_id": "Venue ID", "password_set": "Password saved. Leave blank to keep it", "password_unset": "No password configured", "test": "Test login", "testing": "Checking...", "test_ok": "Login succeeded", "test_fail": "Login failed", "venues": "Venues this account can manage", "practitioners": "Practitioners in this venue (for staff binding)", "venue_hint": "One account can manage several venues. A wrong id will not raise an error, it will just block someone else's venue, so double-check it", "placeholder": { "email": "e.g. manager\\@example.com", "password": "Leave blank to keep current", "venue_id": "e.g. 265267" } },
     "label": { "id": "Store ID", "name": "Store Name", "phone": "Store Phone" },
     "placeholder": { "id": "e.g.: YLS001", "name": "e.g.: New York 196", "phone": "e.g.: 13811012138", "optional": "Optional", "optional_zh": "Optional, in Chinese", "admin_mail": "e.g.: zs01\\@gmail.com", "admin_nick": "Optional, defaults to email", "admin_role_name": "e.g.: Store Admin", "admin_role_code": "e.g.: storeAdmin", "google_calendar_ids": "e.g. xxx\\@group.calendar.google.com" },
     "button": { "query": "Query", "add": "Add Store", "clear": "Clear Filters", "save": "Save" },
@@ -561,6 +562,7 @@
   "notify": { "delete_success": "Deletion successful", "cancel_success": "Cancel successful" },
 
   "staff": {
+    "classpass": { "field": "ClassPass practitioner ID", "placeholder": "Optional. Required for this staff's blocks to reach ClassPass (see Test login on the store page)" },
     "title": "Staff",
     "label": { "id": "Staff ID", "name": "Staff Name", "phone": "Staff Phone", "status": "Staff Status" },
     "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10", "external_name": "Optional", "mail": "Optional; notified on requested-booking changes", "google_calendar_id": "Optional, e.g. xxx\\@group.calendar.google.com; store blocks are synced to this calendar" },
