@@ -212,10 +212,10 @@
 
     <!-- 新增/编辑弹窗（与预约列表共用同一组件，保持一致） -->
     <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="editIsNew"
-                             @saved="reload"/>
+                             @saved="reloadWithAutoBlockFollowUp"/>
 
     <!-- 门店屏蔽时段管理（查看/新增/删除门店 block），变更后刷新日历 -->
-    <cask-store-block-dialog v-model="showStoreBlock" @changed="reload"/>
+    <cask-store-block-dialog v-model="showStoreBlock" @changed="reloadWithAutoBlockFollowUp"/>
 
     <!-- 卡片配色设置：逐预约状态自定义左边栏/背景/文字三色。改的是草稿，保存才落账号 meta -->
     <!-- allow-focus-outside：取色器弹层挂在 body 上、不在弹窗的 Vue 子树里，
@@ -638,8 +638,15 @@ const nowHover = ref(false)
 const nowLabelX = ref(null)
 let nowTimer = null
 
-// 数据定时刷新：每 2 分钟按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次
-const DATA_REFRESH_INTERVAL = 2 * 60 * 1000
+// 数据定时刷新：每 30 秒按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次。
+// 单次成本已与历史数据量脱钩（yl_book 上的 idx_tenant_store_booking_time 让内层查询变成窗口内 range），
+// 所以缩到 30 秒只是请求数变多，扫描量不变
+const DATA_REFRESH_INTERVAL = 30 * 1000
+
+// 会改变自动 block 的操作做完后，延迟这么久再补拉一次：后端那次对账是事务提交后异步跑的，
+// 操作返回时它多半还没落库，只 reload 一次看不到新生成/撤销的自动 block
+const AUTO_BLOCK_FOLLOW_UP_DELAY = 5 * 1000
+let followUpTimer = null
 let refreshTimer = null
 
 function today() {
@@ -1232,7 +1239,7 @@ function saveContextBlock() {
     }
     notifyTopPositive(t('book_calendar.store_block.add_success'))
     showBlockCreate.value = false
-    reload()
+    reloadWithAutoBlockFollowUp()
   }).finally(() => {
     blockSaving.value = false
   })
@@ -1262,7 +1269,7 @@ function deleteContextBlock() {
       return
     }
     notifyTopPositive(t('book_calendar.store_block.delete_success'))
-    reload()
+    reloadWithAutoBlockFollowUp()
   }).finally(() => {
     blockDeleting.value = false
     showBlockDelete.value = false
@@ -1325,7 +1332,7 @@ function cancelData() {
       return
     }
     notifyTopPositive(t('notify.cancel_success'))
-    reload()
+    reloadWithAutoBlockFollowUp()
   })
 }
 
@@ -1373,7 +1380,7 @@ function applyAutoAssign(bookingId) {
     }
     notifyTopPositive(t('book_calendar.auto_assign_success'))
     showAssignResourceConflict.value = false
-    reload()
+    reloadWithAutoBlockFollowUp()
   }).finally(() => {
     assignSubmitting.value = false
   })
@@ -1435,6 +1442,27 @@ function toggleView() {
     viewMode.value = 'week'
     loadWeek()
   }
+}
+
+/**
+ * 会影响自动 block 的操作用这个：先照常刷新，5 秒后再补拉一次。
+ * <p>
+ * 后端的自动 block 对账挂在 @TransactionalEventListener(AFTER_COMMIT) 上异步执行，接口返回时通常还没跑完，
+ * 所以立刻 reload 只能看到预约本身的变化，看不到连带产生/撤销的自动 block。
+ * 同一时刻只保留一个待补拉（后一次操作重置计时），拖拽进行中跳过——与定时刷新同口径。
+ */
+function reloadWithAutoBlockFollowUp() {
+  reload()
+  if (followUpTimer) {
+    clearTimeout(followUpTimer)
+  }
+  followUpTimer = setTimeout(() => {
+    followUpTimer = null
+    if (dragCtx) {
+      return
+    }
+    reload()
+  }, AUTO_BLOCK_FOLLOW_UP_DELAY)
 }
 
 function reload() {
@@ -1677,7 +1705,7 @@ function applyDragAdjust(b, prev, bookTimeStr, staffId) {
     }
     notifyTopPositive(t('book_calendar.adjust_success'))
     showDragResourceConflict.value = false
-    reload()
+    reloadWithAutoBlockFollowUp()
   }).catch(rollback).finally(() => {
     dragAdjusting.value = false
   })
@@ -1807,6 +1835,10 @@ onBeforeUnmount(() => {
   if (refreshTimer) {
     clearInterval(refreshTimer)
     refreshTimer = null
+  }
+  if (followUpTimer) {
+    clearTimeout(followUpTimer)
+    followUpTimer = null
   }
   window.removeEventListener('keydown', onFullscreenKeyDown)
   document.body.classList.remove('cal-fullscreen-active')
