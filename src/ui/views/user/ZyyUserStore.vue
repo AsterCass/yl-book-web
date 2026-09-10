@@ -72,7 +72,7 @@
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
                               upsertClassPassEmail = (row.classPass && row.classPass.email) || ''
                               upsertClassPassVenueId = (row.classPass && row.classPass.venueId) || ''
-                              upsertClassPassPasswordSet = !!(row.classPass && row.classPass.passwordSet)
+                              upsertClassPassPassword = (row.classPass && row.classPass.password) || ''
                               loadStoreResources(row.id)
                               isNew = false;
                               showUpsert = true
@@ -298,34 +298,34 @@
           </div>
 
           <!-- ClassPass 直连：配了账号密码 + venue，该店的 block 就不再经谷歌日历，
-               而是直接下发到 ClassPass（是否真的走直连还取决于后端 sync-mode） -->
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
-            {{ $t('user_store.classpass.title') }}&nbsp;:</h6>
+               而是直接下发到 ClassPass（是否真的走直连还取决于后端 sync-mode）。
+               三个字段各占一行网格，与上面的基础字段同构：标签走左列 h6，输入框只带 placeholder -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.classpass.email')
+            }}&nbsp;:</h6>
           <div>
-            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 28rem">
+            <q-input v-model="upsertClassPassEmail" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.classpass.placeholder.email')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
               {{ $t('user_store.classpass.note') }}
             </div>
+          </div>
 
-            <div class="row items-center q-mt-xs" style="gap: .5rem;">
-              <q-input v-model="upsertClassPassEmail" class="component-outline-input-long-grow" dense outlined
-                       :label="t('user_store.classpass.email')"
-                       :placeholder="t('user_store.classpass.placeholder.email')"/>
-            </div>
-            <div class="row items-center q-mt-sm" style="gap: .5rem;">
-              <q-input v-model="upsertClassPassPassword" type="password" autocomplete="new-password"
-                       class="component-outline-input-long-grow" dense outlined
-                       :label="t('user_store.classpass.password')"
-                       :placeholder="t('user_store.classpass.placeholder.password')"/>
-            </div>
-            <div class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
-              {{ upsertClassPassPasswordSet ? $t('user_store.classpass.password_set')
-                : $t('user_store.classpass.password_unset') }}
-            </div>
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.classpass.password')
+            }}&nbsp;:</h6>
+          <div>
+            <q-input v-model="upsertClassPassPassword" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.classpass.placeholder.password')"/>
+          </div>
 
-            <div class="row items-center q-mt-sm" style="gap: .5rem;">
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.classpass.venue_id')
+            }}&nbsp;:</h6>
+          <div>
+            <div class="row items-center" style="gap: .5rem;">
               <q-input v-model="upsertClassPassVenueId" mask="##########"
                        class="component-outline-input-std" dense outlined
-                       :label="t('user_store.classpass.venue_id')"
                        :placeholder="t('user_store.classpass.placeholder.venue_id')"/>
               <q-btn no-caps unelevated class="component-none-btn-grow"
                      :loading="classPassTesting" :disable="classPassTesting"
@@ -338,7 +338,7 @@
                 </div>
               </q-btn>
             </div>
-            <div class="q-mt-xs" style="opacity: .5; font-size: .75rem; max-width: 28rem">
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
               {{ $t('user_store.classpass.venue_hint') }}
             </div>
 
@@ -489,12 +489,10 @@ const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
-// ClassPass 直连凭据。口令只写不读：出参永不回传，故编辑态输入框始终是空的，
-// 留空即「不修改」，upsertClassPassPasswordSet 仅用于告诉操作者后端到底有没有存过
+// ClassPass 直连凭据。口令按普通字段处理（出参原样回传），三个框语义一致：留空即清空
 const upsertClassPassEmail = ref("")
 const upsertClassPassPassword = ref("")
 const upsertClassPassVenueId = ref("")
-const upsertClassPassPasswordSet = ref(false)
 const classPassTesting = ref(false)
 const classPassResult = ref(null)
 const upsertResourceList = ref([])
@@ -517,7 +515,14 @@ function testClassPass() {
     password: upsertClassPassPassword.value,
     venueId: Number(upsertClassPassVenueId.value) || null,
   }).then(res => {
-    classPassResult.value = (res && res.data) ? res.data : {ok: false, message: 'no response'}
+    // 拦截器返回的是整个 axios response：res.data 是接口信封，业务数据在 res.data.data
+    // （信封层还有 status/message，直接取 res.data 会拿到一个没有 ok 字段的对象，永远显示失败）
+    if (!res || !res.data) {
+      // 登录态失效/后端异常时拦截器已经弹过提示，这里只把结果区收起来
+      classPassResult.value = null
+      return
+    }
+    classPassResult.value = res.data.data || {ok: false, message: 'no response'}
   }).finally(() => {
     classPassTesting.value = false
   })
@@ -608,7 +613,6 @@ function clearUpsertParam() {
   upsertClassPassEmail.value = ""
   upsertClassPassPassword.value = ""
   upsertClassPassVenueId.value = ""
-  upsertClassPassPasswordSet.value = false
   classPassTesting.value = false
   classPassResult.value = null
   upsertResourceList.value = []
@@ -685,9 +689,8 @@ function upsertData() {
       googleCalendarIdList: upsertGoogleCalendarIdList.value,
       classPass: {
         email: upsertClassPassEmail.value,
-        // 口令留空 = 不修改（后端 null 才视为不变，空串才是清空）。
-        // 出参从不回传口令，若这里把空串当清空，改一次门店电话就会把凭据抹掉
-        password: upsertClassPassPassword.value === '' ? null : upsertClassPassPassword.value,
+        // 编辑态已带回原值，留空就是操作者真的要清空（后端空串=清空、null=不变）
+        password: upsertClassPassPassword.value,
         // 留空 -> 0 表示清空（后端把 <=0 归一成 null）
         venueId: Number(upsertClassPassVenueId.value) || 0,
       },

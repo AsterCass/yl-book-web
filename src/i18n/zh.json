@@ -541,7 +541,7 @@
   },
 
   "user_store": {
-    "classpass": { "title": "ClassPass 直连", "note": "配置后该门店的屏蔽时段直接下发到 ClassPass，不再经谷歌日历（需后端 book.classpass.sync-mode=API 生效）", "email": "ClassPass 账号", "password": "ClassPass 密码", "venue_id": "Venue ID", "password_set": "已保存密码，留空则不修改", "password_unset": "尚未配置密码", "test": "测试登录", "testing": "正在验证…", "test_ok": "登录成功", "test_fail": "登录失败", "venues": "该账号可管门店", "practitioners": "该 Venue 下的服务人员（雇员绑定用）", "venue_hint": "一个账号可管多家门店，填错不会报错但会把屏蔽推到别人家，务必核对", "placeholder": { "email": "例如：manager\\@example.com", "password": "留空则不修改", "venue_id": "例如：265267" } },
+    "classpass": { "note": "配置后该门店的屏蔽时段直接下发到 ClassPass，不再经谷歌日历", "email": "ClassPass 账号", "password": "ClassPass 密码", "venue_id": "Venue ID", "test": "测试登录", "testing": "正在验证…", "test_ok": "登录成功", "test_fail": "登录失败", "venues": "该账号可管门店", "practitioners": "该 Venue 下的服务人员（雇员绑定用）", "venue_hint": "一个账号可管多家门店，填错不会报错但会把屏蔽推到别人家，务必核对", "placeholder": { "email": "例如：manager\\@example.com", "password": "ClassPass 登录密码", "venue_id": "例如：265267" } },
     "label": { "id": "门店编号", "name": "门店名称", "phone": "门店电话" },
     "placeholder": { "id": "例如：YLS001", "name": "例如：纽约196", "phone": "例如：13811012138", "optional": "可为空", "optional_zh": "可为空，中文", "admin_mail": "例如：zs01\\@gmail.com", "admin_nick": "可为空，缺省使用邮箱", "admin_role_name": "例如：门店管理员", "admin_role_code": "例如：storeAdmin", "google_calendar_ids": "如 xxx\\@group.calendar.google.com" },
     "button": { "query": "查询", "add": "添加门店", "clear": "清空条件", "save": "保存" },
