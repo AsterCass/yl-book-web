@@ -339,7 +339,7 @@ import {
   bookExport,
   bookList,
   bookReassign,
-  bookResourceCheck
+  bookPreCheck
 } from "@/api/book.js";
 import {staffDetail, staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
@@ -539,7 +539,7 @@ function assignData() {
     applyAssign(staffId)
     return
   }
-  checkResourceThen(assignBookRow.value, () => applyAssign(staffId))
+  checkResourceThen(assignBookRow.value, () => applyAssign(staffId), staffId)
 }
 
 function applyAssign(staffId) {
@@ -564,13 +564,15 @@ const resourceDetail = ref({})
 const resourceSubmitting = ref(false)
 const pendingResourceAction = ref(null)
 
-function checkResourceThen(row, action) {
+function checkResourceThen(row, action, assignedStaffId) {
   if (!row) {
     action()
     return
   }
-  bookResourceCheck({
+  bookPreCheck({
     bookingId: row.id,
+    // 自动分配不传雇员：它会自己避开围栏，落不下只是变待分配，不存在强插
+    assignedStaffId: assignedStaffId || undefined,
     bookTimeStr: row.bookingTime,
     bookRequirementSkillIdList: (row.requiredSkillIds || '').split(',').filter(Boolean),
   }).then(res => {

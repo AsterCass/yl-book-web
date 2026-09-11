@@ -782,7 +782,7 @@
     "resource": {
       "title": "Resource fully booked",
       "summary": "\"{name}\" has {capacity} in total, this booking needs {required}. No capacity left during:",
-      "conflict_window": "Conflict",
+      "rest_summary": "The selected staff is in a scheduled rest period during this time", "rest_note": "Booking here does not cancel the rest — it will be pushed to after this booking.", "conflict_window": "Conflict",
       "target_window": "This booking",
       "occupied_title": "Occupied by",
       "note": "Advisory only — online booking and the AI phone line already show this period as unavailable; staff can still book it in.",

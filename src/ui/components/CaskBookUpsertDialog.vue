@@ -157,7 +157,7 @@ import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js
 import {AssignStrategyEnum, BookSourceEnum} from "@/constants/enums/book.js";
 import {
   bookCreate,
-  bookResourceCheck,
+  bookPreCheck,
   bookCustomerHistory,
   bookCustomerHistoryByName,
   bookSpecialRemarkListSimple,
@@ -455,8 +455,10 @@ function save() {
   // 提交前查一次门店资源位。后端对管理端不拦截容量，这里只是提示——
   // 冲突就把「谁占着、占到几点」摆出来，由店员决定要不要坚持排
   saving.value = true
-  bookResourceCheck({
+  bookPreCheck({
     bookingId: props.isNew ? undefined : props.book.id,
+    // 只有硬指定雇员时才查得了休息围栏（围栏是按人建的）；不指定则交给自动分配
+    assignedStaffId: body.assignedStaffId || undefined,
     bookTimeStr: body.bookTimeStr,
     bookRequirementSkillIdList: body.bookRequirementSkillIdList,
   }).then(res => {

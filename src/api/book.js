@@ -174,14 +174,16 @@ export function bookPhoneRequestUpdate(id, body) {
     })
 }
 
-// 门店共享资源位占用检查（只读，不落库）：管理端建单/改单提交前调一次。
-// body: {bookingId?, bookTimeStr, bookRequirementSkillIdList}
+// 建单/改单提交前检查（只读，不落库）：一次查完「资源位够不够」与「有没有撞上休息围栏」。
+// body: {bookingId?, assignedStaffId?, bookTimeStr, bookRequirementSkillIdList}
+//   assignedStaffId 只用于休息围栏检查；不传 = 交给自动分配，它本来就会避开围栏，不存在强插问题
 // 返回 {ok, resourceName, capacity, required, available, conflictStartTime, conflictEndTime,
-//       targetStartTime, targetEndTime, occupied: [{name, startTime, endTime, skillNames, staffName}]}
-// ok=false 只是提示——后端对管理端不拦截容量，确认后照常提交
-export function bookResourceCheck(body) {
+//       targetStartTime, targetEndTime, occupied: [...], restBlocks: [{staffName, startTime, endTime}]}
+// ok=false 只是提示——后端对管理端两者都不拦，确认后照常提交。
+// 手动 block 不在返回里：它始终硬拦，提交会直接报错，列出来会误导店员以为确认就能过
+export function bookPreCheck(body) {
     return serviceShiro({
-        url: `/book/resource/check`,
+        url: `/book/precheck`,
         data: body,
         method: 'post',
     })

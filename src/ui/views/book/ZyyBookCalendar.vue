@@ -416,7 +416,7 @@ import {
   bookCheckin,
   bookDelete,
   bookDetail,
-  bookResourceCheck,
+  bookPreCheck,
   bookReassign,
   bookUncheckin
 } from "@/api/book.js";
@@ -1421,7 +1421,7 @@ function toggleCheckin(booking) {
 // 待分配预约的一键自动分配。
 // 待分配（PRE）单本身不占资源位——派上雇员的那一刻才开始占，所以这里同样要先提示
 function autoAssignCalendar(booking) {
-  bookResourceCheck({
+  bookPreCheck({
     bookingId: booking.id,
     bookTimeStr: booking.bookingTime,
     bookRequirementSkillIdList: (booking.requiredSkillIds || '').split(',').filter(Boolean),
@@ -1733,8 +1733,10 @@ function commitDrag(ctx, ds) {
 
   // 先查资源位。冲突则<b>先把卡片弹回原位</b>再提示——让它停在新位置会让人以为已经生效了，
   // 取消时又要弹回去。确认后才真正发起 adjust（那时再乐观移动一次）
-  bookResourceCheck({
+  bookPreCheck({
     bookingId: b.id,
+    // 拖到哪个雇员列就是指派给谁；拖进「未分配」列时为 null，交给自动分配
+    assignedStaffId: staffId || undefined,
     bookTimeStr,
     bookRequirementSkillIdList: (b.requiredSkillIds || '').split(',').filter(Boolean),
   }).then(res => {

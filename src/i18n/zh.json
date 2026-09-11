@@ -780,7 +780,7 @@
     "resource": {
       "title": "资源位已排满",
       "summary": "【{name}】共 {capacity} 个，本单需要 {required} 个。以下时段已无空位：",
-      "conflict_window": "冲突时段",
+      "rest_summary": "该雇员此时段处于休息围栏内", "rest_note": "插入后休息不会被取消，而是顺延到本单结束之后。", "conflict_window": "冲突时段",
       "target_window": "本单时段",
       "occupied_title": "该时段占用情况",
       "note": "仅为提醒：客户端与 AI 电话在该时段已不可预约，管理端仍可排入。",

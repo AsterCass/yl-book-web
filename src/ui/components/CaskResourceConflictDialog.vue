@@ -1,8 +1,9 @@
 <template>
 
-  <!-- 门店资源位（床位等）占用提示。
-       后端对管理端<b>不拦截</b>容量，这里只是把「谁占着、占到几点」摆出来让店员判断——
-       只说一句「床位不够」是没法决定要不要坚持排的。确认即照常提交。 -->
+  <!-- 提交前检查的提示弹窗：门店资源位（床位等）占用 + 雇员休息围栏，两类各自独立、可能同时出现。
+       后端对管理端<b>两者都不拦截</b>，这里只是把「谁占着、占到几点」摆出来让店员判断——
+       只说一句「床位不够」是没法决定要不要坚持排的。确认即照常提交。
+       手动 block 不会出现在这里：它始终硬拦，提交会直接报错。 -->
   <q-dialog :model-value="modelValue" @update:model-value="close"
             :persistent="loading" transition-show="fade" transition-hide="fade">
     <q-card class="component-cask-dialog-judgement-std column res-conflict-card">
@@ -15,12 +16,28 @@
 
       <div class="q-mx-lg q-mt-md">
 
-        <div class="res-conflict-summary">
+        <!-- 休息围栏：插进去不会把休息取消掉，而是让它顺延到本单之后，这点必须说清楚 -->
+        <template v-if="(detail.restBlocks || []).length">
+          <div class="res-conflict-summary">{{ $t('book_booking.resource.rest_summary') }}</div>
+          <div class="res-conflict-list q-mt-sm">
+            <div v-for="rb in detail.restBlocks" :key="rb.blockId" class="res-conflict-row">
+              <div class="row items-center no-wrap">
+                <div class="res-conflict-time">{{ timeOnly(rb.startTime) }} ~ {{ timeOnly(rb.endTime) }}</div>
+                <div class="res-conflict-name q-ml-md">{{ rb.staffName }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="res-conflict-note q-mt-sm">{{ $t('book_booking.resource.rest_note') }}</div>
+          <q-separator v-if="detail.resourceName" class="component-separator-base" spaced="1rem"/>
+        </template>
+
+        <div v-if="detail.resourceName" class="res-conflict-summary">
           {{ $t('book_booking.resource.summary', {
             name: detail.resourceName, capacity: detail.capacity, required: detail.required
           }) }}
         </div>
 
+        <template v-if="detail.resourceName">
         <div class="res-conflict-line q-mt-sm">
           <span class="res-conflict-label">{{ $t('book_booking.resource.conflict_window') }}</span>
           <span class="res-conflict-time">{{ detail.conflictStartTime }} ~ {{ detail.conflictEndTime }}</span>
@@ -46,6 +63,7 @@
         </div>
 
         <div class="res-conflict-note q-mt-md">{{ $t('book_booking.resource.note') }}</div>
+        </template>
 
         <div class="row q-mt-lg q-mb-md justify-center">
           <div class="q-mx-md">
@@ -78,7 +96,7 @@ defineProps({
     default: false
   },
   /**
-   * /book/resource/check 的返回体（ok=false 那一份）
+   * /book/precheck 的返回体（ok=false 那一份）：资源位字段 + restBlocks，两类可能同时存在
    */
   detail: {
     type: Object,
