@@ -534,8 +534,8 @@ function addScheduleRange(dayOfWeek) {
     return
   }
   upsertScheduleMap[dayOfWeek].push({
-    startTime: '09:00',
-    endTime: '18:00',
+    startTime: '10:00',
+    endTime: '22:00',
   })
 }
 
