@@ -35,10 +35,14 @@
                       <span v-if="bl.auto" class="store-block-auto-tag q-ml-sm">
                         {{ $t('book_calendar.store_block.auto_tag') }}
                       </span>
+                      <span v-if="bl.rest" class="store-block-rest-tag q-ml-sm">
+                        {{ $t('book_calendar.store_block.rest_tag') }}
+                      </span>
                     </div>
-                    <div v-if="bl.auto || bl.reason" class="component-max-line-text"
+                    <div v-if="bl.auto || bl.rest || bl.reason" class="component-max-line-text"
                          style="opacity: .6; font-size: .78rem">
-                      {{ bl.auto ? $t('book_calendar.store_block.auto_note') : bl.reason }}
+                      {{ bl.auto ? $t('book_calendar.store_block.auto_note')
+                        : (bl.rest ? $t('book_calendar.store_block.rest_note') : bl.reason) }}
                     </div>
                   </div>
                   <q-space/>
@@ -102,7 +106,7 @@
   <cask-dialog-judgment v-model="showDelete"
                         :loading="deleting"
                         :callback-method="onDeleteConfirm"
-                        :dialog-judgment-data="{ title: $t('book_calendar.store_block.delete_title'), content: $t('book_calendar.store_block.delete_content', { time: deleteTarget ? `${deleteTarget.startTime} ~ ${deleteTarget.endTime}` : '' }), falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
+                        :dialog-judgment-data="{ title: $t('book_calendar.store_block.delete_title'), content: $t(deleteTarget && deleteTarget.rest ? 'book_calendar.store_block.delete_content_rest' : 'book_calendar.store_block.delete_content', { time: deleteTarget ? `${deleteTarget.startTime} ~ ${deleteTarget.endTime}` : '' }), falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
   />
 </template>
 
@@ -270,6 +274,17 @@ function deleteBlock() {
   opacity: .7;
   font-size: .68rem;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+// 休息围栏标记：与日历上的休息围栏斜纹同色系
+.store-block-rest-tag {
+  padding: .05rem .35rem;
+  border: 1px solid rgba(33, 150, 83, .6);
+  border-radius: 3px;
+  color: rgb(33, 150, 83);
+  font-size: .68rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 

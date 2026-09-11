@@ -543,6 +543,7 @@
   },
 
   "user_store": {
+    "rest": { "enabled": "Enable rest rule", "continuous": "Max continuous work", "break": "Rest length", "tolerance": "Ignorable gap", "unit": "min", "note": "Once a staff member has worked longer than the limit, the system reserves a no-booking period right after that stretch (shown as Rest Time on the calendar).", "warn": "This prevents rather than repairs: a break cannot be inserted into a stretch that is already fully booked, it can only stop that stretch from growing.", "continuous_hint": "Measured as elapsed time, including small gaps bridged by the ignorable gap below", "tolerance_hint": "Two bookings closer than this still count as continuous work. Must be smaller than the rest length, otherwise the rest period cancels itself out." },
     "classpass": { "note": "Blocks for this store are sent straight to ClassPass instead of going through Google Calendar", "email": "ClassPass account", "password": "ClassPass password", "venue_id": "Venue ID", "test": "Test login", "testing": "Checking...", "test_ok": "Login succeeded", "test_fail": "Login failed", "venues": "Venues this account can manage", "practitioners": "Practitioners in this venue (for staff binding)", "venue_hint": "One account can manage several venues. A wrong id will not raise an error, it will just block someone else's venue, so double-check it", "placeholder": { "email": "e.g. manager\\@example.com", "password": "ClassPass login password", "venue_id": "e.g. 265267" } },
     "label": { "id": "Store ID", "name": "Store Name", "phone": "Store Phone" },
     "placeholder": { "id": "e.g.: YLS001", "name": "e.g.: New York 196", "phone": "e.g.: 13811012138", "optional": "Optional", "optional_zh": "Optional, in Chinese", "admin_mail": "e.g.: zs01\\@gmail.com", "admin_nick": "Optional, defaults to email", "admin_role_name": "e.g.: Store Admin", "admin_role_code": "e.g.: storeAdmin", "google_calendar_ids": "e.g. xxx\\@group.calendar.google.com" },
@@ -892,6 +893,7 @@
   },
 
   "book_calendar": {
+    "off_today": "Off today",
     "title": "Booking Calendar",
     "amount_prefix": "Amount: ",
     "date_start": "Start Date",
@@ -935,6 +937,8 @@
     "store_block": {
       "auto_tag": "Auto",
       "auto_note": "The system found no staff available for this period and has blocked it on third-party channels. To reopen it, adjust the schedule or bookings — it cannot be deleted here.",
+      "rest_tag": "Rest",
+      "rest_note": "Automatically reserved after the staff member has worked too long without a break. You can delete it, but the next sync recreates it.",
       "quick_title": "New block",
       "target_store": "Store-wide: no new bookings during this period",
       "target_staff": "Staff: {name}",
@@ -959,6 +963,7 @@
       "delete_success": "Blocked period deleted",
       "delete_title": "Delete Blocked Period",
       "delete_content": "Delete the blocked period {time}? New bookings will be accepted again in that window.",
+      "delete_content_rest": "Delete the rest period at {time}? It is maintained by the store rest rule, so the system will recreate it on the next check. To remove it for good, turn the rest rule off in the store settings.",
       "time_required": "Please fill in complete start and end time",
       "time_order": "End time must be later than start time",
       "time_window": "Cannot block dates more than 2 weeks ahead"

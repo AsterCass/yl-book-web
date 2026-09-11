@@ -70,6 +70,10 @@
                               upsertOutboundPhone = row.outboundPhone
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
+                              upsertRestEnabled = !!(row.restBreak && row.restBreak.enabled)
+                              upsertRestContinuous = (row.restBreak && row.restBreak.continuousMinutes) || ''
+                              upsertRestBreak = (row.restBreak && row.restBreak.breakMinutes) || ''
+                              upsertRestTolerance = (row.restBreak && row.restBreak.toleranceMinutes) || ''
                               upsertClassPassEmail = (row.classPass && row.classPass.email) || ''
                               upsertClassPassVenueId = (row.classPass && row.classPass.venueId) || ''
                               upsertClassPassPassword = (row.classPass && row.classPass.password) || ''
@@ -297,73 +301,124 @@
             </div>
           </div>
 
+          <!-- 雇员休息规则：连续工作超过上限后，在这段工作的未来侧圈出不接单时段（block_type = REST）。
+               与其他字段同构：标签走左列 h6，输入框只带 placeholder -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.rest.enabled')
+            }}&nbsp;:</h6>
+          <div>
+            <q-checkbox class="q-ma-none" color="grey-10" size="37px" v-model="upsertRestEnabled" :val="true"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.rest.note') }}
+            </div>
+<!--            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">-->
+<!--              {{ $t('user_store.rest.warn') }}-->
+<!--            </div>-->
+          </div>
+
+          <template v-if="upsertRestEnabled">
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+                $t('user_store.rest.continuous')
+              }}&nbsp;:</h6>
+            <div>
+              <div class="row items-center" style="gap: .5rem;">
+                <q-input v-model="upsertRestContinuous" mask="####" class="component-outline-input-std" dense outlined/>
+                <span style="opacity: .6; font-size: .85rem">{{ $t('user_store.rest.unit') }}</span>
+              </div>
+              <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+                {{ $t('user_store.rest.continuous_hint') }}
+              </div>
+            </div>
+
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+                $t('user_store.rest.break')
+              }}&nbsp;:</h6>
+            <div class="row items-center" style="gap: .5rem;">
+              <q-input v-model="upsertRestBreak" mask="####" class="component-outline-input-std" dense outlined/>
+              <span style="opacity: .6; font-size: .85rem">{{ $t('user_store.rest.unit') }}</span>
+            </div>
+
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+                $t('user_store.rest.tolerance')
+              }}&nbsp;:</h6>
+            <div>
+              <div class="row items-center" style="gap: .5rem;">
+                <q-input v-model="upsertRestTolerance" mask="####" class="component-outline-input-std" dense outlined/>
+                <span style="opacity: .6; font-size: .85rem">{{ $t('user_store.rest.unit') }}</span>
+              </div>
+              <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+                {{ $t('user_store.rest.tolerance_hint') }}
+              </div>
+            </div>
+          </template>
+
           <!-- ClassPass 直连：配了账号密码 + venue，该店的 block 就不再经谷歌日历，
                而是直接下发到 ClassPass（是否真的走直连还取决于后端 sync-mode）。
                三个字段各占一行网格，与上面的基础字段同构：标签走左列 h6，输入框只带 placeholder -->
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
-              $t('user_store.classpass.email')
-            }}&nbsp;:</h6>
-          <div>
-            <q-input v-model="upsertClassPassEmail" class="component-outline-input-grow" dense outlined
-                     :placeholder="t('user_store.classpass.placeholder.email')"/>
-            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
-              {{ $t('user_store.classpass.note') }}
-            </div>
-          </div>
+<!--          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{-->
+<!--              $t('user_store.classpass.email')-->
+<!--            }}&nbsp;:</h6>-->
+<!--          <div>-->
+<!--            <q-input v-model="upsertClassPassEmail" class="component-outline-input-grow" dense outlined-->
+<!--                     :placeholder="t('user_store.classpass.placeholder.email')"/>-->
+<!--            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">-->
+<!--              {{ $t('user_store.classpass.note') }}-->
+<!--            </div>-->
+<!--          </div>-->
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
-              $t('user_store.classpass.password')
-            }}&nbsp;:</h6>
-          <div>
-            <q-input v-model="upsertClassPassPassword" class="component-outline-input-grow" dense outlined
-                     :placeholder="t('user_store.classpass.placeholder.password')"/>
-          </div>
+<!--          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{-->
+<!--              $t('user_store.classpass.password')-->
+<!--            }}&nbsp;:</h6>-->
+<!--          <div>-->
+<!--            <q-input v-model="upsertClassPassPassword" class="component-outline-input-grow" dense outlined-->
+<!--                     :placeholder="t('user_store.classpass.placeholder.password')"/>-->
+<!--          </div>-->
 
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
-              $t('user_store.classpass.venue_id')
-            }}&nbsp;:</h6>
-          <div>
-            <div class="row items-center" style="gap: .5rem;">
-              <q-input v-model="upsertClassPassVenueId" mask="##########"
-                       class="component-outline-input-std" dense outlined
-                       :placeholder="t('user_store.classpass.placeholder.venue_id')"/>
-              <q-btn no-caps unelevated class="component-none-btn-grow"
-                     :loading="classPassTesting" :disable="classPassTesting"
-                     @click="testClassPass">
-                <div class="row items-center">
-                  <q-icon name="fa-solid fa-plug-circle-check" size="0.9rem"/>
-                  <div class="q-ml-xs" style="font-size: 0.85rem">
-                    {{ classPassTesting ? $t('user_store.classpass.testing') : $t('user_store.classpass.test') }}
-                  </div>
-                </div>
-              </q-btn>
-            </div>
-            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
-              {{ $t('user_store.classpass.venue_hint') }}
-            </div>
+<!--          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{-->
+<!--              $t('user_store.classpass.venue_id')-->
+<!--            }}&nbsp;:</h6>-->
+<!--          <div>-->
+<!--            <div class="row items-center" style="gap: .5rem;">-->
+<!--              <q-input v-model="upsertClassPassVenueId" mask="##########"-->
+<!--                       class="component-outline-input-std" dense outlined-->
+<!--                       :placeholder="t('user_store.classpass.placeholder.venue_id')"/>-->
+<!--              <q-btn no-caps unelevated class="component-none-btn-grow"-->
+<!--                     :loading="classPassTesting" :disable="classPassTesting"-->
+<!--                     @click="testClassPass">-->
+<!--                <div class="row items-center">-->
+<!--                  <q-icon name="fa-solid fa-plug-circle-check" size="0.9rem"/>-->
+<!--                  <div class="q-ml-xs" style="font-size: 0.85rem">-->
+<!--                    {{ classPassTesting ? $t('user_store.classpass.testing') : $t('user_store.classpass.test') }}-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </q-btn>-->
+<!--            </div>-->
+<!--            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">-->
+<!--              {{ $t('user_store.classpass.venue_hint') }}-->
+<!--            </div>-->
 
-            <!-- 测试结果：venue 用来核对 id 填得对不对，人员列表用来配雇员绑定 -->
-            <div v-if="classPassResult" class="q-mt-sm" style="font-size: .8rem;">
-              <div :style="{color: classPassResult.ok ? '#21ba45' : '#c10015'}">
-                {{ classPassResult.ok ? $t('user_store.classpass.test_ok')
-                  : ($t('user_store.classpass.test_fail') + ' : ' + (classPassResult.message || '')) }}
-              </div>
-              <div v-if="classPassResult.venues && classPassResult.venues.length"
-                   class="q-mt-xs" style="opacity: .7;">
-                <div>{{ $t('user_store.classpass.venues') }} :</div>
-                <div v-for="v in classPassResult.venues" :key="v.venueId" class="q-ml-sm">
-                  {{ v.venueId }} — {{ v.venueName }}<span v-if="v.timezone"> ({{ v.timezone }})</span>
-                </div>
-              </div>
-              <div v-if="classPassResult.practitioners && classPassResult.practitioners.length"
-                   class="q-mt-xs" style="opacity: .7;">
-                <div>{{ $t('user_store.classpass.practitioners') }} :</div>
-                <div v-for="pr in classPassResult.practitioners" :key="pr.id" class="q-ml-sm">
-                  {{ pr.id }} — {{ pr.name }}
-                </div>
-              </div>
-            </div>
-          </div>
+<!--            &lt;!&ndash; 测试结果：venue 用来核对 id 填得对不对，人员列表用来配雇员绑定 &ndash;&gt;-->
+<!--            <div v-if="classPassResult" class="q-mt-sm" style="font-size: .8rem;">-->
+<!--              <div :style="{color: classPassResult.ok ? '#21ba45' : '#c10015'}">-->
+<!--                {{ classPassResult.ok ? $t('user_store.classpass.test_ok')-->
+<!--                  : ($t('user_store.classpass.test_fail') + ' : ' + (classPassResult.message || '')) }}-->
+<!--              </div>-->
+<!--              <div v-if="classPassResult.venues && classPassResult.venues.length"-->
+<!--                   class="q-mt-xs" style="opacity: .7;">-->
+<!--                <div>{{ $t('user_store.classpass.venues') }} :</div>-->
+<!--                <div v-for="v in classPassResult.venues" :key="v.venueId" class="q-ml-sm">-->
+<!--                  {{ v.venueId }} — {{ v.venueName }}<span v-if="v.timezone"> ({{ v.timezone }})</span>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--              <div v-if="classPassResult.practitioners && classPassResult.practitioners.length"-->
+<!--                   class="q-mt-xs" style="opacity: .7;">-->
+<!--                <div>{{ $t('user_store.classpass.practitioners') }} :</div>-->
+<!--                <div v-for="pr in classPassResult.practitioners" :key="pr.id" class="q-ml-sm">-->
+<!--                  {{ pr.id }} — {{ pr.name }}-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
 
         </div>
         </div>
@@ -489,6 +544,11 @@ const upsertOutboundPhone = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
+// 雇员休息规则。三个数值互相制约（休息时长必须大于可忽略间隙），故整块提交、由后端统一校验
+const upsertRestEnabled = ref(false)
+const upsertRestContinuous = ref("")
+const upsertRestBreak = ref("")
+const upsertRestTolerance = ref("")
 // ClassPass 直连凭据。口令按普通字段处理（出参原样回传），三个框语义一致：留空即清空
 const upsertClassPassEmail = ref("")
 const upsertClassPassPassword = ref("")
@@ -610,6 +670,10 @@ function clearUpsertParam() {
   upsertOutboundPhone.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
+  upsertRestEnabled.value = false
+  upsertRestContinuous.value = ""
+  upsertRestBreak.value = ""
+  upsertRestTolerance.value = ""
   upsertClassPassEmail.value = ""
   upsertClassPassPassword.value = ""
   upsertClassPassVenueId.value = ""
@@ -687,6 +751,13 @@ function upsertData() {
       description: upsertDesc.value,
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
       googleCalendarIdList: upsertGoogleCalendarIdList.value,
+      // 整块提交：三个数值互相制约，逐字段合并会让后端校验落在一个半新半旧的组合上
+      restBreak: {
+        enabled: upsertRestEnabled.value,
+        continuousMinutes: Number(upsertRestContinuous.value) || 0,
+        breakMinutes: Number(upsertRestBreak.value) || 0,
+        toleranceMinutes: Number(upsertRestTolerance.value) || 0,
+      },
       classPass: {
         email: upsertClassPassEmail.value,
         // 编辑态已带回原值，留空就是操作者真的要清空（后端空串=清空、null=不变）

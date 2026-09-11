@@ -77,6 +77,8 @@
           <div v-for="col in columns" :key="col.key" class="cal-day-head" :class="{ 'cal-today': col.highlight }">
             <div class="cal-day-main">{{ col.headerMain }}</div>
             <div v-if="col.headerSub" class="cal-day-sub">{{ col.headerSub }}</div>
+            <!-- 日视图：当日班次。没有它就只能靠「哪段没被置灰」去猜某人几点上班 -->
+            <div v-if="col.shiftText" class="cal-day-shift">{{ col.shiftText }}</div>
           </div>
         </div>
 
@@ -103,11 +105,16 @@
               <!-- 小时网格线 -->
               <div v-for="h in hours" :key="h" class="cal-hour-cell" :style="{ height: HOUR_HEIGHT + 'px' }"/>
 
+              <!-- 非排班时段（日视图的雇员列）：纯浅灰、无斜纹，与 block 的斜纹区分开——
+                   「这个人今天不上班」和「这段被屏蔽了」是两回事。垫在 block 之下，不拦事件 -->
+              <div v-for="(seg, oi) in (col.offDuty || [])" :key="'o' + oi" class="cal-off-duty"
+                   :style="{ top: seg.top + 'px', height: seg.height + 'px' }"/>
+
               <!-- block 背景（斜纹置灰）：周视图=门店 block；日视图=门店 block + 该列雇员自己的 block。
-                   自动 block（系统判定该时段全店接不下单、已同步屏蔽第三方渠道）换一套配色区分，
-                   它只是对外镜像、不影响本店排班与改派，所以做得比手动 block 更淡 -->
+                   三种来源三套配色：手动=中性灰；自动=主色（只是对外镜像、不影响本店排班与改派，故更淡）；
+                   休息围栏=绿色（雇员连续工作超时后圈出的不接单时段，参与本地判定） -->
               <div v-for="(block, bi) in col.blocks" :key="'b' + bi" class="cal-block"
-                   :class="{ 'cal-block-auto': block.auto }"
+                   :class="{ 'cal-block-auto': block.auto, 'cal-block-rest': block.rest }"
                    :style="{ top: block.top + 'px', height: block.height + 'px' }">
                 <span v-if="block.auto || block.reason" class="cal-block-reason">
                   {{ block.auto ? $t('book_calendar.store_block.auto_tag') : block.reason }}
@@ -890,7 +897,7 @@ function blockSegmentsForDate(dateStr, staffId) {
     const start = dateStr === bl.startDateStr ? bl.startMin : 0
     const end = dateStr === bl.endDateStr ? bl.endMin : 1440
     if (end > start) {
-      segs.push({start, end, reason: bl.reason, auto: bl.auto,
+      segs.push({start, end, reason: bl.reason, auto: bl.auto, rest: bl.rest,
         id: bl.id, staffId: bl.staffId, storeBlock: bl.storeBlock})
     }
   }
@@ -951,6 +958,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     key, headerMain, headerSub, highlight, blocks: dayBlocks, events,
     dateStr: extra.dateStr || null,
     staffId: extra.staffId || null,
+    shiftText: extra.shiftText || '',
+    offDuty: extra.offDuty || [],
   }
 }
 
@@ -966,10 +975,55 @@ const weekColumns = computed(() => {
   })
 })
 
+/**
+ * 某雇员在某个星期几的班次（分钟），按开始时间排序、合并重叠。
+ * 一天可能有多段（比如中午回家一趟），所以返回数组而不是单个区间。
+ */
+function dayShifts(staff, dow) {
+  const raw = (staff.scheduleList || [])
+      .filter(sc => Number(sc.dayOfWeek) === dow
+          && sc.startMinute != null && sc.endMinute != null && sc.endMinute > sc.startMinute)
+      .map(sc => ({start: Number(sc.startMinute), end: Number(sc.endMinute)}))
+      .sort((a, b) => a.start - b.start)
+  const merged = []
+  for (const seg of raw) {
+    const last = merged[merged.length - 1]
+    if (last && seg.start <= last.end) {
+      last.end = Math.max(last.end, seg.end)
+    } else {
+      merged.push({...seg})
+    }
+  }
+  return merged
+}
+
+/**
+ * 班次在可视范围内的「补集」= 非排班时段，用于给这些区域垫一层浅灰。
+ * 无排班（当天休息但有历史预约）时整列都算非排班。
+ */
+function offDutySegments(shifts, rangeStart, rangeEnd, toPx) {
+  const segs = []
+  let cursor = rangeStart
+  for (const sh of shifts) {
+    const start = Math.max(sh.start, rangeStart)
+    if (start > cursor) {
+      segs.push({start: cursor, end: start})
+    }
+    cursor = Math.max(cursor, Math.min(sh.end, rangeEnd))
+  }
+  if (cursor < rangeEnd) {
+    segs.push({start: cursor, end: rangeEnd})
+  }
+  return segs
+      .filter(seg => seg.end > seg.start)
+      .map(seg => ({top: toPx(seg.start), height: (seg.end - seg.start) / 60 * HOUR_HEIGHT}))
+}
+
 // 每日视图：横坐标为雇员，展示当日每个雇员的工作安排
 const staffColumns = computed(() => {
-  const {startHour} = timeRange.value
+  const {startHour, endHour} = timeRange.value
   const rangeStart = startHour * 60
+  const rangeEnd = endHour * 60
   const toPx = (m) => (m - rangeStart) / 60 * HOUR_HEIGHT
 
   const byStaff = {}
@@ -991,14 +1045,21 @@ const staffColumns = computed(() => {
       buildDayBlocks(dayStr, null, toPx), toPx, {dateStr: dayStr, staffId: null}))
   for (const s of staffList.value) {
     // 只显示当天有排班的雇员；无排班但当天已有预约的仍显示，避免预约块丢失
-    const scheduledToday = (s.scheduleList || []).some(sc => Number(sc.dayOfWeek) === dow)
+    const shifts = dayShifts(s, dow)
     const hasBookings = (byStaff[s.id] || []).length > 0
-    if (!scheduledToday && !hasBookings) {
+    if (shifts.length === 0 && !hasBookings) {
       continue
     }
     // 雇员列：门店 block + 该雇员自己的 block
     cols.push(buildColumn(s.id, s.name, s.phone || '', false, byStaff[s.id] || [],
-        buildDayBlocks(dayStr, s.id, toPx), toPx, {dateStr: dayStr, staffId: s.id}))
+        buildDayBlocks(dayStr, s.id, toPx), toPx, {
+          dateStr: dayStr,
+          staffId: s.id,
+          shiftText: shifts.length
+              ? shifts.map(sh => `${minutesToTime(sh.start)}-${minutesToTime(sh.end)}`).join(', ')
+              : t('book_calendar.off_today'),
+          offDuty: offDutySegments(shifts, rangeStart, rangeEnd, toPx),
+        }))
   }
   return cols
 })
@@ -1177,8 +1238,11 @@ const blockDeleteContent = computed(() => {
   if (!target) {
     return ''
   }
-  return t('book_calendar.store_block.delete_content',
-      {time: `${target.dateStr} ${minutesToTime(target.start)} ~ ${minutesToTime(target.end)}`})
+  const time = `${target.dateStr} ${minutesToTime(target.start)} ~ ${minutesToTime(target.end)}`
+  // 休息围栏删了会被下一轮对账重建，不先说清楚的话店员的体感就是「删不掉」，会反复点
+  return target.rest
+      ? t('book_calendar.store_block.delete_content_rest', {time})
+      : t('book_calendar.store_block.delete_content', {time})
 })
 
 function onColContextMenu(e, col) {
@@ -1781,6 +1845,8 @@ function applyData(res) {
     storeBlock: !!bl.storeBlock,
     // 系统按可约性推导、只用于镜像第三方的 block：日历上只读展示，不可删
     auto: !!bl.auto,
+    // 休息围栏：可以删，但由规则推导，删了下一轮对账会重建（删除确认框里已写明）
+    rest: !!bl.rest,
     reason: bl.reason || '',
     startDateStr: bl.startTime ? bl.startTime.substring(0, 10) : '',
     endDateStr: bl.endTime ? bl.endTime.substring(0, 10) : '',
@@ -1952,6 +2018,16 @@ onBeforeUnmount(() => {
     text-overflow: ellipsis;
   }
 
+  // 当日班次：比电话那行再淡一点，它是背景信息不是主标识
+  .cal-day-shift {
+    font-size: .72rem;
+    opacity: .5;
+    margin-top: .05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   &.cal-today .cal-day-main {
     color: rgb(var(--pointer));
   }
@@ -2009,6 +2085,26 @@ onBeforeUnmount(() => {
       rgba(204, 118, 45, .08) 6px, rgba(204, 118, 45, .08) 12px) !important;
   border-top-color: rgba(204, 118, 45, .5) !important;
   border-bottom-color: rgba(204, 118, 45, .5) !important;
+}
+
+// 休息围栏：绿色斜纹。比自动 block 深一些——它<b>参与本地判定</b>，是实打实约不进去的时段，
+// 不像自动 block 只是对外镜像
+.cal-block-rest {
+  background: repeating-linear-gradient(-45deg,
+      rgba(33, 150, 83, .28) 0, rgba(33, 150, 83, .28) 6px,
+      rgba(33, 150, 83, .09) 6px, rgba(33, 150, 83, .09) 12px) !important;
+  border-top-color: rgba(33, 150, 83, .55) !important;
+  border-bottom-color: rgba(33, 150, 83, .55) !important;
+}
+
+// 非排班时段：纯浅灰、无纹理。刻意不用斜纹——斜纹在本日历里专表「被屏蔽」，
+// 而「这个人今天不上班」是另一回事，两者混用会让人以为排班外的时间是被谁挡掉的
+.cal-off-duty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: rgba(128, 128, 128, .07);
+  pointer-events: none;
 }
 
 .cal-block {
