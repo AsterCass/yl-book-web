@@ -1,16 +1,9 @@
 {
   "name": "Main",
   "voice": {
-    "model": "speech-02-turbo",
-    "pitch": 0,
-    "speed": 1.1,
-    "region": "worldwide",
-    "volume": 1.3,
-    "voiceId": "socialmedia_female_2_v1",
-    "provider": "minimax",
-    "chunkPlan": {
-      "enabled": true
-    },
+    "voiceId": "ara",
+    "language": "auto",
+    "provider": "xai",
     "fallbackPlan": {
       "voices": [
         {
@@ -19,9 +12,7 @@
           "provider": "vapi"
         }
       ]
-    },
-    "languageBoost": "auto",
-    "textNormalizationEnabled": true
+    }
   },
   "model": {
     "url": "https://api.zyyboh.com/llm",
