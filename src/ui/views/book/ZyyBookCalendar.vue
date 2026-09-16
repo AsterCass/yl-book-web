@@ -454,7 +454,7 @@ function formatHmDisplay(hm) {
 }
 const globalState = useGlobalStateStore()
 
-const HOUR_HEIGHT = 64          // 每小时像素高度
+const HOUR_HEIGHT = 85          // 每小时像素高度（所有纵向换算：卡片/排班底色/block/当前时间线/点击与拖动取分钟，都只从这里派生）
 const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
 const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
