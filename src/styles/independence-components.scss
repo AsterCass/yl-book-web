@@ -197,6 +197,20 @@
   background-color: var(--dialog-background-color) !important;
   box-shadow: inset 0 0 2px 1px var(--dialog-background-color-frame) !important;
   backdrop-filter: saturate(200%) blur(30px) !important;
+
+  // 弹窗卡片本身就是 q-dialog 的滚动容器（内容超过视口高度时由它滚动）。
+  // 全局默认把滚动条宽度压成 0（hide-scrollbar 开关），滚轮能滚但看不见条、也没法拖，
+  // 这里同下拉卡片（component-extra-card-std-limit）一样显式给宽度，不受全局开关影响
+  &::-webkit-scrollbar {
+    overflow: visible;
+    background: transparent;
+    height: 13px;
+    width: 13px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--text-color), 0.5);
+  }
 }
 
 .component-cask-dialog-judgement-large {
