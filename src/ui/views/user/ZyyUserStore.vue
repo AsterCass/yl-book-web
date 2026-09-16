@@ -74,6 +74,7 @@
                               upsertRestContinuous = (row.restBreak && row.restBreak.continuousMinutes) || ''
                               upsertRestBreak = (row.restBreak && row.restBreak.breakMinutes) || ''
                               upsertRestTolerance = (row.restBreak && row.restBreak.toleranceMinutes) || ''
+                              upsertReassignPolicy = (row.autoAssign && row.autoAssign.reassignPolicy) || DEFAULT_REASSIGN_POLICY
                               upsertClassPassEmail = (row.classPass && row.classPass.email) || ''
                               upsertClassPassVenueId = (row.classPass && row.classPass.venueId) || ''
                               upsertClassPassPassword = (row.classPass && row.classPass.password) || ''
@@ -112,8 +113,8 @@
 
         </div>
 
-        <!-- 两列布局（同雇员编辑卡片）：左=门店基础信息（新建时含初始管理员），
-             右=谷歌日历 id / 共享资源位两块可增删列表——行数多，塞在单列里会把弹窗拉得很长。
+        <!-- 两列布局（同雇员编辑卡片）：左=门店基础信息（编辑态末尾附谷歌日历列表；新建时含时区与初始管理员），
+             右=共享资源位 / 雇员休息规则 / 自动分配改派等配置块——行数多，塞在单列里会把弹窗拉得很长。
              右列仅编辑态存在，新建时自然退化为单列。no-wrap 强制并排，宽度由内容撑开 -->
         <div class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
 
@@ -185,6 +186,42 @@
           <q-input v-if="!isNew" v-model="upsertDesc" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional')"/>
 
+          <!-- 门店自身谷歌日历列表（仅编辑态）：逐条添加/删除，样式同技能别名维护；
+               门店 block 时除各雇员日历外同时屏蔽这些日历。放左列基础信息末尾，右列只留配置块 -->
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.google_calendar_ids')
+            }}&nbsp;:</h6>
+          <div v-if="!isNew">
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.google_calendar_ids_hint') }}
+            </div>
+            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
+                   @click="addCalendarIdItem">
+              <div class="row items-center justify-center">
+                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
+                <div class="q-ml-xs" style="font-size: 0.85rem">
+                  {{ $t('user_store.upsert.google_calendar_ids_add') }}
+                </div>
+              </div>
+            </q-btn>
+
+            <div v-if="upsertGoogleCalendarIdList.length === 0" class="q-mt-xs"
+                 style="opacity: .5; font-size: .75rem;">
+              {{ $t('user_store.upsert.google_calendar_ids_empty') }}
+            </div>
+
+            <div v-for="(calValue, calIndex) in upsertGoogleCalendarIdList" :key="calIndex"
+                 class="row items-center q-mt-xs" style="gap: .5rem;">
+              <q-input v-model="upsertGoogleCalendarIdList[calIndex]" class="component-outline-input-long-grow"
+                       dense outlined :placeholder="t('user_store.placeholder.google_calendar_ids')"/>
+              <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeCalendarIdItem(calIndex)">
+                <div class="row items-center">
+                  <q-icon name="fa-solid fa-trash" size="1rem"/>
+                </div>
+              </q-btn>
+            </div>
+          </div>
+
 
           <!-- 新建专属：时区与初始管理员。留在左列同一个 grid 里，
                标签列宽才与上面的基础字段一致（各自独立 grid 会各算各的 max-content） -->
@@ -225,45 +262,9 @@
         </div>
         </div>
 
-        <!-- 右列：仅编辑态。两块都是可增删的多行列表，放右侧避免把弹窗纵向拉长 -->
+        <!-- 右列：仅编辑态的配置块——共享资源位（可增删列表）、雇员休息规则、自动分配改派，放右侧避免把弹窗纵向拉长 -->
         <div v-if="!isNew" style="flex: 1 1 auto; min-width: 26rem;">
         <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: start;">
-
-          <!-- 门店自身谷歌日历列表：逐条添加/删除，样式同技能别名维护；
-               门店 block 时除各雇员日历外同时屏蔽这些日历 -->
-          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
-              $t('user_store.upsert.field.google_calendar_ids')
-            }}&nbsp;:</h6>
-          <div>
-            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
-              {{ $t('user_store.upsert.google_calendar_ids_hint') }}
-            </div>
-            <q-btn no-caps unelevated class="component-none-btn-mini-grow"
-                   @click="addCalendarIdItem">
-              <div class="row items-center justify-center">
-                <q-icon name="fa-solid fa-plus" size="0.9rem"/>
-                <div class="q-ml-xs" style="font-size: 0.85rem">
-                  {{ $t('user_store.upsert.google_calendar_ids_add') }}
-                </div>
-              </div>
-            </q-btn>
-
-            <div v-if="upsertGoogleCalendarIdList.length === 0" class="q-mt-xs"
-                 style="opacity: .5; font-size: .75rem;">
-              {{ $t('user_store.upsert.google_calendar_ids_empty') }}
-            </div>
-
-            <div v-for="(calValue, calIndex) in upsertGoogleCalendarIdList" :key="calIndex"
-                 class="row items-center q-mt-xs" style="gap: .5rem;">
-              <q-input v-model="upsertGoogleCalendarIdList[calIndex]" class="component-outline-input-long-grow"
-                       dense outlined :placeholder="t('user_store.placeholder.google_calendar_ids')"/>
-              <q-btn no-caps unelevated class="component-none-btn-grow" @click="removeCalendarIdItem(calIndex)">
-                <div class="row items-center">
-                  <q-icon name="fa-solid fa-trash" size="1rem"/>
-                </div>
-              </q-btn>
-            </div>
-          </div>
 
           <!-- 门店共享资源位：名称由用户自定义，数量为全店并发容量 -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
@@ -351,6 +352,24 @@
               </div>
             </div>
           </template>
+
+          <!-- 自动分配改派策略：自动分配为了给新单腾位时，能否挪动已分配、未开始的单。三态单选、整块提交，
+               后端存 yl_store.meta.autoAssign.reassignPolicy，未配置按 KEEP_PREFERRED 生效 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.auto_assign.field')
+            }}&nbsp;:</h6>
+          <div>
+            <div v-for="policy in reassignPolicyList" :key="policy" class="q-mb-xs">
+              <q-radio v-model="upsertReassignPolicy" :val="policy" color="grey-10" size="37px"
+                       :label="$t(`user_store.auto_assign.policy.${policy}.label`)"/>
+              <div style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem; margin-left: 2.4rem">
+                {{ $t(`user_store.auto_assign.policy.${policy}.hint`) }}
+              </div>
+            </div>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.auto_assign.note') }}
+            </div>
+          </div>
 
           <!-- ClassPass 直连：配了账号密码 + venue，该店的 block 就不再经谷歌日历，
                而是直接下发到 ClassPass（是否真的走直连还取决于后端 sync-mode）。
@@ -549,6 +568,10 @@ const upsertRestEnabled = ref(false)
 const upsertRestContinuous = ref("")
 const upsertRestBreak = ref("")
 const upsertRestTolerance = ref("")
+// 自动分配改派策略（三态单选）：后端未配置时按 KEEP_PREFERRED 生效，出参已是生效值，这里只做兜底
+const DEFAULT_REASSIGN_POLICY = 'KEEP_PREFERRED'
+const reassignPolicyList = ['FREE', 'KEEP_PREFERRED', 'NONE']
+const upsertReassignPolicy = ref(DEFAULT_REASSIGN_POLICY)
 // ClassPass 直连凭据。口令按普通字段处理（出参原样回传），三个框语义一致：留空即清空
 const upsertClassPassEmail = ref("")
 const upsertClassPassPassword = ref("")
@@ -674,6 +697,7 @@ function clearUpsertParam() {
   upsertRestContinuous.value = ""
   upsertRestBreak.value = ""
   upsertRestTolerance.value = ""
+  upsertReassignPolicy.value = DEFAULT_REASSIGN_POLICY
   upsertClassPassEmail.value = ""
   upsertClassPassPassword.value = ""
   upsertClassPassVenueId.value = ""
@@ -757,6 +781,10 @@ function upsertData() {
         continuousMinutes: Number(upsertRestContinuous.value) || 0,
         breakMinutes: Number(upsertRestBreak.value) || 0,
         toleranceMinutes: Number(upsertRestTolerance.value) || 0,
+      },
+      // 整块提交；后端不传才是「不改」，空串=清空回落默认
+      autoAssign: {
+        reassignPolicy: upsertReassignPolicy.value,
       },
       classPass: {
         email: upsertClassPassEmail.value,

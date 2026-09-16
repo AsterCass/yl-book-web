@@ -542,6 +542,7 @@
 
   "user_store": {
     "rest": { "enabled": "启用休息规则", "continuous": "连续工作上限", "break": "休息时长", "tolerance": "可忽略间隙", "unit": "分钟", "note": "雇员连续工作超过上限后，系统在这段工作的未来侧圈出一段不接单的时间（日历上标记为 Rest Time）。", "warn": "这是预防不是补救：已经排满的时段中间插不进休息，只能阻止工作段继续变长。", "continuous_hint": "按跨度计算，含被「可忽略间隙」桥接掉的小空档", "tolerance_hint": "两单之间不超过这么久仍算连续工作；必须小于休息时长，否则休息时段会被自己的容差抵消" },
+    "auto_assign": { "field": "自动分配改派", "note": "只约束系统自动分配；人工指派、拖动调整不受影响。锁得越多，新单落待分配的概率越高，需要有人盯待分配列表。", "policy": { "FREE": { "label": "自由改派", "hint": "以门店最大接单量为先，任何未开始的已分配单都可能被换人腾位" }, "KEEP_PREFERRED": { "label": "点钟单不改派（默认）", "hint": "已分配给偏好雇员的单不会被换人；点钟单自身改期时偏好雇员放不下则落待分配" }, "NONE": { "label": "一律不改派", "hint": "自动分配不会为了腾位挪动任何已分配单，只把新单塞进现有空档；点钟单改期规则同上" } } },
     "classpass": { "note": "配置后该门店的屏蔽时段直接下发到 ClassPass，不再经谷歌日历", "email": "ClassPass 账号", "password": "ClassPass 密码", "venue_id": "Venue ID", "test": "测试登录", "testing": "正在验证…", "test_ok": "登录成功", "test_fail": "登录失败", "venues": "该账号可管门店", "practitioners": "该 Venue 下的服务人员（雇员绑定用）", "venue_hint": "一个账号可管多家门店，填错不会报错但会把屏蔽推到别人家，务必核对", "placeholder": { "email": "例如：manager\\@example.com", "password": "ClassPass 登录密码", "venue_id": "例如：265267" } },
     "label": { "id": "门店编号", "name": "门店名称", "phone": "门店电话" },
     "placeholder": { "id": "例如：YLS001", "name": "例如：纽约196", "phone": "例如：13811012138", "optional": "可为空", "optional_zh": "可为空，中文", "admin_mail": "例如：zs01\\@gmail.com", "admin_nick": "可为空，缺省使用邮箱", "admin_role_name": "例如：门店管理员", "admin_role_code": "例如：storeAdmin", "google_calendar_ids": "如 xxx\\@group.calendar.google.com" },
