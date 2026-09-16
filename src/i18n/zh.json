@@ -571,6 +571,14 @@
     "notify": { "update_success": "更新雇员成功", "skill_assign_success": "配置技能成功", "display_priority_success": "调整显示优先级成功" },
     "skill_assign": { "title": "技能分配" },
     "display_priority": { "title": "调整显示优先级", "note": "拖动排序，排在前面的雇员在预约日历（日视图）中优先展示", "empty": "暂无雇员" },
+    "default_work_time": {
+      "title": "默认工作时间",
+      "note": "下方计划工作时间点击「添加时间段」时预填此时间；两端留空则按系统默认 10:00 ~ 22:00 预填。仅为输入默认值，不影响已保存的排班",
+      "notify": {
+        "incomplete": "默认工作时间需同时填写开始与结束时间，或两者都留空",
+        "invalid_range": "默认工作时间无效：结束时间必须晚于开始时间"
+      }
+    },
     "schedule": {
       "title": "计划工作时间",
       "note": "一天可配置多个时间段，允许交集，系统会在后端进行简化处理",

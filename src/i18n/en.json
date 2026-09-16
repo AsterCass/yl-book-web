@@ -573,6 +573,14 @@
     "notify": { "update_success": "Staff updated successfully", "skill_assign_success": "Skills assigned successfully", "display_priority_success": "Display priority updated successfully" },
     "skill_assign": { "title": "Assign Skills" },
     "display_priority": { "title": "Adjust Display Priority", "note": "Drag to reorder. Staff listed first are shown first in the booking calendar (day view)", "empty": "No staff" },
+    "default_work_time": {
+      "title": "Default Working Time",
+      "note": "Pre-filled when you click \"Add Time Range\" in the planned working time below; leave both empty to use the system default 10:00 ~ 22:00. This is only an input default and does not affect saved schedules",
+      "notify": {
+        "incomplete": "Default working time needs both a start and an end time, or leave both empty",
+        "invalid_range": "Invalid default working time: end time must be later than start time"
+      }
+    },
     "schedule": {
       "title": "Planned Working Time",
       "note": "You can configure multiple time ranges per day; overlaps are allowed and will be simplified on the backend",

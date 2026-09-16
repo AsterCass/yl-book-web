@@ -69,6 +69,7 @@
                               upsertGoogleCalendarId = row.googleCalendarId
                               upsertClassPassItemId = row.classPassItemId
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
+                              initDefaultWorkTime(row.defaultWorkTime)
                               loadStaffBlocks()
                               isNew = false;
                               showUpsert = true
@@ -217,9 +218,26 @@
         </div>
 
         <div style="flex: 1 1 auto; min-width: 26rem;">
-          <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
-            {{ $t('staff.schedule.title') }}
+          <!-- 默认工作时间：与下方「计划工作时间」并列的独立区块（存 yl_staff.meta.defaultWorkTime，随雇员保存）。
+               各天「添加时间段」的预填值，两端留空 = 用系统默认 10:00–22:00；只是输入默认值，不参与排班/分配计算。
+               非必填，标题补 12px 左边距与必填标题（星号占位）的文字起点对齐 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">
+            {{ $t('staff.default_work_time.title') }}
           </h6>
+          <div class="q-mt-sm q-ml-md" style="opacity: 0.5; max-width: 25rem; font-size: 0.85rem">
+            {{ $t('staff.default_work_time.note') }}
+          </div>
+          <div class="row items-center q-mt-sm q-ml-md" style="gap: .5rem;">
+            <cask-time-picker v-model="upsertDefaultStart" :placeholder="DEFAULT_SCHEDULE_START"/>
+            <div>~</div>
+            <cask-time-picker v-model="upsertDefaultEnd" :placeholder="DEFAULT_SCHEDULE_END"/>
+          </div>
+
+          <div class="q-mt-lg row items-center">
+            <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">
+              {{ $t('staff.schedule.title') }}
+            </h6>
+          </div>
           <div class="q-mt-sm q-ml-md" style="opacity: 0.5; max-width: 25rem; font-size: 0.85rem">
             {{ $t('staff.schedule.note') }}
           </div>
@@ -398,6 +416,12 @@ const upsertMail = ref("")
 const upsertGoogleCalendarId = ref("")
 // ClassPass 人员 ID（直连模式下雇员 block 靠它定位到人）；空 = 该雇员不同步
 const upsertClassPassItemId = ref(null)
+// 排班「添加时间段」的系统默认预填值；雇员配了默认工作时间（yl_staff.meta.defaultWorkTime）则优先用它
+const DEFAULT_SCHEDULE_START = '10:00'
+const DEFAULT_SCHEDULE_END = '22:00'
+// 雇员默认工作时间（HH:mm）；两端都空 = 未配置、回落系统默认
+const upsertDefaultStart = ref("")
+const upsertDefaultEnd = ref("")
 const dayOfWeekList = [1, 2, 3, 4, 5, 6, 7]
 const upsertScheduleMap = reactive({
   1: [],
@@ -426,6 +450,8 @@ function clearUpsertParam() {
   upsertMail.value = ""
   upsertGoogleCalendarId.value = ""
   upsertClassPassItemId.value = null
+  upsertDefaultStart.value = ""
+  upsertDefaultEnd.value = ""
   staffBlockList.value = []
   showBlockAdd.value = false
   newBlockStart.value = ""
@@ -529,14 +555,59 @@ function clearScheduleParam() {
   }
 }
 
+// 回填雇员默认工作时间：后端未配置时对象仍返回但字段皆 null → 两端留空。
+// 注意不能直接丢给 minuteToTime：Number(null) 是 0，会被回填成 00:00
+function initDefaultWorkTime(defaultWorkTime) {
+  upsertDefaultStart.value = ""
+  upsertDefaultEnd.value = ""
+  if (!defaultWorkTime || defaultWorkTime.startMinute == null || defaultWorkTime.endMinute == null) {
+    return
+  }
+  upsertDefaultStart.value = minuteToTime(defaultWorkTime.startMinute) || ""
+  upsertDefaultEnd.value = minuteToTime(defaultWorkTime.endMinute) || ""
+}
+
+// 「添加时间段」的预填值：默认工作时间两端都填且合法时用它，否则回落系统默认。
+// 半截/倒置的输入这里只回落、不报错——保存时 buildDefaultWorkTimeForSubmit 会拦
+function resolveDefaultScheduleRange() {
+  const startMinute = timeToMinute(upsertDefaultStart.value)
+  const endMinute = timeToMinute(upsertDefaultEnd.value)
+  if (startMinute !== null && endMinute !== null && startMinute < endMinute) {
+    return {startTime: upsertDefaultStart.value, endTime: upsertDefaultEnd.value}
+  }
+  return {startTime: DEFAULT_SCHEDULE_START, endTime: DEFAULT_SCHEDULE_END}
+}
+
 function addScheduleRange(dayOfWeek) {
   if (!dayOfWeekList.includes(dayOfWeek)) {
     return
   }
-  upsertScheduleMap[dayOfWeek].push({
-    startTime: '10:00',
-    endTime: '22:00',
-  })
+  upsertScheduleMap[dayOfWeek].push(resolveDefaultScheduleRange())
+}
+
+// 默认工作时间提交体（整块覆盖）：两端都空 → {null,null}（后端清空、回落系统默认）；
+// 半截或倒置 → 提示并返回 null，调用方中止提交
+function buildDefaultWorkTimeForSubmit() {
+  const hasStart = !!upsertDefaultStart.value
+  const hasEnd = !!upsertDefaultEnd.value
+  if (!hasStart && !hasEnd) {
+    return {startMinute: null, endMinute: null}
+  }
+  if (!hasStart || !hasEnd) {
+    notifyTopWarning(t('staff.default_work_time.notify.incomplete'))
+    return null
+  }
+  const startMinute = timeToMinute(upsertDefaultStart.value)
+  const endMinute = timeToMinute(upsertDefaultEnd.value)
+  if (startMinute === null || endMinute === null) {
+    notifyTopWarning(t('staff.schedule.notify.invalid_time'))
+    return null
+  }
+  if (startMinute >= endMinute) {
+    notifyTopWarning(t('staff.default_work_time.notify.invalid_range'))
+    return null
+  }
+  return {startMinute: startMinute, endMinute: endMinute}
 }
 
 function removeScheduleRange(dayOfWeek, rangeIndex) {
@@ -695,6 +766,11 @@ function upsertData() {
     return;
   }
 
+  const defaultWorkTime = buildDefaultWorkTimeForSubmit()
+  if (defaultWorkTime === null) {
+    return;
+  }
+
   const body = {
     name: upsertName.value,
     externalName: upsertExternalName.value,
@@ -707,6 +783,8 @@ function upsertData() {
     classPassItemId: Number(upsertClassPassItemId.value) || 0,
     priority: 1,
     scheduleList: scheduleList,
+    // 默认工作时间：整块覆盖，两端 null = 清空（后端「不传」才是保持不变，表单每次都带全量）
+    defaultWorkTime: defaultWorkTime,
   }
 
   if (isNew.value) {
