@@ -454,7 +454,7 @@ function formatHmDisplay(hm) {
 }
 const globalState = useGlobalStateStore()
 
-const HOUR_HEIGHT = 85          // 每小时像素高度（所有纵向换算：卡片/排班底色/block/当前时间线/点击与拖动取分钟，都只从这里派生）
+const HOUR_HEIGHT = 100          // 每小时像素高度（所有纵向换算：卡片/排班底色/block/当前时间线/点击与拖动取分钟，都只从这里派生）
 const DEFAULT_START_HOUR = 9    // 默认最早显示 09:00
 const DEFAULT_END_HOUR = 24     // 默认最晚显示 24:00
 const gutterWidth = '4rem'
@@ -1127,7 +1127,7 @@ function openAddBooking() {
 // ===== 点击空白区域创建预约 =====
 const hoverSlot = ref(null)   // {colKey, top, label, minutes}
 
-// 指针位置 -> 该列时间轴上的分钟数（按 SNAP_MINUTES=10 分钟取档）
+// 指针位置 -> 该列时间轴上的分钟数（按 SNAP_MINUTES 取档，点击建单/右键屏蔽/悬停提示线共用）
 function pointerSlotMinutes(e) {
   const rect = e.currentTarget.getBoundingClientRect()
   const {startHour, endHour} = timeRange.value
@@ -1542,7 +1542,7 @@ function reload() {
 }
 
 // ===== 拖动调整预约 =====
-const SNAP_MINUTES = 10          // 纵向拖动以 10 分钟为单位
+const SNAP_MINUTES = 5           // 时间轴取档粒度（分钟）：拖动调整、点击空白建单、右键屏蔽都按它吸附
 const DRAG_THRESHOLD = 4         // 小于该位移视为点击
 const bodyRef = ref(null)        // 日历主体（定位基准）
 const dragState = ref(null)      // 拖动预览态（响应式，驱动预览块）
