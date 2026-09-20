@@ -847,7 +847,11 @@
       "createUser": "Created By",
       "createTime": "Created At",
       "updateUser": "Updated By",
-      "updateTime": "Updated At"
+      "updateTime": "Updated At",
+      "weekday": { "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat", "7": "Sun" },
+      "history": "Past Bookings at This Store",
+      "history_hint": "Up to 5 most recent before this booking, cancelled included",
+      "history_empty": "No other bookings for this phone number"
     }
   },
 

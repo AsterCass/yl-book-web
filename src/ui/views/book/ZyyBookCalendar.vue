@@ -219,10 +219,14 @@
          不挡住的话点空白关选择器的同一下会顺手在格子上开出新增预约弹窗 -->
     <cask-picker-mask :model-value="datePicking"/>
 
-    <cask-book-detail-dialog v-model="showDetail" :book="detailBook"/>
+    <cask-book-detail-dialog v-model="showDetail" :book="detailBook" :staff-name-map="staffNameById"
+                             :skill-name-map="skillNameById"/>
 
     <!-- 新增/编辑弹窗（与预约列表共用同一组件，保持一致） -->
+    <!-- 雇员/项目列表本页已加载，传进去复用：不传的话弹窗会在挂载时各自再拉一遍
+         （它是随页面常驻的，不是打开时才挂载），刷新一次页面两个接口都会被调两遍 -->
     <cask-book-upsert-dialog v-model="showEdit" :book="editBook" :is-new="editIsNew"
+                             :skill-options="skillOptionsForUpsert" :staff-options="staffOptionsForUpsert"
                              @saved="reloadWithAutoBlockFollowUp"/>
 
     <!-- 门店屏蔽时段管理（查看/新增/删除门店 block），变更后刷新日历 -->
@@ -423,6 +427,7 @@ import {
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {mCalendarColor} from "@/api/myu.js";
 import {staffListSimple} from "@/api/staff.js";
+import {staffSkillListSimple} from "@/api/staff-skill.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
@@ -477,6 +482,28 @@ const staffNameById = computed(() => {
   }
   return map
 })
+// 项目（技能）列表：① 详情弹窗历史预约行的 id -> 名称（那里后端只回技能 id）；
+// ② 传给建单/改单弹窗，省掉它自己再拉一遍。日历卡片本身的项目名走接口返回的 skillDtoList，不依赖这份数据
+const skillList = ref([])
+const skillNameById = computed(() => {
+  const map = {}
+  for (const s of skillList.value) {
+    map[s.id] = s.name
+  }
+  return map
+})
+// 建单弹窗要的选项形状（label/value + 时长/金额提示用字段）
+const skillOptionsForUpsert = computed(() => skillList.value.map(s => ({
+  label: s.name,
+  value: s.id,
+  code: s.code,
+  consumeMinutes: s.consumeMinutes,
+  serviceAmount: s.serviceAmount,
+})))
+const staffOptionsForUpsert = computed(() => staffList.value.map(s => ({
+  label: `${s.name} ( ${s.phone || ' - '} )`,
+  value: s.id,
+})))
 const weekStart = ref(getWeekViewStart(new Date()))
 const dayDate = ref(today())
 // 是否显示已取消的预约（默认隐藏）
@@ -1870,6 +1897,24 @@ function loadDay() {
   bookCalendar({startDateStr: ds, endDateStr: ds}).then(applyData)
 }
 
+// 项目列表：仅用于详情弹窗历史预约行的 id -> 名称渲染。权限上安全——
+// /staff/skill/list/simple 满足 staff:staff:list 或 book:book:list 即可，
+// 而能进本页的账户必然有 book:book:list（上面的雇员列表也要它）
+function loadSkill() {
+  staffSkillListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    skillList.value = res.data.data.map(s => ({
+      id: s.id,
+      name: s.name,
+      code: s.code,
+      consumeMinutes: s.consumeMinutes,
+      serviceAmount: s.serviceAmount,
+    }))
+  })
+}
+
 function loadStaff() {
   staffListSimple().then(res => {
     if (!res || !res.data || !res.data.data) {
@@ -1885,6 +1930,7 @@ function loadStaff() {
 onMounted(() => {
   loadCardColors()
   loadStaff()
+  loadSkill()
   reload()
   nowTimer = setInterval(() => {
     nowTick.value = Date.now()

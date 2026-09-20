@@ -845,7 +845,11 @@
       "createUser": "创建人",
       "createTime": "创建时间",
       "updateUser": "更新人",
-      "updateTime": "更新时间"
+      "updateTime": "更新时间",
+      "weekday": { "1": "周一", "2": "周二", "3": "周三", "4": "周四", "5": "周五", "6": "周六", "7": "周日" },
+      "history": "该手机号本店历史预约",
+      "history_hint": "本单预约时间之前的最近 5 条，含已取消",
+      "history_empty": "该手机号无其他历史预约"
     }
   },
 

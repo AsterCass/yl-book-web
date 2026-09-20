@@ -311,7 +311,8 @@
     />
 
     <!-- Booking Detail Dialog (shared, read-only) -->
-    <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook"/>
+    <cask-book-detail-dialog v-model="showBookDetail" :book="detailBook" :staff-name-map="staffIdNameMap"
+                             :skill-name-map="skillIdNameMap"/>
 
   
     <!-- 资源位占用提示：派人 = 待分配单开始占资源位；后端不拦截，确认后照常执行 -->
@@ -324,7 +325,7 @@
 
 <script setup>
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
@@ -386,6 +387,14 @@ const isNew = ref(false)
 const upsertBook = ref(null)   // 编辑=行数据；新增=null；复制=预填数据
 const skillOptions = ref([])
 const skillOptionsNow = ref([])
+// 项目 id -> 名称：详情弹窗的历史预约行只拿到技能 id，用这份已加载的列表渲染名称
+const skillIdNameMap = computed(() => {
+  const map = {}
+  for (const option of skillOptions.value) {
+    map[option.value] = option.label
+  }
+  return map
+})
 
 function openAddBooking() {
   upsertBook.value = null
