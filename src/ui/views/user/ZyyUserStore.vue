@@ -354,7 +354,7 @@
           </template>
 
           <!-- 自动分配改派策略：自动分配为了给新单腾位时，能否挪动已分配、未开始的单。三态单选、整块提交，
-               后端存 yl_store.meta.autoAssign.reassignPolicy，未配置按 KEEP_PREFERRED 生效 -->
+               后端存 yl_store.meta.autoAssign.reassignPolicy，未配置按 NONE（一律不改派）生效 -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.auto_assign.field')
             }}&nbsp;:</h6>
@@ -568,9 +568,9 @@ const upsertRestEnabled = ref(false)
 const upsertRestContinuous = ref("")
 const upsertRestBreak = ref("")
 const upsertRestTolerance = ref("")
-// 自动分配改派策略（三态单选）：后端未配置时按 KEEP_PREFERRED 生效，出参已是生效值，这里只做兜底
-const DEFAULT_REASSIGN_POLICY = 'KEEP_PREFERRED'
-const reassignPolicyList = ['FREE', 'KEEP_PREFERRED', 'NONE']
+// 自动分配改派策略（三态单选）：后端未配置时按 NONE 生效，出参已是生效值，这里只做兜底
+const DEFAULT_REASSIGN_POLICY = 'NONE'
+const reassignPolicyList = ['FREE', 'KEEP_SPECIAL', 'NONE']
 const upsertReassignPolicy = ref(DEFAULT_REASSIGN_POLICY)
 // ClassPass 直连凭据。口令按普通字段处理（出参原样回传），三个框语义一致：留空即清空
 const upsertClassPassEmail = ref("")
