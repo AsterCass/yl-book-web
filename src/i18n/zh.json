@@ -738,7 +738,8 @@
       "add": "添加预约",
       "clear": "清空条件",
       "save": "保存",
-      "export": "导出"
+      "export": "导出",
+      "export_related": "关联导出"
     },
     "upsert": {
       "title_add": "添加预约",

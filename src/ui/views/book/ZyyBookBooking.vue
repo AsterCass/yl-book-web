@@ -153,8 +153,13 @@
       </q-btn>
       <!-- 导出 xlsx：按当前筛选条件全量导出（不分页，超 3000 后端报错），导出中禁用防重复点击 -->
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
-             :loading="exporting" :disable="exporting" @click="exportData">
+             :loading="exporting" :disable="exporting || exportingRelated" @click="exportData">
         {{ $t('book_booking.button.export') }}
+      </q-btn>
+      <!-- 关联导出：列同上，末尾多一列「其他订单」（该客户在本店除本单外的全部预约）；筛选结果超 500 行后端报错 -->
+      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             :loading="exportingRelated" :disable="exporting || exportingRelated" @click="exportRelatedData">
+        {{ $t('book_booking.button.export_related') }}
       </q-btn>
     </div>
 
@@ -338,6 +343,7 @@ import {
   bookDelete,
   bookDetail,
   bookExport,
+  bookExportRelated,
   bookList,
   bookReassign,
   bookPreCheck
@@ -650,20 +656,30 @@ function buildFilterParam() {
 
 // ===== 导出 xlsx =====
 
-// 导出中：按钮禁用+loading，防重复点击
+// 导出中：按钮禁用+loading，防重复点击（两个导出互斥，同一时间只跑一个）
 const exporting = ref(false)
+const exportingRelated = ref(false)
 
 function exportData() {
-  if (exporting.value) {
+  runExport(bookExport, exporting, 'bookings.xlsx')
+}
+
+function exportRelatedData() {
+  runExport(bookExportRelated, exportingRelated, 'bookings-related.xlsx')
+}
+
+// 两个导出共用：按当前筛选条件请求 blob，业务错误解析提示、成功则触发下载
+function runExport(apiFn, loadingRef, fallbackFileName) {
+  if (exporting.value || exportingRelated.value) {
     return
   }
-  exporting.value = true
-  bookExport(buildFilterParam()).then(async res => {
+  loadingRef.value = true
+  apiFn(buildFilterParam()).then(async res => {
     if (!res || !res.data) {
       return
     }
     const blob = res.data
-    // 后端业务错误（如超 3000 行）会以 JSON 返回：blob 形态需解析后提示，不触发下载
+    // 后端业务错误（如超行数上限）会以 JSON 返回：blob 形态需解析后提示，不触发下载
     if (blob.type && blob.type.includes('application/json')) {
       try {
         const errorObj = JSON.parse(await blob.text())
@@ -673,17 +689,17 @@ function exportData() {
       }
       return
     }
-    // 文件名优先取响应头（后端为 bookings-{时间戳}.xlsx），取不到用兜底
+    // 文件名优先取响应头（后端为 bookings[-related]-{时间戳}.xlsx），取不到用兜底
     const disposition = res.headers ? res.headers['content-disposition'] : ''
     const match = disposition ? disposition.match(/filename=([^;]+)/) : null
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = match ? match[1].trim() : 'bookings.xlsx'
+    link.download = match ? match[1].trim() : fallbackFileName
     link.click()
     window.URL.revokeObjectURL(url)
   }).finally(() => {
-    exporting.value = false
+    loadingRef.value = false
   })
 }
 

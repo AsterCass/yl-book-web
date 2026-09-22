@@ -740,7 +740,8 @@
       "add": "Add Booking",
       "clear": "Clear Filters",
       "save": "Save",
-      "export": "Export"
+      "export": "Export",
+      "export_related": "Export with History"
     },
     "upsert": {
       "title_add": "Add Booking",

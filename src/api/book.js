@@ -52,6 +52,16 @@ export function bookExport(params) {
     })
 }
 
+// 关联导出：列同普通导出，末尾多一列「其他订单」（该客户在本店除本单外的全部预约）；上限 500 行
+export function bookExportRelated(params) {
+    return serviceShiro({
+        url: `/book/export/related`,
+        params: params,
+        method: 'get',
+        responseType: 'blob',
+    })
+}
+
 // storeId 可选：总门店视角（未选定门店）下按数据行所属门店携带 X-Store-Id 调用
 //（/book/detail 要求门店上下文；已选定门店时请求拦截器会用当前门店覆盖，语义一致）
 export function bookDetail(id, storeId) {
