@@ -147,7 +147,8 @@
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
                 <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注——顺序须与下方
-                     悬停卡片一致；第二行起：起止时间+预约项目 / 金额 / 联系方式 / 备注 -->
+                     悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目 / 备注 / 金额 / 联系方式，
+                     周视图 起止时间+预约项目 / 金额 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
                 <div class="cal-event-title">
                   <!-- 日视图首行塞了四项，卡片窄时省略号会把偏好/特殊备注截没；改为整行横向循环滚动，
                        放得下则静止。周视图列窄、卡片多，滚动会很吵，仍用各自的省略号 -->
@@ -949,7 +950,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     const widthPct = 100 / ev.colCount
     const blocked = dayBlocks.some(bl => ev.start < bl.end && ev.end > bl.start)
     const b = ev.booking
-    // 卡片正文行（第二行起）：起止时间+预约项目 / 金额 / 客户联系方式 / 备注，空值自动跳过（下一行上移）
+    // 卡片正文行（第二行起），空值自动跳过（下一行上移）。日视图与周视图顺序不同，见下方 lines
     const timeRange = (b._startHm && b._endHm)
         ? `${formatHmDisplay(b._startHm)} - ${formatHmDisplay(b._endHm)}` : ''
     const isDayView = viewMode.value === 'day'
@@ -963,8 +964,12 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     // 起止时间与预约项目同行，省一行给卡片正文。用「·」而非空格分隔：
     // .cal-event-sub 是 nowrap，HTML 会把连续空格折叠成一个，拉不开视觉间距
     const timeAndSkills = [timeRange, b._calSub].filter(Boolean).join(' · ')
-    const lines = [timeAndSkills, b._amountLine,
-      isDayView ? '' : b._specialRemarks, b._contact, preferredLine, b.remark]
+    // 日视图：备注紧跟在「起止时间 + 预约项目」那一行下面（卡片第三行），先于金额与联系方式——
+    //   备注多是接待时要留意的补充说明，卡片矮时排在后面的行会被裁掉；特殊备注与偏好员工在日视图已上首行
+    // 周视图：保持原顺序，备注仍是最后一行
+    const lines = (isDayView
+        ? [timeAndSkills, b.remark, b._amountLine, b._contact]
+        : [timeAndSkills, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark])
         .filter(Boolean)
     return {
       booking: b,
