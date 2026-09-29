@@ -135,6 +135,7 @@
               <div v-for="(ev, ei) in col.events" :key="'e' + ei" class="cal-event"
                    :class="{
                      'cal-event-blocked': ev.blocked,
+                     'cal-event-off-schedule': ev.offSchedule,
                      'cal-event-cancelled': ev.cancelled,
                      'cal-event-dragging': dragState && dragState.booking.id === ev.booking.id,
                    }"
@@ -150,6 +151,9 @@
                      悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目 / 备注 / 金额 / 联系方式，
                      周视图 起止时间+预约项目 / 金额 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
                 <div class="cal-event-title">
+                  <!-- 排班外警示：放在滚动区外、首行最左，始终可见（原因与当天班次见悬停卡片） -->
+                  <q-icon v-if="ev.offSchedule" name="fa-solid fa-triangle-exclamation" size=".8rem"
+                          class="cal-event-off-schedule-mark"/>
                   <!-- 日视图首行塞了四项，卡片窄时省略号会把偏好/特殊备注截没；改为整行横向循环滚动，
                        放得下则静止。周视图列窄、卡片多，滚动会很吵，仍用各自的省略号 -->
                   <cask-marquee-row :enabled="viewMode === 'day'">
@@ -380,6 +384,15 @@
           <q-icon v-if="hoverCard.ev.booking.status !== -1" name="fa-solid fa-pen" size="0.9rem"
                   class="cal-event-edit" @pointerdown.stop @click.stop="openEdit(hoverCard.ev.booking)"/>
         </div>
+        <!-- 排班外：说明原因并给出该雇员当天的实际班次，前台据此自行决定是否拖动改派 -->
+        <div v-if="hoverCard.ev.offSchedule" class="cal-event-off-schedule-note">
+          <q-icon name="fa-solid fa-triangle-exclamation" size=".75rem" class="q-mr-xs"/>
+          {{
+            $t('book_calendar.off_schedule_note', {
+              shifts: hoverCard.ev.offScheduleShifts || $t('book_calendar.off_schedule_day_off')
+            })
+          }}
+        </div>
         <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
         <div v-if="hoverCard.ev.booking.staffName || hoverCard.ev.booking.status !== -1"
              class="cal-event-footer">
@@ -429,6 +442,7 @@ import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {mCalendarColor} from "@/api/myu.js";
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
+import {formatShifts, isoWeekdayOfDateStr, mergedShifts, scheduleCovers} from "@/utils/schedule-tools.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
@@ -480,6 +494,14 @@ const staffNameById = computed(() => {
   const map = {}
   for (const s of staffList.value) {
     map[s.id] = s.name
+  }
+  return map
+})
+// 雇员 id -> 雇员（含 scheduleList），用于判定卡片是否落在该雇员当前排班之外
+const staffById = computed(() => {
+  const map = {}
+  for (const s of staffList.value) {
+    map[s.id] = s
   }
   return map
 })
@@ -971,10 +993,14 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
         ? [timeAndSkills, b.remark, b._amountLine, b._contact]
         : [timeAndSkills, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark])
         .filter(Boolean)
+    // 排班外：已分配未开始、但该雇员当前排班覆盖不到（多为预约后改过排班），卡片加警示提醒前台手动改派
+    const offScheduleShifts = offScheduleShiftText(b)
     return {
       booking: b,
       preferredName,
       specialRemarks,
+      offSchedule: offScheduleShifts !== null,
+      offScheduleShifts: offScheduleShifts || '',
       top: toPx(ev.start),
       height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
       leftPct: ev.col * widthPct,
@@ -1012,21 +1038,32 @@ const weekColumns = computed(() => {
  * 一天可能有多段（比如中午回家一趟），所以返回数组而不是单个区间。
  */
 function dayShifts(staff, dow) {
-  const raw = (staff.scheduleList || [])
-      .filter(sc => Number(sc.dayOfWeek) === dow
-          && sc.startMinute != null && sc.endMinute != null && sc.endMinute > sc.startMinute)
-      .map(sc => ({start: Number(sc.startMinute), end: Number(sc.endMinute)}))
-      .sort((a, b) => a.start - b.start)
-  const merged = []
-  for (const seg of raw) {
-    const last = merged[merged.length - 1]
-    if (last && seg.start <= last.end) {
-      last.end = Math.max(last.end, seg.end)
-    } else {
-      merged.push({...seg})
-    }
+  // 合并口径与「排班外预约」判定共用同一份实现（utils/schedule-tools.js），列头班次与卡片标记不会各说各话
+  return mergedShifts(staff.scheduleList, dow)
+}
+
+/**
+ * 已分配、未开始的预约是否落在该雇员<b>当前</b>排班之外（改排班不会动已分配的单，于是可能出现
+ * 「单还挂在某人名下、但他那天/那个时段已经不上班」）。只做提示，不改数据。
+ * <p>
+ * 用 _dateStr / _start / _end 而不是重新解析 bookingTime：它们是卡片渲染的依据，拖动后也会同步更新。
+ * 雇员不在雇员列表里（如已删除）时不判定，免得误报。
+ *
+ * @return null = 不在排班外；否则为该雇员当天的班次文本（当天无班次为空串）
+ */
+function offScheduleShiftText(b) {
+  if (!b.staffId || b.status !== BookStatusEnum.WORK.code) {
+    return null
   }
-  return merged
+  const staff = staffById.value[b.staffId]
+  const dow = isoWeekdayOfDateStr(b._dateStr)
+  if (!staff || !dow) {
+    return null
+  }
+  if (scheduleCovers(staff.scheduleList, dow, b._start, b._end)) {
+    return null
+  }
+  return formatShifts(mergedShifts(staff.scheduleList, dow))
 }
 
 /**
@@ -2461,6 +2498,38 @@ onBeforeUnmount(() => {
   &.cal-event-blocked {
     outline: 2px dashed rgba(128, 128, 128, .75);
     outline-offset: -2px;
+  }
+
+  // 排班外标记色：低饱和的深琥珀。全局 --warning（255,183,0）太亮，在浅色主题底色上对比度只有 1.5、几乎看不清；
+  // 这个色在浅色底约 3.6、深色底约 4.6，图标与描边在两套主题下都看得清
+  $off-schedule-color: rgb(181, 108, 31);
+
+  // 排班外（已分配未开始、但雇员当前排班覆盖不到）：琥珀色虚线框。写在 blocked 之后——
+  // 两者同时成立时以它为准，它是需要前台动手处理的那一个
+  &.cal-event-off-schedule {
+    outline: 2px dashed $off-schedule-color;
+    outline-offset: -2px;
+  }
+
+  .cal-event-off-schedule-mark {
+    flex: 0 0 auto;
+    margin-right: .25rem;
+    color: $off-schedule-color;
+  }
+
+  // 悬停卡片里的说明：文字保持正文色（彩色小字再怎么调都不如正文好读），只用标记色做左边条、浅底与图标
+  .cal-event-off-schedule-note {
+    margin: .2rem 0;
+    padding: .2rem .4rem;
+    border-left: 3px solid $off-schedule-color;
+    border-radius: 2px;
+    background: rgba($off-schedule-color, .12);
+    font-size: .72rem;
+    line-height: 1.35;
+
+    .q-icon {
+      color: $off-schedule-color;
+    }
   }
 
   // 已取消：只做删除线，左边栏/底色一律交给该状态的配色（CANCEL 也是可自定义的状态之一）

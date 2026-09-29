@@ -603,6 +603,13 @@
         "invalid_range": "Invalid range: end time must be later than start time"
       }
     },
+    "schedule_impact": {
+      "title": "This schedule change affects assigned bookings",
+      "note": "After saving, the following {count} assigned bookings that have not started will fall outside this staff member's new schedule. The system will not reassign them automatically; please adjust them in the booking calendar (their cards are marked with an orange dashed border).",
+      "truncated": "This staff member has {total} assigned bookings that have not started; only {checked} of them were checked.",
+      "save_anyway": "Save anyway",
+      "back": "Go back"
+    },
     "block": {
       "title": "Blocked Time Slots :",
       "note": "Only blocks within the past/next two weeks are shown; new blocks can be at most two weeks ahead.",
@@ -908,6 +915,8 @@
 
   "book_calendar": {
     "off_today": "Off today",
+    "off_schedule_note": "This staff member's current schedule does not cover this slot (schedule that day: {shifts}). The schedule may have changed after booking; please check whether to reassign.",
+    "off_schedule_day_off": "off",
     "title": "Booking Calendar",
     "amount_prefix": "Amount: ",
     "date_start": "Start Date",

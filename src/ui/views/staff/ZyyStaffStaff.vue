@@ -69,6 +69,7 @@
                               upsertGoogleCalendarId = row.googleCalendarId
                               upsertClassPassItemId = row.classPassItemId
                               initScheduleParam(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
+                              rememberOriginalSchedule(row.scheduleList || row.scheduleDtoList || row.staffScheduleList || [])
                               initDefaultWorkTime(row.defaultWorkTime)
                               loadStaffBlocks()
                               isNew = false;
@@ -363,6 +364,44 @@
       </q-card>
     </q-dialog>
 
+    <!-- 改排班影响提示：保存后有已分配、未开始的预约落在新排班之外时弹出。只提示、不自动改派 -->
+    <q-dialog :model-value="showScheduleImpact" @hide="showScheduleImpact = false"
+              transition-show="fade" transition-hide="fade">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
+        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
+          {{ $t('staff.schedule_impact.title') }}
+        </h5>
+
+        <q-separator class="component-separator-base" inset spaced="1rem"/>
+
+        <div class="q-mx-md" style="width: 30rem; opacity: .7; font-size: .85rem">
+          {{ $t('staff.schedule_impact.note', {count: scheduleImpact.list.length}) }}
+        </div>
+
+        <div class="q-mx-md q-mt-md" style="width: 30rem; max-height: 20rem; overflow-y: auto">
+          <div v-for="booking in scheduleImpact.list" :key="booking.id" class="staff-block-item">
+            <div style="font-weight: 500">{{ impactTimeText(booking) }}</div>
+            <div class="component-max-line-text" style="opacity: .6; font-size: .78rem">
+              {{ impactDetailText(booking) }}
+            </div>
+          </div>
+        </div>
+
+        <div v-if="scheduleImpact.truncated" class="q-mx-md q-mt-sm" style="width: 30rem; opacity: .6; font-size: .78rem">
+          {{ $t('staff.schedule_impact.truncated', {total: scheduleImpact.total, checked: scheduleImpact.checked}) }}
+        </div>
+
+        <div class="row q-mt-xl q-mb-md justify-evenly">
+          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated @click="confirmScheduleImpactSave">
+            {{ $t('staff.schedule_impact.save_anyway') }}
+          </q-btn>
+          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showScheduleImpact = false">
+            {{ $t('staff.schedule_impact.back') }}
+          </q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
+
     <cask-dialog-judgment v-model="showOperation"
                           :callback-method="isTrue => { showOperation = false; if (isTrue) toOpFunc() }"
                           :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('staff.dialog.common.cancel'), trueLabel: $t('staff.dialog.common.confirm') }"
@@ -390,7 +429,10 @@ import {
   staffUpdateSkill
 } from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
-import {bookBlockCreate, bookBlockDelete, bookBlockList} from "@/api/book.js";
+import {bookBlockCreate, bookBlockDelete, bookBlockList, bookList} from "@/api/book.js";
+import {BookStatusEnum} from "@/constants/enums/book.js";
+import {useGlobalStateStore} from "@/utils/global-state.js";
+import {isBookingOutsideSchedule, isoWeekdayOfDateStr, mergedShifts} from "@/utils/schedule-tools.js";
 
 
 const selectId = ref("")
@@ -444,6 +486,7 @@ const newBlockReason = ref("")
 
 function clearUpsertParam() {
   updateId.value = ""
+  rememberOriginalSchedule([])
   upsertName.value = ""
   upsertExternalName.value = ""
   upsertPhone.value = ""
@@ -797,16 +840,120 @@ function upsertData() {
       selectData(true)
     })
   } else {
-    staffUpdate(updateId.value, body).then(res => {
-      if (!res || !res.data) {
+    // 改了排班的话先看看会不会有已分配的单落到新排班之外：有就弹框列出，由操作人决定是否仍然保存
+    if (checkingScheduleImpact.value) {
+      return
+    }
+    checkingScheduleImpact.value = true
+    checkScheduleImpact(scheduleList).then(impact => {
+      if (impact && impact.list.length > 0) {
+        scheduleImpact.value = impact
+        pendingUpdateBody = body
+        showScheduleImpact.value = true
         return
       }
-      clearUpsertParam()
-      showUpsert.value = false
-      notifyTopPositive(t('staff.notify.update_success'))
-      selectData(true)
+      submitStaffUpdate(body)
+    }).catch(() => {
+      // 检查只是辅助提示：自身出错时照常保存，不能因为它把雇员存不进去
+      submitStaffUpdate(body)
+    }).finally(() => {
+      checkingScheduleImpact.value = false
     })
   }
+}
+
+function submitStaffUpdate(body) {
+  staffUpdate(updateId.value, body).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    clearUpsertParam()
+    showUpsert.value = false
+    notifyTopPositive(t('staff.notify.update_success'))
+    selectData(true)
+  })
+}
+
+// ===== 改排班的影响提示 =====
+// 改排班不会动已分配的单：原本排在周三的单，雇员改成二四六之后仍挂在他名下，到那天前台才发现「不上班的人有单」。
+// 保存前先查出该雇员已分配、未开始的预约，按新排班逐张判定，把落到排班外的列出来让操作人当场处理。
+// 系统不自动改派；仍然保存的话，这些单在预约日历上会带橙色虚线框标记（见 ZyyBookCalendar 的 offSchedule）
+
+// 单次最多检查的预约数（列表接口分页）：超出时对话框里注明只检查了一部分
+const SCHEDULE_IMPACT_MAX = 200
+
+const globalState = useGlobalStateStore()
+// 打开编辑时的原排班：只有「实际生效的排班」变了才检查，只改电话/名字这类保存不打扰
+let originalScheduleList = []
+
+function rememberOriginalSchedule(scheduleList) {
+  originalScheduleList = scheduleList || []
+}
+let pendingUpdateBody = null
+const checkingScheduleImpact = ref(false)
+const showScheduleImpact = ref(false)
+const scheduleImpact = ref({list: [], total: 0, checked: 0, truncated: false})
+
+// 排班的比较键：按星期逐天合并重叠/相邻段后再比，
+// 「10-14 + 14-18」与「10-18」在后端存下来是同一份排班，不算改动
+function scheduleKey(scheduleList) {
+  const days = []
+  for (let dow = 1; dow <= 7; dow++) {
+    days.push(mergedShifts(scheduleList, dow).map(seg => `${seg.start}-${seg.end}`).join(','))
+  }
+  return days.join('|')
+}
+
+/**
+ * 按新排班检查该雇员已分配、未开始的预约。
+ * 以下情况直接返回 null（不拦保存）：排班没变；账号没有预约列表权限（/book/list 要 book:book:list，
+ * 请求会被拒并弹错误提示，而这只是一个辅助提示，不该妨碍保存雇员）；查询失败。
+ */
+async function checkScheduleImpact(newScheduleList) {
+  if (scheduleKey(newScheduleList) === scheduleKey(originalScheduleList)) {
+    return null
+  }
+  if (!globalState.hasPermission('book:book:list')) {
+    return null
+  }
+  const res = await bookList({
+    staffId: updateId.value,
+    statusList: [BookStatusEnum.WORK.code],
+    pageNo: 1,
+    pageSize: SCHEDULE_IMPACT_MAX,
+  })
+  if (!res || !res.data || !res.data.data) {
+    return null
+  }
+  const records = res.data.data.records || []
+  const total = res.data.data.total || records.length
+  const list = records
+      .filter(booking => isBookingOutsideSchedule(booking, newScheduleList))
+      .sort((a, b) => (a.bookingTime || '').localeCompare(b.bookingTime || ''))
+  return {list, total, checked: records.length, truncated: total > records.length}
+}
+
+function confirmScheduleImpactSave() {
+  showScheduleImpact.value = false
+  if (pendingUpdateBody) {
+    submitStaffUpdate(pendingUpdateBody)
+    pendingUpdateBody = null
+  }
+}
+
+// 对话框里一张单的时间文本：「2026-10-07 周三 14:00-15:00」（星期按日期直接算，不做时区换算）
+function impactTimeText(booking) {
+  const time = booking.bookingTime || ''
+  const dow = isoWeekdayOfDateStr(time)
+  const weekday = dow ? t(`staff.schedule.day.${dow}`) : ''
+  const start = time.substring(11, 16)
+  const end = booking.endTime ? booking.endTime.substring(11, 16) : ''
+  return [time.substring(0, 10), weekday, end ? `${start}-${end}` : start].filter(Boolean).join(' ')
+}
+
+function impactDetailText(booking) {
+  const skills = (booking.skillDtoList || []).map(skill => skill.name).filter(Boolean).join('/')
+  return [booking.name || '-', skills].filter(Boolean).join(' · ')
 }
 
 

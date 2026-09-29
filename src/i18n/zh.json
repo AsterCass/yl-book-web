@@ -601,6 +601,13 @@
         "invalid_range": "时间段无效：结束时间必须晚于开始时间"
       }
     },
+    "schedule_impact": {
+      "title": "排班调整会影响已分配的预约",
+      "note": "保存后，以下 {count} 张已分配、未开始的预约不在该雇员的新排班内。系统不会自动改派，请到预约日历手动调整（这些预约卡片会带橙色虚线框标记）。",
+      "truncated": "该雇员已分配、未开始的预约共 {total} 张，本次只检查了其中 {checked} 张。",
+      "save_anyway": "仍然保存",
+      "back": "返回修改"
+    },
     "block": {
       "title": "屏蔽时间段 :",
       "note": "默认仅展示前后两周内的屏蔽时间段，新增最多提前两周",
@@ -906,6 +913,8 @@
 
   "book_calendar": {
     "off_today": "今日休息",
+    "off_schedule_note": "该雇员当前排班不覆盖此时段（当天排班：{shifts}），可能是预约后调整过排班，请确认是否改派",
+    "off_schedule_day_off": "休息",
     "title": "预约日历",
     "amount_prefix": "金额：",
     "date_start": "开始日期",
