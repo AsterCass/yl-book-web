@@ -71,6 +71,8 @@
                                 resourceId: item.resourceId,
                                 consumeCount: item.consumeCount
                               }))
+                              upsertAddonOnly = !!row.addonOnly
+                              upsertAddonMainSkillIdList = (row.addonMainList || []).map(item => item.mainSkillId)
                               isNew = false;
                               showUpsert = true
                             }
@@ -157,6 +159,32 @@
                    mask="#.##"
                    reverse-fill-mask
                    :placeholder="t('staff_skill.placeholder.serviceAmount')"/>
+
+          <!-- 附加服务：勾选后客户预约网页 / 电话 AI 不允许单独预约该项目，只能与下方所选主服务同单；
+               管理端建单不受限制。主服务候选只给普通技能（附加服务不能再当主服务，也不能选自己） -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('staff_skill.upsert.field.addonOnly') }}&nbsp;:</h6>
+          <div>
+            <q-checkbox v-model="upsertAddonOnly" dense color="grey-10"
+                        :label="t('staff_skill.upsert.addon_toggle')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem">
+              {{ $t('staff_skill.upsert.addon_note') }}
+            </div>
+            <template v-if="upsertAddonOnly">
+              <q-select v-model="upsertAddonMainSkillIdList" :menu-offset="[0, 5]" :options="addonMainOptions"
+                        class="component-outline-input-grow q-mt-sm"
+                        dense dropdown-icon="fa-solid fa-caret-down" emit-value map-options
+                        menu-anchor="bottom start" multiple use-chips outlined
+                        popup-content-class="component-extra-card-std-limit"/>
+              <div class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
+                {{
+                  upsertAddonMainSkillIdList.length === 0
+                      ? $t('staff_skill.upsert.addon_main_empty')
+                      : $t('staff_skill.upsert.addon_main_note')
+                }}
+              </div>
+            </template>
+          </div>
 
 
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
@@ -263,13 +291,19 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableStaffSkill, tableStaffSkillOperation} from "@/tables/staff-skill.js";
-import {staffSkillCreate, staffSkillDelete, staffSkillList, staffSkillUpdate} from "@/api/staff-skill.js";
+import {
+  staffSkillCreate,
+  staffSkillDelete,
+  staffSkillList,
+  staffSkillListSimple,
+  staffSkillUpdate
+} from "@/api/staff-skill.js";
 import {storeResourceList} from "@/api/store-resource.js";
 
 
@@ -298,8 +332,17 @@ const upsertServiceAmount = ref(null)
 const upsertAliasList = ref([])
 const storeResourceOptions = ref([])
 const upsertResourceConsumptionList = ref([])
+// 附加服务：开关 + 可附加的主服务 id 列表（候选来自本店全部技能的简单列表）
+const upsertAddonOnly = ref(false)
+const upsertAddonMainSkillIdList = ref([])
+const skillSimpleList = ref([])
 
 const updateId = ref("")
+
+// 主服务候选：本店的普通技能（附加服务不能再当主服务，不允许链式），编辑时排除自己
+const addonMainOptions = computed(() => skillSimpleList.value
+    .filter(skill => !skill.addonOnly && (isNew.value || skill.id !== updateId.value))
+    .map(skill => ({label: skill.name, value: skill.id})))
 
 function clearUpsertParam() {
   upsertName.value = ""
@@ -312,6 +355,18 @@ function clearUpsertParam() {
   upsertServiceAmount.value = null
   upsertAliasList.value = []
   upsertResourceConsumptionList.value = []
+  upsertAddonOnly.value = false
+  upsertAddonMainSkillIdList.value = []
+}
+
+// 技能简单列表（含 addonOnly），供「可附加的主服务」下拉；技能有增删改后重拉，候选才跟得上
+function loadSkillSimpleList() {
+  staffSkillListSimple().then(res => {
+    if (!res || !res.data || !res.data.data) {
+      return
+    }
+    skillSimpleList.value = res.data.data
+  })
 }
 
 // op
@@ -414,6 +469,9 @@ function upsertData() {
       resourceId: item.resourceId,
       consumeCount: Number(item.consumeCount),
     })),
+    addonOnly: upsertAddonOnly.value,
+    // 关掉开关就清空主服务：后端对普通服务不接受主服务列表
+    addonMainSkillIdList: upsertAddonOnly.value ? upsertAddonMainSkillIdList.value : [],
   }
 
   if (isNew.value) {
@@ -424,6 +482,7 @@ function upsertData() {
       clearUpsertParam()
       showUpsert.value = false
       selectData(true)
+      loadSkillSimpleList()
     })
   } else {
     staffSkillUpdate(updateId.value, body).then(res => {
@@ -434,6 +493,7 @@ function upsertData() {
       showUpsert.value = false
       notifyTopPositive(t('staff_skill.notify.update_success'))
       selectData(true)
+      loadSkillSimpleList()
     })
   }
 }
@@ -449,6 +509,7 @@ function deleteData() {
     }
     notifyTopPositive(t('notify.delete_success'))
     selectData(true)
+    loadSkillSimpleList()
   })
 }
 
@@ -483,6 +544,13 @@ function selectData(keepPage = false) {
       data.resourceRequirement = (data.resourceConsumptionList || [])
           .map(item => `${item.resourceName || item.resourceId} × ${item.consumeCount}`)
           .join(",")
+      // 附加服务：一行一个可附加的主服务名；普通服务留空；附加服务但没配主服务时给提示（客户端不展示该项目）
+      if (data.addonOnly) {
+        const mainNames = (data.addonMainList || []).map(item => item.mainSkillName || item.mainSkillId)
+        data.addonMains = mainNames.length > 0 ? mainNames.join(",") : t('staff_skill.table.addon_no_main')
+      } else {
+        data.addonMains = ""
+      }
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false
@@ -491,6 +559,7 @@ function selectData(keepPage = false) {
 
 onMounted(() => {
   loadStoreResources()
+  loadSkillSimpleList()
   selectData()
 })
 </script>

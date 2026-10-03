@@ -643,12 +643,13 @@
     "label": { "id": "技能编号", "name": "技能名称", "code": "技能码", "status": "技能状态" },
     "placeholder": { "id": "例如：YLSS001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70", "alias": "例如：足疗", "external_name": "可为空", "external_name_zh": "可为空，中文", "desc_zh": "可为空，中文", "serviceAmount": "可为空，例如：128"},
     "button": { "query": "查询", "add": "添加技能", "clear": "清空条件", "save": "保存" },
-    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "external_name_zh": "对外名称（中文）", "code": "技能码", "desc": "技能描述", "desc_zh": "技能描述（中文）", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名", "resourceConsumptionList": "资源位消耗"}, "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "resource_note": "该技能服务需要占用的门店资源数量。", "resource_add": "添加资源消耗", "resource_empty": "该技能暂不消耗门店资源", "resource_unconfigured": "当前门店尚未配置资源位，请先到门店管理中添加。", "resource_count_placeholder": "消耗数量", "resource_over_capacity": "资源位【{name}】的消耗数量超过了门店总量（{capacity}），该技能将永远无法被预约，请先到门店管理中调大容量。", "resource_all_selected": "所有门店资源位均已添加", "resource_invalid": "请选择有效且不重复的资源位，并填写大于 0 的整数消耗数量", "save_add": "添加", "save_update": "更新" },
+    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "external_name_zh": "对外名称（中文）", "code": "技能码", "desc": "技能描述", "desc_zh": "技能描述（中文）", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名", "resourceConsumptionList": "资源位消耗", "addonOnly": "附加服务"}, "addon_toggle": "仅作为附加服务（客户端不可单独预约）", "addon_note": "勾选后，客户预约网页与电话 AI 只允许该项目与下方任一主服务放在同一张预约单里一起预约；管理端建单不受限制。", "addon_main_note": "客户选择了上述任一主服务后才能添加该项目。主服务只能是普通技能，不能是其他附加服务。", "addon_main_empty": "尚未选择主服务：客户端不会展示该项目，管理端仍可正常使用。", "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "resource_note": "该技能服务需要占用的门店资源数量。", "resource_add": "添加资源消耗", "resource_empty": "该技能暂不消耗门店资源", "resource_unconfigured": "当前门店尚未配置资源位，请先到门店管理中添加。", "resource_count_placeholder": "消耗数量", "resource_over_capacity": "资源位【{name}】的消耗数量超过了门店总量（{capacity}），该技能将永远无法被预约，请先到门店管理中调大容量。", "resource_all_selected": "所有门店资源位均已添加", "resource_invalid": "请选择有效且不重复的资源位，并填写大于 0 的整数消耗数量", "save_add": "添加", "save_update": "更新" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "delete": { "title": "删除技能", "content": "是否要删除【{name}】技能" }
     },
-    "notify": { "update_success": "更新技能成功" }
+    "notify": { "update_success": "更新技能成功" },
+    "table": { "addon_no_main": "未配置主服务（客户端不展示）" }
   },
 
   "home": "主页",

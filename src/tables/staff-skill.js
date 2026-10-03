@@ -72,6 +72,15 @@ const tableStaffSkillCol = [
         align: 'center',
     },
     {
+        // 附加服务：一行一个可附加的主服务名，由 ZyyStaffSkill 用逗号拼好；普通服务为空，
+        // 附加服务但未配置主服务时显示提示文案（客户端不展示该项目）
+        name: 'addonMains',
+        field: 'addonMains',
+        label: '附加于（主服务）',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.MULTI_ROW,
+    },
+    {
         // 一行一个「资源名 × 消耗数」，由 ZyyStaffSkill 用逗号拼好
         name: 'resourceRequirement',
         field: 'resourceRequirement',
