@@ -94,8 +94,7 @@
 
     <q-dialog :model-value="showUpsert" transition-hide="fade" no-backdrop-dismiss no-shake
               transition-show="fade" @hide="showUpsert = false">
-      <q-card class="component-cask-dialog-judgement-std"
-              style="max-width: 2000px !important; min-width: 500px!important;">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
           {{ isNew ? $t('staff_skill.upsert.title_add') : $t('staff_skill.upsert.title_update') }}
         </h5>
@@ -106,8 +105,13 @@
 
         </div>
 
-        <div class="q-ma-md"
-             style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
+        <!-- 两列布局（同门店编辑卡片）：左=基础配置（名称 / 对外名称 / 技能码 / 描述 / 时长 / 金额），
+             右=进阶配置（附加服务与可附加的主服务、技能别名、资源位消耗）——行数多，塞在单列里会把弹窗拉得很长。
+             no-wrap 强制并排，宽度由内容撑开 -->
+        <div class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
+
+        <div style="flex: 1 1 auto; min-width: 24rem;">
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: center;">
 
           <h6 class="cask-litter-title-asterisk" style="white-space: nowrap;">{{ $t('staff_skill.upsert.field.name') }}&nbsp;:</h6>
           <q-input v-model="upsertName" class="component-outline-input-grow" dense outlined
@@ -160,39 +164,55 @@
                    reverse-fill-mask
                    :placeholder="t('staff_skill.placeholder.serviceAmount')"/>
 
-          <!-- 附加服务：勾选后客户预约网页 / 电话 AI 不允许单独预约该项目，只能与下方所选主服务同单；
+        </div>
+        </div>
+
+        <!-- 右列：进阶配置——附加服务（主服务用勾选框，同雇员管理里配置技能的样式）、技能别名、资源位消耗 -->
+        <div style="flex: 1 1 auto; min-width: 26rem;">
+        <div style="display: grid; grid-template-columns: max-content 1fr; gap: 1.2rem; align-items: start;">
+
+          <!-- 附加服务：勾选后客户预约网页 / 电话 AI 不允许单独预约该项目，只能与下面勾选的主服务同单；
                管理端建单不受限制。主服务候选只给普通技能（附加服务不能再当主服务，也不能选自己） -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
             {{ $t('staff_skill.upsert.field.addonOnly') }}&nbsp;:</h6>
           <div>
-            <q-checkbox v-model="upsertAddonOnly" dense color="grey-10"
+            <q-checkbox class="q-ma-none" color="grey-10" size="37px" v-model="upsertAddonOnly"
                         :label="t('staff_skill.upsert.addon_toggle')"/>
-            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem">
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 26rem">
               {{ $t('staff_skill.upsert.addon_note') }}
             </div>
-            <template v-if="upsertAddonOnly">
-              <q-select v-model="upsertAddonMainSkillIdList" :menu-offset="[0, 5]" :options="addonMainOptions"
-                        class="component-outline-input-grow q-mt-sm"
-                        dense dropdown-icon="fa-solid fa-caret-down" emit-value map-options
-                        menu-anchor="bottom start" multiple use-chips outlined
-                        popup-content-class="component-extra-card-std-limit"/>
-              <div class="q-mt-xs" style="opacity: .5; font-size: .75rem;">
+          </div>
+
+          <template v-if="upsertAddonOnly">
+            <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+              {{ $t('staff_skill.upsert.field.addonMainSkillIdList') }}&nbsp;:</h6>
+            <div>
+              <div v-if="addonMainOptions.length === 0" style="opacity: .5; font-size: .75rem; max-width: 26rem">
+                {{ $t('staff_skill.upsert.addon_main_no_candidate') }}
+              </div>
+              <!-- 数组型 v-model + val：勾上即把该技能 id 放进主服务列表，取消即移除 -->
+              <div v-else class="row" style="max-width: 26rem">
+                <div v-for="skill in addonMainOptions" :key="skill.value">
+                  <q-checkbox class="q-ma-xs" color="grey-10" size="37px" v-model="upsertAddonMainSkillIdList"
+                              :val="skill.value" :label="skill.label"/>
+                </div>
+              </div>
+              <div class="q-mt-xs" style="opacity: .5; font-size: .75rem; max-width: 26rem">
                 {{
                   upsertAddonMainSkillIdList.length === 0
                       ? $t('staff_skill.upsert.addon_main_empty')
                       : $t('staff_skill.upsert.addon_main_note')
                 }}
               </div>
-            </template>
-          </div>
-
+            </div>
+          </template>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
             {{
               $t('staff_skill.upsert.field.aliasList')
             }}&nbsp;:</h6>
           <div>
-            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 26rem">
               {{ $t('staff_skill.upsert.alias_note') }}
             </div>
             <q-btn no-caps unelevated class="component-none-btn-mini-grow"
@@ -225,7 +245,7 @@
             {{ $t('staff_skill.upsert.field.resourceConsumptionList') }}&nbsp;:
           </h6>
           <div>
-            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem">
+            <div class="q-mb-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 26rem">
               {{ $t('staff_skill.upsert.resource_note') }}
             </div>
             <q-btn no-caps unelevated class="component-none-btn-mini-grow"
@@ -265,6 +285,8 @@
             </div>
           </div>
 
+        </div>
+        </div>
 
         </div>
 
@@ -470,8 +492,11 @@ function upsertData() {
       consumeCount: Number(item.consumeCount),
     })),
     addonOnly: upsertAddonOnly.value,
-    // 关掉开关就清空主服务：后端对普通服务不接受主服务列表
-    addonMainSkillIdList: upsertAddonOnly.value ? upsertAddonMainSkillIdList.value : [],
+    // 关掉开关就清空主服务：后端对普通服务不接受主服务列表。勾选框只列当前候选，回填进来但已不是候选的
+    // （比如那个技能后来被改成了附加服务）也一并丢掉，免得后端按「主服务不能是附加服务」拒绝
+    addonMainSkillIdList: upsertAddonOnly.value
+        ? upsertAddonMainSkillIdList.value.filter(id => addonMainOptions.value.some(option => option.value === id))
+        : [],
   }
 
   if (isNew.value) {
