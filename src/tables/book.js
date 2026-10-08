@@ -576,7 +576,7 @@ export const tableAiCallReview = {
     showTableSetting: true,
 }
 
-// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）
+// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）+ 重判（已复盘 / 复盘失败的才有，二次确认）
 export const tableAiCallReviewOperation = [
     {
         label: '详情',
@@ -587,5 +587,10 @@ export const tableAiCallReviewOperation = [
         label: '处理',
         condition: 'opsOp',
         name: 'ops',
+    },
+    {
+        label: '重判',
+        condition: 'rejudgeOp',
+        name: 'rejudge',
     },
 ]

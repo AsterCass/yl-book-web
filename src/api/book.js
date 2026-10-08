@@ -355,3 +355,11 @@ export function bookAiCallReviewOps(id, body) {
         method: 'post',
     })
 }
+
+// AI 通话复盘要求重判：只对已复盘 / 复盘失败且客户说过话的记录；下一轮定时裁判（每小时）重判并覆盖原评判
+export function bookAiCallReviewRejudge(id) {
+    return serviceShiro({
+        url: `/book/ai-call-review/rejudge/${id}`,
+        method: 'post',
+    })
+}

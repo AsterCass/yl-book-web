@@ -754,7 +754,10 @@
       "severity": "严重度",
       "knowledge": "AI 自带的知识（判编造的出处：事实包 / 门店 / 目录）",
       "ops": "运营标记",
-      "ops_by": "最后标记于"
+      "ops_by": "最后标记于",
+      "checks": "系统备注（代码核对）",
+      "rejudge": "要求重判",
+      "rejudge_count": "已重判 {n} 次"
     },
     "ops_dialog": {
       "title": "处理标记",
@@ -763,7 +766,14 @@
       "remark_placeholder": "跟进记录 / 误判说明（可为空，保存空内容即清空）"
     },
     "notify": {
-      "ops_success": "标记已保存"
+      "ops_success": "标记已保存",
+      "rejudge_success": "已登记重判，等下一轮定时裁判"
+    },
+    "rejudge_dialog": {
+      "title": "重判确认",
+      "content": "重判会在下一轮定时裁判（每小时 05 分）重新评判这通电话，并覆盖现有的评判结果（不保留历史）。确认？",
+      "cancel": "取消",
+      "confirm": "确认重判"
     }
   },
   "book_feedback": {

@@ -756,7 +756,10 @@
       "severity": "Severity",
       "knowledge": "Knowledge the AI had (sources for the fabrication check: facts / stores / catalog)",
       "ops": "Handling",
-      "ops_by": "last marked at"
+      "ops_by": "last marked at",
+      "checks": "System notes (code checks)",
+      "rejudge": "Request re-judge",
+      "rejudge_count": "re-judged {n} time(s)"
     },
     "ops_dialog": {
       "title": "Mark Handling",
@@ -765,7 +768,14 @@
       "remark_placeholder": "Follow-up notes / why it is a false alarm (optional; saving empty content clears it)"
     },
     "notify": {
-      "ops_success": "Marked"
+      "ops_success": "Marked",
+      "rejudge_success": "Re-judge requested; it runs on the next scheduled judge"
+    },
+    "rejudge_dialog": {
+      "title": "Confirm re-judge",
+      "content": "The next scheduled judge run (hourly at :05) will judge this call again and overwrite the current verdict (no history is kept). Continue?",
+      "cancel": "Cancel",
+      "confirm": "Re-judge"
     }
   },
   "book_feedback": {

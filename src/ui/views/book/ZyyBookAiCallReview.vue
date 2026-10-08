@@ -230,7 +230,9 @@
                   {{ $t('book_ai_call_review.detail.severity') }}: {{ detail.severityName }}
                 </span>
                 <span v-if="detail.judgeModel" class="q-ml-md" style="opacity: .6; font-size: .8rem">
-                  {{ detail.judgeModel }} · {{ detail.reviewedAt }}
+                  {{ detail.judgeModel }}<span v-if="detail.judgeEffort"> / {{ detail.judgeEffort }}</span>
+                  <span v-if="detail.criteriaVersion"> / {{ detail.criteriaVersion }}</span> · {{ detail.reviewedAt }}
+                  <span v-if="detail.rejudgeCount > 0"> · {{ $t('book_ai_call_review.detail.rejudge_count', {n: detail.rejudgeCount}) }}</span>
                 </span>
               </div>
               <div v-if="detailTags.length > 0" class="q-mt-xs">
@@ -251,7 +253,8 @@
                 </div>
               </div>
             </template>
-            <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.FAILED.code" class="q-mt-xs" style="color: rgb(200, 60, 60)">
+            <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.FAILED.code" class="q-mt-xs"
+                 style="color: rgb(200, 60, 60); white-space: pre-wrap; font-size: .9rem">
               {{ $t('book_ai_call_review.detail.failed') }}: {{ detail.reviewError || '-' }}
             </div>
             <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.NO_DIALOGUE.code" class="q-mt-xs" style="opacity: .6">
@@ -260,6 +263,18 @@
             <div v-else class="q-mt-xs" style="opacity: .6">
               {{ $t('book_ai_call_review.detail.pending') }}
             </div>
+            <!-- 代码核对的系统备注：语言不符、该挂没挂、写入没成、被抢位、走了兜底、首包慢…（裁判也拿到了同一份） -->
+            <div v-if="detailChecks.length > 0" class="q-mt-sm">
+              <div style="opacity: .6; font-size: .9rem">{{ $t('book_ai_call_review.detail.checks') }}</div>
+              <div v-for="(c, i) in detailChecks" :key="i" class="q-mt-xs" style="font-size: .85rem; opacity: .85">
+                <q-badge outline color="grey-7" class="q-mr-xs">{{ c.key }}</q-badge>
+                <span style="white-space: pre-wrap">{{ c.note }}</span>
+              </div>
+            </div>
+            <q-btn v-if="detail.rejudgeOp" class="q-mt-sm shadow-1 component-outline-btn-grow" no-caps unelevated
+                   :loading="rejudging" @click="openRejudge(detail)">
+              {{ $t('book_ai_call_review.detail.rejudge') }}
+            </q-btn>
 
             <q-separator class="q-my-md"/>
 
@@ -328,6 +343,17 @@
       </q-card>
     </q-dialog>
 
+    <!-- 重判确认：覆盖现有评判、等下一轮定时裁判（每小时）、消耗一次模型调用 -->
+    <cask-dialog-judgment v-model="showRejudge"
+                          :callback-method="onConfirmRejudge"
+                          :dialog-judgment-data="{
+                            title: t('book_ai_call_review.rejudge_dialog.title'),
+                            content: t('book_ai_call_review.rejudge_dialog.content'),
+                            falseLabel: t('book_ai_call_review.rejudge_dialog.cancel'),
+                            trueLabel: t('book_ai_call_review.rejudge_dialog.confirm'),
+                          }"
+    />
+
   </div>
 </template>
 
@@ -339,7 +365,8 @@ import {notifyTopPositive} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableAiCallReview, tableAiCallReviewOperation} from "@/tables/book.js";
-import {bookAiCallReviewDetail, bookAiCallReviewList, bookAiCallReviewOps} from "@/api/book.js";
+import {bookAiCallReviewDetail, bookAiCallReviewList, bookAiCallReviewOps, bookAiCallReviewRejudge} from "@/api/book.js";
+import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {
   AiCallEndedByEnum,
   AiCallLangEnum,
@@ -461,6 +488,9 @@ function decorate(row) {
     opsRemark: row.opsRemark || '',
     detailOp: true,
     opsOp: true,
+    // 重判：裁判跑过（已复盘 / 复盘失败）且客户说过话的才能重判
+    rejudgeOp: (row.reviewStatus === AiCallReviewStatusEnum.REVIEWED.code
+        || row.reviewStatus === AiCallReviewStatusEnum.FAILED.code) && row.customerTurns > 0,
   }
 }
 
@@ -505,6 +535,8 @@ const detail = ref(null)
 const transcriptGroups = ref([])
 const detailTags = ref([])
 const detailProblems = ref([])
+// 代码核对的系统备注 [{key, turn, note}]
+const detailChecks = ref([])
 
 function openDetail(row) {
   bookAiCallReviewDetail(row.id).then(res => {
@@ -515,6 +547,7 @@ function openDetail(row) {
     detail.value = data
     detailTags.value = parseJsonArray(data.tags)
     detailProblems.value = parseJsonArray(data.problems)
+    detailChecks.value = parseJsonArray(data.checks)
     transcriptGroups.value = buildGroups(parseJsonObject(data.dossier))
     showDetail.value = true
   })
@@ -663,6 +696,41 @@ function onOperationClick(name, row) {
   if (name === 'ops') {
     openOps(row)
   }
+  if (name === 'rejudge') {
+    openRejudge(row)
+  }
+}
+
+// ===== 重判（二次确认：会覆盖现有评判、等下一轮定时裁判，并消耗一次模型调用） =====
+
+const showRejudge = ref(false)
+const rejudgeRow = ref(null)
+const rejudging = ref(false)
+
+function openRejudge(row) {
+  rejudgeRow.value = row
+  showRejudge.value = true
+}
+
+function onConfirmRejudge(confirmed) {
+  showRejudge.value = false
+  if (!confirmed || !rejudgeRow.value || rejudging.value) {
+    return
+  }
+  const row = rejudgeRow.value
+  rejudging.value = true
+  bookAiCallReviewRejudge(row.id).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('book_ai_call_review.notify.rejudge_success'))
+    selectData(true)
+    if (showDetail.value && detail.value && detail.value.id === row.id) {
+      openDetail(row)
+    }
+  }).finally(() => {
+    rejudging.value = false
+  })
 }
 
 onMounted(() => {
