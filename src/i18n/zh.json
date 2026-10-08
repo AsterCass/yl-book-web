@@ -757,7 +757,11 @@
       "ops_by": "最后标记于",
       "checks": "系统备注（代码核对）",
       "rejudge": "要求重判",
-      "rejudge_count": "已重判 {n} 次"
+      "rejudge_count": "已重判 {n} 次",
+      "recording": "录音",
+      "recording_open": "在新窗口打开录音",
+      "no_recording": "没有录音链接（Vapi 报告没到或没开录音）",
+      "vapi_transcript": "Vapi 转写（它那边语音识别的版本，裁判不用）"
     },
     "ops_dialog": {
       "title": "处理标记",

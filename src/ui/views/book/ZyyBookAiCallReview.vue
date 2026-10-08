@@ -187,6 +187,12 @@
                               :label="t('book_ai_call_review.detail.knowledge')">
               <pre class="review-pre" style="max-height: 24rem">{{ detail.knowledge || '-' }}</pre>
             </q-expansion-item>
+            <!-- Vapi 自己的转写（它那边 STT 的版本，可能与本地记录有出入；裁判不用它） -->
+            <q-expansion-item v-if="vapiTranscript" class="q-mt-xs" dense dense-toggle
+                              header-style="opacity: .7; font-size: .85rem; padding-left: 0"
+                              :label="t('book_ai_call_review.detail.vapi_transcript')">
+              <pre class="review-pre" style="max-height: 24rem">{{ vapiTranscript }}</pre>
+            </q-expansion-item>
           </div>
 
           <!-- 右：通话信息 + 评判 + 运营标记 -->
@@ -205,7 +211,21 @@
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.duration') }}&nbsp;:</h6>
               <div>{{ durationShow(detail.durationSec) }}</div>
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.ended_by') }}&nbsp;:</h6>
-              <div :style="`color: ${detail.endedByNameWebColorName}`">{{ detail.endedByName || '-' }}</div>
+              <div :style="`color: ${detail.endedByNameWebColorName}`">
+                {{ detail.endedByName || '-' }}
+                <span v-if="detail.vapiEndedReason" style="opacity: .6; font-size: .8rem">（Vapi: {{ detail.vapiEndedReason }}）</span>
+              </div>
+              <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_ai_call_review.detail.recording') }}&nbsp;:</h6>
+              <div v-if="detail.recordingUrl">
+                <!-- Vapi 存储的录音（优先双声道）：直接播放 + 新窗口打开 -->
+                <audio controls preload="none" :src="detail.recordingUrl" style="max-width: 100%; height: 2rem"></audio>
+                <div style="font-size: .8rem">
+                  <a :href="detail.recordingUrl" target="_blank" rel="noopener" style="color: rgb(var(--pointer))">
+                    {{ $t('book_ai_call_review.detail.recording_open') }}
+                  </a>
+                </div>
+              </div>
+              <div v-else style="opacity: .6">{{ $t('book_ai_call_review.detail.no_recording') }}</div>
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.lang') }}&nbsp;:</h6>
               <div>{{ detail.langName || '-' }}</div>
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.turns') }}&nbsp;:</h6>
@@ -537,6 +557,8 @@ const detailTags = ref([])
 const detailProblems = ref([])
 // 代码核对的系统备注 [{key, turn, note}]
 const detailChecks = ref([])
+// Vapi 报告里的转写（档案正文 vapi.transcript；没收到报告为空）
+const vapiTranscript = ref('')
 
 function openDetail(row) {
   bookAiCallReviewDetail(row.id).then(res => {
@@ -548,7 +570,9 @@ function openDetail(row) {
     detailTags.value = parseJsonArray(data.tags)
     detailProblems.value = parseJsonArray(data.problems)
     detailChecks.value = parseJsonArray(data.checks)
-    transcriptGroups.value = buildGroups(parseJsonObject(data.dossier))
+    const dossier = parseJsonObject(data.dossier)
+    vapiTranscript.value = dossier && dossier.vapi && dossier.vapi.transcript ? String(dossier.vapi.transcript) : ''
+    transcriptGroups.value = buildGroups(dossier)
     showDetail.value = true
   })
 }

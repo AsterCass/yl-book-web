@@ -759,7 +759,11 @@
       "ops_by": "last marked at",
       "checks": "System notes (code checks)",
       "rejudge": "Request re-judge",
-      "rejudge_count": "re-judged {n} time(s)"
+      "rejudge_count": "re-judged {n} time(s)",
+      "recording": "Recording",
+      "recording_open": "Open the recording in a new tab",
+      "no_recording": "No recording link (Vapi report not received or recording disabled)",
+      "vapi_transcript": "Vapi transcript (its own speech recognition; not used by the judge)"
     },
     "ops_dialog": {
       "title": "Mark Handling",

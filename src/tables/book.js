@@ -554,6 +554,14 @@ const tableAiCallReviewCol = [
         defaultVisible: false,
     },
     {
+        // Vapi 报告的结束原因原值（收到 end-of-call-report 才有）；本服务口径的结束方式在「结束方式」列
+        name: 'vapiEndedReason',
+        field: 'vapiEndedReason',
+        label: 'Vapi 原因',
+        align: 'center',
+        defaultVisible: false,
+    },
+    {
         name: 'callId',
         field: 'callId',
         label: 'Vapi 通话',
