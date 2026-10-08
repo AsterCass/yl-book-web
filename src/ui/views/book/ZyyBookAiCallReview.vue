@@ -2,7 +2,8 @@
   <div class="full-width">
 
     <!-- AI 通话复盘：每通真实来电结束后 yl-phone-spring-ai 送来的档案（对话、工具调用与返回、每轮系统事实）
-         + 定时裁判的评判（第二阶段写入）。门店范围跟随页头：总门店 = 账户有权限的全部门店，切到某家门店 = 只看那家 -->
+         + 定时裁判的评判。门店范围跟随页头：总门店 = 账户有权限的全部门店，切到某家门店 = 只看那家。
+         筛选区写法同预约管理：一行 row 自动换行，下拉 / 日期用 grow、文本框用 std -->
     <div class="row items-center">
 
       <div class="q-ml-md">
@@ -10,16 +11,14 @@
           {{ $t('book_ai_call_review.label.start_date') }}&nbsp;:
         </h6>
       </div>
-      <cask-date-picker v-model="selectStartDate" class="q-ma-md"
-                        input-class="component-outline-input-std"/>
+      <cask-date-picker v-model="selectStartDate" class="q-ma-md" input-class="component-outline-input-grow"/>
 
       <div class="q-ml-md">
         <h6>
           {{ $t('book_ai_call_review.label.end_date') }}&nbsp;:
         </h6>
       </div>
-      <cask-date-picker v-model="selectEndDate" class="q-ma-md"
-                        input-class="component-outline-input-std"/>
+      <cask-date-picker v-model="selectEndDate" class="q-ma-md" input-class="component-outline-input-grow"/>
 
       <div class="q-ml-md">
         <h6>
@@ -27,7 +26,7 @@
         </h6>
       </div>
       <q-select v-model="selectReviewStatus" :menu-offset="[0, 5]" :options="reviewStatusOptions"
-                class="q-ma-md component-outline-input-std"
+                class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
@@ -40,7 +39,7 @@
         </h6>
       </div>
       <q-select v-model="selectPass" :menu-offset="[0, 5]" :options="passOptions"
-                class="q-ma-md component-outline-input-std"
+                class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
@@ -53,16 +52,12 @@
         </h6>
       </div>
       <q-select v-model="selectOpsStatus" :menu-offset="[0, 5]" :options="opsStatusOptions"
-                class="q-ma-md component-outline-input-std"
+                class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                 outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
-
-    </div>
-
-    <div class="row items-center">
 
       <div class="q-ml-md">
         <h6>
@@ -70,7 +65,7 @@
         </h6>
       </div>
       <q-select v-model="selectEndedBy" :menu-offset="[0, 5]" :options="endedByOptions"
-                class="q-ma-md component-outline-input-std"
+                class="q-ma-md component-outline-input-grow"
                 clear-icon="fa-solid fa-xmark"
                 clearable
                 dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
@@ -83,7 +78,9 @@
         </h6>
       </div>
       <q-input v-model="selectPhone" class="q-ma-md component-outline-input-std" dense outlined
-               :placeholder="t('book_ai_call_review.placeholder.phone')" @keyup.enter="selectData()"/>
+               :placeholder="t('book_ai_call_review.placeholder.phone')"
+               tabindex="0">
+      </q-input>
 
       <div class="q-ml-md">
         <h6>
@@ -91,11 +88,13 @@
         </h6>
       </div>
       <q-input v-model="selectKeyword" class="q-ma-md component-outline-input-std" dense outlined
-               :placeholder="t('book_ai_call_review.placeholder.keyword')" @keyup.enter="selectData()"/>
+               :placeholder="t('book_ai_call_review.placeholder.keyword')"
+               tabindex="0">
+      </q-input>
 
     </div>
 
-    <div class="row items-center">
+    <div class="row">
       <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData()">
         {{ $t('book_ai_call_review.button.query') }}
       </q-btn>
@@ -123,98 +122,102 @@
                           }"
     />
 
-    <!-- 详情弹窗：左边逐轮对话（每轮下面折叠工具调用与系统事实），右边通话信息 + 裁判评判 + 运营标记 -->
+    <!-- 详情弹窗（写法同预约详情 CaskBookDetailDialog）：两列并排，左 = 逐轮对话（每轮下折叠工具调用与系统事实），
+         右 = 通话信息 + 裁判评判 + 运营标记；内容超过视口高度时整个弹窗卡片滚动，底部只有一个关闭按钮 -->
     <q-dialog :model-value="showDetail" @hide="showDetail = false"
               transition-show="fade" transition-hide="fade">
-      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important; width: 96vw">
+      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
         <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
           {{ $t('book_ai_call_review.detail.title') }}
         </h5>
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
 
-        <div v-if="detail" class="row q-ma-md" style="max-height: 72vh; overflow: auto; min-width: 60rem">
+        <div v-if="detail" class="q-ma-md row no-wrap items-start" style="gap: 2rem;">
 
-          <!-- 左：对话记录 -->
-          <div class="col-7 q-pr-md">
-            <div class="q-mb-sm" style="font-weight: 600">
-              {{ $t('book_ai_call_review.detail.transcript') }}
-            </div>
-            <div v-if="transcriptGroups.length === 0" style="opacity: .6">
+          <!-- 左列：对话记录 -->
+          <div style="flex: 1 1 44rem; min-width: 36rem; max-width: 54rem;">
+            <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.transcript') }}&nbsp;:</h6>
+
+            <div v-if="transcriptGroups.length === 0" class="q-mt-sm" style="opacity: .5; font-size: .85rem;">
               {{ $t('book_ai_call_review.detail.no_transcript') }}
             </div>
-            <div v-for="group in transcriptGroups" :key="group.turn" class="q-mb-sm">
-              <div v-for="(line, i) in group.lines" :key="i" class="q-mb-xs"
-                   :style="line.code ? 'opacity: .6; font-style: italic' : ''">
-                <span style="opacity: .5; font-size: .8rem">[{{ line.turn }}]</span>
-                <span style="font-weight: 600"
-                      :style="line.role === 'customer' ? 'color: rgb(74, 124, 168)' : 'color: rgb(68, 117, 80)'">
-                  &nbsp;{{ line.role === 'customer' ? $t('book_ai_call_review.detail.customer') : $t('book_ai_call_review.detail.ai') }}
+
+            <div v-for="group in transcriptGroups" :key="group.turn" class="q-mt-sm">
+              <div v-for="(line, i) in group.lines" :key="i" class="review-line" :class="{'review-line-code': line.code}">
+                <span class="review-turn">[{{ line.turn }}]</span>
+                <span class="review-role" :class="line.role === 'customer' ? 'review-role-customer' : 'review-role-ai'">
+                  {{ line.role === 'customer' ? $t('book_ai_call_review.detail.customer') : $t('book_ai_call_review.detail.ai') }}
                 </span>
-                <span v-if="line.code" style="opacity: .7; font-size: .8rem">〔{{ $t('book_ai_call_review.detail.code_tag') }}〕</span>
+                <span v-if="line.code" class="review-tag">〔{{ $t('book_ai_call_review.detail.code_tag') }}〕</span>
                 <span>:&nbsp;</span>
-                <span style="white-space: pre-wrap; overflow-wrap: anywhere">{{ line.text }}</span>
-                <span v-if="line.cut" style="opacity: .5; font-size: .8rem">〔{{ $t('book_ai_call_review.detail.cut_tag') }}〕</span>
-                <span v-if="line.signal" style="opacity: .6; font-size: .8rem">〔{{ line.signal }}〕</span>
+                <span class="review-text">{{ line.text }}</span>
+                <span v-if="line.cut" class="review-tag">〔{{ $t('book_ai_call_review.detail.cut_tag') }}〕</span>
+                <span v-if="line.signal" class="review-tag">〔{{ line.signal }}〕</span>
               </div>
+
               <q-expansion-item v-if="group.tools.length > 0 || group.record" class="q-ml-md" dense dense-toggle
-                                header-style="opacity: .7; font-size: .85rem; padding-left: 0"
+                                header-class="review-expansion-header"
                                 :label="group.tools.length > 0
                                   ? t('book_ai_call_review.detail.tools_label', {n: group.tools.length})
                                   : t('book_ai_call_review.detail.facts_label')">
-                <div v-for="tool in group.tools" :key="tool.id" class="q-pa-sm"
-                     style="border-left: 2px solid rgba(128, 128, 128, .3); margin: .3rem 0 .3rem .5rem">
-                  <div style="font-weight: 600">
+                <div v-for="tool in group.tools" :key="tool.id" class="review-tool">
+                  <div style="font-weight: 600;">
                     {{ tool.name }}
                     <span v-if="tool.outcome" :style="`font-weight: 400; color: ${outcomeColor(tool.outcome)}`">
                       &nbsp;· {{ tool.outcome }}
                     </span>
                   </div>
-                  <div style="opacity: .6; font-size: .8rem">{{ $t('book_ai_call_review.detail.input') }}</div>
+                  <div class="review-label">{{ $t('book_ai_call_review.detail.input') }}</div>
                   <pre class="review-pre">{{ pretty(tool.input) }}</pre>
-                  <div style="opacity: .6; font-size: .8rem">{{ $t('book_ai_call_review.detail.result') }}</div>
+                  <div class="review-label">{{ $t('book_ai_call_review.detail.result') }}</div>
                   <pre class="review-pre">{{ tool.result || '-' }}<span v-if="tool.truncated">{{ $t('book_ai_call_review.detail.truncated') }}</span></pre>
                 </div>
-                <div v-if="group.record" class="q-ml-sm q-mt-xs" style="font-size: .8rem; opacity: .75">
-                  <span v-for="f in factItems(group.record)" :key="f.key" class="q-mr-md" style="white-space: nowrap">
-                    {{ f.key }}={{ f.value }}
-                  </span>
+                <div v-if="group.record" class="review-facts q-ml-sm q-mt-xs">
+                  <span v-for="f in factItems(group.record)" :key="f.key" class="q-mr-md">{{ f.key }}={{ f.value }}</span>
                 </div>
               </q-expansion-item>
             </div>
 
-            <q-expansion-item class="q-mt-md" dense dense-toggle header-style="opacity: .7; font-size: .85rem; padding-left: 0"
+            <q-expansion-item class="q-mt-lg" dense dense-toggle header-class="review-expansion-header"
                               :label="t('book_ai_call_review.detail.knowledge')">
-              <pre class="review-pre" style="max-height: 24rem">{{ detail.knowledge || '-' }}</pre>
+              <pre class="review-pre review-pre-tall">{{ detail.knowledge || '-' }}</pre>
             </q-expansion-item>
             <!-- Vapi 自己的转写（它那边 STT 的版本，可能与本地记录有出入；裁判不用它） -->
-            <q-expansion-item v-if="vapiTranscript" class="q-mt-xs" dense dense-toggle
-                              header-style="opacity: .7; font-size: .85rem; padding-left: 0"
+            <q-expansion-item v-if="vapiTranscript" class="q-mt-xs" dense dense-toggle header-class="review-expansion-header"
                               :label="t('book_ai_call_review.detail.vapi_transcript')">
-              <pre class="review-pre" style="max-height: 24rem">{{ vapiTranscript }}</pre>
+              <pre class="review-pre review-pre-tall">{{ vapiTranscript }}</pre>
             </q-expansion-item>
           </div>
 
-          <!-- 右：通话信息 + 评判 + 运营标记 -->
-          <div class="col-5 q-pl-md" style="border-left: 1px solid rgba(128, 128, 128, .25)">
-            <div style="display: grid; grid-template-columns: max-content 1fr; gap: .35rem .8rem; align-items: center; font-size: .9rem">
+          <!-- 右列：通话信息 + 裁判评判 + 运营标记 -->
+          <div style="flex: 0 0 auto; min-width: 26rem; max-width: 32rem;">
+            <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0.6rem; align-items: center;">
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.store') }}&nbsp;:</h6>
               <div>{{ detail.storeName || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.caller') }}&nbsp;:</h6>
               <div>{{ detail.callerPhone || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.called') }}&nbsp;:</h6>
               <div>{{ detail.calledPhone || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.started') }}&nbsp;:</h6>
               <div>{{ detail.startedAt || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.ended') }}&nbsp;:</h6>
               <div>{{ detail.endedAt || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.duration') }}&nbsp;:</h6>
               <div>{{ durationShow(detail.durationSec) }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.ended_by') }}&nbsp;:</h6>
               <div :style="`color: ${detail.endedByNameWebColorName}`">
                 {{ detail.endedByName || '-' }}
                 <span v-if="detail.vapiEndedReason" style="opacity: .6; font-size: .8rem">（Vapi: {{ detail.vapiEndedReason }}）</span>
               </div>
+
               <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_ai_call_review.detail.recording') }}&nbsp;:</h6>
               <div v-if="detail.recordingUrl">
                 <!-- Vapi 存储的录音（优先双声道）：直接播放 + 新窗口打开 -->
@@ -225,95 +228,104 @@
                   </a>
                 </div>
               </div>
-              <div v-else style="opacity: .6">{{ $t('book_ai_call_review.detail.no_recording') }}</div>
+              <div v-else style="opacity: .5;">{{ $t('book_ai_call_review.detail.no_recording') }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.lang') }}&nbsp;:</h6>
               <div>{{ detail.langName || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.turns') }}&nbsp;:</h6>
               <div>{{ detail.customerTurns != null ? detail.customerTurns : '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.review_status') }}&nbsp;:</h6>
               <div :style="`color: ${detail.reviewStatusNameWebColorName}`">{{ detail.reviewStatusName || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.call_id') }}&nbsp;:</h6>
               <div style="overflow-wrap: anywhere; font-size: .8rem; opacity: .8">{{ detail.callId || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.call_sid') }}&nbsp;:</h6>
               <div style="overflow-wrap: anywhere; font-size: .8rem; opacity: .8">{{ detail.callSid || '-' }}</div>
+
               <h6 style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.service_version') }}&nbsp;:</h6>
               <div>{{ detail.serviceVersion || '-' }}</div>
+
             </div>
 
-            <q-separator class="q-my-md"/>
-
-            <div style="font-weight: 600">{{ $t('book_ai_call_review.detail.verdict') }}</div>
+            <!-- 裁判评判 -->
+            <h6 class="q-mt-lg" style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.verdict') }}&nbsp;:</h6>
             <template v-if="detail.reviewStatus === AiCallReviewStatusEnum.REVIEWED.code">
               <div class="q-mt-xs">
                 <span :style="`color: ${detail.passNameWebColorName}; font-weight: 600`">{{ detail.passName }}</span>
                 <span v-if="detail.severityName" class="q-ml-md" style="opacity: .8">
                   {{ $t('book_ai_call_review.detail.severity') }}: {{ detail.severityName }}
                 </span>
-                <span v-if="detail.judgeModel" class="q-ml-md" style="opacity: .6; font-size: .8rem">
-                  {{ detail.judgeModel }}<span v-if="detail.judgeEffort"> / {{ detail.judgeEffort }}</span>
-                  <span v-if="detail.criteriaVersion"> / {{ detail.criteriaVersion }}</span> · {{ detail.reviewedAt }}
-                  <span v-if="detail.rejudgeCount > 0"> · {{ $t('book_ai_call_review.detail.rejudge_count', {n: detail.rejudgeCount}) }}</span>
-                </span>
+              </div>
+              <div v-if="detail.judgeModel" class="q-mt-xs" style="opacity: .5; font-size: .78rem;">
+                {{ detail.judgeModel }}<span v-if="detail.judgeEffort"> / {{ detail.judgeEffort }}</span>
+                <span v-if="detail.criteriaVersion"> / {{ detail.criteriaVersion }}</span> · {{ detail.reviewedAt }}
+                <span v-if="detail.rejudgeCount > 0"> · {{ $t('book_ai_call_review.detail.rejudge_count', {n: detail.rejudgeCount}) }}</span>
               </div>
               <div v-if="detailTags.length > 0" class="q-mt-xs">
                 <q-chip v-for="tag in detailTags" :key="tag" dense size="sm" outline>{{ tag }}</q-chip>
               </div>
-              <div class="q-mt-sm" style="white-space: pre-wrap">{{ detail.summary || '-' }}</div>
-              <div v-if="detail.did" class="q-mt-sm" style="font-size: .9rem">
-                <span style="opacity: .6">{{ $t('book_ai_call_review.detail.did') }}: </span>
-                <span style="white-space: pre-wrap">{{ detail.did }}</span>
+              <div class="q-mt-sm" style="white-space: pre-wrap;">{{ detail.summary || '-' }}</div>
+              <div v-if="detail.did" class="q-mt-sm" style="font-size: .9rem;">
+                <span class="review-label">{{ $t('book_ai_call_review.detail.did') }}: </span>
+                <span style="white-space: pre-wrap;">{{ detail.did }}</span>
               </div>
               <div v-if="detailProblems.length > 0" class="q-mt-sm">
-                <div style="opacity: .6; font-size: .9rem">{{ $t('book_ai_call_review.detail.problems') }}</div>
-                <div v-for="(p, i) in detailProblems" :key="i" class="q-mt-xs" style="font-size: .9rem">
-                  <span style="opacity: .5">[{{ p.turn != null ? p.turn : '-' }}]</span>
-                  <span class="q-ml-xs" style="font-weight: 600">{{ p.criterion || '' }}</span>
+                <div class="review-label">{{ $t('book_ai_call_review.detail.problems') }}</div>
+                <div v-for="(p, i) in detailProblems" :key="i" class="q-mt-xs" style="font-size: .9rem;">
+                  <span class="review-turn">[{{ p.turn != null ? p.turn : '-' }}]</span>
+                  <span class="q-ml-xs" style="font-weight: 600;">{{ p.criterion || '' }}</span>
                   <span v-if="p.severity" class="q-ml-xs" :style="`color: ${severityColor(p.severity)}`">{{ p.severity }}</span>
-                  <span class="q-ml-xs" style="white-space: pre-wrap">{{ p.issue }}</span>
+                  <span class="q-ml-xs" style="white-space: pre-wrap;">{{ p.issue }}</span>
                 </div>
               </div>
             </template>
             <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.FAILED.code" class="q-mt-xs"
-                 style="color: rgb(200, 60, 60); white-space: pre-wrap; font-size: .9rem">
+                 style="color: rgb(200, 60, 60); white-space: pre-wrap; font-size: .9rem;">
               {{ $t('book_ai_call_review.detail.failed') }}: {{ detail.reviewError || '-' }}
             </div>
-            <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.NO_DIALOGUE.code" class="q-mt-xs" style="opacity: .6">
+            <div v-else-if="detail.reviewStatus === AiCallReviewStatusEnum.NO_DIALOGUE.code" class="q-mt-xs" style="opacity: .5;">
               {{ $t('book_ai_call_review.detail.no_dialogue') }}
             </div>
-            <div v-else class="q-mt-xs" style="opacity: .6">
+            <div v-else class="q-mt-xs" style="opacity: .5;">
               {{ $t('book_ai_call_review.detail.pending') }}
             </div>
+
             <!-- 代码核对的系统备注：语言不符、该挂没挂、写入没成、被抢位、走了兜底、首包慢…（裁判也拿到了同一份） -->
             <div v-if="detailChecks.length > 0" class="q-mt-sm">
-              <div style="opacity: .6; font-size: .9rem">{{ $t('book_ai_call_review.detail.checks') }}</div>
-              <div v-for="(c, i) in detailChecks" :key="i" class="q-mt-xs" style="font-size: .85rem; opacity: .85">
+              <div class="review-label">{{ $t('book_ai_call_review.detail.checks') }}</div>
+              <div v-for="(c, i) in detailChecks" :key="i" class="q-mt-xs" style="font-size: .85rem; opacity: .85;">
                 <q-badge outline color="grey-7" class="q-mr-xs">{{ c.key }}</q-badge>
-                <span style="white-space: pre-wrap">{{ c.note }}</span>
+                <span style="white-space: pre-wrap;">{{ c.note }}</span>
               </div>
             </div>
-            <q-btn v-if="detail.rejudgeOp" class="q-mt-sm shadow-1 component-outline-btn-grow" no-caps unelevated
-                   :loading="rejudging" @click="openRejudge(detail)">
-              {{ $t('book_ai_call_review.detail.rejudge') }}
-            </q-btn>
 
-            <q-separator class="q-my-md"/>
-
-            <div style="font-weight: 600">{{ $t('book_ai_call_review.detail.ops') }}</div>
+            <!-- 运营标记 -->
+            <h6 class="q-mt-lg" style="white-space: nowrap;">{{ $t('book_ai_call_review.detail.ops') }}&nbsp;:</h6>
             <div class="q-mt-xs">
               <span :style="`color: ${detail.opsStatusNameWebColorName}`">{{ detail.opsStatusName }}</span>
-              <span v-if="detail.opsTime" class="q-ml-md" style="opacity: .6; font-size: .8rem">
+              <span v-if="detail.opsTime" class="q-ml-md" style="opacity: .5; font-size: .78rem;">
                 {{ $t('book_ai_call_review.detail.ops_by') }} {{ detail.opsTime }}
               </span>
             </div>
-            <div v-if="detail.opsRemark" class="q-mt-xs" style="white-space: pre-wrap; font-size: .9rem">{{ detail.opsRemark }}</div>
-            <q-btn class="q-mt-sm shadow-1 component-outline-btn-grow" no-caps unelevated @click="openOps(detail)">
-              {{ $t('book_ai_call_review.ops_dialog.title') }}
-            </q-btn>
+            <div v-if="detail.opsRemark" class="q-mt-xs" style="white-space: pre-wrap; font-size: .9rem;">{{ detail.opsRemark }}</div>
+
+            <div class="row q-mt-md" style="gap: .6rem;">
+              <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="openOps(detail)">
+                {{ $t('book_ai_call_review.ops_dialog.title') }}
+              </q-btn>
+              <q-btn v-if="detail.rejudgeOp" class="shadow-1 component-outline-btn-grow" no-caps unelevated
+                     :loading="rejudging" @click="openRejudge(detail)">
+                {{ $t('book_ai_call_review.detail.rejudge') }}
+              </q-btn>
+            </div>
           </div>
 
         </div>
 
-        <div class="row q-mt-lg q-mb-md justify-evenly">
+        <div class="row q-mt-xl q-mb-md justify-center">
           <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated @click="showDetail = false">
             {{ $t('book_ai_call_review.detail.close') }}
           </q-btn>
@@ -321,7 +333,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- 运营标记弹窗：处理状态 + 备注（保存空内容即清空） -->
+    <!-- 运营标记弹窗：处理状态 + 备注（保存空内容即清空），写法同预约管理的分配弹窗 -->
     <q-dialog :model-value="showOps" transition-hide="fade" no-backdrop-dismiss no-shake
               transition-show="fade" @hide="showOps = false">
       <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
@@ -331,26 +343,19 @@
 
         <q-separator class="component-separator-base" inset spaced="1rem"/>
 
-        <div class="q-ma-md" style="min-width: 36rem">
-
-          <div class="q-mb-xs" style="font-weight: 600">
-            {{ $t('book_ai_call_review.ops_dialog.status_label') }}
-          </div>
+        <div class="q-ma-md" style="min-width: 25rem">
+          <h6>{{ $t('book_ai_call_review.ops_dialog.status_label') }}&nbsp;:</h6>
           <q-select v-model="opsStatus" :menu-offset="[0, 5]" :options="opsStatusOptions"
-                    class="component-outline-input-grow"
-                    dense dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
+                    class="component-outline-input-grow q-mt-sm"
+                    dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
                     outlined popup-content-class="component-extra-card-std-limit"/>
 
-          <div class="q-mt-md q-mb-xs" style="font-weight: 600">
-            {{ $t('book_ai_call_review.ops_dialog.remark_label') }}
-          </div>
-          <q-input v-model="opsRemark"
-                   dense outlined class="component-outline-input-grow"
+          <h6 class="q-mt-md">{{ $t('book_ai_call_review.ops_dialog.remark_label') }}&nbsp;:</h6>
+          <q-input v-model="opsRemark" class="component-outline-input-grow q-mt-sm" dense outlined
                    :placeholder="t('book_ai_call_review.ops_dialog.remark_placeholder')"/>
-
         </div>
 
-        <div class="row q-mt-lg q-mb-md justify-evenly">
+        <div class="row q-mt-xl q-mb-md justify-evenly">
           <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated :loading="opsSaving"
                  @click="saveOps">
             {{ $t('main_setting_save') }}
@@ -397,8 +402,8 @@ import {
 
 const {t} = useI18n()
 
-// 筛选：通话日期区间（默认最近 7 天）+ 复盘状态 / 结论 / 处理状态 / 结束方式 + 来电号码 / 关键词
-const selectStartDate = ref(daysAgo(6))
+// 筛选：通话日期区间（默认不限）+ 复盘状态 / 结论 / 处理状态 / 结束方式 + 来电号码 / 关键词
+const selectStartDate = ref("")
 const selectEndDate = ref("")
 const selectReviewStatus = ref(null)
 const selectPass = ref(null)
@@ -413,14 +418,6 @@ const passOptions = ref([
   {label: t('book_ai_call_review.pass_true'), value: true},
   {label: t('book_ai_call_review.pass_false'), value: false},
 ])
-
-function daysAgo(n) {
-  const d = new Date()
-  d.setDate(d.getDate() - n)
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}-${m}-${day}`
-}
 
 function clearSearch() {
   selectStartDate.value = ""
@@ -765,6 +762,71 @@ onMounted(() => {
 
 <style scoped lang="scss">
 
+// 对话里的一句：轮次 + 角色 + 正文；代码念的固定句淡显
+.review-line {
+  margin-top: .25rem;
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+.review-line-code {
+  opacity: .55;
+  font-style: italic;
+}
+
+.review-turn {
+  opacity: .5;
+  font-size: .8rem;
+}
+
+.review-role {
+  font-weight: 600;
+  margin-left: .3rem;
+}
+
+.review-role-customer {
+  color: rgb(74, 124, 168);
+}
+
+.review-role-ai {
+  color: rgb(68, 117, 80);
+}
+
+.review-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.review-tag {
+  opacity: .55;
+  font-size: .8rem;
+}
+
+.review-label {
+  opacity: .55;
+  font-size: .8rem;
+}
+
+// 每轮下折叠的工具调用：左侧细线分组（同预约详情里历史预约的边框卡片风格）
+.review-tool {
+  padding: .4rem .6rem;
+  margin: .3rem 0 .3rem .5rem;
+  border-left: 2px solid rgba(var(--text-color), .25);
+}
+
+.review-facts {
+  font-size: .8rem;
+  opacity: .75;
+  word-break: break-all;
+}
+
+:deep(.review-expansion-header) {
+  opacity: .7;
+  font-size: .85rem;
+  padding-left: 0;
+}
+
+// 工具参数 / 返回、知识正文：等宽块，超长内部滚动（同预约详情里历史列表的内部滚动）
 .review-pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -774,7 +836,11 @@ onMounted(() => {
   overflow: auto;
   padding: .3rem .5rem;
   border-radius: 4px;
-  background: rgba(128, 128, 128, .08);
+  background: rgba(var(--text-color), .06);
+}
+
+.review-pre-tall {
+  max-height: 24rem;
 }
 
 </style>
