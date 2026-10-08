@@ -328,3 +328,30 @@ export function bookEmailGiveup(id) {
         method: 'post',
     })
 }
+
+// AI 通话复盘列表：分页，可见门店范围内（总门店 = 账户有权限的全部门店，切到门店 = 只看那家）
+// params: {pageNo, pageSize, startDateStr, endDateStr, reviewStatus, opsStatus, pass, severity, tag, phone, endedBy, keyword}
+export function bookAiCallReviewList(params) {
+    return serviceShiro({
+        url: `/book/ai-call-review/list`,
+        params: params,
+        method: 'get',
+    })
+}
+
+// AI 通话复盘详情：列表行 + 档案正文（dossier，JSON 字符串）+ 问题清单 + AI 自带的知识
+export function bookAiCallReviewDetail(id) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}`,
+        method: 'get',
+    })
+}
+
+// AI 通话复盘运营标记：body {opsStatus, opsRemark}。opsStatus：0=未查看 / 1=已处理 / 2=误判；备注空=清空
+export function bookAiCallReviewOps(id, body) {
+    return serviceShiro({
+        url: `/book/ai-call-review/ops/${id}`,
+        data: body,
+        method: 'post',
+    })
+}

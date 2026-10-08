@@ -662,6 +662,7 @@
   "yl_subsystem_appointment_card_info": "Card Info",
   "yl_subsystem_appointment_feedback": "Customer Feedback",
   "yl_subsystem_appointment_phone_request": "Phone Requests",
+  "yl_subsystem_appointment_ai_call_review": "AI Call Review",
 
   "book_phone_request": {
     "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status" },
@@ -691,6 +692,82 @@
     }
   },
 
+  "book_ai_call_review": {
+    "label": {
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "review_status": "Review Status",
+      "ops_status": "Handling",
+      "pass": "Verdict",
+      "ended_by": "Ended By",
+      "phone": "Caller",
+      "keyword": "Keyword"
+    },
+    "placeholder": {
+      "phone": "Full number or last digits",
+      "keyword": "Summary / problems / what the AI did"
+    },
+    "pass_true": "Pass",
+    "pass_false": "Fail",
+    "button": {
+      "query": "Query",
+      "clear": "Clear Filters"
+    },
+    "note": "After every real call ends, the AI phone receptionist archives the conversation, every tool call with its result and the per-turn system facts here; a scheduled judge reads the archive and gives a verdict (pass or fail, problem list, tags), and staff can mark it handled or a false alarm. Store scope follows the header: the all-stores view shows every store the account has access to, switching to a store shows only that one. The judge only reads the archive and never touches booking data.",
+    "duration": {
+      "minutes": "{m} min {s} s",
+      "seconds": "{s} s"
+    },
+    "detail": {
+      "title": "Call Details",
+      "close": "Close",
+      "store": "Store",
+      "caller": "Caller",
+      "called": "Called number",
+      "started": "Started",
+      "ended": "Ended",
+      "duration": "Duration",
+      "ended_by": "Ended by",
+      "lang": "Language",
+      "turns": "Customer turns",
+      "review_status": "Review status",
+      "call_id": "Vapi call",
+      "call_sid": "Twilio call",
+      "service_version": "Service version",
+      "transcript": "Transcript ([n] = turn, 0 = greeting)",
+      "customer": "Customer",
+      "ai": "AI",
+      "code_tag": "code",
+      "cut_tag": "interrupted",
+      "signal_end": "then hung up",
+      "signal_transfer": "then transferred",
+      "tools_label": "{n} tool call(s) · system facts",
+      "facts_label": "System facts",
+      "input": "Input",
+      "result": "Result",
+      "truncated": " (truncated)",
+      "no_transcript": "No conversation",
+      "verdict": "Judge verdict",
+      "pending": "Not reviewed yet (the judge runs hourly)",
+      "failed": "Review failed",
+      "no_dialogue": "The customer hung up without saying anything; not judged",
+      "did": "What the AI did",
+      "problems": "Problems",
+      "severity": "Severity",
+      "knowledge": "Knowledge the AI had (sources for the fabrication check: facts / stores / catalog)",
+      "ops": "Handling",
+      "ops_by": "last marked at"
+    },
+    "ops_dialog": {
+      "title": "Mark Handling",
+      "status_label": "Status",
+      "remark_label": "Remark",
+      "remark_placeholder": "Follow-up notes / why it is a false alarm (optional; saving empty content clears it)"
+    },
+    "notify": {
+      "ops_success": "Marked"
+    }
+  },
   "book_feedback": {
     "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status" },
     "button": { "query": "Query", "clear": "Clear Filters", "export": "Export" },

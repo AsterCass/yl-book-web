@@ -14,6 +14,7 @@ import ZyyBookEmail from "@/ui/views/book/ZyyBookEmail.vue";
 import ZyyBookCardInfo from "@/ui/views/book/ZyyBookCardInfo.vue";
 import ZyyBookFeedback from "@/ui/views/book/ZyyBookFeedback.vue";
 import ZyyBookPhoneRequest from "@/ui/views/book/ZyyBookPhoneRequest.vue";
+import ZyyBookAiCallReview from "@/ui/views/book/ZyyBookAiCallReview.vue";
 import ZyyUser from "@/ui/views/user/ZyyUser.vue";
 import ZyyStaff from "@/ui/views/staff/ZyyStaff.vue";
 import ZyyDashboard from "@/ui/views/ZyyDashboard.vue";
@@ -157,6 +158,20 @@ const router = createRouter({
                                         label: "yl_subsystem_appointment_phone_request",
                                         color: 'rgb(var(--full-container-background-color))',
                                         permission: 'book:book'
+                                    },
+                                },
+                                {
+                                    // AI 通话复盘（每通真实来电的档案与裁判评判）：复盘域独立权限
+                                    path: "aiCallReview",
+                                    name: "bookAiCallReview",
+                                    component: ZyyBookAiCallReview,
+                                    meta: {
+                                        title: 'yl_subsystem_appointment_ai_call_review',
+                                        value: "bookAiCallReview",
+                                        header: "yl_subsystem_appointment_ai_call_review",
+                                        label: "yl_subsystem_appointment_ai_call_review",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'book:ai-call-review'
                                     },
                                 },
                             ]
@@ -367,6 +382,7 @@ const parentRouteMap = {
     'bookCardInfo': 'subsystemMain',
     'bookFeedback': 'subsystemMain',
     'bookPhoneRequest': 'subsystemMain',
+    'bookAiCallReview': 'subsystemMain',
 
     // subsystem -> subsystemMain
     'order': 'subsystemMain',

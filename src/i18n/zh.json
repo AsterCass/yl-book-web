@@ -660,6 +660,7 @@
   "yl_subsystem_appointment_card_info": "办卡信息",
   "yl_subsystem_appointment_feedback": "客户反馈",
   "yl_subsystem_appointment_phone_request": "电话需求",
+  "yl_subsystem_appointment_ai_call_review": "AI 通话复盘",
 
   "book_phone_request": {
     "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态" },
@@ -689,6 +690,82 @@
     }
   },
 
+  "book_ai_call_review": {
+    "label": {
+      "start_date": "开始日期",
+      "end_date": "结束日期",
+      "review_status": "复盘状态",
+      "ops_status": "处理状态",
+      "pass": "结论",
+      "ended_by": "结束方式",
+      "phone": "来电号码",
+      "keyword": "关键词"
+    },
+    "placeholder": {
+      "phone": "完整号码或尾号",
+      "keyword": "结论 / 问题清单 / 做了什么"
+    },
+    "pass_true": "通过",
+    "pass_false": "未通过",
+    "button": {
+      "query": "查询",
+      "clear": "清空条件"
+    },
+    "note": "每通真实来电结束后，AI 电话接线员把这通电话的对话、工具调用与返回、每轮系统事实归档到这里；定时裁判读档案给出评判（通过与否、问题清单、标签），运营看过后可标记已处理 / 误判。门店范围跟随页头：总门店视角看账户有权限的全部门店，切到某家门店只看那家。裁判只看档案，不碰预约数据。",
+    "duration": {
+      "minutes": "{m} 分 {s} 秒",
+      "seconds": "{s} 秒"
+    },
+    "detail": {
+      "title": "通话详情",
+      "close": "关闭",
+      "store": "门店",
+      "caller": "来电号码",
+      "called": "被叫号码",
+      "started": "开始",
+      "ended": "结束",
+      "duration": "时长",
+      "ended_by": "结束方式",
+      "lang": "会话语言",
+      "turns": "客户轮数",
+      "review_status": "复盘状态",
+      "call_id": "Vapi 通话",
+      "call_sid": "Twilio 通话",
+      "service_version": "服务版本",
+      "transcript": "对话记录（[n] 为轮次，0 = 开场白）",
+      "customer": "顾客",
+      "ai": "AI",
+      "code_tag": "代码",
+      "cut_tag": "被打断",
+      "signal_end": "随后挂断",
+      "signal_transfer": "随后转接",
+      "tools_label": "工具调用 {n} 次 · 系统事实",
+      "facts_label": "系统事实",
+      "input": "参数",
+      "result": "返回",
+      "truncated": "（已截断）",
+      "no_transcript": "没有对话",
+      "verdict": "裁判评判",
+      "pending": "尚未复盘（定时裁判每小时跑一次）",
+      "failed": "复盘失败",
+      "no_dialogue": "客户一句没说就挂了，不进裁判",
+      "did": "AI 做了什么",
+      "problems": "问题清单",
+      "severity": "严重度",
+      "knowledge": "AI 自带的知识（判编造的出处：事实包 / 门店 / 目录）",
+      "ops": "运营标记",
+      "ops_by": "最后标记于"
+    },
+    "ops_dialog": {
+      "title": "处理标记",
+      "status_label": "处理状态",
+      "remark_label": "备注",
+      "remark_placeholder": "跟进记录 / 误判说明（可为空，保存空内容即清空）"
+    },
+    "notify": {
+      "ops_success": "标记已保存"
+    }
+  },
   "book_feedback": {
     "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "反馈状态" },
     "button": { "query": "查询", "clear": "清空条件", "export": "导出" },

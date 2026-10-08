@@ -57,6 +57,46 @@ export const PhoneRequestHandleStatusEnum = new Enum({
     },
 });
 
+// AI 通话复盘状态（yl_ai_call_review.review_status）：档案入库即待复盘，定时裁判跑完置已复盘 / 复盘失败；
+// 运营要求重判置待重判；客户一句没说的通话标无对话、不进裁判
+export const AiCallReviewStatusEnum = new Enum({
+    PENDING: {code: 0, name: '待复盘', desc: '档案已入库，裁判还没跑', color: 'rgb(245, 166, 35)'},
+    REVIEWED: {code: 1, name: '已复盘', desc: '评判已写入', color: 'rgb(68, 117, 80)'},
+    FAILED: {code: 2, name: '复盘失败', desc: '裁判两次都出不了结论，可重判', color: 'rgb(200, 60, 60)'},
+    REJUDGE: {code: 3, name: '待重判', desc: '运营要求重判，等下一轮定时任务', color: 'rgb(74, 124, 168)'},
+    NO_DIALOGUE: {code: 4, name: '无对话', desc: '客户一句没说就挂了，不进裁判', color: 'rgb(127, 140, 141)'},
+});
+
+// AI 通话复盘的运营处理状态（yl_ai_call_review.ops_status），三态可任意流转
+export const AiCallReviewOpsStatusEnum = new Enum({
+    UNREAD: {code: 0, name: '未查看', desc: '默认', color: 'rgb(245, 166, 35)'},
+    HANDLED: {code: 1, name: '已处理', desc: '运营已查看并跟进', color: 'rgb(68, 117, 80)'},
+    FALSE_ALARM: {code: 2, name: '误判', desc: '运营认为裁判判错了', color: 'rgb(150, 100, 160)'},
+});
+
+// 通话结束方式（yl-phone-spring-ai 归档时判定，code 为字符串）
+export const AiCallEndedByEnum = new Enum({
+    CUSTOMER_HANGUP: {code: 'customer-hangup', name: '客户挂断', desc: '', color: 'rgb(74, 124, 168)'},
+    AGENT_END_CALL: {code: 'agent-end_call', name: 'AI 挂断', desc: 'AI 说完再见后调 end_call', color: 'rgb(68, 117, 80)'},
+    AGENT_TRANSFER: {code: 'agent-transfer', name: '转接人工', desc: '', color: 'rgb(142, 68, 173)'},
+    IDLE_HANGUP: {code: 'idle-hangup', name: '静默挂断', desc: '客户长时间不回话，催问后挂断', color: 'rgb(245, 166, 35)'},
+    OTHER: {code: 'other', name: '其他', desc: 'Vapi 报告的其他原因', color: 'rgb(127, 140, 141)'},
+    UNKNOWN: {code: 'unknown', name: '未知', desc: '没收到结束事件，由巡检兜底归档', color: 'rgb(127, 140, 141)'},
+});
+
+// 通话的会话语言
+export const AiCallLangEnum = new Enum({
+    ZH: {code: 'zh', name: '中文', desc: '', color: ''},
+    EN: {code: 'en', name: '英文', desc: '', color: ''},
+});
+
+// 裁判给的严重度
+export const AiCallReviewSeverityEnum = new Enum({
+    NONE: {code: 'none', name: '无', desc: '', color: 'rgb(127, 140, 141)'},
+    MINOR: {code: 'minor', name: '轻微', desc: '', color: 'rgb(245, 166, 35)'},
+    MAJOR: {code: 'major', name: '严重', desc: '', color: 'rgb(200, 60, 60)'},
+});
+
 // 预约邮件处理状态
 export const BookEmailStatusEnum = new Enum({
     UNPROCESSED: {code: 0, name: '未处理', desc: '刚落库，或处理过程中出现瞬时异常，可被重试', color: 'rgb(245, 166, 35)'},

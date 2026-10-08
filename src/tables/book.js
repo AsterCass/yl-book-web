@@ -455,3 +455,137 @@ export const tablePhoneRequestOperation = [
         name: 'edit',
     },
 ]
+
+// AI 通话复盘（每通真实来电的档案 + 裁判评判，每通归属线路绑定的门店）
+const tableAiCallReviewCol = [
+    {
+        name: 'startedAt',
+        field: 'startedAt',
+        label: '通话时间',
+        align: 'center',
+    },
+    {
+        name: 'storeName',
+        field: 'storeName',
+        label: '门店名称',
+        align: 'center',
+    },
+    {
+        name: 'callerPhone',
+        field: 'callerPhone',
+        label: '来电号码',
+        align: 'center',
+    },
+    {
+        name: 'durationShow',
+        field: 'durationShow',
+        label: '时长',
+        align: 'center',
+    },
+    {
+        name: 'endedByName',
+        field: 'endedByName',
+        label: '结束方式',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        name: 'langName',
+        field: 'langName',
+        label: '语言',
+        align: 'center',
+    },
+    {
+        name: 'customerTurns',
+        field: 'customerTurns',
+        label: '客户轮数',
+        align: 'center',
+    },
+    {
+        name: 'reviewStatusName',
+        field: 'reviewStatusName',
+        label: '复盘状态',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        // 裁判结论：通过 / 未通过；未复盘为 '-'
+        name: 'passName',
+        field: 'passName',
+        label: '结论',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        name: 'severityName',
+        field: 'severityName',
+        label: '严重度',
+        align: 'center',
+    },
+    {
+        name: 'tagsShow',
+        field: 'tagsShow',
+        label: '标签',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '12rem',
+    },
+    {
+        name: 'summary',
+        field: 'summary',
+        label: '一句话结论',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        maxWidth: '24rem',
+    },
+    {
+        name: 'opsStatusName',
+        field: 'opsStatusName',
+        label: '处理状态',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.ICON_COLOR,
+    },
+    {
+        name: 'opsRemark',
+        field: 'opsRemark',
+        label: '运营备注',
+        align: 'center',
+        type: ComplexTableColumnTypeEnum.TEXT,
+        defaultVisible: false,
+    },
+    {
+        name: 'callId',
+        field: 'callId',
+        label: 'Vapi 通话',
+        align: 'center',
+        defaultVisible: false,
+    },
+    {
+        name: 'operation',
+        field: 'operation',
+        label: '操作',
+        align: 'center',
+    },
+]
+
+export const tableAiCallReview = {
+    tableColumns: tableAiCallReviewCol,
+    tableKey: "id",
+    selectType: 'none',
+    showFullSize: true,
+    showTableSetting: true,
+}
+
+// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）
+export const tableAiCallReviewOperation = [
+    {
+        label: '详情',
+        condition: 'detailOp',
+        name: 'detail',
+    },
+    {
+        label: '处理',
+        condition: 'opsOp',
+        name: 'ops',
+    },
+]
