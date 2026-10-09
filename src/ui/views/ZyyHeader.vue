@@ -15,6 +15,15 @@
 
         <zyy-header-todo/>
         <zyy-header-memo/>
+
+        <!-- 系统文档：新标签页打开系统使用文档（地址取 VITE_SYSTEM_DOC_URL，未配置则不显示）。样式同左侧备忘入口 -->
+        <q-btn v-if="SYSTEM_DOC_URL" no-caps unelevated class="component-outline-btn-mini-grow q-ml-md"
+               :href="SYSTEM_DOC_URL" target="_blank" rel="noopener noreferrer">
+          <div class="row items-center no-wrap">
+            <q-icon class="q-mr-xs" name="fa-regular fa-file-lines" size=".9rem"/>
+            {{ $t('main_header_system_doc') }}
+          </div>
+        </q-btn>
       </div>
 
       <div class="row items-center justify-center " style="font-size: 1.15rem; font-weight: 500">
@@ -72,6 +81,9 @@ import {userIsLogin} from "@/api/myu.js";
 const t = i18n.global.t
 const thisRouter = useRouter()
 const globalState = useGlobalStateStore();
+
+// 系统使用文档地址（如 https://xxx.com/manual.pdf），构建时注入；为空则顶栏不显示「系统文档」按钮
+const SYSTEM_DOC_URL = (import.meta.env.VITE_SYSTEM_DOC_URL || '').trim()
 
 function upOneLevel() {
   toParentPage(thisRouter)
