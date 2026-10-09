@@ -172,6 +172,11 @@
                   <pre class="review-pre">{{ pretty(tool.input) }}</pre>
                   <div class="review-label">{{ $t('book_ai_call_review.detail.result') }}</div>
                   <pre class="review-pre">{{ tool.result || '-' }}<span v-if="tool.truncated">{{ $t('book_ai_call_review.detail.truncated') }}</span></pre>
+                  <!-- 只进档案、模型没看到的后端原因（资源位不足时的资源名与数量；对话里是中性说法） -->
+                  <template v-if="tool.detail">
+                    <div class="review-label">{{ $t('book_ai_call_review.detail.tool_detail') }}</div>
+                    <pre class="review-pre">{{ tool.detail }}</pre>
+                  </template>
                 </div>
                 <div v-if="group.record" class="review-facts q-ml-sm q-mt-xs">
                   <span v-for="f in factItems(group.record)" :key="f.key" class="q-mr-md">{{ f.key }}={{ f.value }}</span>

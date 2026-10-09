@@ -746,6 +746,7 @@
       "input": "参数",
       "result": "返回",
       "truncated": "（已截断）",
+      "tool_detail": "后端原因（模型没看到，对话里是中性说法）",
       "no_transcript": "没有对话",
       "verdict": "裁判评判",
       "pending": "尚未复盘（定时裁判每小时跑一次）",

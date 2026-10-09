@@ -158,8 +158,8 @@
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
                 <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注 / 备注（日视图、非第三方来源）——顺序须与下方
-                     悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目+资源需求 / 备注（仅第三方来源）/ 金额 / 联系方式，
-                     周视图 起止时间+预约项目+资源需求 / 金额 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
+                     悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目 / 金额+资源需求 / 联系方式 / 备注（仅第三方来源），
+                     周视图 起止时间+预约项目 / 金额+资源需求 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
                 <div class="cal-event-title">
                   <!-- 排班外警示：放在滚动区外、首行最左，始终可见（原因与当天班次见悬停卡片） -->
                   <q-icon v-if="ev.offSchedule" name="fa-solid fa-triangle-exclamation" size=".8rem"
@@ -465,7 +465,7 @@ import {useGlobalStateStore} from "@/utils/global-state.js";
 
 const {t, locale} = useI18n()
 
-// 第三方渠道来源：日视图备注不上首行、保持原位置（见 buildColumn 的 titleRemark）
+// 第三方渠道来源：日视图备注不上首行、放正文最后一行（见 buildColumn 的 titleRemark）
 const THIRD_PARTY_SOURCES = [BookSourceEnum.CLASSPASS.code, BookSourceEnum.BUILDHEALTH.code]
 
 // 时间展示：英文用 12 小时制（含 AM/PM），其他语言用 24 小时制。仅用于展示，
@@ -994,7 +994,14 @@ function turnoverSegmentsForDate(dateStr, staffId, toPx) {
   return segs
 }
 
-// 卡片第二行的门店共享资源占用。后端只给数据（resourceNeedList：资源名 + 数量，多项目按资源取 max，同容量判定），
+// 预约金额：为 null 时提示包含未配置金额的服务技能。在渲染时（buildColumn）拼，切换语言即时生效
+function amountLineOf(b) {
+  return b.amount != null
+      ? `${t('book_calendar.amount_prefix')}${b.amount}`
+      : t('book_booking.amount_unconfigured')
+}
+
+// 门店共享资源占用（与金额同一行）。后端只给数据（resourceNeedList：资源名 + 数量，多项目按资源取 max，同容量判定），
 // 「资源需求：」「无需门店共享资源」走前端 i18n；在渲染时（buildColumn）拼，切换语言即时生效。
 // 空列表 = 不占资源，明确写出来；字段缺失（后端未更新）则不显示，免得误报「无需」
 function resourceLineOf(b) {
@@ -1036,18 +1043,18 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
         ? `${t('book_calendar.preferred_prefix')}${preferredName}` : ''
     // 特殊备注：日视图移到首行（模板内联展示）；周视图一屏七列、首行塞不下，仍作为独立正文行
     const specialRemarks = isDayView ? (b._specialRemarks || '') : ''
-    // 起止时间、预约项目与资源需求同行，省一行给卡片正文。用「·」而非空格分隔：
+    // 起止时间与预约项目同行、金额与资源需求同行，各省一行给卡片正文。用「·」而非空格分隔：
     // .cal-event-sub 是 nowrap，HTML 会把连续空格折叠成一个，拉不开视觉间距
-    const timeAndSkills = [timeRange, b._calSub, resourceLineOf(b)].filter(Boolean).join(' · ')
+    const timeAndSkills = [timeRange, b._calSub].filter(Boolean).join(' · ')
+    const amountAndResource = [amountLineOf(b), resourceLineOf(b)].filter(Boolean).join(' · ')
     // 备注：日视图且非第三方来源（classpass / buildhealth 以外）→ 上首行、跟在特殊备注后面（模板内联展示）；
-    //   第三方来源仍留在正文行（原位置）
+    //   第三方来源放正文最后一行（见下方 lines）
     const titleRemark = isDayView && !THIRD_PARTY_SOURCES.includes(b.source) ? (b.remark || '') : ''
-    // 日视图：未上首行的备注（第三方来源）紧跟在「起止时间 + 预约项目」那一行下面（卡片第三行），先于金额与联系方式——
-    //   备注多是接待时要留意的补充说明，卡片矮时排在后面的行会被裁掉；特殊备注与偏好员工在日视图已上首行
+    // 日视图：未上首行的备注（第三方来源）放最后一行；特殊备注与偏好员工在日视图已上首行
     // 周视图：保持原顺序，备注仍是最后一行
     const lines = (isDayView
-        ? [timeAndSkills, titleRemark ? '' : b.remark, b._amountLine, b._contact]
-        : [timeAndSkills, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark])
+        ? [timeAndSkills, amountAndResource, b._contact, titleRemark ? '' : b.remark]
+        : [timeAndSkills, amountAndResource, b._specialRemarks, b._contact, preferredLine, b.remark])
         .filter(Boolean)
     // 排班外：已分配未开始、但该雇员当前排班覆盖不到（多为预约后改过排班），卡片加警示提醒前台手动改派
     const offScheduleShifts = offScheduleShiftText(b)
@@ -1952,10 +1959,6 @@ function enrichBooking(b) {
   // 特殊备注：后端为逗号分隔字符串，卡片上以空格分割展示为一行
   b._specialRemarks = b.specialRemarks
       ? b.specialRemarks.split(',').filter(item => item).join(' ') : ''
-  // 预约金额：为 null 时提示包含未配置金额的服务技能
-  b._amountLine = b.amount != null
-      ? `${t('book_calendar.amount_prefix')}${b.amount}`
-      : t('book_booking.amount_unconfigured')
   // 客户联系方式：有电话显示电话，否则显示邮件，都没有则为空
   b._contact = b.phone || b.mail || ''
   const skillNames = (b.skillDtoList || []).map(s => s.name).join(',')

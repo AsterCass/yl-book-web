@@ -748,6 +748,7 @@
       "input": "Input",
       "result": "Result",
       "truncated": " (truncated)",
+      "tool_detail": "Backend reason (not shown to the model; the conversation got a neutral wording)",
       "no_transcript": "No conversation",
       "verdict": "Judge verdict",
       "pending": "Not reviewed yet (the judge runs hourly)",
