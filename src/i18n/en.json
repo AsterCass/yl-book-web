@@ -666,7 +666,8 @@
   "yl_subsystem_appointment_ai_call_review": "AI Call Review",
 
   "book_phone_request": {
-    "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status" },
+    "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status", "phone": "Phone" },
+    "placeholder": { "phone": "Full number or partial digits" },
     "button": { "query": "Query", "clear": "Clear Filters" },
     "note": "Non-booking customer requests (lost items, complaints, etc.) recorded by the AI phone receptionist during calls; customers have been told the request is recorded and may get a callback if necessary. Every request belongs to a specific store, and the type is a short label written by the AI; requests that are unhandled or in progress appear in the todo reminder at the top. The Reply column is visible to customers — the AI reads it to them when they call to ask about progress; the remark stays internal.",
     "edit_dialog": {

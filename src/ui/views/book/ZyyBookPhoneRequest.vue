@@ -34,6 +34,17 @@
                 outlined popup-content-class="component-extra-card-std-limit">
       </q-select>
 
+      <!-- 联系电话：包含匹配，后端只取数字（带括号/空格/横杠/+1 都能搜，输入部分数字也行） -->
+      <div class="q-ml-md">
+        <h6>
+          {{ $t('book_phone_request.label.phone') }}&nbsp;:
+        </h6>
+      </div>
+      <q-input v-model="selectPhone" class="q-ma-md component-outline-input-std" dense outlined
+               :placeholder="t('book_phone_request.placeholder.phone')"
+               tabindex="0" @keyup.enter="selectData()">
+      </q-input>
+
     </div>
 
     <div class="row items-center">
@@ -146,16 +157,18 @@ import {PhoneRequestHandleStatusEnum} from "@/constants/enums/book.js";
 
 const {t} = useI18n()
 
-// 筛选：记录日期区间 + 处理状态（空=不过滤）；需求类型为 AI 自拟的自由文本标签，不做筛选
+// 筛选：记录日期区间 + 处理状态 + 联系电话（模糊，空=不过滤）；需求类型为 AI 自拟的自由文本标签，不做筛选
 const selectStartDate = ref("")
 const selectEndDate = ref("")
 const selectHandleStatus = ref(null)
+const selectPhone = ref("")
 const handleStatusOptions = ref(PhoneRequestHandleStatusEnum.toSelectForm())
 
 function clearSearch() {
   selectStartDate.value = ""
   selectEndDate.value = ""
   selectHandleStatus.value = null
+  selectPhone.value = ""
 }
 
 const tableData = ref([])
@@ -181,6 +194,7 @@ function selectData(keepPage = false) {
     startDateStr: selectStartDate.value || null,
     endDateStr: selectEndDate.value || null,
     handleStatus: selectHandleStatus.value ? selectHandleStatus.value.value : null,
+    phone: selectPhone.value.trim() || null,
   }).then(res => {
     if (!res || !res.data || !res.data.data) {
       tableDynamicData.value.inLoading = false

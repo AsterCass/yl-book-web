@@ -664,7 +664,8 @@
   "yl_subsystem_appointment_ai_call_review": "AI 通话复盘",
 
   "book_phone_request": {
-    "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态" },
+    "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态", "phone": "联系电话" },
+    "placeholder": { "phone": "完整号码或部分数字" },
     "button": { "query": "查询", "clear": "清空条件" },
     "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉等），客户已被告知需求已记录、必要时将回访。每条需求归属具体门店，需求类型为 AI 自拟的简短标签；存在未处理或处理中的需求时会出现在顶部待办提醒中。「答复」栏内容客户可见——客户来电查询进展时 AI 会读给客户听，备注仅内部可见。",
     "edit_dialog": {
