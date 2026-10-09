@@ -75,6 +75,7 @@
                               upsertRestBreak = (row.restBreak && row.restBreak.breakMinutes) || ''
                               upsertRestTolerance = (row.restBreak && row.restBreak.toleranceMinutes) || ''
                               upsertReassignPolicy = (row.autoAssign && row.autoAssign.reassignPolicy) || DEFAULT_REASSIGN_POLICY
+                              upsertTurnoverMinutes = (row.turnover && row.turnover.minutes != null) ? String(row.turnover.minutes) : String(DEFAULT_TURNOVER_MINUTES)
                               upsertClassPassEmail = (row.classPass && row.classPass.email) || ''
                               upsertClassPassVenueId = (row.classPass && row.classPass.venueId) || ''
                               upsertClassPassPassword = (row.classPass && row.classPass.password) || ''
@@ -353,6 +354,22 @@
             </div>
           </template>
 
+          <!-- 整理时间（虚拟 block）：同一位技师两张单之间至少空这么久。只约束 AI 电话与本站预约；
+               管理端指定技师排单不受限（提交前提示）、不指定技师时自动分配会避让；0 = 关闭。
+               后端存 yl_store.meta.turnover.minutes，出参已是生效值（未配置按 5）；留空提交 = 清空配置回落默认 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.turnover.field')
+            }}&nbsp;:</h6>
+          <div>
+            <div class="row items-center" style="gap: .5rem;">
+              <q-input v-model="upsertTurnoverMinutes" mask="##" class="component-outline-input-std" dense outlined/>
+              <span style="opacity: .6; font-size: .85rem">{{ $t('user_store.turnover.unit') }}</span>
+            </div>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.turnover.hint') }}
+            </div>
+          </div>
+
           <!-- 自动分配改派策略：自动分配为了给新单腾位时，能否挪动已分配、未开始的单。三态单选、整块提交，
                后端存 yl_store.meta.autoAssign.reassignPolicy，未配置按 NONE（一律不改派）生效 -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
@@ -572,6 +589,9 @@ const upsertRestTolerance = ref("")
 const DEFAULT_REASSIGN_POLICY = 'NONE'
 const reassignPolicyList = ['FREE', 'KEEP_SPECIAL', 'NONE']
 const upsertReassignPolicy = ref(DEFAULT_REASSIGN_POLICY)
+// 整理时间（分钟）：出参已是生效值（未配置按 5），这里只做兜底；留空提交 null = 清空配置回落默认，填 0 = 关闭
+const DEFAULT_TURNOVER_MINUTES = 5
+const upsertTurnoverMinutes = ref(String(DEFAULT_TURNOVER_MINUTES))
 // ClassPass 直连凭据。口令按普通字段处理（出参原样回传），三个框语义一致：留空即清空
 const upsertClassPassEmail = ref("")
 const upsertClassPassPassword = ref("")
@@ -698,6 +718,7 @@ function clearUpsertParam() {
   upsertRestBreak.value = ""
   upsertRestTolerance.value = ""
   upsertReassignPolicy.value = DEFAULT_REASSIGN_POLICY
+  upsertTurnoverMinutes.value = String(DEFAULT_TURNOVER_MINUTES)
   upsertClassPassEmail.value = ""
   upsertClassPassPassword.value = ""
   upsertClassPassVenueId.value = ""
@@ -785,6 +806,10 @@ function upsertData() {
       // 整块提交；后端不传才是「不改」，空串=清空回落默认
       autoAssign: {
         reassignPolicy: upsertReassignPolicy.value,
+      },
+      // 整块提交：留空 = 清空配置（后端回落默认 5），填 0 = 关闭，其余 0~60 由后端校验
+      turnover: {
+        minutes: String(upsertTurnoverMinutes.value ?? '').trim() === '' ? null : Number(upsertTurnoverMinutes.value),
       },
       classPass: {
         email: upsertClassPassEmail.value,

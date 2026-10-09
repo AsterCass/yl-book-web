@@ -110,6 +110,12 @@
               <div v-for="(seg, oi) in (col.offDuty || [])" :key="'o' + oi" class="cal-off-duty"
                    :style="{ top: seg.top + 'px', height: seg.height + 'px' }"/>
 
+              <!-- 整理间隔（虚拟 block，只在日视图的雇员列）：每张已分配单两头的整理时间，后端按门店配置算好、
+                   紧挨着的两单之间没有。极浅的点纹、不拦事件；不进 col.blocks，右键删除与「落在屏蔽时段」判定都碰不到它。
+                   垫在 block 之下：同一处既有整理间隔又有 block 时以 block 为准 -->
+              <div v-for="(seg, ti) in (col.turnover || [])" :key="'t' + ti" class="cal-turnover"
+                   :style="{ top: seg.top + 'px', height: seg.height + 'px' }"/>
+
               <!-- block 背景（斜纹置灰）：周视图=门店 block；日视图=门店 block + 该列雇员自己的 block。
                    三种来源三套配色：手动=中性灰；自动=主色（只是对外镜像、不影响本店排班与改派，故更淡）；
                    休息围栏=绿色（雇员连续工作超时后圈出的不接单时段，参与本地判定） -->
@@ -128,6 +134,10 @@
                 <span class="cal-slot-label">
                   {{ hoverSlot.label }}
                   <span class="cal-slot-hint">{{ $t('book_calendar.slot_hint') }}</span>
+                  <!-- 指针落在整理间隔里：说明这几分钟是什么（阴影本身不拦事件，没法挂 tooltip，提示挂在时间线上） -->
+                  <span v-if="hoverSlot.turnover" class="cal-slot-hint cal-slot-turnover">
+                    {{ $t('book_calendar.turnover_tip', {minutes: turnoverMinutes}) }}
+                  </span>
                 </span>
               </div>
 
@@ -488,6 +498,9 @@ const MIN_COL_WIDTH = '9rem'
 const viewMode = ref('day')     // week | day，默认日视图
 const bookings = ref([])
 const blocks = ref([])
+// 整理间隔（虚拟 block）：后端按门店整理时间算好的每位雇员的段，只画在日视图雇员列，不进 blocks
+const turnover = ref([])
+const turnoverMinutes = ref(0)
 const staffList = ref([])
 // 雇员 id -> 名称（simple 列表），用于偏好员工展示（映射不到时回退显示 id）
 const staffNameById = computed(() => {
@@ -954,6 +967,23 @@ function blockSegmentsForDate(dateStr, staffId) {
   return segs
 }
 
+// 某雇员某日期的整理间隔渲染段（定位到像素）：按日裁剪的口径同 blockSegmentsForDate。
+// 只给日视图的雇员列用；周视图没有雇员列、不画
+function turnoverSegmentsForDate(dateStr, staffId, toPx) {
+  const segs = []
+  for (const tv of turnover.value) {
+    if (tv.staffId !== staffId || dateStr < tv.startDateStr || dateStr > tv.endDateStr) {
+      continue
+    }
+    const start = dateStr === tv.startDateStr ? tv.startMin : 0
+    const end = dateStr === tv.endDateStr ? tv.endMin : 1440
+    if (end > start) {
+      segs.push({start, end, top: toPx(start), height: Math.max((end - start) / 60 * HOUR_HEIGHT, 2)})
+    }
+  }
+  return segs
+}
+
 // 某列的 block 渲染段（定位到像素）
 function buildDayBlocks(dateStr, staffId, toPx) {
   return blockSegmentsForDate(dateStr, staffId).map(seg => ({
@@ -1018,6 +1048,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     staffId: extra.staffId || null,
     shiftText: extra.shiftText || '',
     offDuty: extra.offDuty || [],
+    turnover: extra.turnover || [],
   }
 }
 
@@ -1128,6 +1159,7 @@ const staffColumns = computed(() => {
               ? shifts.map(sh => `${minutesToTime(sh.start)}-${minutesToTime(sh.end)}`).join(', ')
               : t('book_calendar.off_today'),
           offDuty: offDutySegments(shifts, rangeStart, rangeEnd, toPx),
+          turnover: turnoverSegmentsForDate(dayStr, s.id, toPx),
         }))
   }
   return cols
@@ -1219,6 +1251,8 @@ function onColPointerMove(e, col) {
     minutes,
     top: (minutes - startHour * 60) / 60 * HOUR_HEIGHT,
     label: formatMinutesDisplay(minutes),
+    // 落在整理间隔里（日视图雇员列才有）：时间线上多一句说明
+    turnover: (col.turnover || []).some(seg => minutes >= seg.start && minutes < seg.end),
   }
 }
 
@@ -1924,6 +1958,15 @@ function applyData(res) {
     startMin: bl.startTime ? timeToMinutes(bl.startTime.substring(11, 16)) : 0,
     endMin: bl.endTime ? timeToMinutes(bl.endTime.substring(11, 16)) : 0,
   }))
+  // 整理间隔：后端已按门店整理时间算好每位雇员的段（已分配单两头各 N 分钟、减掉预约本身），这里只解析定位
+  turnoverMinutes.value = data.turnoverMinutes || 0
+  turnover.value = (data.turnoverList || []).map(tv => ({
+    staffId: tv.staffId,
+    startDateStr: tv.startTime ? tv.startTime.substring(0, 10) : '',
+    endDateStr: tv.endTime ? tv.endTime.substring(0, 10) : '',
+    startMin: tv.startTime ? timeToMinutes(tv.startTime.substring(11, 16)) : 0,
+    endMin: tv.endTime ? timeToMinutes(tv.endTime.substring(11, 16)) : 0,
+  }))
 }
 
 // 筛选项必传：周视图取本周一~周日，日视图取当天
@@ -2177,6 +2220,19 @@ onBeforeUnmount(() => {
   border-bottom-color: rgba(204, 118, 45, .5) !important;
 }
 
+// 整理间隔（虚拟 block）：极浅的点纹，刻意比三种 block 都淡、不用斜纹——它只挡客户渠道，管理端照样能排，
+// 画成斜纹会让店员以为那里也不能排；每单两头各几分钟，太抢眼也会把日历弄花。不拦事件、无文字
+.cal-turnover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: radial-gradient(rgba(33, 150, 83, .55) .9px, transparent 1.1px) 0 0 / 5px 5px;
+  border-top: 1px dotted rgba(33, 150, 83, .4);
+  border-bottom: 1px dotted rgba(33, 150, 83, .4);
+  z-index: 1;
+  pointer-events: none;
+}
+
 // 休息围栏：绿色斜纹。比自动 block 深一些——它<b>参与本地判定</b>，是实打实约不进去的时段，
 // 不像自动 block 只是对外镜像
 .cal-block-rest {
@@ -2249,6 +2305,11 @@ onBeforeUnmount(() => {
     margin-left: .3rem;
     opacity: .8;
     font-size: .65rem;
+  }
+
+  // 指针落在整理间隔里时追加的一句，与阴影同色系好对上号
+  .cal-slot-turnover {
+    color: rgb(141, 232, 178);
   }
 }
 

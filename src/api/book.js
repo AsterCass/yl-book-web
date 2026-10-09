@@ -184,12 +184,13 @@ export function bookPhoneRequestUpdate(id, body) {
     })
 }
 
-// 建单/改单提交前检查（只读，不落库）：一次查完「资源位够不够」与「有没有撞上休息围栏」。
+// 建单/改单提交前检查（只读，不落库）：一次查完「资源位够不够」「有没有撞上休息围栏」「与该技师的其它单是否挨得不够整理时间」。
 // body: {bookingId?, assignedStaffId?, bookTimeStr, bookRequirementSkillIdList}
-//   assignedStaffId 只用于休息围栏检查；不传 = 交给自动分配，它本来就会避开围栏，不存在强插问题
+//   assignedStaffId 只用于休息围栏与整理时间检查；不传 = 交给自动分配，它本来就会避开两者，不存在强插问题
 // 返回 {ok, resourceName, capacity, required, available, conflictStartTime, conflictEndTime,
-//       targetStartTime, targetEndTime, occupied: [...], restBlocks: [{staffName, startTime, endTime}]}
-// ok=false 只是提示——后端对管理端两者都不拦，确认后照常提交。
+//       targetStartTime, targetEndTime, occupied: [...], restBlocks: [{staffName, startTime, endTime}],
+//       turnoverMinutes, turnoverConflicts: [{bookingId, name, startTime, endTime, skillNames, gapMinutes}]}
+// ok=false 只是提示——后端对管理端三者都不拦，确认后照常提交。
 // 手动 block 不在返回里：它始终硬拦，提交会直接报错，列出来会误导店员以为确认就能过
 export function bookPreCheck(body) {
     return serviceShiro({

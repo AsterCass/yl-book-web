@@ -542,6 +542,7 @@
 
   "user_store": {
     "rest": { "enabled": "启用休息规则", "continuous": "连续工作上限", "break": "休息时长", "tolerance": "可忽略间隙", "unit": "分钟", "note": "雇员连续工作超过上限后，系统在这段工作的未来侧圈出一段不接单的时间（日历上标记为 Rest Time）。", "warn": "这是预防不是补救：已经排满的时段中间插不进休息，只能阻止工作段继续变长。", "continuous_hint": "按跨度计算，含被「可忽略间隙」桥接掉的小空档", "tolerance_hint": "两单之间不超过这么久仍算连续工作；必须小于休息时长，否则休息时段会被自己的容差抵消" },
+    "turnover": { "field": "整理时间", "unit": "分钟", "hint": "同一位技师两张单之间至少留的整理时间（默认 5，填 0 关闭，最多 60）。只约束 AI 电话与本站预约，本站可约表按 10 分钟刻度取整；管理端指定技师排单不受限（提交前会提示），不指定技师时自动分配会避开这段时间。" },
     "auto_assign": { "field": "自动分配改派", "note": "只约束系统自动分配；人工指派、拖动调整不受影响。锁得越多，新单落待分配的概率越高，需要有人盯待分配列表。", "policy": { "FREE": { "label": "自由改派", "hint": "以门店最大接单量为先，任何未开始的已分配单都可能被换人腾位" }, "KEEP_SPECIAL": { "label": "特殊单不改派", "hint": "特殊单（点钟单，或填了备注 / 特殊备注的单）不会被换人腾位，其余单仍可改派；特殊单自身改期时只能留给当前雇员或偏好雇员，两人都放不下则落待分配" }, "NONE": { "label": "一律不改派（默认）", "hint": "自动分配不会为了腾位挪动任何已分配单，只把新单塞进现有空档；特殊单自身改期的规则同上" } } },
     "classpass": { "note": "配置后该门店的屏蔽时段直接下发到 ClassPass，不再经谷歌日历", "email": "ClassPass 账号", "password": "ClassPass 密码", "venue_id": "Venue ID", "test": "测试登录", "testing": "正在验证…", "test_ok": "登录成功", "test_fail": "登录失败", "venues": "该账号可管门店", "practitioners": "该 Venue 下的服务人员（雇员绑定用）", "venue_hint": "一个账号可管多家门店，填错不会报错但会把屏蔽推到别人家，务必核对", "placeholder": { "email": "例如：manager\\@example.com", "password": "ClassPass 登录密码", "venue_id": "例如：265267" } },
     "label": { "id": "门店编号", "name": "门店名称", "phone": "门店电话" },
@@ -890,6 +891,7 @@
       "title": "资源位已排满",
       "summary": "【{name}】共 {capacity} 个，本单需要 {required} 个。以下时段已无空位：",
       "rest_summary": "该雇员此时段处于休息围栏内", "rest_note": "插入后休息不会被取消，而是顺延到本单结束之后。", "conflict_window": "冲突时段",
+      "turnover_summary": "与该技师前后 {minutes} 分钟内的预约太近（整理时间不足）：", "turnover_gap": "间隔 {gap} 分钟", "turnover_note": "管理端不受限，确认后照常提交；AI 电话与本站预约会自动避开这段时间。",
       "target_window": "本单时段",
       "occupied_title": "该时段占用情况",
       "note": "仅为提醒：客户端与 AI 电话在该时段已不可预约，管理端仍可排入。",
@@ -1020,6 +1022,7 @@
     "view_day": "每日视图",
     "view_week": "每周视图",
     "slot_hint": "左键建预约 · 右键建屏蔽时段",
+    "turnover_tip": "整理时间 {minutes} 分钟（AI 电话与本站预约不可约，管理端可排）",
     "unassigned": "未分配",
     "no_name": "未命名",
     "auto_assign": "自动分配",

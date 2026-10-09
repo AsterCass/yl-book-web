@@ -1,7 +1,7 @@
 <template>
 
-  <!-- 提交前检查的提示弹窗：门店资源位（床位等）占用 + 雇员休息围栏，两类各自独立、可能同时出现。
-       后端对管理端<b>两者都不拦截</b>，这里只是把「谁占着、占到几点」摆出来让店员判断——
+  <!-- 提交前检查的提示弹窗：门店资源位（床位等）占用 + 雇员休息围栏 + 整理时间，三类各自独立、可能同时出现。
+       后端对管理端<b>都不拦截</b>，这里只是把「谁占着、占到几点、差几分钟」摆出来让店员判断——
        只说一句「床位不够」是没法决定要不要坚持排的。确认即照常提交。
        手动 block 不会出现在这里：它始终硬拦，提交会直接报错。 -->
   <q-dialog :model-value="modelValue" @update:model-value="close"
@@ -15,6 +15,28 @@
       <q-separator class="component-separator-base" inset spaced="1rem"/>
 
       <div class="q-mx-lg q-mt-md">
+
+        <!-- 整理时间（虚拟 block）：与该技师的其它单挨得不够门店整理时间。管理端不受限，只把差多少摆出来；
+             AI 电话与本站预约在这段时间本来就约不进来 -->
+        <template v-if="(detail.turnoverConflicts || []).length">
+          <div class="res-conflict-summary">
+            {{ $t('book_booking.resource.turnover_summary', {minutes: detail.turnoverMinutes}) }}
+          </div>
+          <div class="res-conflict-list q-mt-sm">
+            <div v-for="tc in detail.turnoverConflicts" :key="tc.bookingId" class="res-conflict-row">
+              <div class="row items-center no-wrap">
+                <div class="res-conflict-time">{{ timeOnly(tc.startTime) }} ~ {{ timeOnly(tc.endTime) }}</div>
+                <div class="res-conflict-name q-ml-md">{{ tc.name }}</div>
+                <q-space/>
+                <div class="res-conflict-staff">{{ $t('book_booking.resource.turnover_gap', {gap: tc.gapMinutes}) }}</div>
+              </div>
+              <div v-if="tc.skillNames" class="res-conflict-skills">{{ tc.skillNames }}</div>
+            </div>
+          </div>
+          <div class="res-conflict-note q-mt-sm">{{ $t('book_booking.resource.turnover_note') }}</div>
+          <q-separator v-if="(detail.restBlocks || []).length || detail.resourceName"
+                       class="component-separator-base" spaced="1rem"/>
+        </template>
 
         <!-- 休息围栏：插进去不会把休息取消掉，而是让它顺延到本单之后，这点必须说清楚 -->
         <template v-if="(detail.restBlocks || []).length">
@@ -96,7 +118,7 @@ defineProps({
     default: false
   },
   /**
-   * /book/precheck 的返回体（ok=false 那一份）：资源位字段 + restBlocks，两类可能同时存在
+   * /book/precheck 的返回体（ok=false 那一份）：资源位字段 + restBlocks + turnoverConflicts，三类可能同时存在
    */
   detail: {
     type: Object,
