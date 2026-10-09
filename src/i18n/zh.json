@@ -761,7 +761,8 @@
       "rejudge_count": "已重判 {n} 次",
       "recording": "录音",
       "recording_open": "在新窗口打开录音",
-      "no_recording": "没有录音链接（Vapi 报告没到或没开录音）",
+      "recording_loading": "正在取回录音…",
+      "no_recording": "没有 Twilio 通话 SID，取不到录音",
       "vapi_transcript": "Vapi 转写（它那边语音识别的版本，裁判不用）"
     },
     "ops_dialog": {
@@ -894,6 +895,7 @@
       "turnover_summary": "与该技师前后 {minutes} 分钟内的预约太近（整理时间不足）：", "turnover_gap": "间隔 {gap} 分钟", "turnover_note": "管理端不受限，确认后照常提交；AI 电话与本站预约会自动避开这段时间。",
       "target_window": "本单时段",
       "occupied_title": "该时段占用情况",
+      "occupied_count": "占用 {name} ×{count}",
       "note": "仅为提醒：客户端与 AI 电话在该时段已不可预约，管理端仍可排入。",
       "save_anyway": "仍然保存",
       "back": "返回修改"
@@ -1050,6 +1052,8 @@
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "preferred_prefix": "偏好：",
+    "resource_prefix": "资源需求：",
+    "resource_none": "无需门店共享资源",
     "store_block": {
       "auto_tag": "自动",
       "auto_note": "系统判定该时段全店接不下单，已同步屏蔽第三方渠道。要放开请改排班或改预约，不能直接删除。",

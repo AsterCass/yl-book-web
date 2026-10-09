@@ -77,8 +77,12 @@
             <div class="row items-center no-wrap">
               <div class="res-conflict-time">{{ timeOnly(row.startTime) }} ~ {{ timeOnly(row.endTime) }}</div>
               <div class="res-conflict-name q-ml-md">{{ row.name }}</div>
+              <!-- 该单占用冲突资源的数量（多项目按 max 计，同容量判定）：各行加起来对照总数，一眼看出满在哪 -->
+              <div v-if="row.consumeCount" class="res-conflict-count q-ml-sm">
+                {{ $t('book_booking.resource.occupied_count', {name: detail.resourceName, count: row.consumeCount}) }}
+              </div>
               <q-space/>
-              <div v-if="row.staffName" class="res-conflict-staff">{{ row.staffName }}</div>
+              <div v-if="row.staffName" class="res-conflict-staff q-ml-sm">{{ row.staffName }}</div>
             </div>
             <div v-if="row.skillNames" class="res-conflict-skills">{{ row.skillNames }}</div>
           </div>
@@ -195,6 +199,17 @@ function timeOnly(str) {
     font-size: .8rem;
     opacity: .65;
     white-space: nowrap;
+  }
+
+  // 占用数：小号描边胶囊，跟在客户名后面
+  .res-conflict-count {
+    font-size: .75rem;
+    font-weight: 500;
+    padding: 0 .4rem;
+    border: 1px solid rgba(var(--text-color), .3);
+    border-radius: .6rem;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .res-conflict-skills {

@@ -9,6 +9,7 @@ export function bookList(params) {
 }
 
 // 预约日历：不分页，返回 { list: [预约...], blockList: [{id, staffId, storeBlock, startTime, endTime, reason}...] }
+// 每张预约带 resourceNeedList: [{resourceId, resourceName, count}]（门店共享资源占用，空 = 不占）
 // startDateStr / endDateStr 为必传（本周一 ~ 本周日，格式 yyyy-MM-dd）
 export function bookCalendar(params) {
     return serviceShiro({
@@ -188,7 +189,9 @@ export function bookPhoneRequestUpdate(id, body) {
 // body: {bookingId?, assignedStaffId?, bookTimeStr, bookRequirementSkillIdList}
 //   assignedStaffId 只用于休息围栏与整理时间检查；不传 = 交给自动分配，它本来就会避开两者，不存在强插问题
 // 返回 {ok, resourceName, capacity, required, available, conflictStartTime, conflictEndTime,
-//       targetStartTime, targetEndTime, occupied: [...], restBlocks: [{staffName, startTime, endTime}],
+//       targetStartTime, targetEndTime,
+//       occupied: [{bookingId, name, startTime, endTime, skillNames, staffName, consumeCount}],
+//       restBlocks: [{staffName, startTime, endTime}],
 //       turnoverMinutes, turnoverConflicts: [{bookingId, name, startTime, endTime, skillNames, gapMinutes}]}
 // ok=false 只是提示——后端对管理端三者都不拦，确认后照常提交。
 // 手动 block 不在返回里：它始终硬拦，提交会直接报错，列出来会误导店员以为确认就能过
@@ -362,5 +365,15 @@ export function bookAiCallReviewRejudge(id) {
     return serviceShiro({
         url: `/book/ai-call-review/rejudge/${id}`,
         method: 'post',
+    })
+}
+
+// AI 通话复盘的录音：Twilio 双声道 mp3 整段返回（blob）。不走 Vapi 的 recordingUrl——那个桶是私有的，浏览器直接打开 403。
+// 后端业务错误（没有 CallSid / Twilio 没有这通的录音）以 JSON 返回，调用方按 blob.type 区分（口径同导出 xlsx）
+export function bookAiCallReviewRecording(id) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}/recording`,
+        method: 'get',
+        responseType: 'blob',
     })
 }

@@ -763,7 +763,8 @@
       "rejudge_count": "re-judged {n} time(s)",
       "recording": "Recording",
       "recording_open": "Open the recording in a new tab",
-      "no_recording": "No recording link (Vapi report not received or recording disabled)",
+      "recording_loading": "Fetching the recording…",
+      "no_recording": "No Twilio call SID, so no recording can be fetched",
       "vapi_transcript": "Vapi transcript (its own speech recognition; not used by the judge)"
     },
     "ops_dialog": {
@@ -896,6 +897,7 @@
       "turnover_summary": "Too close to this technician's other bookings ({minutes}-minute turnover time):", "turnover_gap": "{gap} min gap", "turnover_note": "Advisory only — staff can still save; the AI phone line and online booking keep this gap automatically.",
       "target_window": "This booking",
       "occupied_title": "Occupied by",
+      "occupied_count": "Uses {name} ×{count}",
       "note": "Advisory only — online booking and the AI phone line already show this period as unavailable; staff can still book it in.",
       "save_anyway": "Save anyway",
       "back": "Go back"
@@ -1052,6 +1054,8 @@
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",
+    "resource_prefix": "Resources: ",
+    "resource_none": "No shared store resources",
     "store_block": {
       "auto_tag": "Auto",
       "auto_note": "The system found no staff available for this period and has blocked it on third-party channels. To reopen it, adjust the schedule or bookings — it cannot be deleted here.",

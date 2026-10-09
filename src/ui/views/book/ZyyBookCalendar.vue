@@ -157,9 +157,9 @@
                    }"
                    @pointerdown="onEventPointerDown($event, ev, colIndex)"
                    @mouseenter="onEventEnter($event, ev, colIndex)">
-                <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注——顺序须与下方
-                     悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目 / 备注 / 金额 / 联系方式，
-                     周视图 起止时间+预约项目 / 金额 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
+                <!-- 第一行：客户名称 / 来源（带来源色）/ 偏好员工 / 特殊备注 / 备注（日视图、非第三方来源）——顺序须与下方
+                     悬停卡片一致；第二行起（见 lines）：日视图 起止时间+预约项目+资源需求 / 备注（仅第三方来源）/ 金额 / 联系方式，
+                     周视图 起止时间+预约项目+资源需求 / 金额 / 特殊备注 / 联系方式 / 偏好员工 / 备注 -->
                 <div class="cal-event-title">
                   <!-- 排班外警示：放在滚动区外、首行最左，始终可见（原因与当天班次见悬停卡片） -->
                   <q-icon v-if="ev.offSchedule" name="fa-solid fa-triangle-exclamation" size=".8rem"
@@ -178,6 +178,10 @@
                     <!-- 特殊备注：日视图放首行（周视图作为独立正文行，见 lines） -->
                     <span v-if="ev.specialRemarks" class="cal-event-special">
                       {{ ev.specialRemarks }}
+                    </span>
+                    <!-- 备注：日视图且非第三方来源时跟在特殊备注后面（第三方与周视图仍是正文行，见 lines） -->
+                    <span v-if="ev.titleRemark" class="cal-event-remark">
+                      {{ ev.titleRemark }}
                     </span>
                   </cask-marquee-row>
                   <!-- 前台已签到标记：留在滚动区外，始终可见 -->
@@ -375,7 +379,7 @@
            @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
         <div class="cal-event-title">
           <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
-          <!-- 首行顺序须与上方预约卡片一致：客户名称 / 来源 / 偏好员工 / 特殊备注 -->
+          <!-- 首行顺序须与上方预约卡片一致：客户名称 / 来源 / 偏好员工 / 特殊备注 / 备注 -->
           <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
             {{ hoverCard.ev.sourceName }}
           </span>
@@ -384,6 +388,9 @@
           </span>
           <span v-if="hoverCard.ev.specialRemarks" class="cal-event-special">
             {{ hoverCard.ev.specialRemarks }}
+          </span>
+          <span v-if="hoverCard.ev.titleRemark" class="cal-event-remark">
+            {{ hoverCard.ev.titleRemark }}
           </span>
           <q-space/>
           <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
@@ -457,6 +464,9 @@ import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
 const {t, locale} = useI18n()
+
+// 第三方渠道来源：日视图备注不上首行、保持原位置（见 buildColumn 的 titleRemark）
+const THIRD_PARTY_SOURCES = [BookSourceEnum.CLASSPASS.code, BookSourceEnum.BUILDHEALTH.code]
 
 // 时间展示：英文用 12 小时制（含 AM/PM），其他语言用 24 小时制。仅用于展示，
 // 提交后端的 bookTimeStr 仍走 minutesToTime 的 24 小时制
@@ -984,6 +994,19 @@ function turnoverSegmentsForDate(dateStr, staffId, toPx) {
   return segs
 }
 
+// 卡片第二行的门店共享资源占用。后端只给数据（resourceNeedList：资源名 + 数量，多项目按资源取 max，同容量判定），
+// 「资源需求：」「无需门店共享资源」走前端 i18n；在渲染时（buildColumn）拼，切换语言即时生效。
+// 空列表 = 不占资源，明确写出来；字段缺失（后端未更新）则不显示，免得误报「无需」
+function resourceLineOf(b) {
+  const needs = b.resourceNeedList
+  if (!needs) {
+    return ''
+  }
+  return needs.length
+      ? t('book_calendar.resource_prefix') + needs.map(n => `${n.resourceName}x${n.count}`).join(' ')
+      : t('book_calendar.resource_none')
+}
+
 // 某列的 block 渲染段（定位到像素）
 function buildDayBlocks(dateStr, staffId, toPx) {
   return blockSegmentsForDate(dateStr, staffId).map(seg => ({
@@ -1013,14 +1036,17 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
         ? `${t('book_calendar.preferred_prefix')}${preferredName}` : ''
     // 特殊备注：日视图移到首行（模板内联展示）；周视图一屏七列、首行塞不下，仍作为独立正文行
     const specialRemarks = isDayView ? (b._specialRemarks || '') : ''
-    // 起止时间与预约项目同行，省一行给卡片正文。用「·」而非空格分隔：
+    // 起止时间、预约项目与资源需求同行，省一行给卡片正文。用「·」而非空格分隔：
     // .cal-event-sub 是 nowrap，HTML 会把连续空格折叠成一个，拉不开视觉间距
-    const timeAndSkills = [timeRange, b._calSub].filter(Boolean).join(' · ')
-    // 日视图：备注紧跟在「起止时间 + 预约项目」那一行下面（卡片第三行），先于金额与联系方式——
+    const timeAndSkills = [timeRange, b._calSub, resourceLineOf(b)].filter(Boolean).join(' · ')
+    // 备注：日视图且非第三方来源（classpass / buildhealth 以外）→ 上首行、跟在特殊备注后面（模板内联展示）；
+    //   第三方来源仍留在正文行（原位置）
+    const titleRemark = isDayView && !THIRD_PARTY_SOURCES.includes(b.source) ? (b.remark || '') : ''
+    // 日视图：未上首行的备注（第三方来源）紧跟在「起止时间 + 预约项目」那一行下面（卡片第三行），先于金额与联系方式——
     //   备注多是接待时要留意的补充说明，卡片矮时排在后面的行会被裁掉；特殊备注与偏好员工在日视图已上首行
     // 周视图：保持原顺序，备注仍是最后一行
     const lines = (isDayView
-        ? [timeAndSkills, b.remark, b._amountLine, b._contact]
+        ? [timeAndSkills, titleRemark ? '' : b.remark, b._amountLine, b._contact]
         : [timeAndSkills, b._amountLine, b._specialRemarks, b._contact, preferredLine, b.remark])
         .filter(Boolean)
     // 排班外：已分配未开始、但该雇员当前排班覆盖不到（多为预约后改过排班），卡片加警示提醒前台手动改派
@@ -1029,6 +1055,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       booking: b,
       preferredName,
       specialRemarks,
+      titleRemark,
       offSchedule: offScheduleShifts !== null,
       offScheduleShifts: offScheduleShifts || '',
       top: toPx(ev.start),
@@ -2506,6 +2533,18 @@ onBeforeUnmount(() => {
     font-size: .68rem;
     font-weight: 500;
     opacity: .9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 备注（日视图首行、非第三方来源，跟在特殊备注后）：同款截断策略；常规字重，与加粗的特殊备注区分开
+  .cal-event-remark {
+    flex: 0 999 auto;
+    min-width: 0;
+    font-size: .68rem;
+    font-weight: 400;
+    opacity: .85;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

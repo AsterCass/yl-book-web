@@ -219,14 +219,14 @@
               </div>
 
               <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_ai_call_review.detail.recording') }}&nbsp;:</h6>
-              <div v-if="detail.recordingUrl">
-                <!-- Vapi 存储的录音（优先双声道）：直接播放 + 新窗口打开 -->
-                <audio controls preload="none" :src="detail.recordingUrl" style="max-width: 100%; height: 2rem"></audio>
-                <div style="font-size: .8rem">
-                  <a :href="detail.recordingUrl" target="_blank" rel="noopener" style="color: rgb(var(--pointer))">
-                    {{ $t('book_ai_call_review.detail.recording_open') }}
-                  </a>
-                </div>
+              <div v-if="detail.callSid">
+                <!-- Twilio 录音（双声道 mp3）：带登录头整段取回 blob，再在新窗口交给浏览器播。不在本页放播放器；
+                     也不用 Vapi 的 recordingUrl——那个桶是私有的，直接打开 403 -->
+                <a href="javascript:void(0)" style="color: rgb(var(--pointer)); font-size: .9rem"
+                   :style="recordingLoading ? 'opacity: .5; pointer-events: none' : ''" @click="openRecording">
+                  {{ recordingLoading ? $t('book_ai_call_review.detail.recording_loading')
+                      : $t('book_ai_call_review.detail.recording_open') }}
+                </a>
               </div>
               <div v-else style="opacity: .5;">{{ $t('book_ai_call_review.detail.no_recording') }}</div>
 
@@ -386,11 +386,17 @@
 
 import {onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
-import {notifyTopPositive} from "@/utils/notification-tools.js";
+import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
 import {tableAiCallReview, tableAiCallReviewOperation} from "@/tables/book.js";
-import {bookAiCallReviewDetail, bookAiCallReviewList, bookAiCallReviewOps, bookAiCallReviewRejudge} from "@/api/book.js";
+import {
+  bookAiCallReviewDetail,
+  bookAiCallReviewList,
+  bookAiCallReviewOps,
+  bookAiCallReviewRecording,
+  bookAiCallReviewRejudge
+} from "@/api/book.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {
   AiCallEndedByEnum,
@@ -556,6 +562,47 @@ const detailProblems = ref([])
 const detailChecks = ref([])
 // Vapi 报告里的转写（档案正文 vapi.transcript；没收到报告为空）
 const vapiTranscript = ref('')
+// 录音取回中（整段 mp3 几 MB，期间链接置灰防重复点）
+const recordingLoading = ref(false)
+
+// 在新窗口打开 Twilio 录音：先同步开一个空窗口再去取 blob——等异步回来再 window.open 会被浏览器当弹窗拦掉；
+// 取到后把窗口定位到对象 URL，浏览器用自带播放器播（Twilio 媒体不支持 Range，整段取回后才能拖进度条）。
+// 业务错误以 JSON 返回，按 blob 类型区分后关掉空窗口并提示（口径同预约导出）
+function openRecording() {
+  if (recordingLoading.value || !detail.value || !detail.value.id) {
+    return
+  }
+  const win = window.open('', '_blank')
+  recordingLoading.value = true
+  bookAiCallReviewRecording(detail.value.id).then(async res => {
+    const blob = res && res.data
+    if (!blob) {
+      win && win.close()
+      return
+    }
+    if (blob.type && blob.type.includes('application/json')) {
+      win && win.close()
+      try {
+        const errorObj = JSON.parse(await blob.text())
+        notifyTopWarning(errorObj.message || t('error_request'))
+      } catch (e) {
+        notifyTopWarning(t('error_request'))
+      }
+      return
+    }
+    const url = window.URL.createObjectURL(blob)
+    if (win) {
+      win.location.href = url
+    } else {
+      window.open(url, '_blank')
+    }
+    // 对象 URL 留给新窗口用，这里不 revoke（revoke 后新窗口就加载不到了；随页面关闭一起释放）
+  }).catch(() => {
+    win && win.close()
+  }).finally(() => {
+    recordingLoading.value = false
+  })
+}
 
 function openDetail(row) {
   bookAiCallReviewDetail(row.id).then(res => {
