@@ -1055,6 +1055,7 @@
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "preferred_prefix": "偏好：",
+    "resource_overflow_note": "{name} 在 {start} ~ {end} 同时占用 {peak} 个，超过门店总数 {capacity} 个（仅提示，不影响操作）",
     "resource_prefix": "资源需求：",
     "resource_none": "无需门店共享资源",
     "store_block": {

@@ -1057,6 +1057,7 @@
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",
+    "resource_overflow_note": "{name}: {peak} in use at once during {start} ~ {end}, over the store total of {capacity} (advisory only)",
     "resource_prefix": "Resources: ",
     "resource_none": "No shared store resources",
     "store_block": {

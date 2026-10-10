@@ -164,6 +164,10 @@
                   <!-- 排班外警示：放在滚动区外、首行最左，始终可见（原因与当天班次见悬停卡片） -->
                   <q-icon v-if="ev.offSchedule" name="fa-solid fa-triangle-exclamation" size=".8rem"
                           class="cal-event-off-schedule-mark"/>
+                  <!-- 资源超限警示：该单所在时段某项门店共享资源的同时占用超过总数（仅提示，明细见悬停卡片）。
+                       图标形状与颜色都和排班外的三角区分开，两者可以同时出现 -->
+                  <q-icon v-if="ev.resourceOverflow" name="fa-solid fa-circle-exclamation" size=".8rem"
+                          class="cal-event-resource-overflow-mark"/>
                   <!-- 日视图首行塞了四项，卡片窄时省略号会把偏好/特殊备注截没；改为整行横向循环滚动，
                        放得下则静止。周视图列窄、卡片多，滚动会很吵，仍用各自的省略号 -->
                   <cask-marquee-row :enabled="viewMode === 'day'">
@@ -410,6 +414,12 @@
             })
           }}
         </div>
+        <!-- 资源超限：哪项资源、哪段时间、同时占了几个 / 总共几个；一段一行。仅提示，不拦任何操作 -->
+        <div v-for="(note, ni) in hoverCard.ev.resourceOverflowNotes" :key="'ro' + ni"
+             class="cal-event-resource-overflow-note">
+          <q-icon name="fa-solid fa-circle-exclamation" size=".75rem" class="q-mr-xs"/>
+          {{ note }}
+        </div>
         <div v-for="(line, li) in hoverCard.ev.lines" :key="li" class="cal-event-sub">{{ line }}</div>
         <div v-if="hoverCard.ev.booking.staffName || hoverCard.ev.booking.status !== -1"
              class="cal-event-footer">
@@ -511,6 +521,18 @@ const blocks = ref([])
 // 整理间隔（虚拟 block）：后端按门店整理时间算好的每位雇员的段，只画在日视图雇员列，不进 blocks
 const turnover = ref([])
 const turnoverMinutes = ref(0)
+// 资源超限时段（后端算好，仅提示）：[{resourceName, capacity, peak, startTime, endTime, bookingIds}]
+const resourceOverflows = ref([])
+// 预约 id -> 它涉及的超限时段，卡片渲染时按 id 取
+const overflowsByBookingId = computed(() => {
+  const map = {}
+  for (const seg of resourceOverflows.value) {
+    for (const id of seg.bookingIds || []) {
+      (map[id] = map[id] || []).push(seg)
+    }
+  }
+  return map
+})
 const staffList = ref([])
 // 雇员 id -> 名称（simple 列表），用于偏好员工展示（映射不到时回退显示 id）
 const staffNameById = computed(() => {
@@ -1058,6 +1080,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
         .filter(Boolean)
     // 排班外：已分配未开始、但该雇员当前排班覆盖不到（多为预约后改过排班），卡片加警示提醒前台手动改派
     const offScheduleShifts = offScheduleShiftText(b)
+    // 资源超限：该单占着的某项门店共享资源在某段时间同时占用超过总数（后端算好，这里只取文案）
+    const resourceOverflowNotes = resourceOverflowNotesOf(b)
     return {
       booking: b,
       preferredName,
@@ -1065,6 +1089,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       titleRemark,
       offSchedule: offScheduleShifts !== null,
       offScheduleShifts: offScheduleShifts || '',
+      resourceOverflow: resourceOverflowNotes.length > 0,
+      resourceOverflowNotes,
       top: toPx(ev.start),
       height: Math.max((ev.end - ev.start) / 60 * HOUR_HEIGHT, 22),
       leftPct: ev.col * widthPct,
@@ -1129,6 +1155,27 @@ function offScheduleShiftText(b) {
     return null
   }
   return formatShifts(mergedShifts(staff.scheduleList, dow))
+}
+
+/**
+ * 该单涉及的资源超限提示文案，一段一条（没有则空数组）。只做提示，不改数据、不拦操作。
+ * <p>
+ * 判定全在后端（calendar 的 resourceOverflowList：占用口径、峰值扫描与容量判定是同一份实现），
+ * 前端不在 JS 里再算一遍，只按预约 id 取出来拼文案；在渲染时拼，切换语言即时生效。
+ * 超限时段与预约都在同一天内，只显示时分。
+ */
+function resourceOverflowNotesOf(b) {
+  const segments = overflowsByBookingId.value[b.id]
+  if (!segments) {
+    return []
+  }
+  return segments.map(seg => t('book_calendar.resource_overflow_note', {
+    name: seg.resourceName,
+    start: formatHmDisplay((seg.startTime || '').substring(11, 16)),
+    end: formatHmDisplay((seg.endTime || '').substring(11, 16)),
+    peak: seg.peak,
+    capacity: seg.capacity,
+  }))
 }
 
 /**
@@ -1997,6 +2044,8 @@ function applyData(res) {
     startMin: tv.startTime ? timeToMinutes(tv.startTime.substring(11, 16)) : 0,
     endMin: tv.endTime ? timeToMinutes(tv.endTime.substring(11, 16)) : 0,
   }))
+  // 资源超限时段：后端判定，原样存下（字段缺失 = 后端未更新，按没有超限处理）
+  resourceOverflows.value = data.resourceOverflowList || []
 }
 
 // 筛选项必传：周视图取本周一~周日，日视图取当天
@@ -2632,6 +2681,32 @@ onBeforeUnmount(() => {
 
     .q-icon {
       color: $off-schedule-color;
+    }
+  }
+
+  // 资源超限标记色：低饱和的砖红，与排班外的琥珀区分开（图标形状也不同）。
+  // 浅色底对比度约 4.8、深色底约 3.1，两套主题下都看得清；不用全局的亮红，理由同上面的琥珀
+  $resource-overflow-color: rgb(196, 72, 60);
+
+  // 只加首行图标、不加描边：它是纯提示，不像排班外那样需要前台动手改派
+  .cal-event-resource-overflow-mark {
+    flex: 0 0 auto;
+    margin-right: .25rem;
+    color: $resource-overflow-color;
+  }
+
+  // 悬停卡片里的说明：版式同排班外说明，只换标记色
+  .cal-event-resource-overflow-note {
+    margin: .2rem 0;
+    padding: .2rem .4rem;
+    border-left: 3px solid $resource-overflow-color;
+    border-radius: 2px;
+    background: rgba($resource-overflow-color, .12);
+    font-size: .72rem;
+    line-height: 1.35;
+
+    .q-icon {
+      color: $resource-overflow-color;
     }
   }
 

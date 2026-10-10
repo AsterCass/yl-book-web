@@ -10,6 +10,8 @@ export function bookList(params) {
 
 // 预约日历：不分页，返回 { list: [预约...], blockList: [{id, staffId, storeBlock, startTime, endTime, reason}...] }
 // 每张预约带 resourceNeedList: [{resourceId, resourceName, count}]（门店共享资源占用，空 = 不占）
+// 另带 resourceOverflowList: [{resourceId, resourceName, capacity, peak, startTime, endTime, bookingIds}]
+//   = 资源同时占用超过总数的时段（后端判定，仅提示），日历据此在涉及的卡片上打警示
 // startDateStr / endDateStr 为必传（本周一 ~ 本周日，格式 yyyy-MM-dd）
 export function bookCalendar(params) {
     return serviceShiro({
