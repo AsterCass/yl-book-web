@@ -47,6 +47,12 @@
              @click="openColorSetting">
         {{ $t('book_calendar.color.setting') }}
       </q-btn>
+      <!-- 今日下班（仅日视图）：确认后把「现在 ~ 次日 0 点」里还没被门店屏蔽覆盖的空档补成门店屏蔽，
+           线上渠道今天不再进新单（见 closeToday）。作用对象始终是「今天」，与当前翻到哪一天无关 -->
+      <q-btn v-if="viewMode === 'day'" no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+             @click="showCloseToday = true">
+        {{ $t('book_calendar.close_today.button') }}
+      </q-btn>
 
       <q-space/>
 
@@ -367,6 +373,13 @@
                           :dialog-judgment-data="{ title: $t('book_calendar.store_block.delete_title'), content: blockDeleteContent, falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
     />
 
+    <!-- 今日下班确认：说清楚后果（今天不再接线上新单、第三方有同步延迟）再执行；要连带同步第三方，确认键转圈 -->
+    <cask-dialog-judgment v-model="showCloseToday"
+                          :loading="closingToday"
+                          :callback-method="onCloseTodayConfirm"
+                          :dialog-judgment-data="{ title: $t('book_calendar.close_today.title'), content: $t('book_calendar.close_today.content'), falseLabel: $t('book_booking.dialog.common.cancel'), trueLabel: $t('book_booking.dialog.common.confirm') }"
+    />
+
     <!-- 取消预约确认（复用预约列表的取消文案与逻辑） -->
     <cask-dialog-judgment v-model="showCancel"
                           :callback-method="isTrue => { showCancel = false; if (isTrue) cancelData() }"
@@ -457,6 +470,7 @@ import {
   bookAdjust,
   bookBlockCreate,
   bookBlockDelete,
+  bookBlockList,
   bookCalendar,
   bookCheckin,
   bookDelete,
@@ -470,6 +484,7 @@ import {mCalendarColor} from "@/api/myu.js";
 import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import {formatShifts, isoWeekdayOfDateStr, mergedShifts, scheduleCovers} from "@/utils/schedule-tools.js";
+import {uncoveredRanges} from "@/utils/block-tools.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
@@ -1526,6 +1541,73 @@ function deleteContextBlock() {
     blockDeleting.value = false
     showBlockDelete.value = false
   })
+}
+
+// ===== 今日下班 =====
+const showCloseToday = ref(false)
+// 执行中：确认键转圈、弹窗锁住（也就挡住了连点）。每条新屏蔽都要同步第三方，可能要等几秒
+const closingToday = ref(false)
+
+// 确认框回调：确认后不立刻关窗，等请求收尾再关（同删除屏蔽的做法）
+function onCloseTodayConfirm(isTrue) {
+  if (closingToday.value) {
+    return
+  }
+  if (!isTrue) {
+    showCloseToday.value = false
+    return
+  }
+  closeToday()
+}
+
+/**
+ * 今日下班（纯前端，复用现有的屏蔽列表 / 新建屏蔽接口）：把「现在 ~ 次日 0 点」里还没被门店屏蔽覆盖的空档
+ * 逐段补成门店屏蔽，已有的原样保留。现在 18:00、已有 20:00–22:00 → 新建 18:00–20:00 与 22:00–24:00。
+ * <p>
+ * 「现在」取浏览器本地时间，同日历的当前时间线与「今天」——前提是这台电脑与门店在同一时区。
+ * <p>
+ * 哪些算「已覆盖」：只有门店级且非自动的屏蔽。自动屏蔽虽然也是门店级，但它只是给第三方渠道的镜像、
+ * 不挡 AI 电话和本站预约，且一有取消就会被撤回；雇员屏蔽 / 休息围栏只挡一个人，同样不算。
+ */
+async function closeToday() {
+  closingToday.value = true
+  try {
+    const now = new Date()
+    const todayStr = date.formatDate(now, 'YYYY-MM-DD')
+    // 起点格式化到分钟即向下取整，盖得住「现在」
+    const startStr = date.formatDate(now, 'YYYY-MM-DD HH:mm')
+    const endStr = `${date.formatDate(date.addToDate(now, {days: 1}), 'YYYY-MM-DD')} 00:00`
+    // 现拉一次今天的屏蔽，不用页面上已加载的那份：那份最多滞后一个刷新周期，日历翻到别的日期时也不是今天的
+    const listRes = await bookBlockList({startDateStr: todayStr, endDateStr: todayStr})
+    if (!listRes || !listRes.data || !listRes.data.data) {
+      return
+    }
+    const gaps = uncoveredRanges(startStr, endStr, listRes.data.data.filter(b => b.storeBlock && !b.auto))
+    if (!gaps.length) {
+      // 没有缺口：今天剩余时段早就全被门店屏蔽盖住了（比如已经点过一次）
+      notifyTopWarning(t('book_calendar.close_today.already'))
+      return
+    }
+    const reason = t('book_calendar.close_today.reason')
+    let created = 0
+    for (const gap of gaps) {
+      const res = await bookBlockCreate({...gap, reason})
+      if (!res || !res.data) {
+        // 请求层已弹出错误；后面的不再建，已建的保留——再点一次会从剩下的缺口接着补
+        break
+      }
+      created++
+    }
+    if (created === gaps.length) {
+      notifyTopPositive(t('book_calendar.close_today.success', {count: created}))
+    }
+    if (created) {
+      reloadWithAutoBlockFollowUp()
+    }
+  } finally {
+    closingToday.value = false
+    showCloseToday.value = false
+  }
 }
 
 // 悬浮完整预览（teleport 到 body，不受日历滚动/裁剪容器限制，边缘自动翻转方向）。

@@ -1055,6 +1055,14 @@
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "preferred_prefix": "偏好：",
+    "close_today": {
+      "button": "今日下班",
+      "title": "今日下班",
+      "content": "确认后，今天从现在起不再接受新的线上预约，包括 AI 电话预约、本站预约以及其他第三方预约（第三方渠道同步可能有延迟）。系统会把现在到今晚 24 点之间尚未屏蔽的时段补成门店屏蔽，已有的预约不受影响。确认下班？",
+      "reason": "今日下班",
+      "success": "已下班：今天剩余时段已屏蔽（新增 {count} 段门店屏蔽）",
+      "already": "今天剩余时段已全部屏蔽，无需重复操作"
+    },
     "resource_overflow_note": "{name} 在 {start} ~ {end} 同时占用 {peak} 个，超过门店总数 {capacity} 个（仅提示，不影响操作）",
     "resource_prefix": "资源需求：",
     "resource_none": "无需门店共享资源",

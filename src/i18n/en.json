@@ -1057,6 +1057,14 @@
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",
+    "close_today": {
+      "button": "Close for Today",
+      "title": "Close for Today",
+      "content": "Once confirmed, the store stops taking new online bookings for the rest of today — AI phone bookings, website bookings and other third-party bookings (third-party channels may take a while to sync). The system blocks every part of the time from now until midnight that is not already blocked. Existing bookings are not affected. Close for today?",
+      "reason": "Closed for today",
+      "success": "Closed for today: the rest of today is blocked ({count} store block(s) added)",
+      "already": "The rest of today is already fully blocked — nothing to do"
+    },
     "resource_overflow_note": "{name}: {peak} in use at once during {start} ~ {end}, over the store total of {capacity} (advisory only)",
     "resource_prefix": "Resources: ",
     "resource_none": "No shared store resources",
