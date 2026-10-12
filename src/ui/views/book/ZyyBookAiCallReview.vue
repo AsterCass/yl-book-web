@@ -516,7 +516,7 @@ function decorate(row) {
     opsRemark: row.opsRemark || '',
     detailOp: true,
     opsOp: true,
-    // 重判：裁判跑过（已复盘 / 复盘失败）且客户说过话的才能重判
+    // 重判（入口只在详情弹窗）：裁判跑过（已复盘 / 复盘失败）且客户说过话的才能重判
     rejudgeOp: (row.reviewStatus === AiCallReviewStatusEnum.REVIEWED.code
         || row.reviewStatus === AiCallReviewStatusEnum.FAILED.code) && row.customerTurns > 0,
   }
@@ -768,9 +768,6 @@ function onOperationClick(name, row) {
   }
   if (name === 'ops') {
     openOps(row)
-  }
-  if (name === 'rejudge') {
-    openRejudge(row)
   }
 }
 

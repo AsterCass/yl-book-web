@@ -496,10 +496,12 @@ const tableAiCallReviewCol = [
         align: 'center',
     },
     {
+        // 默认隐藏：列表上用不到，要看可在【列可见性调整】里勾出来；详情弹窗里仍有
         name: 'customerTurns',
         field: 'customerTurns',
         label: '客户轮数',
         align: 'center',
+        defaultVisible: false,
     },
     {
         name: 'reviewStatusName',
@@ -546,12 +548,13 @@ const tableAiCallReviewCol = [
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
+        // 处理标记里填的备注（「处理」弹窗），紧跟处理状态展示
         name: 'opsRemark',
         field: 'opsRemark',
-        label: '运营备注',
+        label: '处理备注',
         align: 'center',
         type: ComplexTableColumnTypeEnum.TEXT,
-        defaultVisible: false,
+        maxWidth: '16rem',
     },
     {
         // Vapi 报告的结束原因原值（收到 end-of-call-report 才有）；本服务口径的结束方式在「结束方式」列
@@ -584,7 +587,7 @@ export const tableAiCallReview = {
     showTableSetting: true,
 }
 
-// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）+ 重判（已复盘 / 复盘失败的才有，二次确认）
+// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）。重判不放行内，入口只在详情弹窗里
 export const tableAiCallReviewOperation = [
     {
         label: '详情',
@@ -595,10 +598,5 @@ export const tableAiCallReviewOperation = [
         label: '处理',
         condition: 'opsOp',
         name: 'ops',
-    },
-    {
-        label: '重判',
-        condition: 'rejudgeOp',
-        name: 'rejudge',
     },
 ]
