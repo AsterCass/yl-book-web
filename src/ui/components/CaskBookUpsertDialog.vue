@@ -106,7 +106,8 @@
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.remark') }}&nbsp;:</h6>
         <q-input v-model="upsertRemark" class="component-outline-input-grow" dense outlined
-                 :placeholder="t('book_booking.placeholder.remark')"/>
+                 :placeholder="t('book_booking.placeholder.remark')"
+                 :hint="$t('book_booking.upsert.remark_hint')"/>
 
       </div>
 
