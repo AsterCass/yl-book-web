@@ -380,3 +380,33 @@ export function bookAiCallReviewRecording(id) {
         responseType: 'blob',
     })
 }
+
+// AI 通话复盘「短信消息」：这通来电号码在可见门店范围内收到过的短信（自动的预约变动短信 + 手动短信，最近 100 条，旧 → 新）
+// + 手动发送要用的发件信息与限制。号码与发件门店由后端从复盘记录取，前端不传号码。权限同详情
+export function bookAiCallReviewSms(id) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}/sms`,
+        method: 'get',
+    })
+}
+
+// 手动短信发送前预览：body {text}。返回最终全文（门店名前缀 + 正文 + 退订提示）、编码、分段数，确认框展示的就是它。
+// 独立权限 book:ai-call-review:sms
+export function bookAiCallReviewSmsPreview(id, body) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}/sms/preview`,
+        data: body,
+        method: 'post',
+    })
+}
+
+// 手动发一条短信：body {text}。接口正常返回不等于发出去了，看返回的 message.state；前端发送前必须二次确认。
+// 后端同步调 Twilio，超时放宽到 45 秒（Twilio 客户端自己的读超时约 30 秒）
+export function bookAiCallReviewSmsSend(id, body) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}/sms`,
+        data: body,
+        method: 'post',
+        timeout: 45000,
+    })
+}

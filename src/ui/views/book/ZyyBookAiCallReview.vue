@@ -373,6 +373,9 @@
       </q-card>
     </q-dialog>
 
+    <!-- 短信消息：门店发给这通来电号码的历史短信 + 手动发送（号码与发件门店由后端从这条记录取） -->
+    <cask-sms-dialog v-model="showSms" :review-id="smsReviewId"/>
+
     <!-- 重判确认：覆盖现有评判、等下一轮定时裁判（每小时）、消耗一次模型调用 -->
     <cask-dialog-judgment v-model="showRejudge"
                           :callback-method="onConfirmRejudge"
@@ -403,6 +406,8 @@ import {
   bookAiCallReviewRejudge
 } from "@/api/book.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import CaskSmsDialog from "@/ui/components/CaskSmsDialog.vue";
+import {smsIsUsNumber} from "@/utils/sms.js";
 import {
   AiCallEndedByEnum,
   AiCallLangEnum,
@@ -516,6 +521,8 @@ function decorate(row) {
     opsRemark: row.opsRemark || '',
     detailOp: true,
     opsOp: true,
+    // 短信消息：有来电号码且是合法美加号码的行才有（匿名来电、国际号码发不了也没有历史）
+    smsOp: smsIsUsNumber(row.callerPhone),
     // 重判（入口只在详情弹窗）：裁判跑过（已复盘 / 复盘失败）且客户说过话的才能重判
     rejudgeOp: (row.reviewStatus === AiCallReviewStatusEnum.REVIEWED.code
         || row.reviewStatus === AiCallReviewStatusEnum.FAILED.code) && row.customerTurns > 0,
@@ -769,7 +776,16 @@ function onOperationClick(name, row) {
   if (name === 'ops') {
     openOps(row)
   }
+  if (name === 'sms') {
+    smsReviewId.value = row.id
+    showSms.value = true
+  }
 }
+
+// ===== 短信消息（历史 + 手动发送，CaskSmsDialog） =====
+
+const showSms = ref(false)
+const smsReviewId = ref("")
 
 // ===== 重判（二次确认：会覆盖现有评判、等下一轮定时裁判，并消耗一次模型调用） =====
 

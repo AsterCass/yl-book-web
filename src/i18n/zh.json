@@ -779,6 +779,83 @@
       "ops_success": "标记已保存",
       "rejudge_success": "已登记重判，等下一轮定时裁判"
     },
+    "sms": {
+      "title": "短信消息",
+      "loading": "正在加载…",
+      "history": "历史短信",
+      "refresh": "刷新",
+      "empty": "还没有给这个号码发过短信",
+      "reply_note": "这里是门店发出的预约通知与手动短信（最近 100 条，当前账户可见的门店）。顾客回复的短信目前看不到，需要对方答复请让对方来电。",
+      "segments": "{n} 段",
+      "kind": {
+        "AUTO": "自动",
+        "MANUAL": "手动",
+        "CONFIRMED": "预约确认",
+        "UPDATED": "预约更新",
+        "CANCELLED": "预约取消"
+      },
+      "state": {
+        "SENDING": "发送中",
+        "SENT": "已发送（等待送达回执）",
+        "DELIVERED": "已送达",
+        "UNDELIVERED": "未送达",
+        "FAILED": "发送失败",
+        "OPTED_OUT": "顾客已退订，未发送",
+        "UNKNOWN": "结果未知",
+        "NOT_SENT": "未实际发送（短信功能关闭）"
+      },
+      "error": {
+        "code_21211": "号码无效",
+        "code_21408": "发件号码没有开通向该地区发短信",
+        "code_21614": "不是能收短信的手机号",
+        "code_30003": "手机关机或不在服务区",
+        "code_30004": "被对方或运营商拦截",
+        "code_30005": "号码不存在或已停用",
+        "code_30006": "座机或无法接收短信的号码",
+        "code_30007": "被运营商当作垃圾短信过滤",
+        "code_30008": "运营商未说明原因",
+        "code_30034": "发件号码未完成 10DLC 登记",
+        "other": "Twilio 错误码 {code}"
+      },
+      "from_store": "发件门店",
+      "from_phone": "发件号码",
+      "to_phone": "收件号码",
+      "text_label": "短信内容",
+      "placeholder": "输入要发给顾客的内容…",
+      "counter": "{encoding} · {units} 字符 · {segments} 段（上限 {max} 段）",
+      "counter_ucs2": "含中文或特殊字符，每段约 67 字",
+      "preview_label": "顾客将收到",
+      "hint_fixed": "开头的门店名与结尾的退订提示由系统固定加上，不能删除，也计入长度。",
+      "hint_service": "只发与这通来电、预约有关的服务沟通，不能发促销等营销内容。",
+      "hint_reply": "顾客回过 STOP 的发不出去，需对方给这个发件号码回复 START 才能恢复。",
+      "send": "发送",
+      "cooldown": "{s} 秒后可再发",
+      "quota": "24 小时内已手动发送 {n} / {cap} 条",
+      "no_permission": "当前账户没有发送短信的权限，只能查看历史。",
+      "cap_reached": "24 小时内已给这个号码手动发了 {cap} 条，达到上限。",
+      "cannot": {
+        "INVALID_PHONE": "来电号码不是有效的美国或加拿大号码，无法发送。",
+        "NO_SENDER": "该门店没有配置 AI 电话号码，无法发送。"
+      },
+      "dry_run": "测试环境：短信功能已关闭，发送只会留下记录，不会真的发到顾客手机。",
+      "confirm": {
+        "title": "确认发送短信",
+        "size": "计费",
+        "size_value": "{segments} 段（{encoding}）",
+        "content": "短信全文",
+        "quiet": "门店当地时间现在是 {time}，属于休息时段，确认现在发送吗？",
+        "cancel": "取消",
+        "ok": "确认发送"
+      },
+      "notify": {
+        "sent": "短信已发送",
+        "not_sent": "测试环境：已记录，未实际发送",
+        "unknown": "网络中断，不确定是否已经发出。请不要马上重发，稍后点「刷新」查看结果。",
+        "failed": "发送失败：{reason}",
+        "opted_out": "顾客已退订（回复过 STOP），发不出去；需对方给发件号码回复 START 才能恢复。"
+      },
+      "close": "关闭"
+    },
     "rejudge_dialog": {
       "title": "重判确认",
       "content": "重判会在下一轮定时裁判（每小时 05 分）重新评判这通电话，并覆盖现有的评判结果（不保留历史）。确认？",

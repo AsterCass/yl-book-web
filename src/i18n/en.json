@@ -781,6 +781,83 @@
       "ops_success": "Marked",
       "rejudge_success": "Re-judge requested; it runs on the next scheduled judge"
     },
+    "sms": {
+      "title": "Text Messages",
+      "loading": "Loading…",
+      "history": "Message history",
+      "refresh": "Refresh",
+      "empty": "No messages have been sent to this number yet",
+      "reply_note": "These are the booking notifications and manual messages sent by the stores you can see (latest 100). Replies from the customer are not shown here; ask them to call if you need an answer.",
+      "segments": "{n} segment(s)",
+      "kind": {
+        "AUTO": "Automatic",
+        "MANUAL": "Manual",
+        "CONFIRMED": "Booking confirmed",
+        "UPDATED": "Booking updated",
+        "CANCELLED": "Booking cancelled"
+      },
+      "state": {
+        "SENDING": "Sending",
+        "SENT": "Sent (awaiting delivery receipt)",
+        "DELIVERED": "Delivered",
+        "UNDELIVERED": "Not delivered",
+        "FAILED": "Failed",
+        "OPTED_OUT": "Customer opted out, not sent",
+        "UNKNOWN": "Result unknown",
+        "NOT_SENT": "Not actually sent (SMS is disabled)"
+      },
+      "error": {
+        "code_21211": "Invalid number",
+        "code_21408": "The sender number is not enabled for this region",
+        "code_21614": "Not a mobile number that can receive texts",
+        "code_30003": "Phone is off or out of service",
+        "code_30004": "Blocked by the recipient or the carrier",
+        "code_30005": "Number does not exist or is no longer in service",
+        "code_30006": "Landline or a number that cannot receive texts",
+        "code_30007": "Filtered by the carrier as spam",
+        "code_30008": "The carrier gave no reason",
+        "code_30034": "The sender number is not registered for 10DLC",
+        "other": "Twilio error {code}"
+      },
+      "from_store": "From store",
+      "from_phone": "From number",
+      "to_phone": "To number",
+      "text_label": "Message",
+      "placeholder": "Type the message for the customer…",
+      "counter": "{encoding} · {units} characters · {segments} segment(s) (max {max})",
+      "counter_ucs2": "contains Chinese or special characters, about 67 per segment",
+      "preview_label": "The customer will receive",
+      "hint_fixed": "The store name at the start and the opt-out line at the end are added automatically, cannot be removed and count toward the length.",
+      "hint_service": "Only send service messages about this call or a booking. No promotions or marketing.",
+      "hint_reply": "Customers who replied STOP cannot be reached until they reply START to this sender number.",
+      "send": "Send",
+      "cooldown": "Send again in {s}s",
+      "quota": "{n} / {cap} manual messages in the last 24 hours",
+      "no_permission": "This account is not allowed to send messages; history only.",
+      "cap_reached": "{cap} manual messages have been sent to this number in the last 24 hours; the limit is reached.",
+      "cannot": {
+        "INVALID_PHONE": "The caller number is not a valid US or Canada number, so it cannot be texted.",
+        "NO_SENDER": "This store has no AI phone number configured, so it cannot send."
+      },
+      "dry_run": "Test environment: SMS is disabled. Sending only records the message; nothing reaches the customer's phone.",
+      "confirm": {
+        "title": "Confirm message",
+        "size": "Billing",
+        "size_value": "{segments} segment(s) ({encoding})",
+        "content": "Full text",
+        "quiet": "It is {time} at the store right now, outside normal hours. Send it now?",
+        "cancel": "Cancel",
+        "ok": "Send"
+      },
+      "notify": {
+        "sent": "Message sent",
+        "not_sent": "Test environment: recorded, not actually sent",
+        "unknown": "The connection dropped, so it is unclear whether the message went out. Do not resend right away; click Refresh in a moment to check.",
+        "failed": "Sending failed: {reason}",
+        "opted_out": "The customer has opted out (replied STOP), so the message cannot be sent until they reply START to the sender number."
+      },
+      "close": "Close"
+    },
     "rejudge_dialog": {
       "title": "Confirm re-judge",
       "content": "The next scheduled judge run (hourly at :05) will judge this call again and overwrite the current verdict (no history is kept). Continue?",

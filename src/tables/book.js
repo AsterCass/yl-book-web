@@ -587,7 +587,8 @@ export const tableAiCallReview = {
     showTableSetting: true,
 }
 
-// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）。重判不放行内，入口只在详情弹窗里
+// 详情（对话、工具调用、评判）+ 处理（运营标记：状态 / 备注）+ 短信消息（门店发给来电号码的历史短信与手动发送，
+// 只在来电号码是合法美加号码的行出现）。重判不放行内，入口只在详情弹窗里
 export const tableAiCallReviewOperation = [
     {
         label: '详情',
@@ -598,5 +599,10 @@ export const tableAiCallReviewOperation = [
         label: '处理',
         condition: 'opsOp',
         name: 'ops',
+    },
+    {
+        label: '短信消息',
+        condition: 'smsOp',
+        name: 'sms',
     },
 ]
