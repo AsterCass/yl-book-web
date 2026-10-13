@@ -865,7 +865,7 @@
       },
       "save_add": "添加",
       "save_update": "更新",
-      "remark_hint": "客户可见", "consume_total": "预计耗时：{minutes} 分钟",
+      "consume_total": "预计耗时：{minutes} 分钟",
       "amount_total": "预计金额：{amount}",
       "auto_name_natural": "自然流客户",
       "auto_name_phone": "电话客户",

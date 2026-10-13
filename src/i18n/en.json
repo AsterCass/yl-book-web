@@ -867,7 +867,7 @@
       },
       "save_add": "Add",
       "save_update": "Update",
-      "remark_hint": "Visible to the customer", "consume_total": "Estimated duration: {minutes} min",
+      "consume_total": "Estimated duration: {minutes} min",
       "amount_total": "Estimated amount: {amount}",
       "auto_name_natural": "Walk in",
       "auto_name_phone": "Phone call",
