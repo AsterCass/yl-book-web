@@ -70,7 +70,7 @@
 
             <h6 class="q-mt-md" style="white-space: nowrap;">{{ $t('book_ai_call_review.sms.text_label') }}&nbsp;:</h6>
             <q-input v-model="text" class="component-outline-input-textarea-grow sms-textarea q-mt-sm" type="textarea"
-                     borderless maxlength="1500" :disable="!canCompose"
+                     borderless maxlength="1500" :disable="!canEdit"
                      :placeholder="t('book_ai_call_review.sms.placeholder')"/>
             <div class="sms-counter" :style="over ? 'color: rgb(200, 60, 60); opacity: 1;' : ''">
               {{ $t('book_ai_call_review.sms.counter', {
@@ -78,6 +78,11 @@
                 max: thread.maxSegments
               }) }}
               <span v-if="!size.gsm"> · {{ $t('book_ai_call_review.sms.counter_ucs2') }}</span>
+            </div>
+            <!-- 草稿：这条通话记录名下的那一份（门店内共享）。显示最后是谁、什么时候存的；编辑区和它不一样时提示还没保存 -->
+            <div v-if="draft" class="sms-draft">
+              {{ $t('book_ai_call_review.sms.draft_info', {name: draft.operatorName || '-', time: draft.timeStr || '-'}) }}
+              <span v-if="draftDirty" class="sms-draft-dirty"> · {{ $t('book_ai_call_review.sms.draft_unsaved') }}</span>
             </div>
 
             <!-- 顾客实际收到的全文：门店名前缀与退订提示由系统固定加上，店员删不掉，也计入长度 -->
@@ -88,9 +93,15 @@
               <li>{{ $t('book_ai_call_review.sms.hint_fixed') }}</li>
               <li>{{ $t('book_ai_call_review.sms.hint_service') }}</li>
               <li>{{ $t('book_ai_call_review.sms.hint_reply') }}</li>
+              <li>{{ $t('book_ai_call_review.sms.hint_draft') }}</li>
             </ul>
 
             <div class="row items-center q-mt-md" style="gap: .8rem;">
+              <!-- 保存草稿：存的是编辑区原文（后端落库）；有草稿而编辑区清空时变成「删除草稿」 -->
+              <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated :loading="savingDraft"
+                     :disable="!canSaveDraft" @click="saveDraft">
+                {{ deletingDraft ? $t('book_ai_call_review.sms.delete_draft') : $t('book_ai_call_review.sms.save_draft') }}
+              </q-btn>
               <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated :loading="previewing"
                      :disable="!canSubmit" @click="openConfirm">
                 {{ cooldownLeft > 0 ? $t('book_ai_call_review.sms.cooldown', {s: cooldownLeft})
@@ -168,7 +179,12 @@ import {computed, nextTick, onBeforeUnmount, ref, watch} from "vue"
 import {useI18n} from 'vue-i18n'
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js"
 import {useGlobalStateStore} from "@/utils/global-state.js"
-import {bookAiCallReviewSms, bookAiCallReviewSmsPreview, bookAiCallReviewSmsSend} from "@/api/book.js"
+import {
+  bookAiCallReviewSms,
+  bookAiCallReviewSmsDraft,
+  bookAiCallReviewSmsPreview,
+  bookAiCallReviewSmsSend
+} from "@/api/book.js"
 import {smsCleanText, smsDisplayPhone, smsMeasure} from "@/utils/sms.js"
 
 const {t, te} = useI18n()
@@ -211,6 +227,7 @@ watch(() => props.modelValue, (open) => {
     text.value = ''
     preview.value = null
     cooldownUntil.value = 0
+    savingDraft.value = false
     load(false)
   } else {
     loadSeq++
@@ -224,7 +241,8 @@ function close() {
   emit('update:modelValue', false)
 }
 
-// 取历史与发件信息；manual = 点了「刷新」（按钮转圈，编辑区内容保留）
+// 取历史与发件信息；manual = 点了「刷新」（按钮转圈，编辑区内容保留）。
+// 打开弹窗的那一次（manual = false）把已存的草稿填进编辑区；刷新不动编辑区，免得冲掉正在写的内容
 function load(manual) {
   if (!props.reviewId) {
     return
@@ -243,6 +261,9 @@ function load(manual) {
       return
     }
     thread.value = res.data.data
+    if (manual !== true && thread.value.draft) {
+      text.value = thread.value.draft.text || ''
+    }
     scrollToBottom()
   }).finally(() => {
     if (seq === loadSeq) {
@@ -326,9 +347,42 @@ const blockReason = computed(() => {
   }
   return ''
 })
-const canCompose = computed(() => !!thread.value && blockReason.value === '')
-const canSubmit = computed(() => canCompose.value && cleanText.value.length > 0 && !over.value
+// 能不能编辑（也就能不能存草稿）：号码与发件号可用、有发送权限。达到当日上限时照样能写、能存草稿，只是不能发
+const canEdit = computed(() => !!thread.value && thread.value.canSend && canSendPermission.value)
+const canSubmit = computed(() => canEdit.value && !capReached.value && cleanText.value.length > 0 && !over.value
     && cooldownLeft.value <= 0 && !previewing.value && !sending.value)
+
+// ===== 草稿（后端存在这条通话复盘记录名下，一条记录一份，门店内共享；只有点了按钮才保存，关弹窗不自动存） =====
+
+const draft = computed(() => (thread.value && thread.value.draft) || null)
+// 和已存草稿比的是只统一了换行的原文——后端也是这样存的（排版字符清理、前后缀都留到发送时）
+const rawText = computed(() => text.value.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
+const draftDirty = computed(() => rawText.value !== (draft.value ? draft.value.text : ''))
+// 有草稿而编辑区清空了：这次保存就是删除（后端约定正文为空 = 删除草稿）
+const deletingDraft = computed(() => !!draft.value && rawText.value.trim() === '')
+const savingDraft = ref(false)
+const canSaveDraft = computed(() => canEdit.value && !savingDraft.value && !sending.value
+    && (draft.value ? draftDirty.value : rawText.value.trim() !== ''))
+
+function saveDraft() {
+  if (!canSaveDraft.value) {
+    return
+  }
+  const reviewId = props.reviewId
+  const deleting = deletingDraft.value
+  savingDraft.value = true
+  bookAiCallReviewSmsDraft(reviewId, {text: text.value}).then(res => {
+    // 弹窗已经关了或换了一通电话：这次保存的结果不属于现在这份数据
+    if (!res || !res.data || !thread.value || !show.value || props.reviewId !== reviewId) {
+      return
+    }
+    thread.value.draft = res.data.data || null
+    notifyTopPositive(t(deleting ? 'book_ai_call_review.sms.notify.draft_deleted'
+        : 'book_ai_call_review.sms.notify.draft_saved'))
+  }).finally(() => {
+    savingDraft.value = false
+  })
+}
 
 // 发出一条后的间隔（后端有同样的限制，这里只是让按钮直接显示倒计时，不必点了才被拒）
 const cooldownUntil = ref(0)
@@ -402,6 +456,10 @@ function confirmSend() {
       thread.value.list.shift()
     }
     thread.value.sentToday = result.sentToday
+    // 短信发出去了，后端已把这条记录的草稿删掉（发送失败 / 顾客已退订时草稿保留，draftCleared 为 false）
+    if (result.draftCleared) {
+      thread.value.draft = null
+    }
     scrollToBottom()
     // 接口正常返回不等于发出去了：按这条记录的状态提示
     if (m.state === 'FAILED') {
@@ -485,6 +543,16 @@ function confirmSend() {
   opacity: .6;
   font-size: .78rem;
   margin-top: .3rem;
+}
+
+.sms-draft {
+  opacity: .6;
+  font-size: .78rem;
+  margin-top: .2rem;
+}
+
+.sms-draft-dirty {
+  color: rgb(190, 130, 40);
 }
 
 .sms-preview {

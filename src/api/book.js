@@ -410,3 +410,13 @@ export function bookAiCallReviewSmsSend(id, body) {
         timeout: 45000,
     })
 }
+
+// 保存手动短信草稿：body {text}。草稿绑在这条通话复盘记录上（一条记录一份、门店内共享），有就覆盖；text 为空 = 删除草稿。
+// 返回保存后的草稿 {text, operatorName, timeStr}，删除时 data 为 null。权限同发送（book:ai-call-review:sms）
+export function bookAiCallReviewSmsDraft(id, body) {
+    return serviceShiro({
+        url: `/book/ai-call-review/${id}/sms/draft`,
+        data: body,
+        method: 'post',
+    })
+}
