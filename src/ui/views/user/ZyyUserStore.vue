@@ -68,6 +68,7 @@
                               upsertPhone = row.phone
                               upsertAiPhone = row.aiPhone
                               upsertOutboundPhone = row.outboundPhone
+                              upsertGoogleReviewUrl = row.googleReviewUrl || ''
                               upsertDesc = row.description
                               upsertGoogleCalendarIdList = row.googleCalendarIdList || []
                               upsertRestEnabled = !!(row.restBreak && row.restBreak.enabled)
@@ -179,6 +180,19 @@
                      :placeholder="t('user_store.placeholder.optional')"/>
             <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
               {{ $t('user_store.upsert.outbound_phone_hint') }}
+            </div>
+          </div>
+
+          <!-- Google 评价链接：Google 商家资料「请求评价」里复制的链接。配了之后服务评价邮件以「去 Google 评价」为主按钮、
+               站内问卷为次，评价短信（系统开启时）也带它；空=只发站内问卷 -->
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.google_review_url')
+            }}&nbsp;:</h6>
+          <div v-if="!isNew">
+            <q-input v-model="upsertGoogleReviewUrl" class="component-outline-input-grow" dense outlined
+                     :placeholder="t('user_store.placeholder.google_review_url')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.google_review_url_hint') }}
             </div>
           </div>
 
@@ -590,6 +604,8 @@ const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
 const upsertAiPhone = ref("")
 const upsertOutboundPhone = ref("")
+// Google 评价链接（服务评价邮件的主按钮、评价短信里的链接）；空=只发站内问卷
+const upsertGoogleReviewUrl = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
 const upsertGoogleCalendarIdList = ref([])
@@ -726,6 +742,7 @@ function clearUpsertParam() {
   upsertPhone.value = ""
   upsertAiPhone.value = ""
   upsertOutboundPhone.value = ""
+  upsertGoogleReviewUrl.value = ""
   upsertDesc.value = ""
   upsertGoogleCalendarIdList.value = []
   upsertRestEnabled.value = false
@@ -779,6 +796,8 @@ function upsertData() {
       phone: upsertPhone.value,
       aiPhone: upsertAiPhone.value,
       outboundPhone: upsertOutboundPhone.value,
+      // 传空串=清空（后端 null 才视为不修改）
+      googleReviewUrl: upsertGoogleReviewUrl.value,
       description: upsertDesc.value,
       timezone: upsertTimezone.value ? upsertTimezone.value.value : null,
       adminMail: upsertAdminMail.value,
@@ -809,6 +828,8 @@ function upsertData() {
       phone: upsertPhone.value,
       aiPhone: upsertAiPhone.value,
       outboundPhone: upsertOutboundPhone.value,
+      // 传空串=清空（后端 null 才视为不修改）
+      googleReviewUrl: upsertGoogleReviewUrl.value,
       description: upsertDesc.value,
       // 始终传数组=整体覆盖：空数组即清空（后端 null 才视为不修改）
       googleCalendarIdList: upsertGoogleCalendarIdList.value,
