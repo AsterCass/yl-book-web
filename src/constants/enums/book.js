@@ -31,6 +31,9 @@ export const BookSourceEnum = new Enum({
     OWN_SITE_FB: {code: 62, name: '本站预约-Fb', desc: '', color: OWN_SITE_COLOR},
     OWN_SITE_INS: {code: 63, name: '本站预约-Ins', desc: '', color: OWN_SITE_COLOR},
     OWN_SITE_YTB: {code: 64, name: '本站预约-Ytb', desc: '', color: OWN_SITE_COLOR},
+    // 客户端 /google 落地页下的单：独立渠道、不属于本站预约（不参与本站活动），颜色单独一个。
+    // 不用 Google 品牌色：蓝近电话预约、绿近自然流/微信、红近本站、黄在浅色底上看不清
+    GOOGLE: {code: 8, name: 'Google预约', desc: '', color: 'rgb(216, 27, 96)'},
     UNKNOW: {code: 100, name: '其他预约', desc: '', color: 'rgb(128, 128, 128)'},
 });
 
