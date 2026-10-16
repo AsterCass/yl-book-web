@@ -787,7 +787,7 @@
       "history": "Message history",
       "refresh": "Refresh",
       "empty": "No messages have been sent to this number yet",
-      "reply_note": "These are the booking notifications, review requests and manual messages sent by the stores you can see (latest 100). Replies from the customer are not shown here; ask them to call if you need an answer.",
+      "reply_note": "These are the booking notifications, appointment reminders, review requests and manual messages sent by the stores you can see (latest 100). Replies from the customer are not shown here; ask them to call if you need an answer.",
       "segments": "{n} segment(s)",
       "kind": {
         "AUTO": "Automatic",
@@ -795,7 +795,8 @@
         "CONFIRMED": "Booking confirmed",
         "UPDATED": "Booking updated",
         "CANCELLED": "Booking cancelled",
-        "REVIEW": "Review request"
+        "REVIEW": "Review request",
+        "REMINDER": "Appointment reminder"
       },
       "state": {
         "SENDING": "Sending",
