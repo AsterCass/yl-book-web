@@ -183,8 +183,8 @@
             </div>
           </div>
 
-          <!-- Google 评价链接：Google 商家资料「请求评价」里复制的链接。配了之后服务评价邮件以「去 Google 评价」为主按钮、
-               站内问卷为次，评价短信（系统开启时）也带它；空=只发站内问卷 -->
+          <!-- Google 评价链接：Google 商家资料「请求评价」里复制的链接。配了之后服务评价邮件与评价短信（系统开启时）
+               都只用它、不再带站内问卷；空=用站内问卷链接 -->
           <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.upsert.field.google_review_url')
             }}&nbsp;:</h6>
@@ -604,7 +604,7 @@ const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
 const upsertAiPhone = ref("")
 const upsertOutboundPhone = ref("")
-// Google 评价链接（服务评价邮件的主按钮、评价短信里的链接）；空=只发站内问卷
+// Google 评价链接（服务评价邮件与评价短信都只用它）；空=用站内问卷链接
 const upsertGoogleReviewUrl = ref("")
 const upsertDesc = ref("")
 // 门店自身谷歌日历 id 列表（门店 block 时一并屏蔽）；仅编辑时可维护，创建不提供该字段
