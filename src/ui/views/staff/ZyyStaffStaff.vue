@@ -1041,6 +1041,9 @@ function selectData(keepPage = false) {
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       data.createUserName = data.createUserName || data.createUserId
+      // 性别：F 女 / M 男 / 其余未登记（电话 AI 据此安排顾客要的女 / 男技师）
+      data.genderName = data.gender === 'F' ? t('staff.gender.female')
+          : data.gender === 'M' ? t('staff.gender.male') : t('staff.gender.unknown')
       data.deleteOp = true
       data.updateOp = true
       // show skill op

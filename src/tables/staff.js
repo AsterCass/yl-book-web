@@ -39,6 +39,13 @@ const tableStaffCol = [
         align: 'center',
     },
     {
+        // 性别（F / M / 未登记）：显示文案在 ZyyStaffStaff.vue 的 selectData 里按界面语言换算
+        name: 'genderName',
+        field: 'genderName',
+        label: '性别',
+        align: 'center',
+    },
+    {
         name: 'phone',
         field: 'phone',
         label: '雇员手机号',
