@@ -135,7 +135,7 @@
                     class="component-outline-input-grow" dense outlined
                     dropdown-icon="fa-solid fa-caret-down" :menu-offset="[0, 5]" menu-anchor="bottom start"
                     popup-content-class="component-extra-card-std-limit"
-                    :hint="t('staff.gender.hint')"/>
+          />
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
