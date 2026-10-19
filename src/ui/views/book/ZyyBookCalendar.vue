@@ -193,6 +193,10 @@
                     <span v-if="ev.titleRemark" class="cal-event-remark">
                       {{ ev.titleRemark }}
                     </span>
+                    <!-- 模型备注：日视图跟在备注后面（只读，后端给好的中文文案） -->
+                    <span v-if="ev.aiRemark" class="cal-event-remark">
+                      {{ ev.aiRemark }}
+                    </span>
                   </cask-marquee-row>
                   <!-- 前台已签到标记：留在滚动区外，始终可见 -->
                   <q-icon v-if="ev.booking.checkIn" name="fa-solid fa-check" size="1rem"
@@ -396,7 +400,7 @@
            @pointerdown="onEventPointerDown($event, hoverCard.ev, hoverCard.colIndex)">
         <div class="cal-event-title">
           <span class="cal-event-name">{{ hoverCard.ev.booking.name || $t('book_calendar.no_name') }}</span>
-          <!-- 首行顺序须与上方预约卡片一致：客户名称 / 来源 / 偏好员工 / 特殊备注 / 备注 -->
+          <!-- 首行顺序须与上方预约卡片一致：客户名称 / 来源 / 偏好员工 / 特殊备注 / 备注 / 模型备注 -->
           <span v-if="hoverCard.ev.sourceName" class="cal-event-source" :style="{ color: hoverCard.ev.sourceColor }">
             {{ hoverCard.ev.sourceName }}
           </span>
@@ -408,6 +412,9 @@
           </span>
           <span v-if="hoverCard.ev.titleRemark" class="cal-event-remark">
             {{ hoverCard.ev.titleRemark }}
+          </span>
+          <span v-if="hoverCard.ev.aiRemark" class="cal-event-remark">
+            {{ hoverCard.ev.aiRemark }}
           </span>
           <q-space/>
           <!-- 签到开关：已签到高亮为对勾（点击取消签到），未签到灰显（点击签到） -->
@@ -1087,6 +1094,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     // 备注：日视图且非第三方来源（classpass / buildhealth 以外）→ 上首行、跟在特殊备注后面（模板内联展示）；
     //   第三方来源放正文最后一行（见下方 lines）
     const titleRemark = isDayView && !THIRD_PARTY_SOURCES.includes(b.source) ? (b.remark || '') : ''
+    // 模型备注（电话 AI 写的结构化备注，后端给好中文文案）：日视图首行、跟在备注后面；只读，周视图不显示
+    const aiRemark = isDayView ? (b.aiRemarkText || '') : ''
     // 日视图：未上首行的备注（第三方来源）放最后一行；特殊备注与偏好员工在日视图已上首行
     // 周视图：保持原顺序，备注仍是最后一行
     const lines = (isDayView
@@ -1102,6 +1111,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       preferredName,
       specialRemarks,
       titleRemark,
+      aiRemark,
       offSchedule: offScheduleShifts !== null,
       offScheduleShifts: offScheduleShifts || '',
       resourceOverflow: resourceOverflowNotes.length > 0,

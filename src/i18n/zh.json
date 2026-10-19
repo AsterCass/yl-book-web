@@ -566,6 +566,7 @@
 
   "staff": {
     "classpass": { "field": "ClassPass 人员 ID", "placeholder": "可为空；填了该雇员的 block 才会同步到 ClassPass（见门店编辑页「测试登录」）" },
+    "gender": { "field": "性别", "unknown": "未登记", "female": "女", "male": "男", "hint": "电话 AI 按这里安排顾客要的女 / 男技师；未登记的不算男也不算女" },
     "title": "雇员",
     "label": { "id": "雇员编号", "name": "雇员名称", "phone": "雇员手机号", "status": "雇员状态" },
     "placeholder": { "id": "例如：YLS001", "name": "例如：张三", "phone": "例如：13811012138", "priority": "例如：10", "external_name": "可为空", "mail": "可为空，配置后点钟变化时发送通知", "google_calendar_id": "可为空，如 xxx\\@group.calendar.google.com，配置后门店 block 会同步屏蔽该日历" },
@@ -1036,6 +1037,7 @@
       "bookingUrl": "预约链接",
       "specialRemark": "特殊备注",
       "remark": "备注",
+      "aiRemark": "模型备注",
       "createUser": "创建人",
       "createTime": "创建时间",
       "updateUser": "更新人",

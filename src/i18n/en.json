@@ -568,6 +568,7 @@
 
   "staff": {
     "classpass": { "field": "ClassPass practitioner ID", "placeholder": "Optional. Required for this staff's blocks to reach ClassPass (see Test login on the store page)" },
+    "gender": { "field": "Gender", "unknown": "Not recorded", "female": "Female", "male": "Male", "hint": "The AI phone line uses this when a customer asks for a female or male technician; staff not recorded count as neither" },
     "title": "Staff",
     "label": { "id": "Staff ID", "name": "Staff Name", "phone": "Staff Phone", "status": "Staff Status" },
     "placeholder": { "id": "e.g.: S001", "name": "e.g.: Tom", "phone": "e.g.: 13811012138", "priority": "e.g.: 10", "external_name": "Optional", "mail": "Optional; notified on requested-booking changes", "google_calendar_id": "Optional, e.g. xxx\\@group.calendar.google.com; store blocks are synced to this calendar" },
@@ -1038,6 +1039,7 @@
       "bookingUrl": "Booking URL",
       "specialRemark": "Special Remarks",
       "remark": "Remark",
+      "aiRemark": "AI Notes",
       "createUser": "Created By",
       "createTime": "Created At",
       "updateUser": "Updated By",

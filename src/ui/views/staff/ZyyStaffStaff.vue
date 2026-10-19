@@ -64,6 +64,7 @@
                               updateId = row.id
                               upsertName = row.name
                               upsertExternalName = row.externalName
+                              upsertGender = row.gender === 'F' || row.gender === 'M' ? row.gender : ''
                               upsertPhone = row.phone
                               upsertMail = row.mail
                               upsertGoogleCalendarId = row.googleCalendarId
@@ -128,6 +129,13 @@
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.external_name') }}&nbsp;:</h6>
           <q-input v-model="upsertExternalName" class="component-outline-input-grow" dense outlined
                    :placeholder="t('staff.placeholder.external_name')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.gender.field') }}&nbsp;:</h6>
+          <q-select v-model="upsertGender" :options="genderOptions" emit-value map-options
+                    class="component-outline-input-grow" dense outlined
+                    dropdown-icon="fa-solid fa-caret-down" :menu-offset="[0, 5]" menu-anchor="bottom start"
+                    popup-content-class="component-extra-card-std-limit"
+                    :hint="t('staff.gender.hint')"/>
 
           <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ $t('staff.upsert.field.phone') }}&nbsp;:</h6>
           <q-input v-model="upsertPhone" class="component-outline-input-grow" dense outlined
@@ -411,7 +419,7 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -451,6 +459,13 @@ const showUpsert = ref(false)
 const isNew = ref(false)
 const upsertName = ref("")
 const upsertExternalName = ref("")
+// 性别：'' 未登记 / 'F' 女 / 'M' 男；电话 AI 据此安排顾客要的女 / 男技师
+const upsertGender = ref("")
+const genderOptions = computed(() => [
+  {label: t('staff.gender.unknown'), value: ''},
+  {label: t('staff.gender.female'), value: 'F'},
+  {label: t('staff.gender.male'), value: 'M'},
+])
 const upsertPhone = ref("")
 // 通知邮箱（点钟得/失/取消通知）；空 = 不发送
 const upsertMail = ref("")
@@ -489,6 +504,7 @@ function clearUpsertParam() {
   rememberOriginalSchedule([])
   upsertName.value = ""
   upsertExternalName.value = ""
+  upsertGender.value = ""
   upsertPhone.value = ""
   upsertMail.value = ""
   upsertGoogleCalendarId.value = ""
@@ -817,6 +833,8 @@ function upsertData() {
   const body = {
     name: upsertName.value,
     externalName: upsertExternalName.value,
+    // 空串 = 未登记（后端按空串清空，同 externalName）
+    gender: upsertGender.value || '',
     phone: upsertPhone.value,
     mail: upsertMail.value,
     // 空串=清空（后端 MP NOT_NULL 更新语义，同 externalName/mail）

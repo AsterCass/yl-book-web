@@ -68,6 +68,12 @@
             <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.remark') }}&nbsp;:</h6>
             <div style="white-space: pre-wrap;">{{ book.remark || '-' }}</div>
 
+            <!-- 模型备注：电话 AI 写的结构化备注（后端给好中文文案），只读、有才显示 -->
+            <template v-if="book.aiRemarkText">
+              <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.aiRemark') }}&nbsp;:</h6>
+              <div style="white-space: pre-wrap;">{{ book.aiRemarkText }}</div>
+            </template>
+
           </div>
         </div>
 
