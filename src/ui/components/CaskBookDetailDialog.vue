@@ -68,10 +68,10 @@
             <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.remark') }}&nbsp;:</h6>
             <div style="white-space: pre-wrap;">{{ book.remark || '-' }}</div>
 
-            <!-- 模型备注：电话 AI 写的结构化备注（后端给好中文文案），只读、有才显示 -->
-            <template v-if="book.aiRemarkText">
+            <!-- 模型备注：电话 AI 写的结构化备注（后端给好中英文案，按界面语言取），只读、有才显示 -->
+            <template v-if="aiRemarkDisplay">
               <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.aiRemark') }}&nbsp;:</h6>
-              <div style="white-space: pre-wrap;">{{ book.aiRemarkText }}</div>
+              <div style="white-space: pre-wrap;">{{ aiRemarkDisplay }}</div>
             </template>
 
           </div>
@@ -169,7 +169,7 @@ import {computed, defineEmits, defineProps} from "vue";
 import {useI18n} from 'vue-i18n'
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 const props = defineProps({
   modelValue: {
@@ -204,6 +204,14 @@ const statusEnum = computed(() =>
     props.book ? BookStatusEnum.fromCode(props.book.status) : null)
 const statusName = computed(() => statusEnum.value ? statusEnum.value.name : '-')
 const statusColor = computed(() => statusEnum.value ? statusEnum.value.color : 'rgb(128, 128, 128)')
+
+// 模型备注：英文界面取英文文案，其余取中文
+const aiRemarkDisplay = computed(() => {
+  if (!props.book) {
+    return ''
+  }
+  return (locale.value === 'en' ? props.book.aiRemarkTextEn : props.book.aiRemarkText) || ''
+})
 
 // 特殊备注：后端返回逗号分隔字符串，详情以空格分割展示
 const specialRemarksDisplay = computed(() =>

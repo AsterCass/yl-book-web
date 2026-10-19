@@ -1094,8 +1094,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     // 备注：日视图且非第三方来源（classpass / buildhealth 以外）→ 上首行、跟在特殊备注后面（模板内联展示）；
     //   第三方来源放正文最后一行（见下方 lines）
     const titleRemark = isDayView && !THIRD_PARTY_SOURCES.includes(b.source) ? (b.remark || '') : ''
-    // 模型备注（电话 AI 写的结构化备注，后端给好中文文案）：日视图首行、跟在备注后面；只读，周视图不显示
-    const aiRemark = isDayView ? (b.aiRemarkText || '') : ''
+    // 模型备注（电话 AI 写的结构化备注，后端给好中英文案，按界面语言取）：日视图首行、跟在备注后面；只读，周视图不显示
+    const aiRemark = isDayView ? ((locale.value === 'en' ? b.aiRemarkTextEn : b.aiRemarkText) || '') : ''
     // 日视图：未上首行的备注（第三方来源）放最后一行；特殊备注与偏好员工在日视图已上首行
     // 周视图：保持原顺序，备注仍是最后一行
     const lines = (isDayView
