@@ -65,6 +65,14 @@ const tableBookCol = [
         align: 'center',
     },
     {
+        // 推荐码（客户端落地页 ?ref= 带来的，下单时记在单上）：默认不显示，在「列可见性调整」里勾选
+        name: 'referralCode',
+        field: 'referralCode',
+        label: '推荐码',
+        align: 'center',
+        defaultVisible: false,
+    },
+    {
         name: 'statusName',
         field: 'statusName',
         label: '预约状态',
