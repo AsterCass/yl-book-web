@@ -148,7 +148,9 @@
               </div>
 
               <!-- 预约块（可拖动） -->
-              <div v-for="(ev, ei) in col.events" :key="'e' + ei" class="cal-event"
+              <!-- key 用预约 id 而不是下标：每 10 秒刷新一次，插进 / 拿掉一张单时，其余卡片的元素仍跟着自己那张单，
+                   不会被挪去显示别人 -->
+              <div v-for="ev in col.events" :key="ev.booking.id" class="cal-event"
                    :class="{
                      'cal-event-blocked': ev.blocked,
                      'cal-event-off-schedule': ev.offSchedule,
@@ -766,10 +768,10 @@ const nowHover = ref(false)
 const nowLabelX = ref(null)
 let nowTimer = null
 
-// 数据定时刷新：每 30 秒按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次。
-// 单次成本已与历史数据量脱钩（yl_book 上的 idx_tenant_store_booking_time 让内层查询变成窗口内 range），
-// 所以缩到 30 秒只是请求数变多，扫描量不变
-const DATA_REFRESH_INTERVAL = 30 * 1000
+// 数据定时刷新：每 10 秒按当前视图重新拉取（日视图拉当天、周视图拉当前周窗口）；拖拽进行中跳过本次。
+// 单次成本已与历史数据量脱钩（yl_book 上的 idx_tenant_store_booking_time 让内层查询变成窗口内 range，
+// 2026-10-20 实测一天 99 单服务端执行约 5 ms），缩到 10 秒只是请求数变多，扫描量不变
+const DATA_REFRESH_INTERVAL = 10 * 1000
 
 // 会改变自动 block 的操作做完后，延迟这么久再补拉一次：后端那次对账是事务提交后异步跑的，
 // 操作返回时它多半还没落库，只 reload 一次看不到新生成/撤销的自动 block
@@ -2140,17 +2142,29 @@ function applyData(res) {
   resourceOverflows.value = data.resourceOverflowList || []
 }
 
+// 同一时刻可能有几个刷新请求在路上（定时刷新、操作后刷新、5 秒补拉、切日期）：只认最后发出的那个的结果，
+// 先发后到的直接丢掉——否则刚签到 / 刚改完的单会被一份更早的数据盖回去，要等下一轮才恢复；切日期时也不会被前一天的结果覆盖
+let reloadSeq = 0
+
+function applyLatest(seq) {
+  return res => {
+    if (seq === reloadSeq) {
+      applyData(res)
+    }
+  }
+}
+
 // 筛选项必传：周视图取本周一~周日，日视图取当天
 function loadWeek() {
   bookCalendar({
     startDateStr: weekDays.value[0].dateStr,
     endDateStr: weekDays.value[6].dateStr,
-  }).then(applyData)
+  }).then(applyLatest(++reloadSeq))
 }
 
 function loadDay() {
   const ds = date.formatDate(dayDate.value, 'YYYY-MM-DD')
-  bookCalendar({startDateStr: ds, endDateStr: ds}).then(applyData)
+  bookCalendar({startDateStr: ds, endDateStr: ds}).then(applyLatest(++reloadSeq))
 }
 
 // 项目列表：仅用于详情弹窗历史预约行的 id -> 名称渲染。权限上安全——
