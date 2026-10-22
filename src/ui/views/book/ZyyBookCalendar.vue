@@ -325,6 +325,11 @@
     <cask-resource-conflict-dialog v-model="showDragResourceConflict" :detail="dragResourceDetail"
                                    :loading="dragAdjusting" @confirm="confirmDragResource"/>
 
+    <!-- 拖拽落点与目标雇员已有预约的服务时间重叠：问是否先把那几张移到未分配（只移它们，拖动的那张不动） -->
+    <cask-drag-overlap-dialog v-model="showDragOverlap" :staff-name="dragOverlap.staffName"
+                              :items="dragOverlap.items" :loading="overlapMoving"
+                              @confirm="confirmDragOverlap"/>
+
     <!-- 右键新建屏蔽时段：开始时间取自右键落点，只需再填时长，复用 /book/block/create -->
     <q-dialog v-model="showBlockCreate" transition-show="fade" transition-hide="fade">
       <q-card class="component-cask-dialog-judgement-std column cal-block-card">
@@ -474,6 +479,7 @@ import CaskStoreBlockDialog from "@/ui/components/CaskStoreBlockDialog.vue";
 import CaskMarqueeRow from "@/ui/components/CaskMarqueeRow.vue";
 import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
 import CaskResourceConflictDialog from "@/ui/components/CaskResourceConflictDialog.vue";
+import CaskDragOverlapDialog from "@/ui/components/CaskDragOverlapDialog.vue";
 import CaskPickerMask from "@/ui/components/CaskPickerMask.vue";
 import {
   bookAdjust,
@@ -494,6 +500,7 @@ import {staffListSimple} from "@/api/staff.js";
 import {staffSkillListSimple} from "@/api/staff-skill.js";
 import {formatShifts, isoWeekdayOfDateStr, mergedShifts, scheduleCovers} from "@/utils/schedule-tools.js";
 import {uncoveredRanges} from "@/utils/block-tools.js";
+import {bookingStarted, overlappingBookings} from "@/utils/book-overlap.js";
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 
@@ -1400,6 +1407,10 @@ const showDragResourceConflict = ref(false)
 const dragResourceDetail = ref({})
 const pendingDrag = ref(null)
 const dragAdjusting = ref(false)
+// 拖拽落点与目标雇员已有预约的服务时间重叠：先问是否把那几张移到未分配（见 checkDragOverlap / confirmDragOverlap）
+const showDragOverlap = ref(false)
+const dragOverlap = ref({staffId: null, staffName: '', items: []})
+const overlapMoving = ref(false)
 
 // ===== 右键屏蔽时段 =====
 // 空白处右键 -> 以落点时间为开始新建 block；已有 block 上右键 -> 确认后取消它。
@@ -1985,6 +1996,12 @@ function commitDrag(ctx, ds) {
       ? (targetCol.staffId || undefined)
       : (ctx.booking.staffId || undefined)
 
+  // 服务时间与目标雇员的已有预约重叠：后端会直接拒（validateStaffNoConflict），这里先接管——问是否把那几张移到未分配。
+  // 此时拖动预览已收起、卡片还在原位，不做乐观移动
+  if (checkDragOverlap(ctx.booking, staffId, dateStr, ds.newStart, ds.newStart + ctx.duration)) {
+    return
+  }
+
   const b = ctx.booking
   // 记录回退所需的原值
   const prev = {
@@ -2057,6 +2074,95 @@ function applyDragAdjust(b, prev, bookTimeStr, staffId) {
   }).catch(rollback).finally(() => {
     dragAdjusting.value = false
   })
+}
+
+/**
+ * 拖动落点与目标雇员已有预约的服务时间重叠（口径同后端，见 utils/book-overlap.js）时接管这次拖动并返回 true：
+ * 目标雇员这个时段不在排班内、或落在手动屏蔽里 → 提示移走了也放不进去，免得白移一张；其余 → 弹框问是否先把那几张
+ * 移到未分配（等同店员手动把它们拖到未分配列，已开始 / 已完成的也一样能移）。没有重叠返回 false，照常走 precheck → adjust。
+ * 雇员不在雇员列表里（如已删除）时不查排班，同「排班外预约」标记。技能对不上前端判断不了，仍由后端报错。
+ */
+function checkDragOverlap(b, staffId, dateStr, start, end) {
+  const items = overlappingBookings(bookings.value, {bookingId: b.id, staffId, dateStr, start, end})
+  if (!items.length) {
+    return false
+  }
+  const staffName = staffNameById.value[staffId] || ''
+  const now = new Date()
+  const nowDateStr = date.formatDate(now, 'YYYY-MM-DD')
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const staff = staffById.value[staffId]
+  const dow = isoWeekdayOfDateStr(dateStr)
+  if (staff && dow && !scheduleCovers(staff.scheduleList, dow, start, end)) {
+    notifyTopWarning(t('book_calendar.drag_overlap.off_schedule', {staff: staffName}))
+    return true
+  }
+  // 手动屏蔽（门店或该雇员）始终硬拦；自动屏蔽与休息围栏管理端不拦
+  if (blockSegmentsForDate(dateStr, staffId).some(seg => !seg.auto && !seg.rest && seg.start < end && start < seg.end)) {
+    notifyTopWarning(t('book_calendar.drag_overlap.blocked'))
+    return true
+  }
+  dragOverlap.value = {
+    staffId,
+    staffName,
+    items: items.map(x => ({
+      id: x.id,
+      bookingTime: x.bookingTime,
+      name: x.name || t('book_calendar.no_name'),
+      timeRange: overlapTimeRange(x),
+      skills: x._calSub,
+      // 点钟 = 偏好雇员就是现在做这单的人（口径同后端的点钟通知）
+      preferred: !!x.preferredStaffId && x.preferredStaffId === x.staffId,
+      remarked: !!(x.remark || x.specialRemarks || x.aiRemarkText),
+      // 已开始 / 已完成：移到未分配后后端会把它算成已过期（与手动拖到未分配列一样），弹框里提前说清
+      started: bookingStarted(x, nowDateStr, nowMinutes),
+    })),
+  }
+  showDragOverlap.value = true
+  return true
+}
+
+function overlapTimeRange(x) {
+  return `${formatMinutesDisplay(x._start)} - ${formatMinutesDisplay(x._end)}`
+}
+
+/**
+ * 确认把重叠的那几张移到未分配：只移它们，拖动的那张不动（店员再拖一次）。
+ * 等同店员手动把它们拖到未分配列：同一个 adjust 接口、时间不变、不带雇员——已开始 / 已完成的也能移（后端会把它算成
+ * 已过期，再拖回某位雇员名下即恢复），与手动操作的结果完全一致。移到未分配只会腾出资源与雇员时段，不需要 precheck。
+ * 页面数据最多滞后一个刷新周期：逐张先取详情，核对还在这位雇员名下、时间没变、没被取消再移，免得把已经被别人挪走的单
+ * 从新雇员名下拿掉。某张失败就停下，已经移走的保留；接口报错的提示由 request.js 统一弹出。
+ */
+async function confirmDragOverlap() {
+  const pending = dragOverlap.value
+  overlapMoving.value = true
+  const moved = []
+  try {
+    for (const item of pending.items) {
+      const res = await bookDetail(item.id)
+      const d = res && res.data ? res.data.data : null
+      if (!d) {
+        return
+      }
+      if (d.status === BookStatusEnum.CANCEL.code || d.staffId !== pending.staffId
+          || (d.bookingTime || '').substring(0, 16) !== (item.bookingTime || '').substring(0, 16)) {
+        notifyTopWarning(t('book_calendar.drag_overlap.changed'))
+        return
+      }
+      const r = await bookAdjust(item.id, (item.bookingTime || '').substring(0, 16), undefined)
+      if (!r || !r.data) {
+        return
+      }
+      moved.push(item.name)
+    }
+  } finally {
+    overlapMoving.value = false
+    showDragOverlap.value = false
+    if (moved.length) {
+      notifyTopPositive(t('book_calendar.drag_overlap.moved', {names: moved.join(locale.value === 'en' ? ', ' : '、')}))
+    }
+    reloadWithAutoBlockFollowUp()
+  }
 }
 
 /**

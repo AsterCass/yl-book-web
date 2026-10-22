@@ -1161,6 +1161,20 @@
       "save_success": "Colors saved"
     },
     "adjust_success": "Booking updated successfully",
+    "drag_overlap": {
+      "title": "Time slot already booked",
+      "summary": "{staff} already has the booking(s) below at this time. Move them to Unassigned first?",
+      "note": "Only these bookings are moved (just like dragging them to the Unassigned column); the one you dragged stays where it was, so drag it again afterwards. Moved bookings no longer hold a technician: reassign them soon, or they expire at their start time.",
+      "note_started": "A booking that has already started shows as Expired once it is in Unassigned; drag it back to a technician to restore it.",
+      "tag_preferred": "Requested",
+      "tag_remark": "Has notes",
+      "tag_started": "Started",
+      "confirm": "Move to Unassigned",
+      "off_schedule": "This time is outside {staff}'s shift, so moving the other booking won't make room",
+      "blocked": "This time is blocked, so moving the other booking won't make room",
+      "changed": "That booking was just changed. Refresh the calendar and try again",
+      "moved": "Moved to Unassigned: {names}. Drag your booking again, and reassign the moved booking(s) soon"
+    },
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",

@@ -1159,6 +1159,20 @@
       "save_success": "配色已保存"
     },
     "adjust_success": "修改预约成功",
+    "drag_overlap": {
+      "title": "该时段已有预约",
+      "summary": "{staff} 在这个时段已有以下预约。是否先把它们移到「未分配」？",
+      "note": "只移动这些预约（和手动拖到「未分配」列一样），你拖动的预约会留在原位，移好后请再拖一次。移走的预约不再占用技师，请尽快重新安排，否则到点会变成已过期。",
+      "note_started": "已开始的预约移到「未分配」后会显示为已过期，拖回技师名下即可恢复。",
+      "tag_preferred": "点钟",
+      "tag_remark": "有备注",
+      "tag_started": "已开始",
+      "confirm": "移到未分配",
+      "off_schedule": "这个时段不在 {staff} 的排班内，移走已有预约也放不进去",
+      "blocked": "这个时段已被屏蔽，移走已有预约也放不进去",
+      "changed": "预约刚被改动过，请刷新日历后再试",
+      "moved": "已移到未分配：{names}。请再拖一次，并尽快安排移走的预约"
+    },
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "preferred_prefix": "偏好：",
