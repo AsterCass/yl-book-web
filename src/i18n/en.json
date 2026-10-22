@@ -511,6 +511,7 @@
   "yl_subsystem_staff": "Staff Management",
 
   "yl_subsystem_staff_skill": "Skill Management",
+  "yl_subsystem_staff_device": "Devices",
 
   "yl_subsystem_user_role": "Role Management",
   "yl_subsystem_user_permission": "Permission Management",
@@ -546,7 +547,7 @@
   "user_store": {
     "rest": { "enabled": "Enable rest rule", "continuous": "Max continuous work", "break": "Rest length", "tolerance": "Ignorable gap", "unit": "min", "note": "Once a staff member has worked longer than the limit, the system reserves a no-booking period right after that stretch (shown as Rest Time on the calendar).", "warn": "This prevents rather than repairs: a break cannot be inserted into a stretch that is already fully booked, it can only stop that stretch from growing.", "continuous_hint": "Measured as elapsed time, including small gaps bridged by the ignorable gap below", "tolerance_hint": "Two bookings closer than this still count as continuous work. Must be smaller than the rest length, otherwise the rest period cancels itself out." },
     "sms_notify": { "field": "Appointment texts", "hint": "Text the customer (from this store's AI phone number) when a booking made by the AI phone line or the online site is created or cancelled, or when the customer changes its time or services themselves. Changes made by staff (time tweaks, reassigning technicians) are not texted; each text carries a link where the customer can see the live details. Online customers must have ticked the appointment-texts box; other booking sources are never texted." },
-    "turnover": { "field": "Turnover time", "unit": "min", "hint": "Minimum gap between two bookings of the same technician (default 5, 0 = off, up to 60). Applies to the AI phone line and online booking only; online slots round up to the next 10-minute mark. Staff can still book into it when assigning a technician directly (a reminder is shown), and auto-assign steers around it." },
+    "turnover": { "field": "Turnover time", "unit": "min", "hint": "Minimum gap between two bookings of the same technician (default 5, 0 = off, up to 60). Applies to the AI phone line, the AI front-desk kiosk and online booking only; online slots round up to the next 10-minute mark. Staff can still book into it when assigning a technician directly (a reminder is shown), and auto-assign steers around it." },
     "auto_assign": { "field": "Auto-assign reassignment", "note": "Only constrains automatic assignment; manual assign and drag adjustments are unaffected. The stricter the policy, the more new bookings end up unassigned, so someone must watch the unassigned list.", "policy": { "FREE": { "label": "Free reassignment", "hint": "Maximize store capacity: any assigned booking that has not started may be moved to another staff to make room" }, "KEEP_SPECIAL": { "label": "Keep special bookings", "hint": "Special bookings (already with their preferred staff, or with a remark / special remark) are never moved to make room; other bookings still may be. When a special booking itself is rescheduled it may only stay with its current or preferred staff, and becomes unassigned if neither can take it" }, "NONE": { "label": "Never reassign (default)", "hint": "Automatic assignment never moves any assigned booking; new bookings only fill existing gaps. Rescheduling a special booking follows the rule above" } } },
     "classpass": { "note": "Blocks for this store are sent straight to ClassPass instead of going through Google Calendar", "email": "ClassPass account", "password": "ClassPass password", "venue_id": "Venue ID", "test": "Test login", "testing": "Checking...", "test_ok": "Login succeeded", "test_fail": "Login failed", "venues": "Venues this account can manage", "practitioners": "Practitioners in this venue (for staff binding)", "venue_hint": "One account can manage several venues. A wrong id will not raise an error, it will just block someone else's venue, so double-check it", "placeholder": { "email": "e.g. manager\\@example.com", "password": "ClassPass login password", "venue_id": "e.g. 265267" } },
     "label": { "id": "Store ID", "name": "Store Name", "phone": "Store Phone" },
@@ -656,6 +657,23 @@
     },
     "notify": { "update_success": "Skill updated successfully" },
     "table": { "addon_no_main": "No main service configured (hidden from customers)" }
+  },
+
+  "staff_device": {
+    "label": { "name": "Device Name", "status": "Status" },
+    "placeholder": { "name": "e.g. Front Desk Kiosk", "remark": "Optional" },
+    "button": { "query": "Search", "add": "Add Device", "clear": "Clear Filters" },
+    "note": "AI receptionist kiosks in this store. Each kiosk connects with its device key; click a key in the list to copy it, and keep it private. A kiosk counts as online if it sent a heartbeat in the last 3 minutes. To see the raw heartbeat a kiosk reported, turn on the 心跳详情 (heartbeat details) column from the gear icon below the table.",
+    "status": { "all": "All", "enabled": "Enabled", "disabled": "Disabled" },
+    "online": { "online": "Online", "offline": "Offline" },
+    "upsert": { "title_add": "Add Device", "title_update": "Update Device", "field": { "name": "Device Name", "remark": "Remark", "status": "Status" }, "save_add": "Add", "save_update": "Update" },
+    "dialog": {
+      "common": { "cancel": "Cancel", "confirm": "Confirm" },
+      "reset_key": { "title": "Reset Key", "content": "Reset the device key of 【{name}】? The old key stops working immediately, and the kiosk cannot connect again until it is set up with the new key." },
+      "delete": { "title": "Delete Device", "content": "Permanently delete 【{name}】? This cannot be undone, and the kiosk will no longer be able to connect." }
+    },
+    "notify": { "create_success": "Device added. Its key is shown in the list; click it to copy.", "update_success": "Device updated successfully", "reset_key_success": "Key reset. Set up the kiosk with the new key; click the key in the list to copy it." },
+    "table": { "never": "Never" }
   },
 
   "home": "Home",
@@ -985,7 +1003,7 @@
       "title": "Resource fully booked",
       "summary": "\"{name}\" has {capacity} in total, this booking needs {required}. No capacity left during:",
       "rest_summary": "The selected staff is in a scheduled rest period during this time", "rest_note": "Booking here does not cancel the rest — it will be pushed to after this booking.", "conflict_window": "Conflict",
-      "turnover_summary": "Too close to this technician's other bookings ({minutes}-minute turnover time):", "turnover_gap": "{gap} min gap", "turnover_note": "Advisory only — staff can still save; the AI phone line and online booking keep this gap automatically.",
+      "turnover_summary": "Too close to this technician's other bookings ({minutes}-minute turnover time):", "turnover_gap": "{gap} min gap", "turnover_note": "Advisory only — staff can still save; the AI phone line, the AI front-desk kiosk and online booking keep this gap automatically.",
       "target_window": "This booking",
       "occupied_title": "Occupied by",
       "occupied_count": "Uses {name} ×{count}",
@@ -1118,7 +1136,7 @@
     "view_day": "Day View",
     "view_week": "Week View",
     "slot_hint": "Left-click to book · right-click to block",
-    "turnover_tip": "Turnover time, {minutes} min (not bookable online or by the AI phone line; staff may still book)",
+    "turnover_tip": "Turnover time, {minutes} min (not bookable online, by the AI phone line or at the AI front-desk kiosk; staff may still book)",
     "unassigned": "Unassigned",
     "no_name": "Unnamed",
     "auto_assign": "Auto Assign",

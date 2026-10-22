@@ -30,6 +30,7 @@ import ZyyUserStore from "@/ui/views/user/ZyyUserStore.vue";
 import ZyyUserTenant from "@/ui/views/user/ZyyUserTenant.vue";
 import ZyyStaffStaff from "@/ui/views/staff/ZyyStaffStaff.vue";
 import ZyyStaffSkill from "@/ui/views/staff/ZyyStaffSkill.vue";
+import ZyyStaffDevice from "@/ui/views/staff/ZyyStaffDevice.vue";
 
 
 const router = createRouter({
@@ -328,6 +329,20 @@ const router = createRouter({
                                         permission: 'staff:skill'
                                     },
                                 },
+                                {
+                                    // 设备：门店一体机上的 AI 数字人前台（设备密钥、启停、心跳与在线状态）
+                                    path: "device",
+                                    name: "staffDevice",
+                                    component: ZyyStaffDevice,
+                                    meta: {
+                                        title: 'yl_subsystem_staff_device',
+                                        value: "staffDevice",
+                                        header: "yl_subsystem_staff_device",
+                                        label: "yl_subsystem_staff_device",
+                                        color: 'rgb(var(--full-container-background-color))',
+                                        permission: 'staff:device'
+                                    },
+                                },
                             ]
                         },
                     ]
@@ -375,6 +390,7 @@ const parentRouteMap = {
 
     'staffStaff': 'subsystemMain',
     'staffSkill': 'subsystemMain',
+    'staffDevice': 'subsystemMain',
 
     'bookBooking': 'subsystemMain',
     'bookCalendar': 'subsystemMain',
