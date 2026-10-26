@@ -25,16 +25,18 @@
 
     </div>
 
+    <!-- 按钮按权限显示（后端同样按权限拦） -->
     <div class="row">
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated @click="selectData()">
+      <q-btn v-if="canList" class="q-ma-md shadow-2 component-full-btn-grow" no-caps push unelevated
+             @click="selectData()">
         {{ $t('staff_device.button.query') }}
       </q-btn>
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
+      <q-btn v-if="canCreate" class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated
              @click="clearUpsertParam(); isNew = true; showUpsert = true">
         {{ $t('staff_device.button.add') }}
       </q-btn>
-      <q-btn class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
+      <q-btn v-if="canList" class="q-ma-md shadow-2 component-full-btn-grow" no-caps push
              unelevated @click="()=> {clearSearch(); selectData();}">
         {{ $t('staff_device.button.clear') }}
       </q-btn>
@@ -64,6 +66,18 @@
                               upsertStatus = row.status === STATUS_DISABLED ? STATUS_DISABLED : STATUS_ENABLED
                               isNew = false;
                               showUpsert = true
+                            }
+                            if(name === 'config') {
+                              configDevice = {id: row.id, name: row.name}
+                              showConfig = true
+                            }
+                            if(name === 'unlockIp') {
+                              toOpId = row.id
+                              toOpIp = row.lastHeartbeatIp
+                              toOpTitle = $t('staff_device.dialog.unlock_ip.title')
+                              toOpDesc = $t('staff_device.dialog.unlock_ip.content', { ip: row.lastHeartbeatIp })
+                              toOpFunc = unlockIp
+                              showOperation = true
                             }
                             if(name === 'resetKey') {
                               toOpId = row.id
@@ -139,34 +153,52 @@
                           :dialog-judgment-data="{ title: toOpTitle, content: toOpDesc, falseLabel: $t('staff_device.dialog.common.cancel'), trueLabel: $t('staff_device.dialog.common.confirm') }"
     />
 
+    <!-- 下发配置：每台设备一份，新建时为空，在行内【配置】里逐台设置。
+         保存后刷新列表：生效版本变了，「配置同步」要等设备拉取后才回到已同步 -->
+    <cask-device-config-dialog v-model="showConfig" :device="configDevice" @saved="selectData(true)"/>
+
   </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import CaskDeviceConfigDialog from "@/ui/components/CaskDeviceConfigDialog.vue";
 import {tableStaffDevice, tableStaffDeviceOperation} from "@/tables/staff-device.js";
 import {
   staffDeviceCreate,
   staffDeviceDelete,
   staffDeviceList,
   staffDeviceResetKey,
+  staffDeviceUnlockIp,
   staffDeviceUpdate
 } from "@/api/staff-device.js";
 import {copy} from "@/utils/base-tools.js";
+import {useGlobalStateStore} from "@/utils/global-state.js";
 
 // 设备状态：0 启用 / 1 停用
 const STATUS_ENABLED = 0
 const STATUS_DISABLED = 1
-// 状态 / 在线列配色：启用、在线同用户状态「正常」的绿，停用同「禁用」的红，离线用中性灰
+// 状态 / 在线列配色：启用、在线同用户状态「正常」的绿，停用同「禁用」的红，离线用中性灰；
+// 待拉取 / IP 有错误计数用预约「待分配」的橙
 const COLOR_GREEN = 'rgb(68, 117, 80)'
 const COLOR_RED = 'rgb(200, 60, 60)'
 const COLOR_GREY = 'rgb(127, 140, 141)'
+const COLOR_ORANGE = 'rgb(245, 166, 35)'
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
+const globalState = useGlobalStateStore()
+
+// 按钮与行操作按权限显示（只是不给看，真正的拦截在后端）
+const canList = computed(() => globalState.hasPermission('staff:device:list'))
+const canCreate = computed(() => globalState.hasPermission('staff:device:create'))
+const canUpdate = computed(() => globalState.hasPermission('staff:device:update'))
+const canDelete = computed(() => globalState.hasPermission('staff:device:delete'))
+const canResetKey = computed(() => globalState.hasPermission('staff:device:reset-key'))
+const canConfig = computed(() => globalState.hasPermission('staff:device:config'))
 
 const selectName = ref("")
 // 全部 = 空串（不上送）；不能用 null 占位——q-select 把 null 当作未选中，「全部」就显示不出来
@@ -203,9 +235,15 @@ function clearUpsertParam() {
   upsertStatus.value = STATUS_ENABLED
 }
 
+// 下发配置弹窗：configDevice = 正在配置的那台 {id, name}
+const showConfig = ref(false)
+const configDevice = ref(null)
+
 // op
 const showOperation = ref(false)
 const toOpId = ref("")
+// 解锁 IP 时要解的那个 IP（设备最近一次心跳的 IP）
+const toOpIp = ref("")
 const toOpTitle = ref("")
 const toOpDesc = ref("")
 const toOpFunc = ref(null)
@@ -282,6 +320,22 @@ function resetKey() {
   })
 }
 
+// 解锁 IP：清掉该 IP 的密钥错误计数，一体机下一次请求起恢复（密钥仍须正确）
+function unlockIp() {
+  if (!toOpIp.value) {
+    notifyTopWarning(t('validation.insufficient_parameters'))
+    return
+  }
+  const ip = toOpIp.value
+  staffDeviceUnlockIp(ip).then(res => {
+    if (!res || !res.data) {
+      return
+    }
+    notifyTopPositive(t('staff_device.notify.unlock_ip_success', {ip}))
+    selectData(true)
+  })
+}
+
 function deleteData() {
   if (!toOpId.value) {
     notifyTopWarning(t('validation.insufficient_parameters'))
@@ -308,8 +362,31 @@ function formatHeartbeatInfo(raw) {
   }
 }
 
+// IP 锁定列：锁着（红）/ 有错误计数没锁（橙）/ 正常（灰）；没有心跳 IP 时后端给 null
+function ipLockText(data) {
+  if (data.ipLocked == null) {
+    return '-'
+  }
+  if (data.ipLocked) {
+    return t('staff_device.ip_lock.locked', {count: data.ipFailCount})
+  }
+  return data.ipFailCount > 0 ? t('staff_device.ip_lock.failed', {count: data.ipFailCount}) : t('staff_device.ip_lock.ok')
+}
+
+function ipLockColor(data) {
+  if (data.ipLocked) {
+    return COLOR_RED
+  }
+  return data.ipFailCount > 0 ? COLOR_ORANGE : COLOR_GREY
+}
+
 // 默认从第一页开始查询；翻页、行操作后刷新时传 keepPage = true 保持当前页
 function selectData(keepPage = false) {
+  // 没有查询权限就不查（后端会拒，只会弹一条错误提示）
+  if (!canList.value) {
+    tableDynamicData.value.inLoading = false
+    return
+  }
   if (!keepPage) {
     tableDynamicData.value.pageNo = 1
   }
@@ -329,9 +406,17 @@ function selectData(keepPage = false) {
     const thisData = res.data.data.records || []
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
-      data.updateOp = true
-      data.resetKeyOp = true
-      data.deleteOp = true
+      data.updateOp = canUpdate.value
+      data.configOp = canConfig.value
+      data.resetKeyOp = canResetKey.value
+      // 只有最近一次心跳的 IP 正被锁着才给解锁；不单设权限，能编辑设备就能解锁
+      data.unlockIpOp = canUpdate.value && data.ipLocked === true
+      data.deleteOp = canDelete.value
+      // 设备上报的配置版本 = 当前生效版本才算已同步；没上报过（老版本、从没心跳）也算待拉取
+      data.configSyncName = data.configSynced ? t('staff_device.sync.synced') : t('staff_device.sync.pending')
+      data.configSyncNameWebColorName = data.configSynced ? COLOR_GREEN : COLOR_ORANGE
+      data.ipLockName = ipLockText(data)
+      data.ipLockNameWebColorName = ipLockColor(data)
       const disabled = data.status === STATUS_DISABLED
       data.statusName = disabled ? t('staff_device.status.disabled') : t('staff_device.status.enabled')
       data.statusNameWebColorName = disabled ? COLOR_RED : COLOR_GREEN
@@ -347,6 +432,11 @@ function selectData(keepPage = false) {
 
 onMounted(() => {
   selectData()
+})
+
+// 状态 / 在线 / IP 锁定 / 配置同步这些格子是查询时按当前语言写进行数据的，切换语言后重查一次（保持当前页）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

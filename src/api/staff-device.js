@@ -51,3 +51,37 @@ export function staffDeviceResetKey(id) {
         method: 'post',
     })
 }
+
+// 解锁因设备密钥错太多被锁的 IP（设备收到 706）：body {ip}
+export function staffDeviceUnlockIp(ip) {
+    return serviceShiro({
+        url: `/staff/device/unlock-ip`,
+        data: {ip},
+        method: 'post',
+    })
+}
+
+// 下发配置的白名单：[{key, type(STRING/URL/PIN), secret, desc, maxLength}]，按表单顺序
+export function staffDeviceConfigKeys() {
+    return serviceShiro({
+        url: `/staff/device/config/keys`,
+        method: 'get',
+    })
+}
+
+// 一台设备的配置：返回 {deviceId, itemList[{key, value}]}；密钥不给原文：设了为 null，没设为空串
+export function staffDeviceConfig(id) {
+    return serviceShiro({
+        url: `/staff/device/config/${id}`,
+        method: 'get',
+    })
+}
+
+// 改一台设备的配置：values {key: value | null}，只动出现的 key，null = 删掉这一项；返回改完后的配置（同上）
+export function staffDeviceConfigUpdate(id, values) {
+    return serviceShiro({
+        url: `/staff/device/config/${id}`,
+        data: {values},
+        method: 'post',
+    })
+}

@@ -661,17 +661,43 @@
     "label": { "name": "设备名称", "status": "设备状态" },
     "placeholder": { "name": "例如：前台一体机", "remark": "可为空" },
     "button": { "query": "查询", "add": "添加设备", "clear": "清空条件" },
-    "note": "本门店的一体机（AI 数字人前台）。一体机凭设备密钥连接系统，点击列表中的密钥即可复制，请妥善保管；最近 3 分钟内有心跳即为在线。如需查看一体机上报的心跳原文，在表格下方齿轮（列可见性调整）中勾选「心跳详情」。",
+    "note": "本门店 AI 数字人前台。一体机凭设备密钥连接系统，最近 3 分钟内有心跳即为在线。「配置同步」显示一体机是否已拉到最新的配置。",
     "status": { "all": "全部", "enabled": "启用", "disabled": "停用" },
     "online": { "online": "在线", "offline": "离线" },
+    "sync": { "synced": "已同步", "pending": "待拉取" },
+    "ip_lock": { "locked": "已锁定 · 错 {count} 次", "failed": "错 {count} 次", "ok": "正常" },
     "upsert": { "title_add": "添加设备", "title_update": "更新设备", "field": { "name": "设备名称", "remark": "备注", "status": "设备状态" }, "save_add": "添加", "save_update": "更新" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "reset_key": { "title": "重置密钥", "content": "确定要重置【{name}】的设备密钥吗？旧密钥立即失效，该一体机需要重新配置新密钥后才能继续连接。" },
-      "delete": { "title": "删除设备", "content": "确定要永久删除【{name}】吗？删除后无法恢复，该一体机将无法再连接。" }
+      "unlock_ip": { "title": "解锁 IP", "content": "确定解锁 {ip} 吗？该 IP 的密钥错误次数清零，一体机下一次请求起恢复连接（密钥仍须正确，否则会重新计数）。" },
+      "delete": { "title": "删除设备", "content": "确定要永久删除【{name}】吗？删除后无法恢复，该一体机将无法再连接，它自己的配置也一并删除。" }
     },
-    "notify": { "create_success": "添加设备成功，设备密钥已显示在列表中（点击即可复制）", "update_success": "更新设备成功", "reset_key_success": "密钥已重置，请把新密钥配置到该一体机上（点击列表中的密钥即可复制）" },
-    "table": { "never": "从未上线" }
+    "notify": { "create_success": "添加设备成功，设备密钥已显示在列表中（点击即可复制）", "update_success": "更新设备成功", "reset_key_success": "密钥已重置，请把新密钥配置到该一体机上（点击列表中的密钥即可复制）", "unlock_ip_success": "已解锁 {ip}" },
+    "table": {
+      "never": "从未上线",
+      "col": { "name": "名称", "store": "门店", "device_key": "密钥（点击复制）", "status": "状态", "online": "在线", "last_heartbeat": "最近心跳", "heartbeat_ip": "心跳 IP", "ip_lock": "IP 锁定", "version": "版本", "config_sync": "配置同步", "heartbeat_info": "心跳详情", "remark": "备注", "operation": "操作" },
+      "op": { "update": "编辑", "config": "配置", "reset_key": "重置密钥", "unlock_ip": "解锁 IP", "delete": "删除" }
+    },
+    "config": {
+      "title_device": "设备配置 · {name}",
+      "note_device":"这里设的项只对这台一体机生效。密钥只能修改、不能查看。",
+      "key": {
+        "upstream_base_url": { "label": "大模型接口地址", "hint": "例如 https://api.deepseek.com/anthropic" },
+        "upstream_model": { "label": "大模型名称", "hint": "例如 claude-sonnet-5" },
+        "upstream_api_key": { "label": "大模型密钥" },
+        "tts_aliyun_base_url": { "label": "TTS 地址", "hint": "例如 https://abc.us-east-1.maas.aliyuncs.com/apps/anthropic" },
+        "tts_aliyun_model": { "label": "TTS 模型", "hint": "例如 qwen-audio-3.0-tts-flash" },
+        "tts_aliyun_api_key": { "label": "TTS 密钥" },
+        "tts_aliyun_voice_zh": { "label": "中文音色", "hint": "例如 Cherry" },
+        "tts_aliyun_voice_en": { "label": "英文音色", "hint": "例如 Cherry" },
+        "kiosk_maintenance_pin": { "label": "调试口令", "hint": "4–8 位数字，一体机调试控制台的口令" }
+      },
+      "ph": { "secret_set": "已设置，输入新值可替换", "secret_unset": "未设置" },
+      "save": "保存",
+      "close": "关闭",
+      "notify": { "no_change": "没有改动", "save_success": "已保存，一体机下一次心跳后会拉取" }
+    }
   },
 
   "home": "主页",
@@ -762,6 +788,7 @@
       "cut_tag": "被打断",
       "signal_end": "随后挂断",
       "signal_transfer": "随后转接",
+      "reply_after": "回复用时 {s} 秒",
       "tools_label": "工具调用 {n} 次 · 系统事实",
       "facts_label": "系统事实",
       "input": "参数",

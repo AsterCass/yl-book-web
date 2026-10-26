@@ -663,17 +663,43 @@
     "label": { "name": "Device Name", "status": "Status" },
     "placeholder": { "name": "e.g. Front Desk Kiosk", "remark": "Optional" },
     "button": { "query": "Search", "add": "Add Device", "clear": "Clear Filters" },
-    "note": "AI receptionist kiosks in this store. Each kiosk connects with its device key; click a key in the list to copy it, and keep it private. A kiosk counts as online if it sent a heartbeat in the last 3 minutes. To see the raw heartbeat a kiosk reported, turn on the 心跳详情 (heartbeat details) column from the gear icon below the table.",
+    "note": "AI receptionist kiosks in this store. Each kiosk connects with its device key. A kiosk counts as online if it sent a heartbeat in the last 3 minutes. the Config Sync column shows whether the kiosk has pulled the latest settings. ",
     "status": { "all": "All", "enabled": "Enabled", "disabled": "Disabled" },
     "online": { "online": "Online", "offline": "Offline" },
+    "sync": { "synced": "Synced", "pending": "Pending pull" },
+    "ip_lock": { "locked": "Locked · {count} wrong keys", "failed": "{count} wrong keys", "ok": "OK" },
     "upsert": { "title_add": "Add Device", "title_update": "Update Device", "field": { "name": "Device Name", "remark": "Remark", "status": "Status" }, "save_add": "Add", "save_update": "Update" },
     "dialog": {
       "common": { "cancel": "Cancel", "confirm": "Confirm" },
       "reset_key": { "title": "Reset Key", "content": "Reset the device key of 【{name}】? The old key stops working immediately, and the kiosk cannot connect again until it is set up with the new key." },
-      "delete": { "title": "Delete Device", "content": "Permanently delete 【{name}】? This cannot be undone, and the kiosk will no longer be able to connect." }
+      "unlock_ip": { "title": "Unlock IP", "content": "Unlock {ip}? Its wrong-key count is cleared and the kiosk can connect again from its next request (the key still has to be right, or counting starts over)." },
+      "delete": { "title": "Delete Device", "content": "Permanently delete 【{name}】? This cannot be undone, the kiosk will no longer be able to connect, and its own config is deleted too." }
     },
-    "notify": { "create_success": "Device added. Its key is shown in the list; click it to copy.", "update_success": "Device updated successfully", "reset_key_success": "Key reset. Set up the kiosk with the new key; click the key in the list to copy it." },
-    "table": { "never": "Never" }
+    "notify": { "create_success": "Device added. Its key is shown in the list; click it to copy.", "update_success": "Device updated successfully", "reset_key_success": "Key reset. Set up the kiosk with the new key; click the key in the list to copy it.", "unlock_ip_success": "{ip} unlocked" },
+    "table": {
+      "never": "Never",
+      "col": { "name": "Name", "store": "Store", "device_key": "Key (click to copy)", "status": "Status", "online": "Online", "last_heartbeat": "Last Heartbeat", "heartbeat_ip": "Heartbeat IP", "ip_lock": "IP Lock", "version": "Version", "config_sync": "Config Sync", "heartbeat_info": "Heartbeat Details", "remark": "Remark", "operation": "Actions" },
+      "op": { "update": "Edit", "config": "Config", "reset_key": "Reset Key", "unlock_ip": "Unlock IP", "delete": "Delete" }
+    },
+    "config": {
+      "title_device": "Device Config · {name}",
+      "note_device":"Settings here apply to this kiosk only. Secrets can be changed but not viewed.",
+      "key": {
+        "upstream_base_url": { "label": "Model API URL", "hint": "e.g. https://api.deepseek.com/anthropic" },
+        "upstream_model": { "label": "Model name", "hint": "e.g. claude-sonnet-5" },
+        "upstream_api_key": { "label": "Model API key" },
+        "tts_aliyun_base_url": { "label": "TTS URL", "hint": "e.g. https://abc.us-east-1.maas.aliyuncs.com/apps/anthropic" },
+        "tts_aliyun_model": { "label": "TTS model", "hint": "e.g. qwen-audio-3.0-tts-flash" },
+        "tts_aliyun_api_key": { "label": "TTS API key" },
+        "tts_aliyun_voice_zh": { "label": "Chinese voice", "hint": "e.g. Cherry" },
+        "tts_aliyun_voice_en": { "label": "English voice", "hint": "e.g. Cherry" },
+        "kiosk_maintenance_pin": { "label": "Maintenance PIN", "hint": "4–8 digits, for the kiosk's debug console" }
+      },
+      "ph": { "secret_set": "Set; type a new value to replace it", "secret_unset": "Not set" },
+      "save": "Save",
+      "close": "Close",
+      "notify": { "no_change": "Nothing changed", "save_success": "Saved; the kiosk pulls it after its next heartbeat" }
+    }
   },
 
   "home": "Home",
@@ -764,6 +790,7 @@
       "cut_tag": "interrupted",
       "signal_end": "then hung up",
       "signal_transfer": "then transferred",
+      "reply_after": "replied in {s}s",
       "tools_label": "{n} tool call(s) · system facts",
       "facts_label": "System facts",
       "input": "Input",
