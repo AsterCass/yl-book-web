@@ -145,6 +145,8 @@
 
             <div v-for="group in transcriptGroups" :key="group.turn" class="q-mt-sm">
               <div v-for="(line, i) in group.lines" :key="i" class="review-line" :class="{'review-line-code': line.code}">
+                <!-- 开始说的时刻（门店本地；档案第 3 版起才有）：AI 的话是第一段发出去的时刻，顾客的话是这句话到达服务端的时刻 -->
+                <span v-if="line.time" class="review-time">{{ line.time }}</span>
                 <span class="review-turn">[{{ line.turn }}]</span>
                 <span class="review-role" :class="line.role === 'customer' ? 'review-role-customer' : 'review-role-ai'">
                   {{ line.role === 'customer' ? $t('book_ai_call_review.detail.customer') : $t('book_ai_call_review.detail.ai') }}
@@ -154,6 +156,7 @@
                 <span class="review-text">{{ line.text }}</span>
                 <span v-if="line.cut" class="review-tag">〔{{ $t('book_ai_call_review.detail.cut_tag') }}〕</span>
                 <span v-if="line.signal" class="review-tag">〔{{ line.signal }}〕</span>
+                <span v-if="line.replyAfter != null" class="review-tag">〔{{ $t('book_ai_call_review.detail.reply_after', {s: line.replyAfter}) }}〕</span>
               </div>
 
               <q-expansion-item v-if="group.tools.length > 0 || group.record" class="q-ml-md" dense dense-toggle
@@ -648,8 +651,17 @@ function buildGroups(dossier) {
     }
     return byTurn.get(turn)
   }
+  // 顾客说完后 AI 的第一句（垫话也算：顾客最先听到的就是它）标出回复用时 = 两句开始时刻之差（档案第 3 版起每句带 at）
+  let customerAt = null
   for (const line of (dossier.transcript || [])) {
-    group(line.turn).lines.push({...line})
+    const copy = {...line}
+    if (line.role === 'customer') {
+      customerAt = line.at || null
+    } else if (customerAt != null && line.at) {
+      copy.replyAfter = (Math.max(0, line.at - customerAt) / 1000).toFixed(1)
+      customerAt = null
+    }
+    group(line.turn).lines.push(copy)
   }
   for (const tool of (dossier.tools || [])) {
     group(tool.turn).tools.push({...tool, outcome: null})
@@ -842,6 +854,14 @@ onMounted(() => {
 .review-turn {
   opacity: .5;
   font-size: .8rem;
+}
+
+// 每句开始说的时刻
+.review-time {
+  opacity: .5;
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+  margin-right: .35rem;
 }
 
 .review-role {

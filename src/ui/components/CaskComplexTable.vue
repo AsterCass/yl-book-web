@@ -62,7 +62,8 @@
                     <div class="col-12">
                       <q-checkbox v-for="(thisSlot, index) in allRowSlot" :key="index"
                                   v-model="thisSlot.visible" checked-icon="task_alt"
-                                  unchecked-icon="panorama_fish_eye" :label="thisSlot.label"
+                                  unchecked-icon="panorama_fish_eye"
+                                  :label="thisSlot.labelKey ? $t(thisSlot.labelKey) : thisSlot.label"
                                   @update:model-value="(val) => updateColVisible(thisSlot, val)"
                       />
                     </div>
@@ -111,7 +112,7 @@
 
       <template v-for="(thisSlot, index) in allRowSlot" :key="index" v-slot:[thisSlot.slotName]>
         <th :class="`text-${thisSlot.align}`">
-          {{ thisSlot.label }}
+          {{ thisSlot.labelKey ? $t(thisSlot.labelKey) : thisSlot.label }}
           <q-icon v-if="thisSlot.sortableLite" name="fa-solid fa-sort-up" size="16px"
                   style="margin-bottom: 3px; transition: opacity 0.3s ease;"
                   :style="ComplexTableSortedStatus.ASC === thisSlot.sortStatus ? 'opacity: 1' : 'opacity: .5'"/>
@@ -181,7 +182,7 @@
                  v-for="(operation, index) in customTableOperation" :key="index"
                  :style="`color: ${operation.color ? operation.color : 'rgb(var(--pointer))'}; cursor: pointer; margin: 0 .2rem`"
                  @click="emit('operationClick', operation.name, props.row) ">
-              {{ operation.label }}
+              {{ operation.labelKey ? $t(operation.labelKey) : operation.label }}
             </div>
           </div>
         </q-td>
@@ -315,6 +316,8 @@ const buildCustomSlot = () => {
         align: column.align ? column.align : 'center',
         name: column.name,
         label: column.label,
+        // 可选的 i18n 键：有就按当前语言显示（切语言即时生效），没有用 label 原文
+        labelKey: column.labelKey,
         slotName: `header-cell-${column.name}`,
         sortableLite: column.sortableLite,
         sortStatus: ComplexTableSortedStatus.DEFAULT,
