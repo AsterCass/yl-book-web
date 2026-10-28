@@ -65,6 +65,8 @@
                               upsertExternalNameZh = row.externalNameZh
                               upsertAddress = row.address
                               upsertAddressZh = row.addressZh
+                              upsertDirectionsEn = (row.directions && row.directions.en) || ''
+                              upsertDirectionsZh = (row.directions && row.directions.zh) || ''
                               upsertPhone = row.phone
                               upsertAiPhone = row.aiPhone
                               upsertOutboundPhone = row.outboundPhone
@@ -151,6 +153,27 @@
             }}&nbsp;:</h6>
           <q-input v-if="!isNew" v-model="upsertAddressZh" class="component-outline-input-grow" dense outlined
                    :placeholder="t('user_store.placeholder.optional_zh')"/>
+
+          <!-- 到店路线（电话 AI 用，后端存 yl_store.meta.directions）：顾客问怎么过来时 AI 照着念。中英文各一段——
+               英文电话的提示词里不能有汉字，不能只写一段让模型现翻；每段最多 500 字，后端同样校验 -->
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.directions')
+            }}&nbsp;:</h6>
+          <q-input v-if="!isNew" v-model="upsertDirectionsEn" type="textarea" borderless maxlength="500" counter
+                   class="component-outline-input-textarea-grow directions-textarea"
+                   :placeholder="t('user_store.placeholder.directions')"/>
+
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.directions_zh')
+            }}&nbsp;:</h6>
+          <div v-if="!isNew">
+            <q-input v-model="upsertDirectionsZh" type="textarea" borderless maxlength="500" counter
+                     class="component-outline-input-textarea-grow directions-textarea"
+                     :placeholder="t('user_store.placeholder.directions_zh')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.directions_hint') }}
+            </div>
+          </div>
 
           <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important;">{{
               $t('user_store.upsert.field.phone')
@@ -600,6 +623,9 @@ const upsertExternalName = ref("")
 const upsertExternalNameZh = ref("")
 const upsertAddress = ref("")
 const upsertAddressZh = ref("")
+// 到店路线（电话 AI 用）：中英文各一段；仅编辑时可维护，创建不提供该字段
+const upsertDirectionsEn = ref("")
+const upsertDirectionsZh = ref("")
 const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
 const upsertAiPhone = ref("")
@@ -739,6 +765,8 @@ function clearUpsertParam() {
   upsertExternalNameZh.value = ""
   upsertAddress.value = ""
   upsertAddressZh.value = ""
+  upsertDirectionsEn.value = ""
+  upsertDirectionsZh.value = ""
   upsertPhone.value = ""
   upsertAiPhone.value = ""
   upsertOutboundPhone.value = ""
@@ -851,6 +879,11 @@ function upsertData() {
       // 整块提交：true / false（后端未配置按开生效）
       smsNotify: {
         enabled: !!upsertSmsNotifyEnabled.value,
+      },
+      // 整块提交：留空 = 清空那一段（后端去首尾空白、空串存 null）
+      directions: {
+        en: upsertDirectionsEn.value,
+        zh: upsertDirectionsZh.value,
       },
       classPass: {
         email: upsertClassPassEmail.value,
@@ -970,5 +1003,9 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
+// 到店路线：两三句话的长度，用不着通用长文本框的 16rem
+:deep(.directions-textarea textarea) {
+  height: 6rem;
+  line-height: 1.45;
+}
 </style>
