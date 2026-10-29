@@ -14,7 +14,7 @@
       <div v-if="loading" class="row justify-center q-pa-xl">
         <q-spinner size="2rem"/>
       </div>
-      <!-- 表单按后端白名单生成：名称在左（悬停看配置项 key），输入框在右。留空 = 不设置（一体机用本地配置），灰字是示例；
+      <!-- 表单按后端白名单生成：名称在左（悬停看配置项 key），输入框在右。留空 = 不设置，灰字是示例（数字项是默认值和范围）；
            密钥只能改不能看：留空不动，填了就是新值 -->
       <div v-else class="q-ma-md device-config-grid">
         <template v-for="meta in keyList" :key="meta.key">
@@ -25,7 +25,8 @@
             </h6>
             <q-input v-model="drafts[meta.key]" class="component-outline-input-grow" dense outlined clearable
                      :type="meta.secret ? 'password' : 'text'" :autocomplete="meta.secret ? 'new-password' : 'off'"
-                     :maxlength="meta.maxLength" :placeholder="placeholder(meta, items[meta.key])"/>
+                     :mask="inputMask(meta)" :maxlength="meta.maxLength"
+                     :placeholder="placeholder(meta, items[meta.key])"/>
           </template>
         </template>
       </div>
@@ -68,7 +69,7 @@ const props = defineProps({
   },
 })
 
-// 白名单元数据：[{key, type, secret, desc, maxLength}]，取一次后缓存
+// 白名单元数据：[{key, type, secret, desc, maxLength, min, max}]（min / max 只有 NUMBER 有），取一次后缓存
 const keyList = ref([])
 // key -> {key, value}（后端 itemList 按 key 展开）；密钥的 value：设了为 null，没设为空串
 const items = ref({})
@@ -166,11 +167,22 @@ function keyLabel(meta) {
   return te(keyI18n(meta, 'label')) ? t(keyI18n(meta, 'label')) : meta.key
 }
 
-// 灰字：普通项给示例；密钥只说设没设
+// 数字项用 mask 只放数字进来（宽松，不管范围，范围由后端校验）：范围带小数的（概率）是 #.##，整数的（毫秒）按上限的位数
+function inputMask(meta) {
+  if (meta.type !== 'NUMBER') {
+    return undefined
+  }
+  return `${meta.min}${meta.max}`.includes('.') ? '#.##' : '#'.repeat(String(meta.max).length)
+}
+
+// 灰字：普通项给示例，数字项后面再带上范围；密钥只说设没设
 function placeholder(meta, item) {
   const hint = te(keyI18n(meta, 'hint')) ? t(keyI18n(meta, 'hint')) : ''
   if (meta.secret) {
     return item.value === null ? t('staff_device.config.ph.secret_set') : (hint || t('staff_device.config.ph.secret_unset'))
+  }
+  if (meta.type === 'NUMBER') {
+    return t('staff_device.config.ph.number', {hint, min: meta.min, max: meta.max})
   }
   return hint
 }

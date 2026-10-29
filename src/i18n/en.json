@@ -693,9 +693,14 @@
         "tts_aliyun_api_key": { "label": "TTS API key" },
         "tts_aliyun_voice_zh": { "label": "Chinese voice", "hint": "e.g. Cherry" },
         "tts_aliyun_voice_en": { "label": "English voice", "hint": "e.g. Cherry" },
-        "kiosk_maintenance_pin": { "label": "Maintenance PIN", "hint": "4–8 digits, for the kiosk's debug console" }
+        "kiosk_maintenance_pin": { "label": "Maintenance PIN", "hint": "4–8 digits, for the kiosk's debug console" },
+        "kiosk_vad_start_prob": { "label": "Voice start threshold", "hint": "Default 0.5; voice probability above this counts as speaking" },
+        "kiosk_vad_end_prob": { "label": "Voice end threshold", "hint": "Default 0.35; below this counts as stopped; keep it under the start threshold" },
+        "kiosk_vad_end_silence_ms": { "label": "End silence (ms)", "hint": "Default 600; this long under the end threshold ends a sentence" },
+        "kiosk_vad_barge_prob": { "label": "Barge-in threshold", "hint": "Default 0.8; while the avatar talks, voice must be above this to count" },
+        "kiosk_vad_barge_ms": { "label": "Barge-in duration (ms)", "hint": "Default 300; this long above the barge-in threshold pauses the avatar" }
       },
-      "ph": { "secret_set": "Set; type a new value to replace it", "secret_unset": "Not set" },
+      "ph": { "secret_set": "Set; type a new value to replace it", "secret_unset": "Not set", "number": "{hint}; range {min}–{max}" },
       "save": "Save",
       "close": "Close",
       "notify": { "no_change": "Nothing changed", "save_success": "Saved; the kiosk pulls it after its next heartbeat" }
