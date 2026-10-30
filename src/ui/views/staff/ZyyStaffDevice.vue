@@ -424,6 +424,9 @@ function selectData(keepPage = false) {
       data.onlineNameWebColorName = data.online ? COLOR_GREEN : COLOR_GREY
       data.lastHeartbeatTime = data.lastHeartbeatTime || t('staff_device.table.never')
       data.heartbeatInfo = formatHeartbeatInfo(data.lastHeartbeatInfo)
+      // 版本：配置里设了终端版本、一体机还没更新到时显示「当前 → 设定」
+      data.versionName = data.updateVersion && data.updateVersion !== data.version
+          ? `${data.version || '-'} → ${data.updateVersion}` : (data.version || '')
     });
     tableData.value = thisData
     tableDynamicData.value.inLoading = false

@@ -696,7 +696,8 @@
         "kiosk_vad_end_prob": { "label": "人声收音门槛", "hint": "默认 0.35；低于它算停了，要低于起音门槛" },
         "kiosk_vad_end_silence_ms": { "label": "尾静默（毫秒）", "hint": "默认 600；低于收音门槛这么久算一句说完" },
         "kiosk_vad_barge_prob": { "label": "打断门槛", "hint": "默认 0.8；数字人说话时高过它才算客人在说" },
-        "kiosk_vad_barge_ms": { "label": "打断持续（毫秒）", "hint": "默认 300；高过打断门槛累计这么久才停住播报" }
+        "kiosk_vad_barge_ms": { "label": "打断持续（毫秒）", "hint": "默认 300；高过打断门槛累计这么久才停住播报" },
+        "kiosk_update_version": { "label": "终端版本", "hint": "例如 1.0.2；和一体机现在的版本不一样就更新（也能退回旧版本），不填不更新" }
       },
       "ph": { "secret_set": "已设置，输入新值可替换", "secret_unset": "未设置", "number": "{hint}，范围 {min}–{max}" },
       "save": "保存",

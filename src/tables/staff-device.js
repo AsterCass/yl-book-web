@@ -87,9 +87,9 @@ const tableStaffDeviceCol = [
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
     {
-        // 取自心跳 JSON 的 version 字段
+        // 心跳 JSON 的 version 字段；配置里设了终端版本、一体机还没更新到时，ZyyStaffDevice 写成「当前 → 设定」
         name: 'version',
-        field: 'version',
+        field: 'versionName',
         label: '版本',
         labelKey: 'staff_device.table.col.version',
         align: 'center',
