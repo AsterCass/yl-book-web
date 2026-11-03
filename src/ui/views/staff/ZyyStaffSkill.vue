@@ -160,8 +160,7 @@
               $t('staff_skill.upsert.field.serviceAmount')
             }}&nbsp;:</h6>
           <q-input v-model="upsertServiceAmount" class="component-outline-input-grow" dense outlined
-                   mask="#.##"
-                   reverse-fill-mask
+                   @update:model-value="onInput"
                    :placeholder="t('staff_skill.placeholder.serviceAmount')"/>
 
         </div>
@@ -365,6 +364,13 @@ const updateId = ref("")
 const addonMainOptions = computed(() => skillSimpleList.value
     .filter(skill => !skill.addonOnly && (isNew.value || skill.id !== updateId.value))
     .map(skill => ({label: skill.name, value: skill.id})))
+
+// 输入限制
+const onInput = (val) => {
+  // 实时过滤非法字符，只保留最多4位整数和2位小数
+  const m = String(val ?? '').match(/^\d{0,5}(\.\d{0,2})?/)
+  upsertServiceAmount.value = m ? m[0] : ''
+}
 
 function clearUpsertParam() {
   upsertName.value = ""
