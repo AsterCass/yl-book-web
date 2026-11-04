@@ -354,7 +354,7 @@ export function bookAiCallReviewDetail(id) {
     })
 }
 
-// AI 通话复盘运营标记：body {opsStatus, opsRemark}。opsStatus：0=未查看 / 1=已处理 / 2=误判；备注空=清空
+// AI 通话复盘运营标记：body {opsStatus, opsRemark}。opsStatus：0=未查看 / 1=已处理 / 2=误判 / 3=待发送挽留 / 4=已发送挽留；备注空=清空
 export function bookAiCallReviewOps(id, body) {
     return serviceShiro({
         url: `/book/ai-call-review/ops/${id}`,

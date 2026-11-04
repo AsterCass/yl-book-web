@@ -75,11 +75,13 @@ export const AiCallReviewStatusEnum = new Enum({
     NO_DIALOGUE: {code: 4, name: '无对话', desc: '客户一句没说就挂了，不进裁判', color: 'rgb(127, 140, 141)'},
 });
 
-// AI 通话复盘的运营处理状态（yl_ai_call_review.ops_status），三态可任意流转
+// AI 通话复盘的运营处理状态（yl_ai_call_review.ops_status），五态可任意流转；挽留两态只给运营标记、筛选用
 export const AiCallReviewOpsStatusEnum = new Enum({
     UNREAD: {code: 0, name: '未查看', desc: '默认', color: 'rgb(245, 166, 35)'},
     HANDLED: {code: 1, name: '已处理', desc: '运营已查看并跟进', color: 'rgb(68, 117, 80)'},
     FALSE_ALARM: {code: 2, name: '误判', desc: '运营认为裁判判错了', color: 'rgb(150, 100, 160)'},
+    PENDING_RETENTION: {code: 3, name: '待发送挽留', desc: '需要给顾客发挽留信息，还没发', color: 'rgb(214, 96, 77)'},
+    RETENTION_SENT: {code: 4, name: '已发送挽留', desc: '挽留信息已发出', color: 'rgb(74, 124, 168)'},
 });
 
 // 通话结束方式（yl-phone-spring-ai 归档时判定，code 为字符串）
