@@ -191,7 +191,11 @@
                     <span v-if="ev.specialRemarks" class="cal-event-special">
                       {{ ev.specialRemarks }}
                     </span>
-                    <!-- 备注：日视图且非第三方来源时跟在特殊备注后面（第三方与周视图仍是正文行，见 lines） -->
+                    <!-- 顾客备注：日视图跟在特殊备注后面、店员备注前面（周视图是店员备注上一行，见 lines） -->
+                    <span v-if="ev.customerRemark" class="cal-event-remark">
+                      {{ $t('book_calendar.customer_remark_prefix') }}{{ ev.customerRemark }}
+                    </span>
+                    <!-- 店员备注：日视图且非第三方来源时跟在顾客备注后面（第三方与周视图仍是正文行，见 lines） -->
                     <span v-if="ev.titleRemark" class="cal-event-remark">
                       {{ ev.titleRemark }}
                     </span>
@@ -416,6 +420,9 @@
           </span>
           <span v-if="hoverCard.ev.specialRemarks" class="cal-event-special">
             {{ hoverCard.ev.specialRemarks }}
+          </span>
+          <span v-if="hoverCard.ev.customerRemark" class="cal-event-remark">
+            {{ $t('book_calendar.customer_remark_prefix') }}{{ hoverCard.ev.customerRemark }}
           </span>
           <span v-if="hoverCard.ev.titleRemark" class="cal-event-remark">
             {{ hoverCard.ev.titleRemark }}
@@ -1103,13 +1110,16 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
     // 备注：日视图且非第三方来源（classpass / buildhealth 以外）→ 上首行、跟在特殊备注后面（模板内联展示）；
     //   第三方来源放正文最后一行（见下方 lines）
     const titleRemark = isDayView && !THIRD_PARTY_SOURCES.includes(b.source) ? (b.remark || '') : ''
+    // 顾客备注（本站 / 电话 AI / 数字人前台写的，只读）：日视图上首行、在特殊备注与店员备注之间；周视图是店员备注上一行
+    const customerRemarkLine = b.customerRemark ? `${t('book_calendar.customer_remark_prefix')}${b.customerRemark}` : ''
+    const customerRemark = isDayView ? (b.customerRemark || '') : ''
     // 模型备注（电话 AI 写的结构化备注，后端给好中英文案，按界面语言取）：日视图首行、跟在备注后面；只读，周视图不显示
     const aiRemark = isDayView ? ((locale.value === 'en' ? b.aiRemarkTextEn : b.aiRemarkText) || '') : ''
     // 日视图：未上首行的备注（第三方来源）放最后一行；特殊备注与偏好员工在日视图已上首行
     // 周视图：保持原顺序，备注仍是最后一行
     const lines = (isDayView
         ? [timeAndSkills, amountAndResource, b._contact, titleRemark ? '' : b.remark]
-        : [timeAndSkills, amountAndResource, b._specialRemarks, b._contact, preferredLine, b.remark])
+        : [timeAndSkills, amountAndResource, b._specialRemarks, b._contact, preferredLine, customerRemarkLine, b.remark])
         .filter(Boolean)
     // 排班外：已分配未开始、但该雇员当前排班覆盖不到（多为预约后改过排班），卡片加警示提醒前台手动改派
     const offScheduleShifts = offScheduleShiftText(b)
@@ -1119,6 +1129,7 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       booking: b,
       preferredName,
       specialRemarks,
+      customerRemark,
       titleRemark,
       aiRemark,
       offSchedule: offScheduleShifts !== null,
@@ -2113,7 +2124,7 @@ function checkDragOverlap(b, staffId, dateStr, start, end) {
       skills: x._calSub,
       // 点钟 = 偏好雇员就是现在做这单的人（口径同后端的点钟通知）
       preferred: !!x.preferredStaffId && x.preferredStaffId === x.staffId,
-      remarked: !!(x.remark || x.specialRemarks || x.aiRemarkText),
+      remarked: !!(x.remark || x.customerRemark || x.specialRemarks || x.aiRemarkText),
       // 已开始 / 已完成：移到未分配后后端会把它算成已过期（与手动拖到未分配列一样），弹框里提前说清
       started: bookingStarted(x, nowDateStr, nowMinutes),
     })),

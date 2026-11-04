@@ -100,9 +100,16 @@ const tableBookCol = [
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
     {
+        // 顾客备注（本站 / 电话 AI / 数字人前台写入，管理端只读）
+        name: 'customerRemark',
+        field: 'customerRemarkDisplay',
+        label: '顾客备注',
+        align: 'center',
+    },
+    {
         name: 'remark',
         field: 'remarkDisplay',
-        label: '备注',
+        label: '店员备注',
         align: 'center',
     },
     {

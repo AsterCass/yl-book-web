@@ -103,6 +103,13 @@
                   outlined popup-content-class="component-extra-card-std-limit">
         </q-select>
 
+        <!-- 顾客备注：顾客自己写的，店员只能看、不能改（后端也不认）；没有就不显示 -->
+        <template v-if="customerRemark">
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+            {{ $t('book_booking.upsert.field.customerRemark') }}&nbsp;:</h6>
+          <div class="q-py-xs" style="white-space: pre-wrap; opacity: .8;">{{ customerRemark }}</div>
+        </template>
+
         <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
           {{ $t('book_booking.upsert.field.remark') }}&nbsp;:</h6>
         <q-input v-model="upsertRemark" class="component-outline-input-grow" dense outlined
@@ -192,6 +199,8 @@ const upsertPreferredStaffId = ref(null)
 const upsertAssignedStaffId = ref(null)
 const upsertSource = ref(BookSourceEnum.PHONE.code)
 const upsertRemark = ref("")
+// 顾客备注：只读展示（编辑已有预约且有内容时）
+const customerRemark = ref("")
 const upsertSpecialRemarkList = ref([])
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
 // 门店特殊备注选项（纯文案字符串，选中值即文案，无需 id 映射）
@@ -285,6 +294,8 @@ function populate() {
   // 来源不设默认值：新增必须显式选择（保存时校验）
   upsertSource.value = b && b.source != null ? b.source : null
   upsertRemark.value = b && b.remark ? b.remark : ''
+  // 复制预约（isNew）不带：顾客备注只能由顾客渠道写
+  customerRemark.value = !props.isNew && b && b.customerRemark ? b.customerRemark : ''
   // 优先取数组；列表行数据只有逗号分隔的 specialRemarks 字符串，需解析回填（否则更新时会误清空）
   if (b && Array.isArray(b.specialRemarkList)) {
     upsertSpecialRemarkList.value = [...b.specialRemarkList]

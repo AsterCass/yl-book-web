@@ -999,7 +999,8 @@
         "bookingUrl": "预约链接",
         "source": "预约来源",
         "specialRemark": "特殊备注",
-        "remark": "备注"
+        "customerRemark": "顾客备注",
+        "remark": "店员备注"
       },
       "save_add": "添加",
       "save_update": "更新",
@@ -1087,7 +1088,8 @@
       "amount": "预约金额",
       "bookingUrl": "预约链接",
       "specialRemark": "特殊备注",
-      "remark": "备注",
+      "customerRemark": "顾客备注",
+      "remark": "店员备注",
       "aiRemark": "模型备注",
       "createUser": "创建人",
       "createTime": "创建时间",
@@ -1209,6 +1211,7 @@
     "legend_block": "已屏蔽时段",
     "legend_blocked": "预约落在屏蔽时段",
     "preferred_prefix": "偏好：",
+    "customer_remark_prefix": "顾客：",
     "close_today": {
       "button": "今日下班",
       "title": "今日下班",

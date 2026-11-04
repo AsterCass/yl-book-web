@@ -726,6 +726,7 @@ function selectData(keepPage = false) {
       data.statusName = statusEnum ? statusEnum.name : '未知'
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
       data.remarkDisplay = truncate(data.remark)
+      data.customerRemarkDisplay = truncate(data.customerRemark)
       // op flags (time gate: config-assign only allowed before booking starts)
       const notStarted = !isStarted(data.bookingTime)
       data.detailOp = true

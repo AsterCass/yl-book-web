@@ -1001,7 +1001,8 @@
         "bookingUrl": "Booking URL",
         "source": "Booking Source",
         "specialRemark": "Special Remarks",
-        "remark": "Remark"
+        "customerRemark": "Customer Remark",
+        "remark": "Store Remark"
       },
       "save_add": "Add",
       "save_update": "Update",
@@ -1089,7 +1090,8 @@
       "amount": "Amount",
       "bookingUrl": "Booking URL",
       "specialRemark": "Special Remarks",
-      "remark": "Remark",
+      "customerRemark": "Customer Remark",
+      "remark": "Store Remark",
       "aiRemark": "AI Notes",
       "createUser": "Created By",
       "createTime": "Created At",
@@ -1211,6 +1213,7 @@
     "legend_block": "Blocked slot",
     "legend_blocked": "Booking in blocked slot",
     "preferred_prefix": "Preferred: ",
+    "customer_remark_prefix": "Customer: ",
     "close_today": {
       "button": "Close for Today",
       "title": "Close for Today",

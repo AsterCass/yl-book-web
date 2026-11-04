@@ -65,6 +65,10 @@
             <h6 style="white-space: nowrap;">{{ $t('book_booking.detail.specialRemark') }}&nbsp;:</h6>
             <div>{{ specialRemarksDisplay || '-' }}</div>
 
+            <!-- 顾客备注：顾客自己写的（本站 / 电话 AI / 数字人前台），只读 -->
+            <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.customerRemark') }}&nbsp;:</h6>
+            <div style="white-space: pre-wrap;">{{ book.customerRemark || '-' }}</div>
+
             <h6 style="white-space: nowrap; align-self: flex-start;">{{ $t('book_booking.detail.remark') }}&nbsp;:</h6>
             <div style="white-space: pre-wrap;">{{ book.remark || '-' }}</div>
 
