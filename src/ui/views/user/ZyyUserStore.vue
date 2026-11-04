@@ -67,6 +67,7 @@
                               upsertAddressZh = row.addressZh
                               upsertDirectionsEn = (row.directions && row.directions.en) || ''
                               upsertDirectionsZh = (row.directions && row.directions.zh) || ''
+                              upsertAiPrompt = row.aiPrompt || ''
                               upsertPhone = row.phone
                               upsertAiPhone = row.aiPhone
                               upsertOutboundPhone = row.outboundPhone
@@ -172,6 +173,21 @@
                      :placeholder="t('user_store.placeholder.directions_zh')"/>
             <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
               {{ $t('user_store.upsert.directions_hint') }}
+            </div>
+          </div>
+
+          <!-- 电话 AI 的门店自定义提示词（后端存 yl_store.meta.aiPrompt.text）：原样接进本店电话 AI 的系统提示。只能输入英文——
+               英文通话的提示词里不能有汉字；输入时就把非英文字符滤掉（见 onAiPromptInput），后端同样拦汉字、限 2000 字 -->
+          <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
+              $t('user_store.upsert.field.ai_prompt')
+            }}&nbsp;:</h6>
+          <div v-if="!isNew">
+            <q-input ref="aiPromptInput" :model-value="upsertAiPrompt" @update:model-value="onAiPromptInput"
+                     type="textarea" borderless maxlength="2000" counter
+                     class="component-outline-input-textarea-grow ai-prompt-textarea"
+                     :placeholder="t('user_store.placeholder.ai_prompt')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('user_store.upsert.ai_prompt_hint') }}
             </div>
           </div>
 
@@ -592,7 +608,7 @@
 
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -626,6 +642,46 @@ const upsertAddressZh = ref("")
 // 到店路线（电话 AI 用）：中英文各一段；仅编辑时可维护，创建不提供该字段
 const upsertDirectionsEn = ref("")
 const upsertDirectionsZh = ref("")
+// 电话 AI 的门店自定义提示词（只能英文）；仅编辑时可维护
+const upsertAiPrompt = ref("")
+const aiPromptInput = ref(null)
+
+/**
+ * 只留英文键盘打得出的字符：可见 ASCII、换行、Tab。从文档粘进来的英文常带弯引号、长短破折号、省略号、特殊空格，
+ * 中文输入法的全角状态会打出全角字母和标点——这些先换成对应的 ASCII，其余（汉字等）直接去掉。
+ */
+function toEnglishOnly(text) {
+  return String(text ?? '')
+      .replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      .replace(/[\u2018\u2019\u201A\u2032]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u2033]/g, '"')
+      .replace(/[\u2013\u2014\u2212]/g, '-')
+      .replace(/\u2026/g, '...')
+      .replace(/\u3002/g, '.')
+      .replace(/[\u00A0\u2002-\u200A\u202F\u3000]/g, ' ')
+      .replace(/[^\x20-\x7E\n\t]/g, '')
+}
+
+function onAiPromptInput(value) {
+  const raw = String(value ?? '')
+  const clean = toEnglishOnly(raw)
+  upsertAiPrompt.value = clean
+  if (clean === raw) {
+    return
+  }
+  // 滤掉后若与上一次的值相同，QInput 不会重渲染，输入框里还留着刚打的字：直接改原生元素，光标放回原处
+  const el = aiPromptInput.value && aiPromptInput.value.getNativeElement && aiPromptInput.value.getNativeElement()
+  const caret = el && typeof el.selectionStart === 'number' ? toEnglishOnly(raw.slice(0, el.selectionStart)).length : null
+  nextTick(() => {
+    if (!el || el.value === clean) {
+      return
+    }
+    el.value = clean
+    if (caret !== null && el === document.activeElement) {
+      el.setSelectionRange(caret, caret)
+    }
+  })
+}
 const upsertPhone = ref("")
 // 呼出电话：回访客户时先拨通的本店号码（电话需求页「拨打电话」用）
 const upsertAiPhone = ref("")
@@ -767,6 +823,7 @@ function clearUpsertParam() {
   upsertAddressZh.value = ""
   upsertDirectionsEn.value = ""
   upsertDirectionsZh.value = ""
+  upsertAiPrompt.value = ""
   upsertPhone.value = ""
   upsertAiPhone.value = ""
   upsertOutboundPhone.value = ""
@@ -885,6 +942,8 @@ function upsertData() {
         en: upsertDirectionsEn.value,
         zh: upsertDirectionsZh.value,
       },
+      // 空串 = 清空（后端 null 才视为不修改）
+      aiPrompt: toEnglishOnly(upsertAiPrompt.value),
       classPass: {
         email: upsertClassPassEmail.value,
         // 编辑态已带回原值，留空就是操作者真的要清空（后端空串=清空、null=不变）
@@ -1006,6 +1065,12 @@ onMounted(() => {
 // 到店路线：两三句话的长度，用不着通用长文本框的 16rem
 :deep(.directions-textarea textarea) {
   height: 6rem;
+  line-height: 1.45;
+}
+
+// 自定义提示词：可能是几条规则，比路线高一些
+:deep(.ai-prompt-textarea textarea) {
+  height: 9rem;
   line-height: 1.45;
 }
 </style>
