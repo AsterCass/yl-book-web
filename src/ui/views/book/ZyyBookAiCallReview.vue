@@ -157,6 +157,22 @@
                 <span v-if="line.cut" class="review-tag">〔{{ $t('book_ai_call_review.detail.cut_tag') }}〕</span>
                 <span v-if="line.signal" class="review-tag">〔{{ line.signal }}〕</span>
                 <span v-if="line.replyAfter != null" class="review-tag">〔{{ $t('book_ai_call_review.detail.reply_after', {s: line.replyAfter}) }}〕</span>
+                <!-- Vapi 的识别置信度（报告 vapi.stt 按文本对到这句；几段合成一句时取最低的那段）；悬停看每段与低置信度的词 -->
+                <span v-if="line.stt" class="review-stt" :style="`color: ${sttColor(line.stt.confidence)}`">
+                  〔{{ $t('book_ai_call_review.detail.stt_tag', {p: pct(line.stt.confidence)}) }}<template
+                    v-if="line.stt.lowWords.length > 0"> · {{ $t('book_ai_call_review.detail.stt_low', {words: line.stt.lowWords.join(', ')}) }}</template>〕
+                  <q-tooltip max-width="28rem" class="review-stt-tooltip">
+                    <div style="font-weight: 600; margin-bottom: .25rem">{{ $t('book_ai_call_review.detail.stt_tooltip') }}</div>
+                    <div v-for="(seg, k) in line.stt.segments" :key="k" style="margin-bottom: .25rem">
+                      <span style="font-variant-numeric: tabular-nums">{{ seg.confidence == null ? '-' : pct(seg.confidence) + '%' }}</span>
+                      <span v-if="seg.sec != null" style="opacity: .7">&nbsp;@{{ seg.sec }}s</span>
+                      &nbsp;{{ seg.text }}
+                      <div v-if="seg.low && seg.low.length > 0" style="opacity: .8">
+                        {{ seg.low.map(w => `${w.word} ${pct(w.confidence)}%`).join(', ') }}
+                      </div>
+                    </div>
+                  </q-tooltip>
+                </span>
               </div>
 
               <q-expansion-item v-if="group.tools.length > 0 || group.record" class="q-ml-md" dense dense-toggle
@@ -632,6 +648,7 @@ function openDetail(row) {
     const dossier = parseJsonObject(data.dossier)
     vapiTranscript.value = dossier && dossier.vapi && dossier.vapi.transcript ? String(dossier.vapi.transcript) : ''
     transcriptGroups.value = buildGroups(dossier)
+    attachStt(transcriptGroups.value, dossier && dossier.vapi && Array.isArray(dossier.vapi.stt) ? dossier.vapi.stt : [])
     showDetail.value = true
   })
 }
@@ -700,6 +717,82 @@ function buildGroups(dossier) {
   }
   groups.sort((a, b) => a.turn - b.turn)
   return groups
+}
+
+// 识别置信度的比较口径：小写、只留字母数字与汉字（标点、空白差异不算）
+function sttKey(text) {
+  return String(text || '').toLowerCase().replace(/[^0-9a-z\u4e00-\u9fff]+/g, '')
+}
+
+// Vapi 报告里顾客的每一段（vapi.stt：{text, sec, confidence, low[{word, confidence}]}）按文本对到对话记录的顾客句上：
+// 一段不一定等于一句（停顿被拆开、或几段没听到回复被合成一句），所以按顺序把「文本被这句包含」的连续几段都归给它；
+// 对不上的段（我们没收到、或文本有出入）往后最多跳 3 段再找。挂到 line.stt：{confidence 取各段最低, lowWords, segments}
+function attachStt(groups, stt) {
+  if (!stt.length) {
+    return
+  }
+  let p = 0
+  for (const g of groups) {
+    for (const line of g.lines) {
+      if (line.role !== 'customer' || p >= stt.length) {
+        continue
+      }
+      const key = sttKey(line.text)
+      if (!key) {
+        continue
+      }
+      let start = -1
+      for (let j = p; j < Math.min(stt.length, p + 4); j++) {
+        const k = sttKey(stt[j].text)
+        if (k && key.includes(k)) {
+          start = j
+          break
+        }
+      }
+      if (start < 0) {
+        continue
+      }
+      const segments = []
+      let j = start
+      while (j < stt.length) {
+        const k = sttKey(stt[j].text)
+        if (!k || !key.includes(k)) {
+          break
+        }
+        segments.push(stt[j])
+        j++
+      }
+      p = j
+      const known = segments.filter(s => typeof s.confidence === 'number')
+      if (!known.length) {
+        continue
+      }
+      const lowWords = []
+      for (const s of segments) {
+        for (const w of (s.low || [])) {
+          if (w && w.word && !lowWords.includes(w.word) && lowWords.length < 5) {
+            lowWords.push(w.word)
+          }
+        }
+      }
+      line.stt = {confidence: Math.min(...known.map(s => s.confidence)), lowWords, segments}
+    }
+  }
+}
+
+function pct(v) {
+  return Math.round((Number(v) || 0) * 100)
+}
+
+// 识别置信度配色：< 60% 红、< 85% 橙、其余淡灰（AssemblyAI 的整句置信度正常在 85% 以上）
+function sttColor(v) {
+  if (v < 0.6) {
+    return 'rgb(214, 96, 77)'
+  }
+  if (v < 0.85) {
+    return 'rgb(209, 143, 46)'
+  }
+  return 'rgba(var(--text-color), .45)'
 }
 
 // TURN_LOG 里值得一眼看到的字段（为空 / false / -1 的不显示）
@@ -885,6 +978,11 @@ onMounted(() => {
 .review-tag {
   opacity: .55;
   font-size: .8rem;
+}
+
+.review-stt {
+  font-size: .8rem;
+  cursor: default;
 }
 
 .review-label {

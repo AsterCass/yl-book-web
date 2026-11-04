@@ -796,7 +796,7 @@
       "cut_tag": "interrupted",
       "signal_end": "then hung up",
       "signal_transfer": "then transferred",
-      "reply_after": "replied in {s}s",
+      "reply_after": "replied in {s}s", "stt_tag": "STT {p}%", "stt_low": "low: {words}", "stt_tooltip": "Vapi speech recognition confidence (per segment / words below 60%)",
       "tools_label": "{n} tool call(s) · system facts",
       "facts_label": "System facts",
       "input": "Input",

@@ -794,7 +794,7 @@
       "cut_tag": "被打断",
       "signal_end": "随后挂断",
       "signal_transfer": "随后转接",
-      "reply_after": "回复用时 {s} 秒",
+      "reply_after": "回复用时 {s} 秒", "stt_tag": "识别 {p}%", "stt_low": "低：{words}", "stt_tooltip": "Vapi 识别置信度（每段话 / 低于 60% 的词）",
       "tools_label": "工具调用 {n} 次 · 系统事实",
       "facts_label": "系统事实",
       "input": "参数",
