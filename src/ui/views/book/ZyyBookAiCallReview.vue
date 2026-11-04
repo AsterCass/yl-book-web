@@ -157,11 +157,13 @@
                 <span v-if="line.cut" class="review-tag">〔{{ $t('book_ai_call_review.detail.cut_tag') }}〕</span>
                 <span v-if="line.signal" class="review-tag">〔{{ line.signal }}〕</span>
                 <span v-if="line.replyAfter != null" class="review-tag">〔{{ $t('book_ai_call_review.detail.reply_after', {s: line.replyAfter}) }}〕</span>
-                <!-- Vapi 的识别置信度（报告 vapi.stt 按文本对到这句；几段合成一句时取最低的那段）；悬停看每段与低置信度的词 -->
+                <!-- Vapi 的识别置信度（报告 vapi.stt 对到这句；几段合成一句时取最低的那段；对不上 / 没有数据显示 —）：
+                     低于 50% 标红，悬停看每段与低置信度的词 -->
                 <span v-if="line.stt" class="review-stt" :style="`color: ${sttColor(line.stt.confidence)}`">
-                  〔{{ $t('book_ai_call_review.detail.stt_tag', {p: pct(line.stt.confidence)}) }}<template
-                    v-if="line.stt.lowWords.length > 0"> · {{ $t('book_ai_call_review.detail.stt_low', {words: line.stt.lowWords.join(', ')}) }}</template>〕
-                  <q-tooltip max-width="28rem" class="review-stt-tooltip">
+                  〔{{ line.stt.confidence == null
+                    ? $t('book_ai_call_review.detail.stt_none')
+                    : $t('book_ai_call_review.detail.stt_tag', {p: pct(line.stt.confidence)}) }}〕
+                  <q-tooltip v-if="line.stt.segments.length > 0" max-width="28rem">
                     <div style="font-weight: 600; margin-bottom: .25rem">{{ $t('book_ai_call_review.detail.stt_tooltip') }}</div>
                     <div v-for="(seg, k) in line.stt.segments" :key="k" style="margin-bottom: .25rem">
                       <span style="font-variant-numeric: tabular-nums">{{ seg.confidence == null ? '-' : pct(seg.confidence) + '%' }}</span>
@@ -648,7 +650,7 @@ function openDetail(row) {
     const dossier = parseJsonObject(data.dossier)
     vapiTranscript.value = dossier && dossier.vapi && dossier.vapi.transcript ? String(dossier.vapi.transcript) : ''
     transcriptGroups.value = buildGroups(dossier)
-    attachStt(transcriptGroups.value, dossier && dossier.vapi && Array.isArray(dossier.vapi.stt) ? dossier.vapi.stt : [])
+    attachStt(transcriptGroups.value, dossier && dossier.vapi ? dossier.vapi.stt : null)
     showDetail.value = true
   })
 }
@@ -724,73 +726,86 @@ function sttKey(text) {
   return String(text || '').toLowerCase().replace(/[^0-9a-z\u4e00-\u9fff]+/g, '')
 }
 
-// Vapi 报告里顾客的每一段（vapi.stt：{text, sec, confidence, low[{word, confidence}]}）按文本对到对话记录的顾客句上：
+// Vapi 报告里顾客的每一段（vapi.stt：{text, at, endAt, sec, confidence, low[{word, confidence}]}）对到对话记录的顾客句上。
 // 一段不一定等于一句（停顿被拆开、或几段没听到回复被合成一句），所以按顺序把「文本被这句包含」的连续几段都归给它；
-// 对不上的段（我们没收到、或文本有出入）往后最多跳 3 段再找。挂到 line.stt：{confidence 取各段最低, lowWords, segments}
+// 对不上的段（我们没收到、或文本有出入）往后最多跳 3 段再找。文本对不上时按时间：上一句顾客话之后、这句到达服务端
+// （line.at，顾客说完之后）前后 2 秒内说完的那几段。挂到 line.stt：{confidence 取各段最低（没有 = null，显示 —）, segments}。
+// 报告里没有 stt（没收到报告、或这个功能上线前的档案）时一句都不标
 function attachStt(groups, stt) {
-  if (!stt.length) {
+  if (!Array.isArray(stt)) {
     return
   }
   let p = 0
+  let prevAt = null
   for (const g of groups) {
     for (const line of g.lines) {
-      if (line.role !== 'customer' || p >= stt.length) {
+      if (line.role !== 'customer') {
         continue
       }
-      const key = sttKey(line.text)
-      if (!key) {
-        continue
+      const segments = matchByText(stt, p, sttKey(line.text)) || matchByTime(stt, p, prevAt, line.at)
+      if (segments.length > 0) {
+        p = stt.indexOf(segments[segments.length - 1]) + 1
       }
-      let start = -1
-      for (let j = p; j < Math.min(stt.length, p + 4); j++) {
-        const k = sttKey(stt[j].text)
-        if (k && key.includes(k)) {
-          start = j
-          break
-        }
-      }
-      if (start < 0) {
-        continue
-      }
-      const segments = []
-      let j = start
-      while (j < stt.length) {
-        const k = sttKey(stt[j].text)
-        if (!k || !key.includes(k)) {
-          break
-        }
-        segments.push(stt[j])
-        j++
-      }
-      p = j
+      prevAt = line.at || prevAt
       const known = segments.filter(s => typeof s.confidence === 'number')
-      if (!known.length) {
-        continue
+      line.stt = {
+        confidence: known.length > 0 ? Math.min(...known.map(s => s.confidence)) : null,
+        segments,
       }
-      const lowWords = []
-      for (const s of segments) {
-        for (const w of (s.low || [])) {
-          if (w && w.word && !lowWords.includes(w.word) && lowWords.length < 5) {
-            lowWords.push(w.word)
-          }
-        }
-      }
-      line.stt = {confidence: Math.min(...known.map(s => s.confidence)), lowWords, segments}
     }
   }
+}
+
+// 从 p 往后最多 4 段里找第一段文本被这句包含的，再把紧跟着的同样被包含的几段一起拿走；一段都没有返回 null
+function matchByText(stt, p, key) {
+  if (!key) {
+    return null
+  }
+  for (let j = p; j < Math.min(stt.length, p + 4); j++) {
+    const k = sttKey(stt[j].text)
+    if (!k || !key.includes(k)) {
+      continue
+    }
+    const out = []
+    while (j < stt.length) {
+      const kk = sttKey(stt[j].text)
+      if (!kk || !key.includes(kk)) {
+        break
+      }
+      out.push(stt[j])
+      j++
+    }
+    return out
+  }
+  return null
+}
+
+// 时间兜底：从 p 起、在上一句顾客话之后且不晚于这句到达 2 秒说完的连续几段
+function matchByTime(stt, p, prevAt, at) {
+  const out = []
+  if (!at) {
+    return out
+  }
+  for (let j = p; j < stt.length; j++) {
+    const end = stt[j].endAt || stt[j].at
+    if (!end || end > at + 2000) {
+      break
+    }
+    if (prevAt == null || end > prevAt) {
+      out.push(stt[j])
+    }
+  }
+  return out
 }
 
 function pct(v) {
   return Math.round((Number(v) || 0) * 100)
 }
 
-// 识别置信度配色：< 60% 红、< 85% 橙、其余淡灰（AssemblyAI 的整句置信度正常在 85% 以上）
+// 识别置信度配色：低于 50% 标红，其余（含没有数据）淡灰
 function sttColor(v) {
-  if (v < 0.6) {
+  if (typeof v === 'number' && v < 0.5) {
     return 'rgb(214, 96, 77)'
-  }
-  if (v < 0.85) {
-    return 'rgb(209, 143, 46)'
   }
   return 'rgba(var(--text-color), .45)'
 }

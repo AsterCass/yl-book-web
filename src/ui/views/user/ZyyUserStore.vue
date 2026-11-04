@@ -662,12 +662,19 @@ function toEnglishOnly(text) {
       .replace(/[^\x20-\x7E\n\t]/g, '')
 }
 
+// 去掉了非英文字符时提示一下（连续输入时 3 秒内只提示一次）
+let aiPromptWarnedAt = 0
+
 function onAiPromptInput(value) {
   const raw = String(value ?? '')
   const clean = toEnglishOnly(raw)
   upsertAiPrompt.value = clean
   if (clean === raw) {
     return
+  }
+  if (Date.now() - aiPromptWarnedAt > 3000 && clean.length < raw.length) {
+    aiPromptWarnedAt = Date.now()
+    notifyTopWarning(t('user_store.upsert.ai_prompt_english_only'))
   }
   // 滤掉后若与上一次的值相同，QInput 不会重渲染，输入框里还留着刚打的字：直接改原生元素，光标放回原处
   const el = aiPromptInput.value && aiPromptInput.value.getNativeElement && aiPromptInput.value.getNativeElement()
