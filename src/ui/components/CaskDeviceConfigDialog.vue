@@ -14,24 +14,26 @@
       <div v-if="loading" class="row justify-center q-pa-xl">
         <q-spinner size="2rem"/>
       </div>
-      <!-- 表单按后端白名单生成，两列（同门店编辑弹窗）：左列大模型 / 语音合成 / 一体机，右列预约 / 人声检测，每列一个 grid
-           （标签列宽各列自己对齐），组名横跨整行。名称在左（悬停看配置项 key），输入框在右。留空 = 不设置，灰字是示例
-           （数字项是默认值和范围）；密钥只能改不能看：留空不动，填了就是新值；开关项（BOOLEAN）是拨动开关，没设时按默认值显示 -->
-      <div v-else class="q-ma-md row no-wrap items-start device-config-columns">
-        <div v-for="(column, ci) in columns" :key="ci" class="device-config-grid">
-          <template v-for="group in column" :key="group.id">
-            <div class="device-config-group">{{ groupLabel(group.id) }}</div>
-            <template v-for="meta in group.keys" :key="meta.key">
-              <h6 style="white-space: nowrap; margin-left: 12px!important;">
-                {{ keyLabel(meta) }}&nbsp;:
-                <q-tooltip>{{ meta.key }}</q-tooltip>
-              </h6>
-              <div v-if="meta.type === 'BOOLEAN'" class="row items-center no-wrap">
-                <q-toggle :model-value="toggleValue(meta)" color="primary"
-                          @update:model-value="val => drafts[meta.key] = val ? 'true' : 'false'"/>
-                <span style="opacity: .5; font-size: .85rem">{{ keyHint(meta) }}</span>
+      <!-- 表单按后端白名单生成，两列等宽（写法同门店编辑弹窗）：左列大模型与语音合成，右列其余，不分组、不加标题，每列一个
+           grid（名称 | 输入框）。留空 = 不设置，灰字是示例（数字项是默认值和范围）；密钥只能改不能看：留空不动，填了就是新值；
+           开关项（BOOLEAN）是勾选框（同门店编辑里的「预约变动短信」），没设时按默认值显示，说明写在下面 -->
+      <div v-else class="q-ma-md device-config-two-columns">
+        <div v-for="(column, ci) in columnKeys" :key="ci" class="device-config-column">
+          <template v-for="meta in column" :key="meta.key">
+            <template v-if="meta.type === 'BOOLEAN'">
+              <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">
+                {{ keyLabel(meta) }}&nbsp;:</h6>
+              <div>
+                <q-checkbox class="q-ma-none" color="grey-10" size="37px" :model-value="checked(meta)"
+                            @update:model-value="val => drafts[meta.key] = val ? 'true' : 'false'"/>
+                <div v-if="keyHint(meta)" class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+                  {{ keyHint(meta) }}
+                </div>
               </div>
-              <q-input v-else v-model="drafts[meta.key]" class="component-outline-input-grow" dense outlined clearable
+            </template>
+            <template v-else>
+              <h6 style="white-space: nowrap; margin-left: 12px!important;">{{ keyLabel(meta) }}&nbsp;:</h6>
+              <q-input v-model="drafts[meta.key]" class="component-outline-input-grow" dense outlined
                        :type="meta.secret ? 'password' : 'text'" :autocomplete="meta.secret ? 'new-password' : 'off'"
                        :mask="inputMask(meta)" :maxlength="meta.maxLength"
                        :placeholder="placeholder(meta, items[meta.key])"/>
@@ -82,14 +84,6 @@ const props = defineProps({
 // defaultValue 只有后端自己用的预约项有），取一次后缓存
 const keyList = ref([])
 
-// 分组与分列（按 key 的前缀，后端加的新 key 没归到哪一组就放左列最后的「其他」）：左列 0、右列 1，组内按白名单顺序
-const GROUPS = [
-  {id: 'ai', column: 0, match: key => key.startsWith('upstream.') || key.startsWith('tts.')},
-  {id: 'kiosk', column: 0, match: key => key === 'kiosk.maintenance-pin' || key === 'kiosk.update.version'},
-  {id: 'booking', column: 1, match: key => key.startsWith('booking.')},
-  {id: 'vad', column: 1, match: key => key.startsWith('kiosk.vad.')},
-]
-const OTHER_GROUP = {id: 'other', column: 0}
 // key -> {key, value}（后端 itemList 按 key 展开）；密钥的 value：设了为 null，没设为空串
 const items = ref({})
 // key -> 输入框里的值；密钥的输入框一开始总是空的
@@ -97,27 +91,21 @@ const drafts = ref({})
 const loading = ref(false)
 const saving = ref(false)
 
-// [[{id, keys}...], [{id, keys}...]]：两列各自的组，空组不出
-const columns = computed(() => {
-  const byGroup = new Map()
-  for (const meta of keyList.value) {
-    if (!items.value[meta.key]) {
-      continue
-    }
-    const group = GROUPS.find(g => g.match(meta.key)) || OTHER_GROUP
-    if (!byGroup.has(group)) {
-      byGroup.set(group, [])
-    }
-    byGroup.get(group).push(meta)
-  }
-  const result = [[], []]
-  for (const group of [...GROUPS, OTHER_GROUP]) {
-    if (byGroup.has(group)) {
-      result[group.column].push({id: group.id, keys: byGroup.get(group)})
-    }
-  }
-  return result.filter(column => column.length > 0)
+// 两列（不分组、不加标题）：左列大模型与语音合成（upstream.* / tts.*），右列其余（调试口令、预约、人声检测、终端版本），
+// 各自按白名单顺序；后端加的新 key 落在右列
+const LEFT_COLUMN = key => key.startsWith('upstream.') || key.startsWith('tts.')
+
+const columnKeys = computed(() => {
+  const shown = keyList.value.filter(meta => items.value[meta.key])
+  return [shown.filter(meta => LEFT_COLUMN(meta.key)), shown.filter(meta => !LEFT_COLUMN(meta.key))]
 })
+
+// 勾选框项（BOOLEAN）的当前显示：输入框里的值（'true' / 'false'），没设（空串）按后端给的默认值
+function checked(meta) {
+  const raw = drafts.value[meta.key]
+  const cur = raw === '' || raw == null ? (meta.defaultValue || 'false') : String(raw)
+  return cur === 'true'
+}
 
 watch(() => props.modelValue, (val) => {
   if (val && props.device) {
@@ -212,18 +200,6 @@ function keyHint(meta) {
   return te(keyI18n(meta, 'hint')) ? t(keyI18n(meta, 'hint')) : ''
 }
 
-function groupLabel(id) {
-  const k = `staff_device.config.group.${id}`
-  return te(k) ? t(k) : id
-}
-
-// 开关项的当前显示：输入框里的值（'true' / 'false'），没设（空串）按后端给的默认值
-function toggleValue(meta) {
-  const raw = drafts.value[meta.key]
-  const cur = raw === '' || raw == null ? (meta.defaultValue || 'false') : String(raw)
-  return cur === 'true'
-}
-
 // 数字项用 mask 只放数字进来（宽松，不管范围，范围由后端校验）：范围带小数的（概率）是 #.##，整数的（毫秒）按上限的位数
 function inputMask(meta) {
   if (meta.type !== 'NUMBER') {
@@ -247,31 +223,23 @@ function placeholder(meta, item) {
 
 <style scoped lang="scss">
 
-.device-config-columns {
+/* 两列等宽：外层两条 1fr 轨道（最小宽度各自由内容撑开、取较宽的那一列），每列内部是 名称 | 输入框 的网格 */
+.device-config-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  align-items: start;
   max-height: 65vh;
   overflow-y: auto;
   padding-right: .5rem;
 }
 
-.device-config-grid {
-  flex: 1 1 auto;
+.device-config-column {
   min-width: 26rem;
   display: grid;
-  grid-template-columns: max-content minmax(16rem, 1fr);
-  gap: 1rem 1.2rem;
+  grid-template-columns: max-content 1fr;
+  gap: 1.2rem;
   align-items: center;
-}
-
-/* 组名横跨标签列与输入列 */
-.device-config-group {
-  grid-column: 1 / -1;
-  font-weight: 600;
-  opacity: .7;
-  font-size: .9rem;
-  margin-top: .4rem;
-  border-bottom: 1px solid rgba(0, 0, 0, .08);
-  padding-bottom: .2rem;
 }
 
 </style>
