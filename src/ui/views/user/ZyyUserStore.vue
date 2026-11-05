@@ -176,7 +176,7 @@
             </div>
           </div>
 
-          <!-- 电话 AI 的门店自定义提示词（后端存 yl_store.meta.aiPrompt.text）：原样接进本店电话 AI 的系统提示。只能输入英文——
+          <!-- 门店的 AI 提示词（后端存 yl_store.meta.aiPrompt.text）：原样接进本店电话 AI 与一体机（2026-11-05 起共用）的系统提示。只能输入英文——
                英文通话的提示词里不能有汉字；输入时就把非英文字符滤掉（见 onAiPromptInput），后端同样拦汉字、限 2000 字 -->
           <h6 v-if="!isNew" style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.upsert.field.ai_prompt')
