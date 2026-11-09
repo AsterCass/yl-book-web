@@ -436,7 +436,7 @@
             </div>
           </div>
 
-          <!-- 自动分配改派策略：自动分配为了给新单腾位时，能否挪动已分配、未开始的单。三态单选、整块提交，
+          <!-- 自动分配改派策略：自动分配为了给新单腾位时，能否挪动已分配、未开始的单。四选一、整块提交，
                后端存 yl_store.meta.autoAssign.reassignPolicy，未配置按 NONE（一律不改派）生效 -->
           <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start;">{{
               $t('user_store.auto_assign.field')
@@ -705,7 +705,8 @@ const upsertRestBreak = ref("")
 const upsertRestTolerance = ref("")
 // 自动分配改派策略（三态单选）：后端未配置时按 NONE 生效，出参已是生效值，这里只做兜底
 const DEFAULT_REASSIGN_POLICY = 'NONE'
-const reassignPolicyList = ['FREE', 'KEEP_SPECIAL', 'NONE']
+// NEW_ONLY（只排新单）：同 NONE，另外新单进来时不顺带安置已有的待分配单（2026-11-09）
+const reassignPolicyList = ['FREE', 'KEEP_SPECIAL', 'NONE', 'NEW_ONLY']
 const upsertReassignPolicy = ref(DEFAULT_REASSIGN_POLICY)
 // 整理时间（分钟）：出参已是生效值（未配置按 5），这里只做兜底；留空提交 null = 清空配置回落默认，填 0 = 关闭
 const DEFAULT_TURNOVER_MINUTES = 5
