@@ -728,9 +728,25 @@
     "label": { "start_date": "Start Date", "end_date": "End Date", "status": "Status", "phone": "Phone" },
     "placeholder": { "phone": "Full number or partial digits" },
     "button": { "query": "Query", "clear": "Clear Filters" },
-    "note": "Non-booking customer requests (lost items, complaints, etc.) recorded by the AI phone receptionist during calls; customers have been told the request is recorded and may get a callback if necessary. Every request belongs to a specific store, and the type is a short label written by the AI; requests that are unhandled or in progress appear in the todo reminder at the top. The Reply column is visible to customers — the AI reads it to them when they call to ask about progress; the remark stays internal.",
+    "status": {
+      "UNHANDLED": "Unhandled",
+      "IN_PROGRESS": "In Progress",
+      "HANDLED": "Handled",
+      "NO_NEED": "No Action Needed",
+      "CUSTOMER_CANCELED": "Canceled by Customer"
+    },
+    "note": "Non-booking customer requests (lost items, complaints, etc.) recorded by the AI phone receptionist during calls; customers have been told the request is recorded and may get a callback if necessary. Every request belongs to a specific store, and the type is a short label written by the AI; requests that are unhandled or in progress are listed above the booking calendar, where the front desk can handle them or call back. The Reply column is visible to customers — the AI reads it to them when they call to ask about progress; the remark stays internal.",
     "edit_dialog": {
       "title": "Edit Request",
+      "handle_title": "Handle Phone Request",
+      "time_label": "Recorded",
+      "store_label": "Store",
+      "phone_label": "Customer Phone",
+      "type_label": "Type",
+      "summary_label": "Summary",
+      "detail_label": "Details",
+      "call_label": "Callbacks",
+      "calendar_hint": "The request leaves the list above the calendar only once it is set to \"{handled}\" or \"{noNeed}\"; \"{inProgress}\" stays listed.",
       "status_label": "Status",
       "remark_label": "Remark (internal only)",
       "remark_placeholder": "Follow-up / callback notes (optional; saving empty content clears it)",
@@ -1161,6 +1177,14 @@
   },
 
   "book_calendar": {
+    "phone_request": {
+      "title": "Phone requests · {count} open",
+      "more": "{count} more",
+      "collapse": "Collapse",
+      "handle": "Handle",
+      "call": "Call Back",
+      "truncated": "Only the first {count} are shown here; see the Phone Requests page for the rest"
+    },
     "off_today": "Off today",
     "off_schedule_note": "This staff member's current schedule does not cover this slot (schedule that day: {shifts}). The schedule may have changed after booking; please check whether to reassign.",
     "off_schedule_day_off": "off",

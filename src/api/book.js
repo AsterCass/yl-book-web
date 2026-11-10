@@ -167,7 +167,8 @@ export function bookPhoneRequestCall(id) {
 }
 
 // 电话需求（AI 电话记录的非预约类客户诉求）列表：分页，可见门店范围内
-// params: {pageNo, pageSize, startDateStr, endDateStr, handleStatus, phone}
+// params: {pageNo, pageSize, startDateStr, endDateStr, handleStatus, handleStatusList, unhandledFirst, phone}
+//   handleStatusList：多选状态（数组，非空时优先于 handleStatus）；unhandledFirst：未处理排最前（日历电话需求栏用）
 //   phone：联系电话模糊搜索，后端只取其中的数字做包含匹配
 export function bookPhoneRequestList(params) {
     return serviceShiro({

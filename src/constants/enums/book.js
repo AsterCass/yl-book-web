@@ -52,12 +52,15 @@ export const BookFeedbackHandleStatusEnum = new Enum({
 });
 
 // 电话需求处理状态（口径同客户反馈，多一个「处理中」）；需求类型为 AI 自拟的自由文本标签，无枚举。
-// 未处理与处理中均计入顶部待办；客户来电查询时 AI 会把状态转述给客户。
+// 未处理与处理中 = 还没办完，显示在预约日历上方的电话需求栏（2026-11-10 起不进顶部待办）；
+// 两者的颜色因此用红 / 橙，与已办结的几种区分开。客户来电查询时 AI 会把状态转述给客户。
+// 界面上的状态名走 i18n（book_phone_request.status.<键>，见 utils/phone-request.js 的 phoneRequestStatusName），
+// 这里的 name 只在缺翻译时兜底。
 // CUSTOMER_CANCELED 只能由客户来电撤销时经 AI 电话入口写入，管理端选中保存会被后端拒绝
-// （前端不做限制，是有意的：筛选、列表、编辑弹窗都要能显示这个状态）
+// （电话需求页前端不做限制，是有意的：筛选、列表、编辑弹窗都要能显示这个状态；日历栏的弹窗不列它，那里只有未办完的）
 export const PhoneRequestHandleStatusEnum = new Enum({
-    UNHANDLED: {code: 0, name: '未处理', desc: '默认状态，待运营跟进', color: 'rgb(245, 166, 35)'},
-    IN_PROGRESS: {code: 3, name: '处理中', desc: '运营正在跟进，尚未办结', color: 'rgb(74, 124, 168)'},
+    UNHANDLED: {code: 0, name: '未处理', desc: '默认状态，待运营跟进', color: 'rgb(200, 60, 60)'},
+    IN_PROGRESS: {code: 3, name: '处理中', desc: '运营正在跟进，尚未办结', color: 'rgb(245, 166, 35)'},
     HANDLED: {code: 1, name: '已处理', desc: '运营已跟进处理', color: 'rgb(68, 117, 80)'},
     NO_NEED: {code: 2, name: '无需处理', desc: '无需跟进', color: 'rgb(127, 140, 141)'},
     CUSTOMER_CANCELED: {

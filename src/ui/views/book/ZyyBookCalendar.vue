@@ -1,23 +1,24 @@
 <template>
-  <div class="full-width cal-page" :class="{ 'cal-page-fullscreen': isFullscreen }">
+  <div class="full-width cal-page" :class="{ 'cal-page-fullscreen': isFullscreen }"
+       :style="{ '--cal-phone-bar-h': phoneBarHeight + 'px' }">
 
     <!-- 顶部：导航 + 视图切换 -->
-    <div class="row items-center q-mb-lg q-mt-sm cal-toolbar">
+    <div class="row items-center q-mb-md cal-toolbar">
       <!-- 周视图：双箭头=按周移动(±7天)，单箭头=按天移动(±1天)；日视图：单箭头=按天移动 -->
       <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow" @click="shift(-7)">
         <q-icon name="fa-solid fa-angles-left" size=".9rem"/>
       </q-btn>
-      <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(-1)">
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs q-my-sm" @click="shift(-1)">
         <q-icon name="fa-solid fa-chevron-left" size=".9rem"/>
       </q-btn>
-      <q-btn round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(1)">
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs q-my-sm" @click="shift(1)">
         <q-icon name="fa-solid fa-chevron-right" size=".9rem"/>
       </q-btn>
-      <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow q-ml-xs" @click="shift(7)">
+      <q-btn v-if="viewMode === 'week'" round flat dense class="component-none-btn-grow q-ml-xs q-my-sm" @click="shift(7)">
         <q-icon name="fa-solid fa-angles-right" size=".9rem"/>
       </q-btn>
       <!-- 直接跳到某一天：要翻到几周前/后时，不必一天天点箭头挪过去 -->
-      <q-btn round flat dense class="component-none-btn-grow q-ml-xs">
+      <q-btn round flat dense class="component-none-btn-grow q-ml-xs q-my-sm">
         <q-icon name="fa-regular fa-calendar" size="1rem"/>
         <!-- z-index 抬到 6001：压过同为 6000 的遮罩（与日期/时间选择器同一套做法） -->
         <q-popup-proxy ref="datePopupRef" transition-show="scale" transition-hide="scale"
@@ -29,27 +30,27 @@
         </q-popup-proxy>
       </q-btn>
       <div class="cal-title q-ml-md">{{ rangeLabel }}</div>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="resetView">
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm" @click="resetView">
         {{ viewMode === 'week' ? $t('book_calendar.this_week') : $t('book_calendar.today') }}
       </q-btn>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow" @click="toggleView">
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm" @click="toggleView">
         {{ viewMode === 'week' ? $t('book_calendar.view_day') : $t('book_calendar.view_week') }}
       </q-btn>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm"
              @click="showCancelled = !showCancelled">
         {{ showCancelled ? $t('book_calendar.hide_cancelled') : $t('book_calendar.show_cancelled') }}
       </q-btn>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm"
              @click="showStoreBlock = true">
         {{ $t('book_calendar.store_block.manage') }}
       </q-btn>
-      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+      <q-btn no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm"
              @click="openColorSetting">
         {{ $t('book_calendar.color.setting') }}
       </q-btn>
       <!-- 今日下班（仅日视图）：确认后把「现在 ~ 次日 0 点」里还没被门店屏蔽覆盖的空档补成门店屏蔽，
            线上渠道今天不再进新单（见 closeToday）。作用对象始终是「今天」，与当前翻到哪一天无关 -->
-      <q-btn v-if="viewMode === 'day'" no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow"
+      <q-btn v-if="viewMode === 'day'" no-caps unelevated  class="q-ml-xl shadow-1 component-full-btn-mini-grow q-my-sm"
              @click="showCloseToday = true">
         {{ $t('book_calendar.close_today.button') }}
       </q-btn>
@@ -67,6 +68,12 @@
 <!--        <span class="cal-legend-dot cal-legend-blocked"/>-->
 <!--        <span>{{ $t('book_calendar.legend_blocked') }}</span>-->
 <!--      </div>-->
+    </div>
+
+    <!-- 电话需求栏：本店还没办完的电话需求（前台不看左上角的闪动待办），随下方定时刷新一起拉；没有就不占位。
+         外层量高度：有内容时日历主体相应变矮，整页高度不变 -->
+    <div ref="phoneBarWrapRef" class="cal-phone-bar-wrap">
+      <zyy-book-phone-request-bar ref="phoneBarRef"/>
     </div>
 
     <div v-if="columns.length === 0" class="row flex-center q-py-xl" style="opacity: .6;">
@@ -488,6 +495,7 @@ import CaskColorPicker from "@/ui/components/CaskColorPicker.vue";
 import CaskResourceConflictDialog from "@/ui/components/CaskResourceConflictDialog.vue";
 import CaskDragOverlapDialog from "@/ui/components/CaskDragOverlapDialog.vue";
 import CaskPickerMask from "@/ui/components/CaskPickerMask.vue";
+import ZyyBookPhoneRequestBar from "@/ui/views/book/ZyyBookPhoneRequestBar.vue";
 import {
   bookAdjust,
   bookBlockCreate,
@@ -2314,15 +2322,37 @@ function loadStaff() {
   })
 }
 
+// ===== 电话需求栏 =====
+const phoneBarRef = ref(null)
+const phoneBarWrapRef = ref(null)
+// 电话需求栏实际占的高度（含下边距；没有需求时为 0）：日历主体的最大高度减去它，整页高度不变
+const phoneBarHeight = ref(0)
+let phoneBarObserver = null
+
+function refreshPhoneBar() {
+  if (phoneBarRef.value) {
+    phoneBarRef.value.refresh()
+  }
+}
+
 onMounted(() => {
   loadCardColors()
   loadStaff()
   loadSkill()
   reload()
+  refreshPhoneBar()
+  if (typeof ResizeObserver !== 'undefined' && phoneBarWrapRef.value) {
+    phoneBarObserver = new ResizeObserver(() => {
+      phoneBarHeight.value = phoneBarWrapRef.value ? phoneBarWrapRef.value.offsetHeight : 0
+    })
+    phoneBarObserver.observe(phoneBarWrapRef.value)
+  }
   nowTimer = setInterval(() => {
     nowTick.value = Date.now()
   }, NOW_TICK_INTERVAL)
   refreshTimer = setInterval(() => {
+    // 电话需求与日历数据无关，拖拽中照常刷新
+    refreshPhoneBar()
     if (dragCtx) {
       return
     }
@@ -2333,6 +2363,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   removeDragListeners()
+  if (phoneBarObserver) {
+    phoneBarObserver.disconnect()
+    phoneBarObserver = null
+  }
   if (nowTimer) {
     clearInterval(nowTimer)
     nowTimer = null
@@ -2365,9 +2399,18 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   background: rgb(var(--background-color));
 
-  // 全屏下日历主体尽量占满高度（默认 66vh）
+  // 全屏下日历主体尽量占满高度（默认 66vh）；电话需求栏占多高就再让出多高，至少留 20rem
   .cal-body-scroll {
-    max-height: calc(100vh - 13rem);
+    max-height: max(20rem, calc(100vh - 13rem - var(--cal-phone-bar-h, 0px)));
+  }
+}
+
+// flow-root：栏的下边距算进外层高度（不与外层发生外边距折叠），量出来的就是它实际占的高度
+.cal-phone-bar-wrap {
+  display: flow-root;
+
+  :deep(.phone-request-bar) {
+    margin-bottom: 1rem;
   }
 }
 
@@ -2469,7 +2512,8 @@ onBeforeUnmount(() => {
 }
 
 .cal-body-scroll {
-  max-height: 66vh;
+  // 有电话需求栏时让出它的高度，整页不被撑高；至少留 20rem
+  max-height: max(20rem, calc(66vh - var(--cal-phone-bar-h, 0px)));
   overflow-y: auto;
 }
 

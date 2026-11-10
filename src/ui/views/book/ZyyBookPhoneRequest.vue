@@ -75,85 +75,28 @@
                           }"
     />
 
-         <!-- 统一编辑弹窗：处理状态 + 运营备注（仅内部） + 门店答复 comment（客户可见）。
-         备注/答复保存空内容即清空 -->
-    <q-dialog :model-value="showEdit" transition-hide="fade" no-backdrop-dismiss no-shake
-              transition-show="fade" @hide="showEdit = false">
-      <q-card class="component-cask-dialog-judgement-std" style="max-width: 2000px !important">
-        <h5 style="font-weight: 600!important; margin-left: .5rem !important;">
-          {{ $t('book_phone_request.edit_dialog.title') }}
-        </h5>
+    <!-- 统一编辑弹窗：需求本身只读展示 + 处理状态 / 运营备注（仅内部） / 门店答复 comment（客户可见）。
+         与预约日历电话需求栏共用 -->
+    <cask-phone-request-edit-dialog v-model="showEdit" :request="editRow" @saved="selectData(true)"/>
 
-        <q-separator class="component-separator-base" inset spaced="1rem"/>
-
-        <div class="q-ma-md" style="min-width: 36rem">
-
-          <div class="q-mb-xs" style="font-weight: 600">
-            {{ $t('book_phone_request.edit_dialog.status_label') }}
-          </div>
-          <q-select v-model="editStatus" :menu-offset="[0, 5]" :options="handleStatusOptions"
-                    class="component-outline-input-grow"
-                    dense dropdown-icon="fa-solid fa-caret-down" menu-anchor="bottom start"
-                    outlined popup-content-class="component-extra-card-std-limit"/>
-
-          <div class="q-mt-md q-mb-xs" style="font-weight: 600">
-            {{ $t('book_phone_request.edit_dialog.remark_label') }}
-          </div>
-          <q-input v-model="editRemark"
-                   dense outlined class="component-outline-input-grow"
-                   :placeholder="t('book_phone_request.edit_dialog.remark_placeholder')"/>
-
-          <div class="q-mt-md q-mb-xs" style="font-weight: 600">
-            {{ $t('book_phone_request.edit_dialog.comment_label') }}
-          </div>
-          <q-input v-model="editComment"
-                   dense outlined class="component-outline-input-grow"
-                   :placeholder="t('book_phone_request.edit_dialog.comment_placeholder')"/>
-          <!-- 明示可见性：该字段会被 AI 电话读给来电查询的客户 -->
-          <div class="q-mt-xs" style="opacity: .6; font-size: .8rem">
-            {{ $t('book_phone_request.edit_dialog.comment_hint') }}
-          </div>
-
-        </div>
-
-        <div class="row q-mt-lg q-mb-md justify-evenly">
-          <q-btn class="shadow-1 component-full-btn-grow" no-caps unelevated :loading="editSaving"
-                 @click="saveEdit">
-            {{ $t('main_setting_save') }}
-          </q-btn>
-          <q-btn class="shadow-1 component-outline-btn-grow" no-caps unelevated
-                 @click="showEdit = false">
-            {{ $t('main_setting_cancel') }}
-          </q-btn>
-        </div>
-      </q-card>
-    </q-dialog>
-
-    <!-- 拨打确认：明确告知「先拨门店呼出电话、店员接起后自动接通客户」，防误呼 -->
-    <cask-dialog-judgment v-model="showCallConfirm"
-                          :callback-method="onConfirmCall"
-                          :dialog-judgment-data="{
-                            title: t('book_phone_request.call_dialog.title'),
-                            content: callConfirmContent,
-                            falseLabel: t('book_phone_request.call_dialog.cancel'),
-                            trueLabel: t('book_phone_request.call_dialog.confirm'),
-                          }"
-    />
+    <!-- 回访拨号：先拨门店电话、按 1 才接通客户，二次确认防误呼。与预约日历电话需求栏共用 -->
+    <cask-phone-request-call ref="callRef" @called="selectData(true)"/>
 
   </div>
 </template>
 
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
-import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
-import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
+import CaskPhoneRequestEditDialog from "@/ui/components/CaskPhoneRequestEditDialog.vue";
+import CaskPhoneRequestCall from "@/ui/components/CaskPhoneRequestCall.vue";
 import {tablePhoneRequest, tablePhoneRequestOperation} from "@/tables/book.js";
-import {bookPhoneRequestCall, bookPhoneRequestList, bookPhoneRequestUpdate} from "@/api/book.js";
+import {bookPhoneRequestList} from "@/api/book.js";
 import {PhoneRequestHandleStatusEnum} from "@/constants/enums/book.js";
+import {phoneRequestStatusName, phoneRequestStatusOptions} from "@/utils/phone-request.js";
 
 const {t} = useI18n()
 
@@ -162,7 +105,8 @@ const selectStartDate = ref("")
 const selectEndDate = ref("")
 const selectHandleStatus = ref(null)
 const selectPhone = ref("")
-const handleStatusOptions = ref(PhoneRequestHandleStatusEnum.toSelectForm())
+// 状态名走 i18n，随界面语言切换
+const handleStatusOptions = computed(() => phoneRequestStatusOptions())
 
 function clearSearch() {
   selectStartDate.value = ""
@@ -211,7 +155,7 @@ function selectData(keepPage = false) {
         detail: row.detail || '',
         remark: row.remark || '',
         comment: row.comment || '',
-        handleStatusName: statusEnum ? statusEnum.name : '',
+        handleStatusName: phoneRequestStatusName(row.handleStatus),
         handleStatusNameWebColorName: statusEnum ? statusEnum.color : 'rgb(128, 128, 128)',
         // 统一编辑（状态/备注/答复）：所有行可用
         editOp: true,
@@ -229,103 +173,19 @@ function selectData(keepPage = false) {
   })
 }
 
-// ===== 统一编辑（处理状态 + 备注（仅内部） + 答复 comment（客户可见）） =====
+// ===== 统一编辑（处理状态 + 备注（仅内部） + 答复 comment（客户可见）） / 回访拨号：弹窗见共用组件 =====
 
 const showEdit = ref(false)
-const editId = ref("")
-const editStatus = ref(null)
-const editRemark = ref("")
-const editComment = ref("")
-// 保存中：按钮 loading 防重复提交
-const editSaving = ref(false)
-
-function openEdit(row) {
-  editId.value = row.id
-  const statusEnum = PhoneRequestHandleStatusEnum.fromCode(row.handleStatus)
-  // q-select 选项形状与筛选下拉一致（toSelectForm 的 {label, value}）
-  editStatus.value = statusEnum ? {label: statusEnum.name, value: statusEnum.code} : null
-  editRemark.value = row.remark || ''
-  editComment.value = row.comment || ''
-  showEdit.value = true
-}
-
-function saveEdit() {
-  if (editSaving.value || !editStatus.value) {
-    return
-  }
-  editSaving.value = true
-  // 备注/答复空内容原样提交=清空
-  bookPhoneRequestUpdate(editId.value, {
-    handleStatus: editStatus.value.value,
-    remark: editRemark.value,
-    comment: editComment.value,
-  }).then(res => {
-    if (!res || !res.data) {
-      return
-    }
-    showEdit.value = false
-    notifyTopPositive(t('book_phone_request.notify.update_success'))
-    selectData(true)
-  }).finally(() => {
-    editSaving.value = false
-  })
-}
-
-// ===== 拨打电话（Twilio 回拨桥接：先拨门店呼出电话，店员接起后自动接通客户） =====
-
-const showCallConfirm = ref(false)
-const callRow = ref(null)
-const callConfirmContent = ref("")
-// 呼出中：防重复点击（一次点击=一通真实电话）
-const calling = ref(false)
-
-function openCallConfirm(row) {
-  // 门店电话（店员接听的一端）与呼出电话（主叫显示，本店 Twilio 号码）缺一不可，
-  // 后端同样会拒绝，这里先给出可操作的提示
-  if (!row.storePhone) {
-    notifyTopWarning(t('book_phone_request.notify.no_store_phone'))
-    return
-  }
-  if (!row.storeOutboundPhone) {
-    notifyTopWarning(t('book_phone_request.notify.no_outbound_phone'))
-    return
-  }
-  callRow.value = row
-  callConfirmContent.value = t('book_phone_request.call_dialog.content', {
-    phone: row.phone,
-    store: row.storePhone,
-    outbound: row.storeOutboundPhone,
-  })
-  showCallConfirm.value = true
-}
-
-function onConfirmCall(confirmed) {
-  showCallConfirm.value = false
-  if (!confirmed || !callRow.value || calling.value) {
-    return
-  }
-  const row = callRow.value
-  calling.value = true
-  bookPhoneRequestCall(row.id).then(res => {
-    if (!res || !res.data || !res.data.data) {
-      return
-    }
-    notifyTopPositive(t('book_phone_request.notify.call_success', {
-      store: res.data.data.storePhone,
-    }))
-    // 回访次数/最近一次回访即时刷新
-    selectData(true)
-  }).finally(() => {
-    calling.value = false
-  })
-}
+const editRow = ref(null)
+const callRef = ref(null)
 
 function onOperationClick(name, row) {
   if (name === 'edit') {
-    openEdit(row)
+    editRow.value = row
+    showEdit.value = true
   }
   if (name === 'call') {
-    openCallConfirm(row)
+    callRef.value.open(row)
   }
 }
 

@@ -726,9 +726,25 @@
     "label": { "start_date": "开始日期", "end_date": "结束日期", "status": "处理状态", "phone": "联系电话" },
     "placeholder": { "phone": "完整号码或部分数字" },
     "button": { "query": "查询", "clear": "清空条件" },
-    "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉等），客户已被告知需求已记录、必要时将回访。每条需求归属具体门店，需求类型为 AI 自拟的简短标签；存在未处理或处理中的需求时会出现在顶部待办提醒中。「答复」栏内容客户可见——客户来电查询进展时 AI 会读给客户听，备注仅内部可见。",
+    "status": {
+      "UNHANDLED": "未处理",
+      "IN_PROGRESS": "处理中",
+      "HANDLED": "已处理",
+      "NO_NEED": "无需处理",
+      "CUSTOMER_CANCELED": "客户已取消"
+    },
+    "note": "AI 电话接线员在通话中记录的非预约类客户需求（遗失物品 / 投诉等），客户已被告知需求已记录、必要时将回访。每条需求归属具体门店，需求类型为 AI 自拟的简短标签；未处理或处理中的需求会显示在预约日历上方，前台可在那里直接处理、回拨。「答复」栏内容客户可见——客户来电查询进展时 AI 会读给客户听，备注仅内部可见。",
     "edit_dialog": {
       "title": "编辑需求",
+      "handle_title": "处理电话需求",
+      "time_label": "记录时间",
+      "store_label": "门店",
+      "phone_label": "顾客电话",
+      "type_label": "需求类型",
+      "summary_label": "简述",
+      "detail_label": "详细描述",
+      "call_label": "回访记录",
+      "calendar_hint": "改为「{handled}」或「{noNeed}」后，这条需求才不会再显示在日历上方；「{inProgress}」会继续显示。",
       "status_label": "处理状态",
       "remark_label": "备注（仅内部可见）",
       "remark_placeholder": "跟进 / 回访记录（可为空，保存空内容即清空）",
@@ -1159,6 +1175,14 @@
   },
 
   "book_calendar": {
+    "phone_request": {
+      "title": "电话需求 · {count} 条未办完",
+      "more": "还有 {count} 条",
+      "collapse": "收起",
+      "handle": "处理",
+      "call": "回拨",
+      "truncated": "这里只显示前 {count} 条，其余请到「电话需求」页查看"
+    },
     "off_today": "今日休息",
     "off_schedule_note": "该雇员当前排班不覆盖此时段（当天排班：{shifts}），可能是预约后调整过排班，请确认是否改派",
     "off_schedule_day_off": "休息",

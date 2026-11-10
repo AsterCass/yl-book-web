@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute-full row" style="margin: 5rem 2px 0 5rem">
+  <div class="absolute-full row" style="margin: 5rem 2px 0 2%">
 
 
     <cask-tabs-vertical :tabs="tabs" v-model="tab" :width="globalState.language === 'zh' ? '10rem' : '17rem'"
