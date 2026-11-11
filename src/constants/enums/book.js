@@ -35,6 +35,9 @@ export const BookSourceEnum = new Enum({
     // 照本站客户发（须勾选过预约短信同意）。
     // 不用 Google 品牌色：蓝近电话预约、绿近自然流/微信、红近本站、黄在浅色底上看不清
     GOOGLE: {code: 8, name: 'Google', desc: '', color: 'rgb(216, 27, 96)'},
+    // Google Ad（2026-11-11）：仍是 /google 页下的单，落地链接带了门店参数（?store=xxx）且不是 ?ads=no = Google 广告带来的。
+    // 业务处理与 Google 完全一样（短信、提醒、不参与本站活动），只是来源分开记、方便筛选；颜色同 Google（同一渠道，参照本站各分身同色）
+    GOOGLE_AD: {code: 81, name: 'Google Ad', desc: '', color: 'rgb(216, 27, 96)'},
     // 门店一体机上的 AI 数字人前台建的单；可不留手机号。留了号码的（留号码即同意，2026-11-05 起）同 AI 电话一样
     // 发确认、提醒、改约与取消短信，没留号码的不发。
     // 颜色取靛蓝（Indigo 400）：色相落在电话预约的蓝与 classpass 的紫之间的空档，与最近的 classpass 色差
