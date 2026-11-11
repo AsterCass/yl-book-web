@@ -8,10 +8,16 @@
       <div class="row items-center no-wrap phone-request-bar-head">
         <q-icon name="fa-solid fa-phone-volume" size=".9rem" class="q-mr-sm"/>
         <span class="phone-request-bar-title">{{ $t('book_calendar.phone_request.title', {count: total}) }}</span>
+        <!-- 醒目提示（红色系）：告诉前台这是顾客在 AI 电话里提的需求、要及时跟进，办完点「处理」改状态。
+             放不下时省略号截断，不挤掉右侧的展开 / 收起 -->
+        <span class="phone-request-bar-alert q-ml-md">
+          <q-icon name="fa-solid fa-circle-exclamation" size=".8rem" class="q-mr-xs"/>
+          {{ $t('book_calendar.phone_request.alert', {handle: $t('book_calendar.phone_request.handle')}) }}
+        </span>
         <q-space/>
         <!-- 默认只显示前 COLLAPSED_COUNT 条，其余折叠 -->
-        <q-btn v-if="total > COLLAPSED_COUNT" flat dense no-caps size="sm" class="component-none-btn-grow"
-               @click="expanded = !expanded">
+        <q-btn v-if="total > COLLAPSED_COUNT" flat dense no-caps no-wrap size="sm"
+               class="component-none-btn-grow phone-request-bar-toggle" @click="expanded = !expanded">
           {{ expanded ? $t('book_calendar.phone_request.collapse')
             : $t('book_calendar.phone_request.more', {count: total - COLLAPSED_COUNT}) }}
           <q-icon :name="expanded ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'" size=".7rem" class="q-ml-xs"/>
@@ -179,7 +185,32 @@ defineExpose({refresh})
   min-height: 1.6rem;
 
   .phone-request-bar-title {
+    flex: none;
     font-weight: 600;
+  }
+
+  // 展开 / 收起不跟提示抢宽度：窄屏时提示省略，按钮保持一行
+  .phone-request-bar-toggle {
+    flex: none;
+    margin-left: .5rem;
+  }
+
+  // 红色系提示：浅红底 + 红字 + 红边，与左侧红色竖条同色
+  .phone-request-bar-alert {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 2px 8px;
+    border: 1px solid rgba(200, 60, 60, .35);
+    border-radius: .35rem;
+    background: rgba(200, 60, 60, .08);
+    color: rgb(200, 60, 60);
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.5;
+    // 始终一行，窄屏放不下时末尾省略号
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

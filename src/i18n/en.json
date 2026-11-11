@@ -1179,6 +1179,7 @@
   "book_calendar": {
     "phone_request": {
       "title": "Phone requests · {count} open",
+      "alert": "Customers raised these on the AI phone line. Very important! Please follow up promptly, and click [{handle}] to update the status once done.",
       "more": "{count} more",
       "collapse": "Collapse",
       "handle": "Handle",

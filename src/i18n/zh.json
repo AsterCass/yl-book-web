@@ -1177,6 +1177,7 @@
   "book_calendar": {
     "phone_request": {
       "title": "电话需求 · {count} 条未办完",
+      "alert": "该内容为顾客在 AI 电话端提出的需求，非常重要！请及时跟进解决，完成后点击【{handle}】修改跟进状态",
       "more": "还有 {count} 条",
       "collapse": "收起",
       "handle": "处理",
