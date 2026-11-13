@@ -91,7 +91,7 @@ const drafts = ref({})
 const loading = ref(false)
 const saving = ref(false)
 
-// 两列（不分组、不加标题）：左列大模型与语音合成（upstream.* / tts.*），右列其余（调试口令、预约、人声检测、终端版本），
+// 两列（不分组、不加标题）：左列大模型与语音合成（upstream.* / tts.*），右列其余（调试口令、预约、人声检测、录像上传、终端版本），
 // 各自按白名单顺序；后端加的新 key 落在右列
 const LEFT_COLUMN = key => key.startsWith('upstream.') || key.startsWith('tts.')
 
@@ -200,9 +200,10 @@ function keyHint(meta) {
   return te(keyI18n(meta, 'hint')) ? t(keyI18n(meta, 'hint')) : ''
 }
 
-// 数字项用 mask 只放数字进来（宽松，不管范围，范围由后端校验）：范围带小数的（概率）是 #.##，整数的（毫秒）按上限的位数
+// 数字项用 mask 只放数字进来（宽松，不管范围，范围由后端校验）：范围带小数的（概率）是 #.##，整数的（毫秒）按上限的位数；
+// 范围是负数的（人声最低音量，-70 到 -20 dB）mask 打不进减号，不加 mask，格式由后端校验
 function inputMask(meta) {
-  if (meta.type !== 'NUMBER') {
+  if (meta.type !== 'NUMBER' || Number(meta.min) < 0) {
     return undefined
   }
   return `${meta.min}${meta.max}`.includes('.') ? '#.##' : '#'.repeat(String(meta.max).length)
