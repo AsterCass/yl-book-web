@@ -128,7 +128,7 @@
 
 <script setup>
 
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -146,7 +146,7 @@ import {
 import {staffDetail} from "@/api/staff.js";
 import {BookFeedbackHandleStatusEnum} from "@/constants/enums/book.js";
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 // 筛选：提交日期区间（展示口径，匿名=出现时间）+ 处理状态（单选，空=不过滤）
 const selectStartDate = ref("")
@@ -377,6 +377,10 @@ onMounted(() => {
   selectData()
 })
 
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
+})
 </script>
 
 <style scoped lang="scss">

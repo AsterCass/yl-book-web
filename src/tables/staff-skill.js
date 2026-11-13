@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -24,51 +25,78 @@ const tableStaffSkillCol = [
         name: 'name',
         field: 'name',
         label: '技能名称',
+        labelKey: 'table.staff_skill.col.name',
         align: 'center',
     },
     {
         name: 'externalName',
         field: 'externalName',
         label: '对外名称',
+        labelKey: 'table.staff_skill.col.externalName',
         align: 'center',
     },
     {
         name: 'externalNameZh',
         field: 'externalNameZh',
         label: '对外名称（中文）',
+        labelKey: 'table.staff_skill.col.externalNameZh',
         align: 'center',
     },
     {
+        // 显示顺序（2026-11-13）：本页列表即按管理端排序排，两列都默认显示，方便对照编号
+        name: 'adminSort',
+        field: 'adminSort',
+        label: '管理端排序',
+        labelKey: 'table.staff_skill.col.adminSort',
+        align: 'center',
+    },
+    {
+        name: 'customerSort',
+        field: 'customerSort',
+        label: '顾客端排序',
+        labelKey: 'table.staff_skill.col.customerSort',
+        align: 'center',
+    },
+    {
+        // 别名 / 描述默认不显示（内容长、平时用不上），可在表格设置里打开
         name: 'aliases',
         field: 'aliases',
         label: '技能别名',
+        labelKey: 'table.staff_skill.col.aliases',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
+        defaultVisible: false,
     },
     {
         name: 'description',
         field: 'description',
         label: '技能描述',
+        labelKey: 'table.staff_skill.col.description',
         align: 'center',
         type: ComplexTableColumnTypeEnum.TEXT,
+        defaultVisible: false,
     },
     {
         name: 'descriptionZh',
         field: 'descriptionZh',
         label: '技能描述（中文）',
+        labelKey: 'table.staff_skill.col.descriptionZh',
         align: 'center',
+        defaultVisible: false,
         type: ComplexTableColumnTypeEnum.TEXT,
     },
     {
         name: 'consumeMinutes',
         field: 'consumeMinutes',
         label: '技能耗时（分钟）',
+        labelKey: 'table.staff_skill.col.consumeMinutes',
         align: 'center',
     },
     {
         name: 'serviceAmount',
         field: 'serviceAmount',
         label: '服务金额',
+        labelKey: 'table.staff_skill.col.serviceAmount',
         align: 'center',
     },
     {
@@ -77,6 +105,7 @@ const tableStaffSkillCol = [
         name: 'addonMains',
         field: 'addonMains',
         label: '附加于（主服务）',
+        labelKey: 'table.staff_skill.col.addonMains',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
@@ -85,6 +114,7 @@ const tableStaffSkillCol = [
         name: 'resourceRequirement',
         field: 'resourceRequirement',
         label: '资源需求',
+        labelKey: 'table.staff_skill.col.resourceRequirement',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
@@ -92,6 +122,7 @@ const tableStaffSkillCol = [
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.staff_skill.col.operation',
         align: 'center',
     },
 ]
@@ -125,11 +156,13 @@ export const tableStaffSkill = {
 export const tableStaffSkillOperation = [
     {
         label: '编辑',
+        labelKey: 'table.staff_skill.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '删除',
+        labelKey: 'table.staff_skill.op.delete',
         condition: 'deleteOp',
         name: 'delete',
         color: 'rgb(var(--negative))',

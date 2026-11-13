@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -24,36 +25,42 @@ const tableStoreCol = [
         name: 'name',
         field: 'name',
         label: '门店名称',
+        labelKey: 'table.store.col.name',
         align: 'center',
     },
     {
         name: 'externalName',
         field: 'externalName',
         label: '外部名称',
+        labelKey: 'table.store.col.externalName',
         align: 'center',
     },
     {
         name: 'externalNameZh',
         field: 'externalNameZh',
         label: '外部名称（中文）',
+        labelKey: 'table.store.col.externalNameZh',
         align: 'center',
     },
     {
         name: 'address',
         field: 'address',
         label: '门店地址',
+        labelKey: 'table.store.col.address',
         align: 'center',
     },
     {
         name: 'addressZh',
         field: 'addressZh',
         label: '门店地址（中文）',
+        labelKey: 'table.store.col.addressZh',
         align: 'center',
     },
     {
         name: 'phone',
         field: 'phone',
         label: '门店电话',
+        labelKey: 'table.store.col.phone',
         align: 'center',
     },
     {
@@ -61,6 +68,7 @@ const tableStoreCol = [
         name: 'aiPhone',
         field: 'aiPhone',
         label: 'AI 电话',
+        labelKey: 'table.store.col.aiPhone',
         align: 'center',
     },
     {
@@ -69,18 +77,21 @@ const tableStoreCol = [
         name: 'outboundPhone',
         field: 'outboundPhone',
         label: '呼出电话',
+        labelKey: 'table.store.col.outboundPhone',
         align: 'center',
     },
     {
         name: 'timezoneName',
         field: 'timezoneName',
         label: '门店时区',
+        labelKey: 'table.store.col.timezoneName',
         align: 'center',
     },
     {
         name: 'statusName',
         field: 'statusName',
         label: '门店状态',
+        labelKey: 'table.store.col.statusName',
         align: 'center',
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
@@ -88,6 +99,7 @@ const tableStoreCol = [
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.store.col.operation',
         align: 'center',
     },
 ]
@@ -121,11 +133,13 @@ export const tableStore = {
 export const tableStoreOperation = [
     {
         label: '编辑',
+        labelKey: 'table.store.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '特殊备注',
+        labelKey: 'table.store.op.remark',
         condition: 'remarkOp',
         name: 'remark',
     },

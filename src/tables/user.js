@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -24,30 +25,35 @@ const tableUserCol = [
         name: 'id',
         field: 'id',
         label: '用户编号',
+        labelKey: 'table.user.col.id',
         align: 'center',
     },
     {
         name: 'nickName',
         field: 'nickName',
         label: '用户昵称',
+        labelKey: 'table.user.col.nickName',
         align: 'center',
     },
     {
         name: 'mail',
         field: 'mail',
         label: '用户邮箱',
+        labelKey: 'table.user.col.mail',
         align: 'center',
     },
     {
         name: 'phone',
         field: 'phone',
         label: '用户手机号',
+        labelKey: 'table.user.col.phone',
         align: 'center',
     },
     {
         name: 'roles',
         field: 'roles',
         label: '用户角色',
+        labelKey: 'table.user.col.roles',
         align: 'center',
     },
     {
@@ -55,6 +61,7 @@ const tableUserCol = [
         name: 'grantedStores',
         field: 'grantedStores',
         label: '拥有门店',
+        labelKey: 'table.user.col.grantedStores',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
@@ -62,18 +69,21 @@ const tableUserCol = [
         name: 'genderName',
         field: 'genderName',
         label: '性别',
+        labelKey: 'table.user.col.genderName',
         align: 'center',
     },
     {
         name: 'birth',
         field: 'birth',
         label: '生日',
+        labelKey: 'table.user.col.birth',
         align: 'center',
     },
     {
         name: 'statusName',
         field: 'statusName',
         label: '用户状态',
+        labelKey: 'table.user.col.statusName',
         align: 'center',
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
@@ -81,18 +91,21 @@ const tableUserCol = [
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
+        labelKey: 'table.user.col.createTime',
         align: 'center',
     },
     {
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
+        labelKey: 'table.user.col.createUserName',
         align: 'center',
     },
     {
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.user.col.operation',
         align: 'center',
     },
 ]
@@ -126,40 +139,47 @@ export const tableUser = {
 export const tableUserOperation = [
     {
         label: '编辑',
+        labelKey: 'table.user.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '修改角色',
+        labelKey: 'table.user.op.updateRole',
         condition: 'updateRoleOp',
         name: 'updateRole',
     },
     {
         // 仅租户级账户（非门店账户）可被分配门店
         label: '分配门店',
+        labelKey: 'table.user.op.assignStore',
         condition: 'assignStoreOp',
         name: 'assignStore',
     },
     {
         label: '删除',
+        labelKey: 'table.user.op.delete',
         condition: 'deleteOp',
         name: 'delete',
         color: 'rgb(var(--negative))',
     },
     {
         label: '禁用',
+        labelKey: 'table.user.op.disable',
         condition: 'disableOp',
         name: 'disable',
         color: 'rgb(var(--negative))',
     },
     {
         label: '启用',
+        labelKey: 'table.user.op.enable',
         condition: 'enableOp',
         name: 'enable',
         color: 'rgb(var(--positive))',
     },
     {
         label: '解锁',
+        labelKey: 'table.user.op.unlock',
         condition: 'unlockOp',
         name: 'unlock',
         color: 'rgb(var(--positive))',

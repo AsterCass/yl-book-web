@@ -419,7 +419,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -446,7 +446,7 @@ import {isBookingOutsideSchedule, isoWeekdayOfDateStr, mergedShifts} from "@/uti
 const selectId = ref("")
 const selectName = ref("")
 const selectPhone = ref("")
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
@@ -1081,6 +1081,11 @@ function getAllSkills() {
 onMounted(() => {
   selectData()
   getAllSkills()
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

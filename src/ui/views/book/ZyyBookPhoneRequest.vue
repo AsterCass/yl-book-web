@@ -87,7 +87,7 @@
 
 <script setup>
 
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import CaskDatePicker from "@/ui/components/CaskDatePicker.vue";
@@ -98,7 +98,7 @@ import {bookPhoneRequestList} from "@/api/book.js";
 import {PhoneRequestHandleStatusEnum} from "@/constants/enums/book.js";
 import {phoneRequestStatusName, phoneRequestStatusOptions} from "@/utils/phone-request.js";
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 // 筛选：记录日期区间 + 处理状态 + 联系电话（模糊，空=不过滤）；需求类型为 AI 自拟的自由文本标签，不做筛选
 const selectStartDate = ref("")
@@ -193,6 +193,10 @@ onMounted(() => {
   selectData()
 })
 
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
+})
 </script>
 
 <style scoped lang="scss">

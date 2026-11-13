@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -24,18 +25,21 @@ const tableStaffCol = [
         name: 'id',
         field: 'id',
         label: '雇员编号',
+        labelKey: 'table.staff.col.id',
         align: 'center',
     },
     {
         name: 'name',
         field: 'name',
         label: '雇员名称',
+        labelKey: 'table.staff.col.name',
         align: 'center',
     },
     {
         name: 'externalName',
         field: 'externalName',
         label: '外部名称',
+        labelKey: 'table.staff.col.externalName',
         align: 'center',
     },
     {
@@ -43,24 +47,28 @@ const tableStaffCol = [
         name: 'genderName',
         field: 'genderName',
         label: '性别',
+        labelKey: 'table.staff.col.genderName',
         align: 'center',
     },
     {
         name: 'phone',
         field: 'phone',
         label: '雇员手机号',
+        labelKey: 'table.staff.col.phone',
         align: 'center',
     },
     {
         name: 'mail',
         field: 'mail',
         label: '通知邮箱',
+        labelKey: 'table.staff.col.mail',
         align: 'center',
     },
     {
         name: 'skills',
         field: 'skills',
         label: '雇员技能',
+        labelKey: 'table.staff.col.skills',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
     },
@@ -68,18 +76,21 @@ const tableStaffCol = [
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
+        labelKey: 'table.staff.col.createTime',
         align: 'center',
     },
     {
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
+        labelKey: 'table.staff.col.createUserName',
         align: 'center',
     },
     {
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.staff.col.operation',
         align: 'center',
     },
 ]
@@ -113,16 +124,19 @@ export const tableStaff = {
 export const tableStaffOperation = [
     {
         label: '编辑',
+        labelKey: 'table.staff.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '配置技能',
+        labelKey: 'table.staff.op.updateSkill',
         condition: 'skillOp',
         name: 'updateSkill',
     },
     {
         label: '删除',
+        labelKey: 'table.staff.op.delete',
         condition: 'deleteOp',
         name: 'delete',
         color: 'rgb(var(--negative))',

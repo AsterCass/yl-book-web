@@ -330,7 +330,8 @@
 
 <script setup>
 import {BookSourceEnum, BookStatusEnum} from "@/constants/enums/book.js";
-import {computed, onMounted, reactive, ref} from "vue";
+import {enumUnknownName} from "@/constants/enums/common.js";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import {date} from "quasar";
@@ -370,7 +371,7 @@ const selectBookingTimeStart = ref("")
 const selectBookingTimeEnd = ref("")
 const statusOptions = ref(BookStatusEnum.toSelectForm())
 const sourceOptions = ref(BookSourceEnum.toSelectForm())
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
@@ -723,7 +724,7 @@ function selectData(keepPage = false) {
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       const statusEnum = BookStatusEnum.fromCode(data.status)
-      data.statusName = statusEnum ? statusEnum.name : '未知'
+      data.statusName = statusEnum ? statusEnum.name : enumUnknownName()
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
       data.remarkDisplay = truncate(data.remark)
       data.customerRemarkDisplay = truncate(data.customerRemark)
@@ -791,6 +792,11 @@ onMounted(() => {
   loadSkillList()
   // load staff first so the booking list can resolve preferred-staff names
   loadStaffList().then(() => selectData())
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

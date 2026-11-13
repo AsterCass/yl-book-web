@@ -153,7 +153,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n';
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
 import {tablePermission, tablePermissionOperation} from "@/tables/permission.js";
@@ -162,7 +162,7 @@ import {PermissionTypeEnum} from "@/constants/enums/common.js";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 
-const { t } = useI18n()
+const {t, locale} = useI18n()
 const selectId = ref("")
 const keyword = ref("")
 const parentId = ref("")
@@ -176,7 +176,7 @@ const upsertName = ref("")
 const upsertCode = ref("")
 const upsertDesc = ref("")
 const upsertParentId = ref("")
-const upsertType = ref({label: '页面', value: 1})
+const upsertType = ref(PermissionTypeEnum.fromCodeToSelectFrom(PermissionTypeEnum.NORMAL.code))
 
 const updateId = ref("")
 
@@ -207,7 +207,7 @@ function clearUpsertParam() {
   upsertCode.value = ""
   upsertDesc.value = ""
   upsertParentId.value = ""
-  upsertType.value = {label: '页面', value: 1}
+  upsertType.value = PermissionTypeEnum.fromCodeToSelectFrom(PermissionTypeEnum.NORMAL.code)
 }
 
 function upsertData() {
@@ -304,6 +304,11 @@ function selectData(keepPage = false) {
 
 onMounted(()=> {
   selectData();
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

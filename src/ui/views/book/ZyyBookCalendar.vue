@@ -1093,6 +1093,11 @@ function buildDayBlocks(dateStr, staffId, toPx) {
 
 // 构建一列（预约块 + 定位 + 是否落在 block 内）
 // extra: { dateStr, staffId } —— 拖拽落点用于计算新的 bookTimeStr / staffId
+function sourceNameOf(b) {
+  const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
+  return sourceEnum ? sourceEnum.name : ''
+}
+
 function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBlocks, toPx, extra = {}) {
   const rawEvents = rawBookings.map(b => ({start: b._start, end: b._end, booking: b}))
   const laid = layoutEvents(rawEvents)
@@ -1151,7 +1156,8 @@ function buildColumn(key, headerMain, headerSub, highlight, rawBookings, dayBloc
       blocked,
       cancelled: b.status === -1,
       sourceColor: b._sourceColor,
-      sourceName: b._sourceName,
+      // 来源名在渲染时取（枚举 name 随界面语言），切换语言即时生效
+      sourceName: sourceNameOf(b),
       lines,
     }
   })
@@ -2221,7 +2227,6 @@ function enrichBooking(b) {
   // 来源文字（带来源色）；卡片三色按状态在渲染时实时计算（见 cardStyle），此处不预生成
   const sourceEnum = b.source != null ? BookSourceEnum.fromCode(b.source) : null
   b._sourceColor = sourceEnum ? sourceEnum.color : 'rgb(128, 128, 128)'
-  b._sourceName = sourceEnum ? sourceEnum.name : ''
   // 特殊备注：后端为逗号分隔字符串，卡片上以空格分割展示为一行
   b._specialRemarks = b.specialRemarks
       ? b.specialRemarks.split(',').filter(item => item).join(' ') : ''

@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -24,18 +25,21 @@ const tablePermissionCol = [
         name: 'id',
         field: 'id',
         label: '权限编号',
+        labelKey: 'table.permission.col.id',
         align: 'center',
     },
     {
         name: 'name',
         field: 'name',
         label: '权限名称',
+        labelKey: 'table.permission.col.name',
         align: 'center',
     },
     {
         name: 'typeName',
         field: 'typeName',
         label: '权限类型',
+        labelKey: 'table.permission.col.typeName',
         align: 'center',
         type: ComplexTableColumnTypeEnum.ICON_COLOR,
     },
@@ -43,48 +47,56 @@ const tablePermissionCol = [
         name: 'code',
         field: 'code',
         label: '权限码',
+        labelKey: 'table.permission.col.code',
         align: 'center',
     },
     {
         name: 'desc',
         field: 'desc',
         label: '权限描述',
+        labelKey: 'table.permission.col.desc',
         align: 'center',
     },
     {
         name: 'parentId',
         field: 'parentId',
         label: '父权限编号',
+        labelKey: 'table.permission.col.parentId',
         align: 'center',
     },
     {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
+        labelKey: 'table.permission.col.createTime',
         align: 'center',
     },
     {
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
+        labelKey: 'table.permission.col.createUserName',
         align: 'center',
     },
     {
         name: 'updateTime',
         field: 'updateTime',
         label: '更新时间',
+        labelKey: 'table.permission.col.updateTime',
         align: 'center',
     },
     {
         name: 'updateUserName',
         field: 'updateUserName',
         label: '更新用户',
+        labelKey: 'table.permission.col.updateUserName',
         align: 'center',
     },
     {
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.permission.col.operation',
         align: 'center',
     },
 ]
@@ -118,11 +130,13 @@ export const tablePermission = {
 export const tablePermissionOperation = [
     {
         label: '编辑',
+        labelKey: 'table.permission.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '删除',
+        labelKey: 'table.permission.op.delete',
         condition: 'deleteOp',
         name: 'delete',
         color: 'rgb(var(--negative))',

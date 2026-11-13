@@ -73,7 +73,7 @@
 
 <script setup>
 
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {date} from "quasar";
 import {useI18n} from 'vue-i18n'
 import {notifyTopWarning} from "@/utils/notification-tools.js";
@@ -105,7 +105,10 @@ const confirmAction = ref('query')
 const querying = ref(false)
 const exporting = ref(false)
 
-const tableData = ref([])
+// 查询结果原样存着，表格行在渲染时拼（来源名、交易类型、推荐码前缀都随界面语言）：切换语言即时生效，
+// 不用为了换语言重新查询（查询要消耗第三方限流额度）
+const records = ref([])
+const tableData = computed(() => records.value.map(cardRow))
 // 无分页：dataSum = 聚合后的手机号行数；pageNo/pageSize 仅为组件必需的占位
 const tableDynamicData = ref(
     {
@@ -198,32 +201,37 @@ function doQuery() {
     }
     const pageData = res.data.data
     tableDynamicData.value.dataSum = pageData.total
-    tableData.value = (pageData.records || []).map(row => ({
-      phone: row.phone,
-      names: (row.nameList || []).map(noComma).join(','),
-      // 行格式：来源 | 项目1/项目2 | $金额 | 推荐码 | 时间（空项自动省略）
-      bookLines: (row.bookList || []).map(item => {
-        const sourceEnum = BookSourceEnum.fromCode(item.source)
-        const parts = [
-          sourceEnum ? sourceEnum.name : '',
-          noComma((item.skillNames || []).join('/')),
-          item.amount != null ? `$${item.amount}` : '',
-          item.referralCode ? `${t('book_card_info.referral_prefix')}${noComma(item.referralCode)}` : '',
-          item.bookingTime,
-        ]
-        return parts.filter(p => p).join(' | ')
-      }).join(','),
-      // 总充值金额（后端已按交易类型聚合：充值加、退款减、消费不计入）
-      totalRecharge: `$${row.totalRechargeAmount != null ? row.totalRechargeAmount : 0}`,
-      // 充值/退款流水，行格式：门店 | 交易类型 | $金额 | 时间
-      rechargeLines: (row.rechargeList || []).map(rechargeLine).join(','),
-      // 消费流水（后端单列返回，不与充值混排），行格式同上
-      consumeLines: (row.consumeList || []).map(rechargeLine).join(','),
-    }))
+    records.value = pageData.records || []
   }).finally(() => {
     querying.value = false
     tableDynamicData.value.inLoading = false
   })
+}
+
+// 一行（一个手机号）的展示数据
+function cardRow(row) {
+  return {
+    phone: row.phone,
+    names: (row.nameList || []).map(noComma).join(','),
+    // 行格式：来源 | 项目1/项目2 | $金额 | 推荐码 | 时间（空项自动省略）
+    bookLines: (row.bookList || []).map(item => {
+      const sourceEnum = BookSourceEnum.fromCode(item.source)
+      const parts = [
+        sourceEnum ? sourceEnum.name : '',
+        noComma((item.skillNames || []).join('/')),
+        item.amount != null ? `$${item.amount}` : '',
+        item.referralCode ? `${t('book_card_info.referral_prefix')}${noComma(item.referralCode)}` : '',
+        item.bookingTime,
+      ]
+      return parts.filter(p => p).join(' | ')
+    }).join(','),
+    // 总充值金额（后端已按交易类型聚合：充值加、退款减、消费不计入）
+    totalRecharge: `$${row.totalRechargeAmount != null ? row.totalRechargeAmount : 0}`,
+    // 充值/退款流水，行格式：门店 | 交易类型 | $金额 | 时间
+    rechargeLines: (row.rechargeList || []).map(rechargeLine).join(','),
+    // 消费流水（后端单列返回，不与充值混排），行格式同上
+    consumeLines: (row.consumeList || []).map(rechargeLine).join(','),
+  }
 }
 
 // 导出 xlsx：与查询同一条后端链路（含第三方调用与其限流约束），blob 下载

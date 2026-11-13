@@ -276,7 +276,7 @@
 
 <script setup>
 import {CommonStatusEnum, GenderOptEnum} from "@/constants/enums/common.js";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -304,7 +304,7 @@ const mail = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(CommonStatusEnum.toSelectForm())
 const genderOptions = ref(GenderOptEnum.toSelectForm())
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
@@ -592,6 +592,11 @@ function getAllRoles() {
 onMounted(() => {
   selectData()
   getAllRoles()
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

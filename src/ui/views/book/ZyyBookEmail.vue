@@ -145,7 +145,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -154,11 +154,12 @@ import CaskDialogJudgment from "@/ui/components/CaskDialogJudgment.vue";
 import {tableBookEmail, tableBookEmailOperation} from "@/tables/book-email.js";
 import {bookDetail, bookEmailGiveup, bookEmailList, bookEmailReparse} from "@/api/book.js";
 import {BookEmailStatusEnum, BookSourceEnum, EmailIntentEnum} from "@/constants/enums/book.js";
+import {enumUnknownName} from "@/constants/enums/common.js";
 import {useGlobalStateStore} from "@/utils/global-state.js";
 import {truncate} from "@/utils/base-tools.js";
 
 const globalState = useGlobalStateStore();
-const {t} = useI18n()
+const {t, locale} = useI18n()
 const selectBookId = ref("")
 const selectStatus = ref(null)
 const statusOptions = ref(BookEmailStatusEnum.toSelectForm())
@@ -271,7 +272,7 @@ function selectData(keepPage = false) {
     tableDynamicData.value.dataSum = res.data.data.total
     thisData.forEach(data => {
       const statusEnum = BookEmailStatusEnum.fromCode(data.status)
-      data.statusName = statusEnum ? statusEnum.name : '未知'
+      data.statusName = statusEnum ? statusEnum.name : enumUnknownName()
       data.statusNameWebColorName = statusEnum ? statusEnum.color : 'rgb(128, 128, 128)'
       const intentEnum = EmailIntentEnum.fromCode(data.intent)
       data.intentName = intentEnum ? intentEnum.name : '-'
@@ -296,6 +297,11 @@ function selectData(keepPage = false) {
 
 onMounted(() => {
   selectData()
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

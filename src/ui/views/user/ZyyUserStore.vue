@@ -608,7 +608,7 @@
 
 
 <script setup>
-import {nextTick, onMounted, ref} from "vue";
+import {nextTick, onMounted, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -620,7 +620,7 @@ import {storeResourceDelete, storeResourceList, storeResourceSave} from "@/api/s
 import {CommonStatusEnum, TimezoneOptEnum} from "@/constants/enums/common.js";
 
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 const selectId = ref("")
 const selectName = ref("")
 const selectPhone = ref("")
@@ -1066,6 +1066,11 @@ function selectData(keepPage = false) {
 
 onMounted(() => {
   selectData()
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

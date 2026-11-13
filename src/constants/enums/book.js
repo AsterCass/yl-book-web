@@ -7,13 +7,13 @@ export const BookStatusEnum = new Enum({
     DONE: {code: 3, name: '已完成', desc: '已分配且已过结束时间', color: 'rgb(127, 140, 141)'},
     EXPIRED: {code: 4, name: '已过期', desc: '始终未分配却已过开始时间（无人接单/爽约）', color: 'rgb(155, 89, 182)'},
     CANCEL: {code: -1, name: '已取消', desc: '人工取消', color: 'rgb(200, 60, 60)'},
-});
+}, 'enum.book_status');
 
 export const AssignStrategyEnum = new Enum({
     PRIORITY: {code: 1, name: '按优先级', desc: '按员工优先级分配', color: 'rgb(68, 117, 80)'},
     PROXIMITY: {code: 2, name: '临近工作', desc: '按工作时间相近分配', color: 'rgb(52, 152, 219)'},
     BALANCED: {code: 3, name: '平均承担', desc: '按工作量平均分配', color: 'rgb(155, 89, 182)'},
-});
+}, 'enum.assign_strategy');
 
 // 本站预约及其子渠道统一使用同一颜色
 const OWN_SITE_COLOR = 'rgb(211, 95, 33)'
@@ -45,14 +45,14 @@ export const BookSourceEnum = new Enum({
     // 深色底（#121212）约 3.9:1，两套主题都看得清——更深的 Indigo 500 (63, 81, 181) 在深色底只有约 2.7:1，发糊
     RECEPTION: {code: 9, name: '数字人预约', desc: '', color: 'rgb(92, 107, 192)'},
     UNKNOW: {code: 100, name: '其他预约', desc: '', color: 'rgb(128, 128, 128)'},
-});
+}, 'enum.book_source');
 
 // 客户反馈处理状态
 export const BookFeedbackHandleStatusEnum = new Enum({
     UNHANDLED: {code: 0, name: '未处理', desc: '默认状态，待运营跟进', color: 'rgb(245, 166, 35)'},
     HANDLED: {code: 1, name: '已处理', desc: '运营已跟进处理', color: 'rgb(68, 117, 80)'},
     NO_NEED: {code: 2, name: '无需处理', desc: '无需跟进', color: 'rgb(127, 140, 141)'},
-});
+}, 'enum.feedback_handle_status');
 
 // 电话需求处理状态（口径同客户反馈，多一个「处理中」）；需求类型为 AI 自拟的自由文本标签，无枚举。
 // 未处理与处理中 = 还没办完，显示在预约日历上方的电话需求栏（2026-11-10 起不进顶部待办）；
@@ -71,7 +71,7 @@ export const PhoneRequestHandleStatusEnum = new Enum({
         desc: '客户来电主动撤销（取消原因并入详细描述）；不计入待办，运营仍可流转到其他状态',
         color: 'rgb(150, 100, 160)',
     },
-});
+}, 'book_phone_request.status');
 
 // AI 通话复盘状态（yl_ai_call_review.review_status）：档案入库即待复盘，定时裁判跑完置已复盘 / 复盘失败；
 // 运营要求重判置待重判；客户一句没说的通话标无对话、不进裁判
@@ -81,7 +81,7 @@ export const AiCallReviewStatusEnum = new Enum({
     FAILED: {code: 2, name: '复盘失败', desc: '裁判两次都出不了结论，可重判', color: 'rgb(200, 60, 60)'},
     REJUDGE: {code: 3, name: '待重判', desc: '运营要求重判，等下一轮定时任务', color: 'rgb(74, 124, 168)'},
     NO_DIALOGUE: {code: 4, name: '无对话', desc: '客户一句没说就挂了，不进裁判', color: 'rgb(127, 140, 141)'},
-});
+}, 'enum.ai_call_review_status');
 
 // AI 通话复盘的运营处理状态（yl_ai_call_review.ops_status），五态可任意流转；挽留两态只给运营标记、筛选用
 export const AiCallReviewOpsStatusEnum = new Enum({
@@ -90,7 +90,7 @@ export const AiCallReviewOpsStatusEnum = new Enum({
     FALSE_ALARM: {code: 2, name: '误判', desc: '运营认为裁判判错了', color: 'rgb(150, 100, 160)'},
     PENDING_RETENTION: {code: 3, name: '待发送挽留', desc: '需要给顾客发挽留信息，还没发', color: 'rgb(214, 96, 77)'},
     RETENTION_SENT: {code: 4, name: '已发送挽留', desc: '挽留信息已发出', color: 'rgb(74, 124, 168)'},
-});
+}, 'enum.ai_call_review_ops_status');
 
 // 通话结束方式（yl-phone-spring-ai 归档时判定，code 为字符串）
 export const AiCallEndedByEnum = new Enum({
@@ -100,20 +100,20 @@ export const AiCallEndedByEnum = new Enum({
     IDLE_HANGUP: {code: 'idle-hangup', name: '静默挂断', desc: '客户长时间不回话，催问后挂断', color: 'rgb(245, 166, 35)'},
     OTHER: {code: 'other', name: '其他', desc: 'Vapi 报告的其他原因', color: 'rgb(127, 140, 141)'},
     UNKNOWN: {code: 'unknown', name: '未知', desc: '没收到结束事件，由巡检兜底归档', color: 'rgb(127, 140, 141)'},
-});
+}, 'enum.ai_call_ended_by');
 
 // 通话的会话语言
 export const AiCallLangEnum = new Enum({
     ZH: {code: 'zh', name: '中文', desc: '', color: ''},
     EN: {code: 'en', name: '英文', desc: '', color: ''},
-});
+}, 'enum.ai_call_lang');
 
 // 裁判给的严重度
 export const AiCallReviewSeverityEnum = new Enum({
     NONE: {code: 'none', name: '无', desc: '', color: 'rgb(127, 140, 141)'},
     MINOR: {code: 'minor', name: '轻微', desc: '', color: 'rgb(245, 166, 35)'},
     MAJOR: {code: 'major', name: '严重', desc: '', color: 'rgb(200, 60, 60)'},
-});
+}, 'enum.ai_call_review_severity');
 
 // 预约邮件处理状态
 export const BookEmailStatusEnum = new Enum({
@@ -121,11 +121,11 @@ export const BookEmailStatusEnum = new Enum({
     PROCESSED: {code: 1, name: '已处理', desc: '解析为预约/取消并成功落库', color: 'rgb(68, 117, 80)'},
     FAILED: {code: -1, name: '处理失败', desc: '判定为预约/取消，但落库失败', color: 'rgb(200, 60, 60)'},
     NO_NEED: {code: -2, name: '无需处理', desc: '广告邮件或其他非预约邮件', color: 'rgb(128, 128, 128)'},
-});
+}, 'enum.book_email_status');
 
 // 大模型对邮件意图的判定结果
 export const EmailIntentEnum = new Enum({
     IGNORE: {code: 0, name: '无需处理', desc: '广告/其他非预约邮件', color: 'rgb(128, 128, 128)'},
     BOOKING: {code: 1, name: '预约', desc: '预约邮件', color: 'rgb(68, 117, 80)'},
     CANCEL: {code: 2, name: '取消预约', desc: '取消预约邮件', color: 'rgb(230, 126, 34)'},
-});
+}, 'enum.email_intent');

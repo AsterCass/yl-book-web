@@ -7,6 +7,7 @@
 * field：绑定数据字段，一般和name相同
 *
 * [自定义]
+* labelKey（可选）：i18n 键（en.json / zh.json 的 table 分区），有就按当前语言显示（切换语言即时生效），label 只作兜底
 * sortableLite：（可选，默认false）是否支持排序（重写官方逻辑）
 * cardShowLabel（可选，默认true）：卡片方式显示时，是否展示该列label
 * cardSite（可选，默认 'content' ）：卡片方式显示时，该字段在卡片的位置，
@@ -22,54 +23,63 @@ const tableRoleCol = [
         name: 'id',
         field: 'id',
         label: '角色编号',
+        labelKey: 'table.role.col.id',
         align: 'center',
     },
     {
         name: 'name',
         field: 'name',
         label: '角色名称',
+        labelKey: 'table.role.col.name',
         align: 'center',
     },
     {
         name: 'code',
         field: 'code',
         label: '角色码',
+        labelKey: 'table.role.col.code',
         align: 'center',
     },
     {
         name: 'desc',
         field: 'desc',
         label: '角色描述',
+        labelKey: 'table.role.col.desc',
         align: 'center',
     },
     {
         name: 'createTime',
         field: 'createTime',
         label: '创建时间',
+        labelKey: 'table.role.col.createTime',
         align: 'center',
     },
     {
         name: 'createUserName',
         field: 'createUserName',
         label: '创建用户',
+        labelKey: 'table.role.col.createUserName',
         align: 'center',
     },
     {
         name: 'updateTime',
         field: 'updateTime',
         label: '更新时间',
+        labelKey: 'table.role.col.updateTime',
         align: 'center',
     },
     {
         name: 'updateUserName',
         field: 'updateUserName',
         label: '更新用户',
+        labelKey: 'table.role.col.updateUserName',
         align: 'center',
     },
     {
         name: 'operation',
         field: 'operation',
         label: '操作',
+        labelKey: 'table.role.col.operation',
         align: 'center',
     },
 ]
@@ -103,21 +113,25 @@ export const tableRole = {
 export const tableRoleOperation = [
     {
         label: '编辑',
+        labelKey: 'table.role.op.update',
         condition: 'updateOp',
         name: 'update',
     },
     {
         label: '查看权限',
+        labelKey: 'table.role.op.getPer',
         condition: 'getPerOp',
         name: 'getPer',
     },
     {
         label: '修改权限',
+        labelKey: 'table.role.op.updatePer',
         condition: 'updatePerOp',
         name: 'updatePer',
     },
     {
         label: '删除',
+        labelKey: 'table.role.op.delete',
         condition: 'deleteOp',
         name: 'delete',
         color: 'rgb(var(--negative))',

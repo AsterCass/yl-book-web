@@ -73,6 +73,8 @@
                               }))
                               upsertAddonOnly = !!row.addonOnly
                               upsertAddonMainSkillIdList = (row.addonMainList || []).map(item => item.mainSkillId)
+                              upsertAdminSort = row.adminSort == null ? '' : String(row.adminSort)
+                              upsertCustomerSort = row.customerSort == null ? '' : String(row.customerSort)
                               isNew = false;
                               showUpsert = true
                             }
@@ -162,6 +164,26 @@
           <q-input v-model="upsertServiceAmount" class="component-outline-input-grow" dense outlined
                    @update:model-value="onInput"
                    :placeholder="t('staff_skill.placeholder.serviceAmount')"/>
+
+          <!-- 显示顺序：两个序号互不影响，只能填 0–9999 的整数（mask），留空保存为 0 -->
+          <h6 style="white-space: nowrap; margin-left: 12px!important;">{{
+              $t('staff_skill.upsert.field.admin_sort')
+            }}&nbsp;:</h6>
+          <q-input v-model="upsertAdminSort" class="component-outline-input-grow" dense outlined
+                   mask="####"
+                   :placeholder="t('staff_skill.placeholder.admin_sort')"/>
+
+          <h6 style="white-space: nowrap; margin-left: 12px!important; align-self: flex-start; padding-top: .5rem">{{
+              $t('staff_skill.upsert.field.customer_sort')
+            }}&nbsp;:</h6>
+          <div>
+            <q-input v-model="upsertCustomerSort" class="component-outline-input-grow" dense outlined
+                     mask="####"
+                     :placeholder="t('staff_skill.placeholder.customer_sort')"/>
+            <div class="q-mt-xs" style="opacity: 0.5; font-size: 0.85rem; max-width: 24rem">
+              {{ $t('staff_skill.upsert.sort_note') }}
+            </div>
+          </div>
 
         </div>
         </div>
@@ -312,7 +334,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import {useI18n} from 'vue-i18n'
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -331,7 +353,7 @@ import {storeResourceList} from "@/api/store-resource.js";
 const selectId = ref("")
 const selectName = ref("")
 const selectCode = ref("")
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 function clearSearch() {
   selectId.value = ""
@@ -357,6 +379,14 @@ const upsertResourceConsumptionList = ref([])
 const upsertAddonOnly = ref(false)
 const upsertAddonMainSkillIdList = ref([])
 const skillSimpleList = ref([])
+// 显示顺序（管理端 / 顾客端），mask 输入框里是字符串，提交时转整数，留空按 0
+const upsertAdminSort = ref('')
+const upsertCustomerSort = ref('')
+
+function sortNo(val) {
+  const n = parseInt(val, 10)
+  return Number.isNaN(n) ? 0 : n
+}
 
 const updateId = ref("")
 
@@ -385,6 +415,8 @@ function clearUpsertParam() {
   upsertResourceConsumptionList.value = []
   upsertAddonOnly.value = false
   upsertAddonMainSkillIdList.value = []
+  upsertAdminSort.value = ''
+  upsertCustomerSort.value = ''
 }
 
 // 技能简单列表（含 addonOnly），供「可附加的主服务」下拉；技能有增删改后重拉，候选才跟得上
@@ -503,6 +535,8 @@ function upsertData() {
     addonMainSkillIdList: upsertAddonOnly.value
         ? upsertAddonMainSkillIdList.value.filter(id => addonMainOptions.value.some(option => option.value === id))
         : [],
+    adminSort: sortNo(upsertAdminSort.value),
+    customerSort: sortNo(upsertCustomerSort.value),
   }
 
   if (isNew.value) {
@@ -592,6 +626,11 @@ onMounted(() => {
   loadStoreResources()
   loadSkillSimpleList()
   selectData()
+})
+
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
 })
 </script>
 

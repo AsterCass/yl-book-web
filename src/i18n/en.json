@@ -648,9 +648,9 @@
 
   "staff_skill": {
     "label": { "id": "Skill ID", "name": "Skill Name", "code": "Skill Code", "status": "Skill Status" },
-    "placeholder": { "id": "e.g. YLSS001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70", "alias": "e.g. Foot Spa", "external_name": "Optional", "external_name_zh": "Optional, in Chinese", "desc_zh": "Optional, in Chinese", "serviceAmount": "Optional, e.g. 128" },
+    "placeholder": { "id": "e.g. YLSS001", "name": "e.g. Foot Massage", "code": "e.g. footSpa", "desc": "e.g. Relieves fatigue, improves circulation", "consumeMinutes": "70", "alias": "e.g. Foot Spa", "external_name": "Optional", "external_name_zh": "Optional, in Chinese", "desc_zh": "Optional, in Chinese", "serviceAmount": "Optional, e.g. 128", "admin_sort": "0–9999, blank = 0", "customer_sort": "0–9999, blank = 0" },
     "button": { "query": "Search", "add": "Add Skill", "clear": "Clear Filters", "save": "Save" },
-    "upsert": { "title_add": "Add Skill", "title_update": "Update Skill", "field": { "name": "Skill Name", "external_name": "External Name", "external_name_zh": "External Name (CN)", "code": "Skill Code", "desc": "Skill Description", "desc_zh": "Skill Description (CN)", "consumeMinutes": "Duration", "serviceAmount": "Service Amount", "aliasList": "Skill Alias", "resourceConsumptionList": "Resource Consumption", "addonOnly": "Add-on", "addonMainSkillIdList": "Main Services" }, "addon_toggle": "Add-on only (customers cannot book it on its own)", "addon_main_no_candidate": "This store has no other regular service that could be a main service.", "addon_note": "When checked, the customer booking site and the phone AI only accept this service together with one of the main services below in the same booking; bookings created in the admin console are not restricted.", "addon_main_note": "Customers can add this service only after choosing one of the main services above. A main service must be a regular service, not another add-on.", "addon_main_empty": "No main service selected yet: customers will not see this service; it stays available in the admin console.", "alias_note": "This alias field is used during third-party appointment API calls to determine whether it refers to the same skill.", "alias_add": "Add Alias", "alias_empty": "No alias", "resource_note": "Configure the store resources occupied by one service using this skill.", "resource_add": "Add Resource", "resource_empty": "This skill does not consume store resources", "resource_unconfigured": "No resources are configured for this store. Add them in Store Management first.", "resource_count_placeholder": "Quantity", "resource_over_capacity": "Consumption of resource 【{name}】 exceeds the store total ({capacity}). This service could never be booked. Increase the capacity in Store Management first.", "resource_all_selected": "All store resources have already been added", "resource_invalid": "Select valid, unique resources and enter positive integer quantities", "save_add": "Add", "save_update": "Update" },
+    "upsert": { "title_add": "Add Skill", "title_update": "Update Skill", "field": { "name": "Skill Name", "external_name": "External Name", "external_name_zh": "External Name (CN)", "code": "Skill Code", "desc": "Skill Description", "desc_zh": "Skill Description (CN)", "consumeMinutes": "Duration", "serviceAmount": "Service Amount", "aliasList": "Skill Alias", "resourceConsumptionList": "Resource Consumption", "addonOnly": "Add-on", "addonMainSkillIdList": "Main Services", "admin_sort": "Admin Order", "customer_sort": "Customer Order" }, "addon_toggle": "Add-on only (customers cannot book it on its own)", "addon_main_no_candidate": "This store has no other regular service that could be a main service.", "addon_note": "When checked, the customer booking site and the phone AI only accept this service together with one of the main services below in the same booking; bookings created in the admin console are not restricted.", "addon_main_note": "Customers can add this service only after choosing one of the main services above. A main service must be a regular service, not another add-on.", "addon_main_empty": "No main service selected yet: customers will not see this service; it stays available in the admin console.", "alias_note": "This alias field is used during third-party appointment API calls to determine whether it refers to the same skill.", "alias_add": "Add Alias", "alias_empty": "No alias", "resource_note": "Configure the store resources occupied by one service using this skill.", "resource_add": "Add Resource", "resource_empty": "This skill does not consume store resources", "resource_unconfigured": "No resources are configured for this store. Add them in Store Management first.", "resource_count_placeholder": "Quantity", "resource_over_capacity": "Consumption of resource 【{name}】 exceeds the store total ({capacity}). This service could never be booked. Increase the capacity in Store Management first.", "resource_all_selected": "All store resources have already been added", "resource_invalid": "Select valid, unique resources and enter positive integer quantities", "sort_note": "Smaller numbers come first; on equal numbers, admin order shows the newest first and customer order keeps creation order. Admin order is used by the service dropdowns in the admin console and by this list; customer order is used by the customer booking site, the phone AI and the front-desk kiosk, with main services and add-ons ordered separately. Leave gaps (10, 20, 30) so a new service can be slotted in without renumbering.", "save_add": "Add", "save_update": "Update" },
     "dialog": {
       "common": { "cancel": "Cancel", "confirm": "Confirm" },
       "delete": { "title": "Delete Skill", "content": "Delete skill 【{name}】?" }
@@ -1299,5 +1299,365 @@
       "assigned": "Assigned",
       "cancelled": "Cancelled"
     }
+  },
+  "table": {
+    "book_email": {
+      "col": {
+        "id": "Email ID",
+        "title": "Subject",
+        "content": "Content",
+        "intentName": "Detected Intent",
+        "statusName": "Status",
+        "errorMsg": "Error",
+        "sourceName": "Source",
+        "retryCount": "Retries",
+        "createTime": "Received At",
+        "operation": "Actions"
+      },
+      "op": {
+        "emailDetail": "Email Details",
+        "bookDetail": "Booking Details",
+        "reparse": "Retry",
+        "giveup": "No Action Needed"
+      }
+    },
+    "book": {
+      "col": {
+        "id": "Booking ID",
+        "name": "Customer Name",
+        "phone": "Customer Phone",
+        "mail": "Customer Email",
+        "bookingTime": "Booking Time",
+        "bookProjectNames": "Services",
+        "sourceName": "Source",
+        "referralCode": "Referral Code",
+        "statusName": "Status",
+        "staffName": "Staff",
+        "preferredStaffName": "Preferred Staff",
+        "specialRemarks": "Special Notes",
+        "customerRemark": "Customer Note",
+        "remark": "Staff Note",
+        "createTime": "Created At",
+        "operation": "Actions"
+      },
+      "op": {
+        "detail": "Details",
+        "update": "Edit",
+        "copy": "Copy",
+        "assign": "Assign Staff",
+        "autoAssign": "Auto Assign",
+        "delete": "Cancel Booking"
+      }
+    },
+    "card_info": {
+      "col": {
+        "phone": "Phone",
+        "names": "Customer Names",
+        "bookLines": "Booking History",
+        "totalRecharge": "Total Top-up",
+        "rechargeLines": "Top-up History",
+        "consumeLines": "Spending History"
+      }
+    },
+    "feedback": {
+      "col": {
+        "id": "Feedback ID",
+        "storeName": "Store",
+        "bookId": "Booking ID",
+        "staffName": "Staff",
+        "scoreShow": "Rating",
+        "content": "Review",
+        "handleStatusName": "Status",
+        "remark": "Note",
+        "createTime": "Submitted At",
+        "operation": "Actions"
+      },
+      "op": {
+        "showBookDetail": "Details",
+        "editRemark": "Edit Note",
+        "markHandled": "Mark Handled",
+        "markNoNeed": "No Action Needed",
+        "markUnhandled": "Mark Unhandled"
+      }
+    },
+    "phone_request": {
+      "col": {
+        "id": "Request ID",
+        "storeName": "Store",
+        "phone": "Contact Phone",
+        "type": "Type",
+        "summary": "Summary",
+        "detail": "Details",
+        "handleStatusName": "Status",
+        "remark": "Note",
+        "comment": "Reply",
+        "createTime": "Recorded At",
+        "callShow": "Call-back Log",
+        "operation": "Actions"
+      },
+      "op": {
+        "call": "Call",
+        "edit": "Edit"
+      }
+    },
+    "ai_call_review": {
+      "col": {
+        "startedAt": "Call Time",
+        "storeName": "Store",
+        "callerPhone": "Caller",
+        "durationShow": "Duration",
+        "endedByName": "Ended By",
+        "langName": "Language",
+        "customerTurns": "Customer Turns",
+        "reviewStatusName": "Review Status",
+        "passName": "Verdict",
+        "severityName": "Severity",
+        "tagsShow": "Tags",
+        "summary": "Summary",
+        "opsStatusName": "Handling Status",
+        "opsRemark": "Handling Note",
+        "vapiEndedReason": "Vapi Reason",
+        "callId": "Vapi Call",
+        "operation": "Actions"
+      },
+      "op": {
+        "detail": "Details",
+        "ops": "Handle",
+        "sms": "SMS"
+      }
+    },
+    "permission": {
+      "col": {
+        "id": "Permission ID",
+        "name": "Permission Name",
+        "typeName": "Type",
+        "code": "Permission Code",
+        "desc": "Description",
+        "parentId": "Parent ID",
+        "createTime": "Created At",
+        "createUserName": "Created By",
+        "updateTime": "Updated At",
+        "updateUserName": "Updated By",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "role": {
+      "col": {
+        "id": "Role ID",
+        "name": "Role Name",
+        "code": "Role Code",
+        "desc": "Description",
+        "createTime": "Created At",
+        "createUserName": "Created By",
+        "updateTime": "Updated At",
+        "updateUserName": "Updated By",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "getPer": "View Permissions",
+        "updatePer": "Edit Permissions",
+        "delete": "Delete"
+      }
+    },
+    "staff_skill": {
+      "col": {
+        "name": "Skill Name",
+        "externalName": "External Name",
+        "externalNameZh": "External Name (CN)",
+        "adminSort": "Admin Order",
+        "customerSort": "Customer Order",
+        "aliases": "Aliases",
+        "description": "Description",
+        "descriptionZh": "Description (CN)",
+        "consumeMinutes": "Duration (min)",
+        "serviceAmount": "Service Amount",
+        "addonMains": "Add-on To",
+        "resourceRequirement": "Resources",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "staff": {
+      "col": {
+        "id": "Staff ID",
+        "name": "Staff Name",
+        "externalName": "External Name",
+        "genderName": "Gender",
+        "phone": "Phone",
+        "mail": "Notification Email",
+        "skills": "Skills",
+        "createTime": "Created At",
+        "createUserName": "Created By",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "updateSkill": "Set Skills",
+        "delete": "Delete"
+      }
+    },
+    "store": {
+      "col": {
+        "name": "Store Name",
+        "externalName": "External Name",
+        "externalNameZh": "External Name (CN)",
+        "address": "Address",
+        "addressZh": "Address (CN)",
+        "phone": "Store Phone",
+        "aiPhone": "AI Phone",
+        "outboundPhone": "Outbound Phone",
+        "timezoneName": "Time Zone",
+        "statusName": "Status",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "remark": "Special Notes"
+      }
+    },
+    "user": {
+      "col": {
+        "id": "User ID",
+        "nickName": "Nickname",
+        "mail": "Email",
+        "phone": "Phone",
+        "roles": "Roles",
+        "grantedStores": "Stores",
+        "genderName": "Gender",
+        "birth": "Birthday",
+        "statusName": "Status",
+        "createTime": "Created At",
+        "createUserName": "Created By",
+        "operation": "Actions"
+      },
+      "op": {
+        "update": "Edit",
+        "updateRole": "Edit Roles",
+        "assignStore": "Assign Stores",
+        "delete": "Delete",
+        "disable": "Disable",
+        "enable": "Enable",
+        "unlock": "Unlock"
+      }
+    }
+  },
+  "enum": {
+    "book_status": {
+      "PRE": "Pending",
+      "WORK": "Assigned",
+      "IN_PROGRESS": "In Progress",
+      "DONE": "Completed",
+      "EXPIRED": "Expired",
+      "CANCEL": "Cancelled"
+    },
+    "assign_strategy": {
+      "PRIORITY": "By Priority",
+      "PROXIMITY": "Nearest Shift",
+      "BALANCED": "Balanced Load"
+    },
+    "book_source": {
+      "NATURAL": "Organic",
+      "PHONE": "Phone",
+      "WECHAT": "WeChat",
+      "CLASSPASS": "ClassPass",
+      "BUILDHEALTH": "BuildHealth",
+      "AI": "AI Phone",
+      "OWN_SITE": "Website",
+      "OWN_SITE_TK": "Website-Tk",
+      "OWN_SITE_FB": "Website-Fb",
+      "OWN_SITE_INS": "Website-Ins",
+      "OWN_SITE_YTB": "Website-Ytb",
+      "GOOGLE": "Google",
+      "GOOGLE_AD": "Google Ad",
+      "RECEPTION": "AI Front Desk",
+      "UNKNOW": "Other"
+    },
+    "feedback_handle_status": {
+      "UNHANDLED": "Unhandled",
+      "HANDLED": "Handled",
+      "NO_NEED": "No Action Needed"
+    },
+    "ai_call_review_status": {
+      "PENDING": "Pending Review",
+      "REVIEWED": "Reviewed",
+      "FAILED": "Review Failed",
+      "REJUDGE": "Re-review Queued",
+      "NO_DIALOGUE": "No Dialogue"
+    },
+    "ai_call_review_ops_status": {
+      "UNREAD": "Unread",
+      "HANDLED": "Handled",
+      "FALSE_ALARM": "False Alarm",
+      "PENDING_RETENTION": "Retention Pending",
+      "RETENTION_SENT": "Retention Sent"
+    },
+    "ai_call_ended_by": {
+      "CUSTOMER_HANGUP": "Customer Hung Up",
+      "AGENT_END_CALL": "AI Ended",
+      "AGENT_TRANSFER": "Transferred",
+      "IDLE_HANGUP": "Idle Hang-up",
+      "OTHER": "Other",
+      "UNKNOWN": "Unknown"
+    },
+    "ai_call_lang": {
+      "ZH": "Chinese",
+      "EN": "English"
+    },
+    "ai_call_review_severity": {
+      "NONE": "None",
+      "MINOR": "Minor",
+      "MAJOR": "Major"
+    },
+    "book_email_status": {
+      "UNPROCESSED": "Unprocessed",
+      "PROCESSED": "Processed",
+      "FAILED": "Failed",
+      "NO_NEED": "No Action Needed"
+    },
+    "email_intent": {
+      "IGNORE": "Not a Booking",
+      "BOOKING": "Booking",
+      "CANCEL": "Cancellation"
+    },
+    "timezone": {
+      "SHANGHAI": "Shanghai",
+      "NEW_YORK": "New York",
+      "CALIFORNIA": "California"
+    },
+    "common_status": {
+      "NORMAL": "Active",
+      "DISABLE": "Disabled",
+      "LOCKED": "Locked"
+    },
+    "permission_type": {
+      "NORMAL": "Page",
+      "DISABLE": "Button",
+      "LOCKED": "API"
+    },
+    "todo_level": {
+      "USER": "User",
+      "TENANT": "Tenant",
+      "STORE": "Store"
+    },
+    "gender": {
+      "FEMALE": "Female",
+      "MALE": "Male",
+      "LESBIAN": "Lesbian",
+      "GAY": "Gay",
+      "BISEXUAL": "Bisexual",
+      "TRANSGENDER": "Transgender",
+      "QUEER": "Queer",
+      "HELICOPTER": "Attack Helicopter",
+      "WALMART_BAG": "Walmart Bag"
+    },
+    "unknown": "Unknown"
   }
 }

@@ -646,9 +646,9 @@
 
   "staff_skill": {
     "label": { "id": "技能编号", "name": "技能名称", "code": "技能码", "status": "技能状态" },
-    "placeholder": { "id": "例如：YLSS001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70", "alias": "例如：足疗", "external_name": "可为空", "external_name_zh": "可为空，中文", "desc_zh": "可为空，中文", "serviceAmount": "可为空，例如：128"},
+    "placeholder": { "id": "例如：YLSS001", "name": "例如：足浴", "code": "例如：footSpa", "desc":  "例如：一泡解千乏，疏通又经络，焕发心活力", "consumeMinutes":  "70", "alias": "例如：足疗", "external_name": "可为空", "external_name_zh": "可为空，中文", "desc_zh": "可为空，中文", "serviceAmount": "可为空，例如：128", "admin_sort": "0–9999，留空为 0", "customer_sort": "0–9999，留空为 0"},
     "button": { "query": "查询", "add": "添加技能", "clear": "清空条件", "save": "保存" },
-    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "external_name_zh": "对外名称（中文）", "code": "技能码", "desc": "技能描述", "desc_zh": "技能描述（中文）", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名", "resourceConsumptionList": "资源位消耗", "addonOnly": "附加服务", "addonMainSkillIdList": "可附加的主服务"}, "addon_toggle": "仅作为附加服务（客户端不可单独预约）", "addon_main_no_candidate": "当前门店没有其他普通技能可作为主服务。", "addon_note": "勾选后，客户预约网页与电话 AI 只允许该项目与下方任一主服务放在同一张预约单里一起预约；管理端建单不受限制。", "addon_main_note": "客户选择了上述任一主服务后才能添加该项目。主服务只能是普通技能，不能是其他附加服务。", "addon_main_empty": "尚未选择主服务：客户端不会展示该项目，管理端仍可正常使用。", "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "resource_note": "该技能服务需要占用的门店资源数量。", "resource_add": "添加资源消耗", "resource_empty": "该技能暂不消耗门店资源", "resource_unconfigured": "当前门店尚未配置资源位，请先到门店管理中添加。", "resource_count_placeholder": "消耗数量", "resource_over_capacity": "资源位【{name}】的消耗数量超过了门店总量（{capacity}），该技能将永远无法被预约，请先到门店管理中调大容量。", "resource_all_selected": "所有门店资源位均已添加", "resource_invalid": "请选择有效且不重复的资源位，并填写大于 0 的整数消耗数量", "save_add": "添加", "save_update": "更新" },
+    "upsert": { "title_add": "添加技能", "title_update": "更新技能", "field": { "name": "技能名称", "external_name": "对外名称", "external_name_zh": "对外名称（中文）", "code": "技能码", "desc": "技能描述", "desc_zh": "技能描述（中文）", "consumeMinutes": "技能时长", "serviceAmount": "服务金额", "aliasList": "技能别名", "resourceConsumptionList": "资源位消耗", "addonOnly": "附加服务", "addonMainSkillIdList": "可附加的主服务", "admin_sort": "管理端排序", "customer_sort": "顾客端排序"}, "addon_toggle": "仅作为附加服务（客户端不可单独预约）", "addon_main_no_candidate": "当前门店没有其他普通技能可作为主服务。", "addon_note": "勾选后，客户预约网页与电话 AI 只允许该项目与下方任一主服务放在同一张预约单里一起预约；管理端建单不受限制。", "addon_main_note": "客户选择了上述任一主服务后才能添加该项目。主服务只能是普通技能，不能是其他附加服务。", "addon_main_empty": "尚未选择主服务：客户端不会展示该项目，管理端仍可正常使用。", "alias_note": "该别名字段用于定位第三方预约接口调用的时候，判断是否为同一个技能依据", "alias_add": "添加别名", "alias_empty": "暂无别名", "resource_note": "该技能服务需要占用的门店资源数量。", "resource_add": "添加资源消耗", "resource_empty": "该技能暂不消耗门店资源", "resource_unconfigured": "当前门店尚未配置资源位，请先到门店管理中添加。", "resource_count_placeholder": "消耗数量", "resource_over_capacity": "资源位【{name}】的消耗数量超过了门店总量（{capacity}），该技能将永远无法被预约，请先到门店管理中调大容量。", "resource_all_selected": "所有门店资源位均已添加", "resource_invalid": "请选择有效且不重复的资源位，并填写大于 0 的整数消耗数量", "sort_note": "数字小的排在前面；号相同时，管理端新建的在前，顾客端按创建先后。管理端排序用于管理端的服务下拉和本页列表；顾客端排序用于顾客预约网站、AI 电话和前台一体机，主服务和附加项目各自排。建议按 10、20、30 留间隔编号，以后插入新服务不用改别的号。", "save_add": "添加", "save_update": "更新" },
     "dialog": {
       "common": { "cancel": "取消", "confirm": "确认" },
       "delete": { "title": "删除技能", "content": "是否要删除【{name}】技能" }
@@ -1297,5 +1297,365 @@
       "assigned": "已分配",
       "cancelled": "已取消"
     }
+  },
+  "table": {
+    "book_email": {
+      "col": {
+        "id": "邮件编号",
+        "title": "邮件标题",
+        "content": "邮件内容",
+        "intentName": "判定意图",
+        "statusName": "处理状态",
+        "errorMsg": "错误原因",
+        "sourceName": "来源",
+        "retryCount": "重试次数",
+        "createTime": "接收时间",
+        "operation": "操作"
+      },
+      "op": {
+        "emailDetail": "邮件详情",
+        "bookDetail": "预约详情",
+        "reparse": "重试",
+        "giveup": "无需处理"
+      }
+    },
+    "book": {
+      "col": {
+        "id": "预约编号",
+        "name": "客户名称",
+        "phone": "客户手机号",
+        "mail": "客户邮箱",
+        "bookingTime": "预约时间",
+        "bookProjectNames": "预约项目",
+        "sourceName": "预约来源",
+        "referralCode": "推荐码",
+        "statusName": "预约状态",
+        "staffName": "服务人员",
+        "preferredStaffName": "偏好员工",
+        "specialRemarks": "特殊备注",
+        "customerRemark": "顾客备注",
+        "remark": "店员备注",
+        "createTime": "创建时间",
+        "operation": "操作"
+      },
+      "op": {
+        "detail": "详情",
+        "update": "编辑",
+        "copy": "复制",
+        "assign": "配置分配",
+        "autoAssign": "自动分配",
+        "delete": "取消预约"
+      }
+    },
+    "card_info": {
+      "col": {
+        "phone": "手机号",
+        "names": "用户名称列表",
+        "bookLines": "历史预约数据列表",
+        "totalRecharge": "总充值金额",
+        "rechargeLines": "充值数据列表",
+        "consumeLines": "消费数据列表"
+      }
+    },
+    "feedback": {
+      "col": {
+        "id": "反馈编号",
+        "storeName": "门店名称",
+        "bookId": "预约编号",
+        "staffName": "服务雇员名称",
+        "scoreShow": "客户评分",
+        "content": "客户评价",
+        "handleStatusName": "反馈状态",
+        "remark": "备注",
+        "createTime": "提交时间",
+        "operation": "操作"
+      },
+      "op": {
+        "showBookDetail": "详情",
+        "editRemark": "编辑备注",
+        "markHandled": "标记已处理",
+        "markNoNeed": "无需处理",
+        "markUnhandled": "标记未处理"
+      }
+    },
+    "phone_request": {
+      "col": {
+        "id": "需求编号",
+        "storeName": "门店名称",
+        "phone": "联系电话",
+        "type": "需求类型",
+        "summary": "简述",
+        "detail": "详细描述",
+        "handleStatusName": "处理状态",
+        "remark": "备注",
+        "comment": "答复",
+        "createTime": "记录时间",
+        "callShow": "回访记录",
+        "operation": "操作"
+      },
+      "op": {
+        "call": "拨打电话",
+        "edit": "编辑"
+      }
+    },
+    "ai_call_review": {
+      "col": {
+        "startedAt": "通话时间",
+        "storeName": "门店名称",
+        "callerPhone": "来电号码",
+        "durationShow": "时长",
+        "endedByName": "结束方式",
+        "langName": "语言",
+        "customerTurns": "客户轮数",
+        "reviewStatusName": "复盘状态",
+        "passName": "结论",
+        "severityName": "严重度",
+        "tagsShow": "标签",
+        "summary": "一句话结论",
+        "opsStatusName": "处理状态",
+        "opsRemark": "处理备注",
+        "vapiEndedReason": "Vapi 原因",
+        "callId": "Vapi 通话",
+        "operation": "操作"
+      },
+      "op": {
+        "detail": "详情",
+        "ops": "处理",
+        "sms": "短信消息"
+      }
+    },
+    "permission": {
+      "col": {
+        "id": "权限编号",
+        "name": "权限名称",
+        "typeName": "权限类型",
+        "code": "权限码",
+        "desc": "权限描述",
+        "parentId": "父权限编号",
+        "createTime": "创建时间",
+        "createUserName": "创建用户",
+        "updateTime": "更新时间",
+        "updateUserName": "更新用户",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "delete": "删除"
+      }
+    },
+    "role": {
+      "col": {
+        "id": "角色编号",
+        "name": "角色名称",
+        "code": "角色码",
+        "desc": "角色描述",
+        "createTime": "创建时间",
+        "createUserName": "创建用户",
+        "updateTime": "更新时间",
+        "updateUserName": "更新用户",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "getPer": "查看权限",
+        "updatePer": "修改权限",
+        "delete": "删除"
+      }
+    },
+    "staff_skill": {
+      "col": {
+        "name": "技能名称",
+        "externalName": "对外名称",
+        "externalNameZh": "对外名称（中文）",
+        "adminSort": "管理端排序",
+        "customerSort": "顾客端排序",
+        "aliases": "技能别名",
+        "description": "技能描述",
+        "descriptionZh": "技能描述（中文）",
+        "consumeMinutes": "技能耗时（分钟）",
+        "serviceAmount": "服务金额",
+        "addonMains": "附加于（主服务）",
+        "resourceRequirement": "资源需求",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "delete": "删除"
+      }
+    },
+    "staff": {
+      "col": {
+        "id": "雇员编号",
+        "name": "雇员名称",
+        "externalName": "外部名称",
+        "genderName": "性别",
+        "phone": "雇员手机号",
+        "mail": "通知邮箱",
+        "skills": "雇员技能",
+        "createTime": "创建时间",
+        "createUserName": "创建用户",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "updateSkill": "配置技能",
+        "delete": "删除"
+      }
+    },
+    "store": {
+      "col": {
+        "name": "门店名称",
+        "externalName": "外部名称",
+        "externalNameZh": "外部名称（中文）",
+        "address": "门店地址",
+        "addressZh": "门店地址（中文）",
+        "phone": "门店电话",
+        "aiPhone": "AI 电话",
+        "outboundPhone": "呼出电话",
+        "timezoneName": "门店时区",
+        "statusName": "门店状态",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "remark": "特殊备注"
+      }
+    },
+    "user": {
+      "col": {
+        "id": "用户编号",
+        "nickName": "用户昵称",
+        "mail": "用户邮箱",
+        "phone": "用户手机号",
+        "roles": "用户角色",
+        "grantedStores": "拥有门店",
+        "genderName": "性别",
+        "birth": "生日",
+        "statusName": "用户状态",
+        "createTime": "创建时间",
+        "createUserName": "创建用户",
+        "operation": "操作"
+      },
+      "op": {
+        "update": "编辑",
+        "updateRole": "修改角色",
+        "assignStore": "分配门店",
+        "delete": "删除",
+        "disable": "禁用",
+        "enable": "启用",
+        "unlock": "解锁"
+      }
+    }
+  },
+  "enum": {
+    "book_status": {
+      "PRE": "待分配",
+      "WORK": "已分配",
+      "IN_PROGRESS": "进行中",
+      "DONE": "已完成",
+      "EXPIRED": "已过期",
+      "CANCEL": "已取消"
+    },
+    "assign_strategy": {
+      "PRIORITY": "按优先级",
+      "PROXIMITY": "临近工作",
+      "BALANCED": "平均承担"
+    },
+    "book_source": {
+      "NATURAL": "自然流",
+      "PHONE": "电话预约",
+      "WECHAT": "微信预约",
+      "CLASSPASS": "classpass",
+      "BUILDHEALTH": "buildhealth",
+      "AI": "AI预约",
+      "OWN_SITE": "本站预约",
+      "OWN_SITE_TK": "本站预约-Tk",
+      "OWN_SITE_FB": "本站预约-Fb",
+      "OWN_SITE_INS": "本站预约-Ins",
+      "OWN_SITE_YTB": "本站预约-Ytb",
+      "GOOGLE": "Google",
+      "GOOGLE_AD": "Google Ad",
+      "RECEPTION": "数字人预约",
+      "UNKNOW": "其他预约"
+    },
+    "feedback_handle_status": {
+      "UNHANDLED": "未处理",
+      "HANDLED": "已处理",
+      "NO_NEED": "无需处理"
+    },
+    "ai_call_review_status": {
+      "PENDING": "待复盘",
+      "REVIEWED": "已复盘",
+      "FAILED": "复盘失败",
+      "REJUDGE": "待重判",
+      "NO_DIALOGUE": "无对话"
+    },
+    "ai_call_review_ops_status": {
+      "UNREAD": "未查看",
+      "HANDLED": "已处理",
+      "FALSE_ALARM": "误判",
+      "PENDING_RETENTION": "待发送挽留",
+      "RETENTION_SENT": "已发送挽留"
+    },
+    "ai_call_ended_by": {
+      "CUSTOMER_HANGUP": "客户挂断",
+      "AGENT_END_CALL": "AI 挂断",
+      "AGENT_TRANSFER": "转接人工",
+      "IDLE_HANGUP": "静默挂断",
+      "OTHER": "其他",
+      "UNKNOWN": "未知"
+    },
+    "ai_call_lang": {
+      "ZH": "中文",
+      "EN": "英文"
+    },
+    "ai_call_review_severity": {
+      "NONE": "无",
+      "MINOR": "轻微",
+      "MAJOR": "严重"
+    },
+    "book_email_status": {
+      "UNPROCESSED": "未处理",
+      "PROCESSED": "已处理",
+      "FAILED": "处理失败",
+      "NO_NEED": "无需处理"
+    },
+    "email_intent": {
+      "IGNORE": "无需处理",
+      "BOOKING": "预约",
+      "CANCEL": "取消预约"
+    },
+    "timezone": {
+      "SHANGHAI": "上海",
+      "NEW_YORK": "纽约",
+      "CALIFORNIA": "加州"
+    },
+    "common_status": {
+      "NORMAL": "正常",
+      "DISABLE": "禁用",
+      "LOCKED": "锁定"
+    },
+    "permission_type": {
+      "NORMAL": "页面",
+      "DISABLE": "按钮",
+      "LOCKED": "接口"
+    },
+    "todo_level": {
+      "USER": "用户",
+      "TENANT": "租户",
+      "STORE": "门店"
+    },
+    "gender": {
+      "FEMALE": "女",
+      "MALE": "男",
+      "LESBIAN": "女同性恋",
+      "GAY": "男同性恋",
+      "BISEXUAL": "双性恋",
+      "TRANSGENDER": "跨性别",
+      "QUEER": "酷儿",
+      "HELICOPTER": "武装直升飞机",
+      "WALMART_BAG": "沃尔玛购物袋"
+    },
+    "unknown": "未知"
   }
 }

@@ -413,7 +413,7 @@
 
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useI18n} from 'vue-i18n'
 import {notifyTopPositive, notifyTopWarning} from "@/utils/notification-tools.js";
 import CaskComplexTable from "@/ui/components/CaskComplexTable.vue";
@@ -437,7 +437,7 @@ import {
   AiCallReviewStatusEnum
 } from "@/constants/enums/book.js";
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 
 // 筛选：通话日期区间（默认不限）+ 复盘状态 / 结论 / 处理状态 / 结束方式 + 来电号码 / 关键词
 const selectStartDate = ref("")
@@ -943,6 +943,10 @@ onMounted(() => {
   selectData()
 })
 
+// 表格行里的状态名等是取数时按当时语言生成的：切换界面语言后重新取当前页（同 ZyyStaffDevice）
+watch(locale, () => {
+  selectData(true)
+})
 </script>
 
 <style scoped lang="scss">
