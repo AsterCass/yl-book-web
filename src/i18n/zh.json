@@ -706,7 +706,7 @@
         "kiosk_vad_min_db": { "label": "人声最低音量（dB）", "hint": "默认 -48；比它轻的声音不算客人在说话，挡背景音乐，调高（如 -40）更不容易被背景声触发" },
         "oss_endpoint": { "label": "录像上传地址", "hint": "例如 https://oss-us-east-1.aliyuncs.com（美国弗吉尼亚）" },
         "oss_bucket": { "label": "录像 Bucket", "hint": "OSS 的 Bucket 名称" },
-        "oss_prefix": { "label": "录像目录名", "hint": "好认的名字，如 ny196-1；不能和别的设备重名，不填这台不上传" },
+        "oss_prefix": { "label": "录像目录名", "hint": "门店编号，如 196；同店第二台填 196-2，不能重名，不填这台不上传" },
         "oss_access_key_id": { "label": "录像 AccessKey ID", "hint": "只能写入的子账号" },
         "oss_access_key_secret": { "label": "录像 AccessKey Secret", "hint": "只能写入的子账号" },
         "kiosk_update_version": { "label": "终端版本", "hint": "例如 1.0.2；和一体机现在的版本不一样就更新（也能退回旧版本），不填不更新" }

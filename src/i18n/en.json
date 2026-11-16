@@ -708,7 +708,7 @@
         "kiosk_vad_min_db": { "label": "Minimum voice level (dB)", "hint": "Default -48; quieter sound is not counted as a guest talking (blocks background music). Raise it (e.g. -40) if music still triggers" },
         "oss_endpoint": { "label": "Recording upload endpoint", "hint": "e.g. https://oss-us-east-1.aliyuncs.com (US Virginia)" },
         "oss_bucket": { "label": "Recording bucket", "hint": "OSS bucket name" },
-        "oss_prefix": { "label": "Recording folder", "hint": "A readable name such as ny196-1; unique across devices. Empty = this kiosk does not upload" },
+        "oss_prefix": { "label": "Recording folder", "hint": "Store number such as 196 (a second kiosk: 196-2); unique across devices. Empty = no upload" },
         "oss_access_key_id": { "label": "Recording AccessKey ID", "hint": "Write-only RAM user" },
         "oss_access_key_secret": { "label": "Recording AccessKey Secret", "hint": "Write-only RAM user" },
         "kiosk_update_version": { "label": "Kiosk version", "hint": "e.g. 1.0.2; the kiosk updates (or rolls back) to it when its own version differs. Empty = no update" }
