@@ -65,7 +65,6 @@ const tableStaffSkillCol = [
         labelKey: 'table.staff_skill.col.aliases',
         align: 'center',
         type: ComplexTableColumnTypeEnum.MULTI_ROW,
-        defaultVisible: false,
     },
     {
         name: 'description',
