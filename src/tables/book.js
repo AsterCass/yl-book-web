@@ -49,6 +49,7 @@ const tableBookCol = [
         label: '客户邮箱',
         labelKey: 'table.book.col.mail',
         align: 'center',
+        defaultVisible: false,
     },
     {
         name: 'bookingTime',
@@ -103,6 +104,7 @@ const tableBookCol = [
         label: '偏好员工',
         labelKey: 'table.book.col.preferredStaffName',
         align: 'center',
+        defaultVisible: false,
     },
     {
         name: 'specialRemarks',
@@ -119,6 +121,7 @@ const tableBookCol = [
         label: '顾客备注',
         labelKey: 'table.book.col.customerRemark',
         align: 'center',
+        defaultVisible: false,
     },
     {
         name: 'remark',
@@ -133,6 +136,7 @@ const tableBookCol = [
         label: '创建时间',
         labelKey: 'table.book.col.createTime',
         align: 'center',
+        defaultVisible: false,
     },
     {
         name: 'operation',
