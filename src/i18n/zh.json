@@ -701,7 +701,7 @@
         "kiosk_vad_start_prob": { "label": "人声起音门槛", "hint": "默认 0.6；人声概率高过它算客人开口" },
         "kiosk_vad_end_prob": { "label": "人声收音门槛", "hint": "默认 0.35；低于它算停了，要低于起音门槛" },
         "kiosk_vad_end_silence_ms": { "label": "尾静默（毫秒）", "hint": "默认 600；低于收音门槛这么久算一句说完" },
-        "kiosk_vad_min_speech_ms": { "label": "最短有效语音（毫秒）", "hint": "默认 180；短词漏识别可试 128。调低后也更容易收进短促噪声" },
+        "kiosk_vad_min_speech_ms": { "label": "最短有效语音（毫秒）", "hint": "默认 128 毫秒。调低后更容易收进短促噪声" },
         "kiosk_vad_barge_prob": { "label": "打断门槛", "hint": "默认 0.85；数字人说话时高过它才算客人在说" },
         "kiosk_vad_barge_ms": { "label": "打断持续（毫秒）", "hint": "默认 300；高过打断门槛累计这么久才停住播报" },
         "kiosk_vad_min_db": { "label": "人声最低音量（dB）", "hint": "默认 -48；比它轻的声音不算客人在说话，挡背景音乐，调高（如 -40）更不容易被背景声触发" },

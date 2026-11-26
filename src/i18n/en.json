@@ -703,7 +703,7 @@
         "kiosk_vad_start_prob": { "label": "Voice start threshold", "hint": "Default 0.6; voice probability above this counts as speaking" },
         "kiosk_vad_end_prob": { "label": "Voice end threshold", "hint": "Default 0.35; below this counts as stopped; keep it under the start threshold" },
         "kiosk_vad_end_silence_ms": { "label": "End silence (ms)", "hint": "Default 600; this long under the end threshold ends a sentence" },
-        "kiosk_vad_min_speech_ms": { "label": "Minimum speech duration (ms)", "hint": "Default 180. Try 128 for missed short replies. Lower values may also pick up brief noises." },
+        "kiosk_vad_min_speech_ms": { "label": "Minimum speech duration (ms)", "hint": "Default 128 ms. Lower values may also pick up brief noises." },
         "kiosk_vad_barge_prob": { "label": "Barge-in threshold", "hint": "Default 0.85; while the avatar talks, voice must be above this to count" },
         "kiosk_vad_barge_ms": { "label": "Barge-in duration (ms)", "hint": "Default 300; this long above the barge-in threshold pauses the avatar" },
         "kiosk_vad_min_db": { "label": "Minimum voice level (dB)", "hint": "Default -48; quieter sound is not counted as a guest talking (blocks background music). Raise it (e.g. -40) if music still triggers" },

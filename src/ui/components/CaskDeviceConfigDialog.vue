@@ -81,7 +81,7 @@ const props = defineProps({
 })
 
 // 白名单元数据：[{key, type, secret, desc, maxLength, min, max, defaultValue}]（min / max 只有 NUMBER 有，
-// defaultValue 只有后端自己用的预约项有），取一次后缓存
+// defaultValue 用于声明了默认值的配置项），取一次后缓存
 const keyList = ref([])
 
 // key -> {key, value}（后端 itemList 按 key 展开）；密钥的 value：设了为 null，没设为空串
