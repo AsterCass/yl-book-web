@@ -710,6 +710,7 @@
         "oss_prefix": { "label": "录像目录名", "hint": "门店编号，如 196；同店第二台填 196-2，不能重名，不填这台不上传" },
         "oss_access_key_id": { "label": "录像 AccessKey ID", "hint": "只能写入的子账号" },
         "oss_access_key_secret": { "label": "录像 AccessKey Secret", "hint": "只能写入的子账号" },
+        "kiosk_update_source": { "label": "更新根地址", "hint": "填写 HTTPS 发布目录，不带版本号；留空不更新" },
         "kiosk_update_version": { "label": "终端版本", "hint": "例如 1.0.2；和一体机现在的版本不一样就更新（也能退回旧版本），不填不更新" }
       },
       "ph": { "secret_set": "已设置，输入新值可替换", "secret_unset": "未设置", "number": "{hint}，范围 {min}–{max}" },

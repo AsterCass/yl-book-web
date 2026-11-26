@@ -712,6 +712,7 @@
         "oss_prefix": { "label": "Recording folder", "hint": "Store number such as 196 (a second kiosk: 196-2); unique across devices. Empty = no upload" },
         "oss_access_key_id": { "label": "Recording AccessKey ID", "hint": "Write-only RAM user" },
         "oss_access_key_secret": { "label": "Recording AccessKey Secret", "hint": "Write-only RAM user" },
+        "kiosk_update_source": { "label": "Update base URL", "hint": "Enter the HTTPS release directory without the version. Leave blank to disable updates." },
         "kiosk_update_version": { "label": "Kiosk version", "hint": "e.g. 1.0.2; the kiosk updates (or rolls back) to it when its own version differs. Empty = no update" }
       },
       "ph": { "secret_set": "Set; type a new value to replace it", "secret_unset": "Not set", "number": "{hint}; range {min}–{max}" },
